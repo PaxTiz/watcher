@@ -22,7 +22,7 @@ export default class CredentialsService {
       access_token: credentials.access_token,
       refresh_token: credentials.refresh_token,
       expires_at: credentials.access_token,
-      userId: data.user_id,
+      userId: credentials.user_id,
     };
 
     if (refresh) {
@@ -77,13 +77,9 @@ export default class CredentialsService {
       return credentials;
     }
 
-    const callback: Record<
-      CredentialsType,
-      ((token: string) => Promise<ServiceCredentials>) | undefined
-    > = {
+    const callback: Record<CredentialsType, (token: string) => Promise<ServiceCredentials>> = {
       google: (token: string) => external.google.oauth.refresh_access_token(token),
-      // TODO: Implement `Twitch` refresh token
-      twitch: undefined,
+      twitch: (token: string) => external.twitch.oauth.refresh_access_token(token),
     };
 
     const handler = callback[service]!;

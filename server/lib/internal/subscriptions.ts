@@ -27,8 +27,12 @@ export default class SubscriptionsService {
   }
 
   async sync() {
-    // TODO: Download logos and cache them locally
+    // TODO: Store logos in local to avoid rate limit
+    // TOOD: Update subscription if it exists
+    // TODO: Remove subscriptions that does not exists anymore
+
     await this.sync_youtube();
+    await this.sync_twitch();
   }
 
   private async sync_youtube() {
@@ -57,6 +61,47 @@ export default class SubscriptionsService {
           token.access_token,
           response.data.nextPageToken ?? undefined,
         );
+      } else {
+        break;
+      }
+    }
+
+    await database.insertInto("subscriptions").values(subscriptions).execute();
+  }
+
+  private async sync_twitch() {
+    const config = useRuntimeConfig();
+    const database = useDatabase();
+    const token = await internal.credentials.get("twitch");
+    if (!token) {
+      throw createError({ statusCode: 403 });
+    }
+
+    const subscriptions: Array<Omit<SubscriptionTable, "id">> = [];
+
+    let response = await external.twitch.followers.list({
+      userId: token.userId,
+      token: token.access_token,
+      clientId: config.twitch.clientId,
+    });
+    while (true) {
+      for (const subscription of response.data) {
+        subscriptions.push({
+          service: "twitch",
+          service_id: subscription.broadcaster_id,
+          name: subscription.broadcaster_name,
+          url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
+          logo: subscription.logo,
+        });
+      }
+
+      if (response.pagination.cursor) {
+        response = await external.twitch.followers.list({
+          userId: token.userId,
+          token: token.access_token,
+          clientId: config.twitch.clientId,
+          cursor: response.pagination.cursor,
+        });
       } else {
         break;
       }
