@@ -1,54 +1,66 @@
-import { google, Auth } from "googleapis";
 import type { ServiceCredentials } from "#shared/types/credentials";
-import { fromUnixTime, formatISO } from "date-fns";
+import { formatISO } from "date-fns";
+import { Google, generateState, generateCodeVerifier } from "arctic";
+
+const verifiers: Record<string, string> = {};
 
 export default class GoogleOAuthService {
-  private client: Auth.OAuth2Client;
+  private client: Google;
 
   constructor() {
     const config = useRuntimeConfig();
-    this.client = new google.auth.OAuth2({
-      clientId: config.google.clientId,
-      clientSecret: config.google.clientSecret,
-      redirectUri: "http://localhost:3000/api/oauth/google/callback",
-    });
+    this.client = new Google(
+      config.google.clientId,
+      config.google.clientSecret,
+      "http://localhost:3000/api/oauth/google/callback",
+    );
   }
 
   async get_authorization_url() {
-    return this.client.generateAuthUrl({
-      scope: [
-        "https://www.googleapis.com/auth/youtube.readonly",
-        "https://www.googleapis.com/auth/userinfo.profile",
-      ],
-      access_type: "offline",
-      prompt: "consent",
-    });
+    const state = generateState();
+    verifiers[state] = generateCodeVerifier();
+
+    const url = this.client.createAuthorizationURL(state, verifiers[state], [
+      "https://www.googleapis.com/auth/youtube.readonly",
+      "https://www.googleapis.com/auth/userinfo.profile",
+    ]);
+
+    url.searchParams.set("access_type", "offline");
+    url.searchParams.set("prompt", "consent");
+
+    return url.toString();
   }
 
-  async get_tokens(code: string): Promise<ServiceCredentials> {
-    const response = await this.client.getToken({ code });
-    const user = await this.get_user(response.tokens.access_token!);
+  async get_tokens(state: string, code: string): Promise<ServiceCredentials> {
+    const verifier = verifiers[state];
+    if (!verifier) {
+      throw new Error("Invalid authentication flow for Google: code verifier not found");
+    }
+
+    const response = await this.client.validateAuthorizationCode(code, verifier);
+    const user = await this.get_user(response.accessToken());
+
+    delete verifiers[state];
 
     return {
       service: "google",
       userId: user.userId,
-      access_token: response.tokens.access_token!,
-      refresh_token: response.tokens.refresh_token!,
-      expires_at: formatISO(fromUnixTime(response.tokens.expiry_date!)),
+      access_token: response.accessToken(),
+      refresh_token: response.refreshToken(),
+      expires_at: formatISO(response.accessTokenExpiresAt()),
     };
   }
 
   async refresh_access_token(token: string): Promise<ServiceCredentials> {
-    this.client.setCredentials({ refresh_token: token });
-    const response = await this.client.refreshAccessToken();
-    const user = await this.get_user(response.credentials.access_token!);
+    const response = await this.client.refreshAccessToken(token);
+    const user = await this.get_user(response.accessToken());
 
     return {
       service: "google",
       userId: user.userId,
-      access_token: response.credentials.access_token!,
-      refresh_token: response.credentials.refresh_token!,
-      expires_at: formatISO(fromUnixTime(response.credentials.expiry_date!)),
+      access_token: response.accessToken(),
+      refresh_token: response.refreshToken(),
+      expires_at: formatISO(response.accessTokenExpiresAt()),
     };
   }
 

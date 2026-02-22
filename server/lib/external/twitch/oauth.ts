@@ -1,6 +1,6 @@
 import type { ServiceCredentials } from "#shared/types/credentials";
 import { formatISO } from "date-fns";
-import { Twitch, generateState, decodeIdToken } from "arctic";
+import { Twitch, generateState } from "arctic";
 
 export default class TwitchOAuthService {
   private client: Twitch;
