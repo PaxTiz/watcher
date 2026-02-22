@@ -25,7 +25,7 @@ export default class CredentialsService {
     };
 
     if (refresh) {
-      return this.refresh_if_needed("google", serviceCredentials);
+      return this.refresh_if_needed(service, serviceCredentials);
     }
 
     return serviceCredentials;
