@@ -26,6 +26,8 @@ export type CredentialTable = {
   refresh_token: string;
 
   expires_at: string;
+
+  user_id: string;
 };
 
 export type Database = {
