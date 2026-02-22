@@ -24,4 +24,29 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+
+  runtimeConfig: {
+    database: {
+      host: "",
+      port: "",
+      user: "",
+      pass: "",
+      name: "",
+    },
+
+    google: {
+      clientId: "",
+      clientSecret: "",
+    },
+
+    twitch: {
+      clientId: "",
+      clientSecret: "",
+    },
+
+    atproto: {
+      clientId: "",
+      clientSecret: "",
+    },
+  },
 });
