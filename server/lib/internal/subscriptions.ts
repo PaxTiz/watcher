@@ -17,6 +17,7 @@ export default class SubscriptionsService {
     return subscriptions.map((sub) => ({
       id: sub.id,
       name: sub.name,
+      isFavorite: false,
       channel: {
         service: sub.service,
         url: sub.url,

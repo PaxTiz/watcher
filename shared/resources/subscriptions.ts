@@ -5,6 +5,8 @@ export type SubscriptionResource = {
 
   name: string;
 
+  isFavorite: boolean;
+
   channel: {
     service: SubscriptionType;
     url: string;

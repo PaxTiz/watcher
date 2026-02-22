@@ -6,12 +6,21 @@ defineProps<{ subscription: SubscriptionResource }>();
 
 <template>
   <nuxt-link
-    class="block w-[calc(88px+1rem)] p-2 bg-ui-bg rounded focus:outline-alt"
+    class="block w-[calc(88px+1rem)] p-2 bg-ui-bg rounded border focus:outline-alt"
+    :class="{
+      'border-highlight': subscription.isFavorite,
+      'border-transparent': !subscription.isFavorite,
+    }"
     :to="subscription.channel.url"
     target="_blank"
     external
   >
-    <img class="rounded" :src="subscription.channel.logo" :alt="`Logo de ${subscription.name}`" />
+    <img
+      class="rounded"
+      loading="lazy"
+      :src="subscription.channel.logo"
+      :alt="`Logo de ${subscription.name}`"
+    />
     <p class="flex items-center justify-center text-center text-xs text-slate-400 mt-2">
       <Icon
         class="shrink-0"

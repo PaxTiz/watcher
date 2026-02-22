@@ -1,11 +1,9 @@
-<script lang="ts" setup>
-const { data } = useFetch("/api/subscriptions");
-</script>
-
 <template>
   <NuxtLoadingIndicator />
 
+  <AppHeader />
+
   <main class="container py-16">
-    <SubscriptionsList :subscriptions="data ?? []" />
+    <NuxtPage />
   </main>
 </template>
