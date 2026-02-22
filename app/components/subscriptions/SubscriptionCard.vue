@@ -6,7 +6,7 @@ defineProps<{ subscription: SubscriptionResource }>();
 
 <template>
   <nuxt-link
-    class="block w-[calc(88px+1rem)] p-2 bg-slate-900 rounded"
+    class="block w-[calc(88px+1rem)] p-2 bg-ui-bg rounded focus:outline-alt"
     :to="subscription.channel.url"
     target="_blank"
     external

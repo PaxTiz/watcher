@@ -7,6 +7,11 @@
 
   --radius-*: initial;
   --radius: 0.25rem;
+
+  --color-ui-bg: var(--color-slate-900);
+  --color-ui-border: var(--color-slate-800);
+  --color-ui-text: var(--color-slate-400);
+  --color-alt: var(--color-orange-500);
 }
 
 @utility container {
@@ -15,4 +20,18 @@
 
 body {
   background-color: var(--color-slate-950);
+}
+
+input,
+select {
+  background-color: var(--color-ui-bg);
+  border: 1px solid var(--color-ui-border);
+  border-radius: var(--radius);
+  padding: --spacing(1) --spacing(4);
+  color: var(--color-ui-text);
+  min-height: 38px;
+
+  &:focus {
+    outline-color: var(--color-alt);
+  }
 }

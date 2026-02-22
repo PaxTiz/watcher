@@ -26,6 +26,7 @@ export default class SubscriptionsService {
   }
 
   async sync() {
+    // TODO: Download logos and cache them locally
     await this.sync_youtube();
   }
 
