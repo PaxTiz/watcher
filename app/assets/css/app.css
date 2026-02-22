@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Alegreya Sans", sans-serif;
+
+  --spacing: 0.25rem;
+}
