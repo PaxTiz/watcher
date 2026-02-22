@@ -1,9 +1,30 @@
 import { useDatabase } from "#server/database";
 import type { SubscriptionTable } from "#server/database/schema";
+import type { SubscriptionResource } from "#shared/resources/subscriptions";
 import { internal } from ".";
 import { external } from "../external";
 
 export default class SubscriptionsService {
+  async find_all(): Promise<Array<SubscriptionResource>> {
+    const database = useDatabase();
+
+    const subscriptions = await database
+      .selectFrom("subscriptions")
+      .selectAll()
+      .orderBy("name", "asc")
+      .execute();
+
+    return subscriptions.map((sub) => ({
+      id: sub.id,
+      name: sub.name,
+      channel: {
+        service: sub.service,
+        url: sub.url,
+        logo: sub.logo,
+      },
+    }));
+  }
+
   async sync() {
     await this.sync_youtube();
   }

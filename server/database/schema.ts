@@ -1,12 +1,13 @@
 import { Generated } from "kysely";
 import type { CredentialsType } from "#shared/types/credentials";
+import type { SubscriptionType } from "#shared/types/subscriptions";
 
 export type SubscriptionTable = {
   id: Generated<number>;
 
   service_id: string;
 
-  service: string;
+  service: SubscriptionType;
 
   name: string;
 

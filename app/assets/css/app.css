@@ -4,4 +4,15 @@
   --font-sans: "Alegreya Sans", sans-serif;
 
   --spacing: 0.25rem;
+
+  --radius-*: initial;
+  --radius: 0.25rem;
+}
+
+@utility container {
+  margin-inline: auto;
+}
+
+body {
+  background-color: var(--color-slate-950);
 }

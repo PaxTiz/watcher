@@ -48,7 +48,7 @@ export default class CredentialsService {
           refresh_token: data.refresh_token,
           expires_at: data.expires_at,
         })
-        .where("id", "=", exists.id)
+        .where("service", "=", exists.service)
         .execute();
     } else {
       await database
@@ -78,7 +78,7 @@ export default class CredentialsService {
       CredentialsType,
       ((token: string) => Promise<ServiceCredentials>) | undefined
     > = {
-      google: external.google.oauth.refresh_access_token,
+      google: (token: string) => external.google.oauth.refresh_access_token(token),
       // TODO: Implement `Twitch` refresh token
       twitch: undefined,
     };
