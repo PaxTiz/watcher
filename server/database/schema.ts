@@ -35,6 +35,8 @@ export type VideoTable = {
 
   service: SubscriptionType;
 
+  service_id: string;
+
   subscription_id: string;
 
   title: string;
