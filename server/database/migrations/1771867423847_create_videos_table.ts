@@ -11,7 +11,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("duration", "integer", (c) => c.notNull())
     .addColumn("url", "varchar", (c) => c.notNull())
     .addColumn("thumbnail", "varchar", (c) => c.notNull())
-    .addColumn("created_at", "varchar", (c) => c.notNull())
+    .addColumn("created_at", "timestamptz", (c) => c.notNull())
     .execute();
 }
 

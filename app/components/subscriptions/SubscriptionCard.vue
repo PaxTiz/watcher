@@ -9,7 +9,7 @@ defineProps<{ subscription: SubscriptionResource }>();
     class="block w-[calc(88px+1rem)] p-2 bg-ui-bg rounded border focus:outline-alt"
     :class="{
       'border-highlight': subscription.isFavorite,
-      'border-transparent': !subscription.isFavorite,
+      'border-ui-border': !subscription.isFavorite,
     }"
     :to="subscription.channel.url"
     target="_blank"
