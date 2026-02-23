@@ -11,6 +11,12 @@ const thumbnail = computed(() => {
     case "youtube":
       return video.thumbnail;
     case "twitch":
+      if (video.thumbnail.startsWith("https://vod-secure.twitch.tv/")) {
+        // Twitch API is currently limited for sizes of thumbnails, see
+        // https://dev.twitch.tv/docs/api/reference/#get-videos
+        return video.thumbnail.replace("%{width}", "320").replace("%{height}", "180");
+      }
+
       return video.thumbnail.replace("%{width}", "380").replace("%{height}", "210");
   }
 });
