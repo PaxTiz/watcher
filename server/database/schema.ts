@@ -30,7 +30,28 @@ export type CredentialTable = {
   user_id: string;
 };
 
+export type VideoTable = {
+  id: Generated<number>;
+
+  service: SubscriptionType;
+
+  subscription_id: string;
+
+  title: string;
+
+  description: string;
+
+  duration: number;
+
+  url: string;
+
+  thumbnail: string;
+
+  created_at: string;
+};
+
 export type Database = {
   subscriptions: SubscriptionTable;
   credentials: CredentialTable;
+  videos: VideoTable;
 };
