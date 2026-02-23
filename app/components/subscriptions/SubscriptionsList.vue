@@ -33,7 +33,7 @@ watchDebounced(
     </select>
   </div>
 
-  <div class="flex flex-wrap justify-between gap-4">
+  <div class="infinite-grid-[88px] gap-4">
     <SubscriptionCard
       v-for="subscription in filtered"
       :key="subscription.id"

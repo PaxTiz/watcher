@@ -18,10 +18,15 @@ const thumbnail = computed(() => {
 
 <template>
   <nuxt-link
-    class="block w-[calc(380px+1rem)] p-2 bg-ui-bg rounded border focus:outline-alt"
+    class="block p-2 bg-ui-bg rounded border focus:outline-alt"
     :to="`/videos/${video.id}`"
   >
-    <img class="rounded" :src="thumbnail" loading="lazy" :alt="`Image de la vidéo #${video.id}`" />
+    <img
+      class="aspect-video w-full object-cover rounded"
+      :src="thumbnail"
+      loading="lazy"
+      :alt="`Image de la vidéo #${video.id}`"
+    />
 
     <div class="grid grid-cols-[2rem_1fr] gap-4 mt-4">
       <div>

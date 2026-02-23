@@ -20,6 +20,11 @@
   padding-inline: --spacing(4);
 }
 
+@utility infinite-grid-* {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(--value([length]), 1fr));
+}
+
 body {
   background-color: var(--color-slate-950);
 }
