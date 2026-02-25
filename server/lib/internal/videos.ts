@@ -1,8 +1,68 @@
 import type { Paginated } from "#shared/types/shared";
 import type { VideoResource } from "#shared/resources/videos";
 import { useDatabase } from "#server/database";
+import { external } from "../external";
 
 export default class VideosService {
+  async get_by_id(id: number): Promise<VideoResource> {
+    const database = useDatabase();
+
+    const video = await database
+      .selectFrom("videos")
+      .where("id", "=", id)
+      .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
+      .select([
+        "videos.id as video_id",
+        "videos.title as video_title",
+        "videos.description as video_description",
+        "videos.duration as video_duration",
+        "videos.url as video_url",
+        "videos.thumbnail as video_thumbnail",
+        "videos.created_at as video_created_at",
+        "subscriptions.id as subscription_id",
+        "subscriptions.name as subscription_name",
+        "subscriptions.service as subscription_service",
+        "subscriptions.url as subscription_url",
+        "subscriptions.logo as subscription_logo",
+      ])
+      .executeTakeFirstOrThrow();
+
+    return {
+      id: video.video_id,
+      title: video.video_title,
+      description: video.video_description,
+      duration: video.video_duration,
+      url: video.video_url,
+      thumbnail: video.video_thumbnail,
+      created_at: video.video_created_at,
+      author: {
+        id: video.subscription_id,
+        name: video.subscription_name,
+        isFavorite: false,
+        channel: {
+          service: video.subscription_service,
+          url: video.subscription_url,
+          logo: video.subscription_logo,
+        },
+      },
+    };
+  }
+
+  async get_url(id: number) {
+    const database = useDatabase();
+    const video = await database
+      .selectFrom("videos")
+      .select(["service", "service_id"])
+      .where("id", "=", id)
+      .executeTakeFirstOrThrow();
+
+    if (video.service !== "twitch") {
+      return null;
+    }
+
+    return external.twitch.videos.get_graphql_video_url(video.service_id);
+  }
+
   async find_all(params: { page: number }): Promise<Paginated<VideoResource>> {
     const database = useDatabase();
 

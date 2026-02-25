@@ -34,6 +34,15 @@ export type Twitch = {
   };
 
   Videos: {
+    PlaybackAccessToken: {
+      data?: {
+        videoPlaybackAccessToken?: {
+          value?: string;
+          signature?: string;
+        };
+      };
+    };
+
     List: {
       data: [
         {
@@ -58,6 +67,19 @@ export type Twitch = {
       ];
       pagination: {
         cursor?: string;
+      };
+    };
+
+    __INTERNAL__: {
+      GetSingleVideo: {
+        data?: {
+          video?: {
+            broadcastType: string;
+            createdAt: string;
+            seekPreviewsURL: string;
+            owner: { login: string };
+          };
+        };
       };
     };
   };

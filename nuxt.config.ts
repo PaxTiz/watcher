@@ -40,6 +40,7 @@ export default defineNuxtConfig({
     },
 
     twitch: {
+      playerClientId: "",
       clientId: "",
       clientSecret: "",
     },
