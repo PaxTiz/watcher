@@ -59,7 +59,7 @@ export default class GoogleOAuthService {
       service: "google",
       userId: user.userId,
       access_token: response.accessToken(),
-      refresh_token: response.refreshToken(),
+      refresh_token: token,
       expires_at: formatISO(response.accessTokenExpiresAt()),
     };
   }
