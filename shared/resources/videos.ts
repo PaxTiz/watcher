@@ -1,7 +1,10 @@
 import type { SubscriptionResource } from "./subscriptions";
+import type { SubscriptionType } from "#shared/types/subscriptions";
 
 export type VideoResource = {
   id: number;
+
+  service: SubscriptionType;
 
   author: SubscriptionResource;
 

@@ -9,10 +9,11 @@ export default class VideosService {
 
     const video = await database
       .selectFrom("videos")
-      .where("id", "=", id)
+      .where("videos.id", "=", id)
       .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
       .select([
         "videos.id as video_id",
+        "videos.service as video_service",
         "videos.title as video_title",
         "videos.description as video_description",
         "videos.duration as video_duration",
@@ -29,6 +30,7 @@ export default class VideosService {
 
     return {
       id: video.video_id,
+      service: video.video_service,
       title: video.video_title,
       description: video.video_description,
       duration: video.video_duration,
@@ -52,15 +54,17 @@ export default class VideosService {
     const database = useDatabase();
     const video = await database
       .selectFrom("videos")
-      .select(["service", "service_id"])
+      .select(["service", "service_id", "url"])
       .where("id", "=", id)
       .executeTakeFirstOrThrow();
 
-    if (video.service !== "twitch") {
-      return null;
+    if (video.service === "twitch") {
+      return external.twitch.videos.get_graphql_video_url(video.service_id);
+    } else if (video.service === "youtube") {
+      return video.url;
     }
 
-    return external.twitch.videos.get_graphql_video_url(video.service_id);
+    throw new Error(`Could not get URL for video fo service type : ${video.service}`);
   }
 
   async find_all(params: { page: number }): Promise<Paginated<VideoResource>> {
@@ -79,6 +83,7 @@ export default class VideosService {
       .orderBy("created_at", "desc")
       .select([
         "videos.id as video_id",
+        "videos.service as video_service",
         "videos.title as video_title",
         "videos.description as video_description",
         "videos.duration as video_duration",
@@ -97,6 +102,7 @@ export default class VideosService {
     for (const item of items) {
       mapped_items.push({
         id: item.video_id,
+        service: item.video_service,
         title: item.video_title,
         description: item.video_description,
         duration: item.video_duration,

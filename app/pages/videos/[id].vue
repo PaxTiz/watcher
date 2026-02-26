@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 const route = useRoute();
-const id = Number(route.params.id);
+
+const { data } = await useFetch(`/api/videos/${route.params.id}`);
 </script>
 
 <template>
-  <VideoPlayer :id="id" />
+  <VideoPlayer :video="data" />
+
+  <VideoMeta :video="data" class="mt-8" />
 </template>

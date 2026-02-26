@@ -1,8 +1,15 @@
 <script lang="ts" setup>
 import "media-chrome";
-import "hls-video-element";
 
-const { id } = defineProps<{ id: number }>();
+import type { VideoResource } from "#shared/resources/videos";
+
+const { video } = defineProps<{ video: VideoResource }>();
+
+if (video.service === "twitch") {
+  await import("hls-video-element");
+} else if (video.service === "youtube") {
+  await import("youtube-video-element");
+}
 
 const loadPolicy = {
   default: {
@@ -17,7 +24,8 @@ const loadPolicy = {
 <template>
   <media-controller class="w-full aspect-video">
     <hls-video
-      :src="`/api/videos/${id}/url`"
+      v-if="video.service === 'twitch'"
+      :src="`/api/videos/${video.id}/url`"
       slot="media"
       :config="{
         debug: true,
@@ -29,9 +37,15 @@ const loadPolicy = {
         keyLoadPolicy: loadPolicy,
       }"
       crossorigin
-      muted
     >
     </hls-video>
+
+    <youtube-video
+      v-else-if="video.service === 'youtube'"
+      :src="video.url"
+      slot="media"
+      crossorigin
+    ></youtube-video>
 
     <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
     <media-control-bar>
