@@ -1,5 +1,5 @@
-import { internal } from "~~/server/lib/internal";
+import { services } from "#framework/server";
 
 export default defineEventHandler(async (event) => {
-  return internal.videos.find_all({ page: 1 });
+  return services.videos.find_all({ page: 1 });
 });

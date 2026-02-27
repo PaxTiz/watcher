@@ -1,4 +1,6 @@
+import { AbstractService } from "#framework";
 import type { Twitch } from "#shared/types/twitch";
+import { isAfter } from "date-fns";
 
 const DEFAULT_RESOLUTIONS = {
   chunked: { name: "Source", resolution: "chunked", frameRate: 60 },
@@ -10,7 +12,7 @@ const DEFAULT_RESOLUTIONS = {
   "160p30": { name: "160p", resolution: "284x160", frameRate: 30 },
 };
 
-export default class TwitchVideosService {
+export default class TwitchVideosService extends AbstractService {
   async list(params: {
     token: string;
     clientId: string;
@@ -120,15 +122,11 @@ export default class TwitchVideosService {
     createdAt: string,
     res_key: string,
   ) {
-    const now = new Date("2023-02-10");
-    const created = new Date(createdAt);
-    const daysDiff = (now - created) / (1000 * 3600 * 24);
-
     if (broadcast_type === "highlight") {
       return `https://${domain}/${vod_special_id}/${res_key}/highlight-${vod_id}.m3u8`;
     }
 
-    if (broadcast_type === "upload" && daysDiff > 7) {
+    if (broadcast_type === "upload" && isAfter(new Date(), createdAt)) {
       return `https://${domain}/${channel_login}/${vod_id}/${vod_special_id}/${res_key}/index-dvr.m3u8`;
     }
 

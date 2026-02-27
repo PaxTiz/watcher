@@ -1,6 +1,7 @@
+import { AbstractService } from "#framework";
 import { youtube_v3 } from "googleapis";
 
-export default class GoogleYoutubeSubscriptionsService {
+export default class GoogleYoutubeSubscriptionsService extends AbstractService {
   async list(token: string, cursor?: string) {
     const client = new youtube_v3.Youtube({});
     return client.subscriptions.list({

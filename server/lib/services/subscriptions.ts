@@ -1,17 +1,12 @@
+import { AbstractService } from "#framework";
+import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import type { SubscriptionTable, VideoTable } from "#server/database/schema";
 import type { SubscriptionResource } from "#shared/resources/subscriptions";
-import { ServiceCredentials } from "~~/shared/types/credentials";
-import { internal } from ".";
-import { external } from "../external";
+import type { ServiceCredentials } from "~~/shared/types/credentials";
 
 type Subscription = Omit<SubscriptionTable, "id">;
 type SubscriptionsList = Array<Subscription>;
-type Subscriptions = {
-  added: SubscriptionsList;
-  updated: SubscriptionsList;
-  removed: SubscriptionsList;
-};
 
 type Video = Omit<VideoTable, "id">;
 type VideosList = Array<Video>;
@@ -21,7 +16,7 @@ type Sync<T> = {
   removed: Array<string>;
 };
 
-export default class SubscriptionsService {
+export default class SubscriptionsService extends AbstractService {
   async find_all(): Promise<Array<SubscriptionResource>> {
     const database = useDatabase();
 
@@ -51,7 +46,7 @@ export default class SubscriptionsService {
   }
 
   private async sync_youtube() {
-    const token = await internal.credentials.get("google");
+    const token = await services.credentials.get("google");
     if (!token) {
       throw createError({ statusCode: 403 });
     }
@@ -111,7 +106,7 @@ export default class SubscriptionsService {
   private async get_youtube_subscriptions(token: string) {
     const subscriptions: SubscriptionsList = [];
 
-    let response = await external.google.youtube.subscriptions.list(token);
+    let response = await services.external.google.youtubeSubscriptions.list(token);
     while (true) {
       for (const subscription of response.data.items ?? []) {
         subscriptions.push({
@@ -124,7 +119,7 @@ export default class SubscriptionsService {
       }
 
       if (response.data.nextPageToken) {
-        response = await external.google.youtube.subscriptions.list(
+        response = await services.external.google.youtubeSubscriptions.list(
           token,
           response.data.nextPageToken,
         );
@@ -182,7 +177,10 @@ export default class SubscriptionsService {
   private async get_youtube_videos_by_channel(token: string, channel_id: string) {
     const videos: Array<Omit<VideoTable, "id">> = [];
 
-    const all_videos = await external.google.youtube.videos.get_latest_videos(token, channel_id);
+    const all_videos = await services.external.google.youtubeVideos.get_latest_videos(
+      token,
+      channel_id,
+    );
 
     for (const video of all_videos) {
       videos.push({
@@ -203,7 +201,7 @@ export default class SubscriptionsService {
 
   private async sync_twitch() {
     const config = useRuntimeConfig();
-    const token = await internal.credentials.get("twitch");
+    const token = await services.credentials.get("twitch");
     if (!token) {
       throw createError({ statusCode: 403 });
     }
@@ -308,7 +306,7 @@ export default class SubscriptionsService {
   private async get_twitch_subscriptions(token: ServiceCredentials, clientId: string) {
     const subscriptions: SubscriptionsList = [];
 
-    let response = await external.twitch.followers.list({
+    let response = await services.external.twitch.followers.list({
       userId: token.userId,
       token: token.access_token,
       clientId,
@@ -325,7 +323,7 @@ export default class SubscriptionsService {
       }
 
       if (response.pagination.cursor) {
-        response = await external.twitch.followers.list({
+        response = await services.external.twitch.followers.list({
           userId: token.userId,
           token: token.access_token,
           cursor: response.pagination.cursor,
@@ -346,7 +344,7 @@ export default class SubscriptionsService {
   ) {
     const videos: Array<Omit<VideoTable, "id">> = [];
 
-    let response = await external.twitch.videos.list({
+    let response = await services.external.twitch.videos.list({
       userId: steamerId,
       token: token.access_token,
       clientId,
@@ -367,7 +365,7 @@ export default class SubscriptionsService {
       }
 
       if (response.pagination.cursor) {
-        response = await external.twitch.videos.list({
+        response = await services.external.twitch.videos.list({
           userId: token.userId,
           token: token.access_token,
           cursor: response.pagination.cursor,

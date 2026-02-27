@@ -1,9 +1,10 @@
+import { AbstractService } from "#framework";
+import { services } from "#framework/server";
 import type { ServiceCredentials, CredentialsType } from "#shared/types/credentials";
 import { useDatabase } from "#server/database";
-import { external } from "../external";
 import { isBefore, parseISO } from "date-fns";
 
-export default class CredentialsService {
+export default class CredentialsService extends AbstractService {
   async get(service: CredentialsType, refresh = true): Promise<ServiceCredentials | null> {
     const database = useDatabase();
 
@@ -78,8 +79,8 @@ export default class CredentialsService {
     }
 
     const callback: Record<CredentialsType, (token: string) => Promise<ServiceCredentials>> = {
-      google: (token: string) => external.google.oauth.refresh_access_token(token),
-      twitch: (token: string) => external.twitch.oauth.refresh_access_token(token),
+      google: (token: string) => services.external.google.oauth.refresh_access_token(token),
+      twitch: (token: string) => services.external.twitch.oauth.refresh_access_token(token),
     };
 
     const handler = callback[service]!;

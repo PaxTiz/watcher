@@ -1,10 +1,10 @@
-import { internal } from "~~/server/lib/internal";
+import { services } from "#framework/server";
 
 export default defineEventHandler(async (event) => {
   const param = getRouterParam(event, "id");
   const id = Number(param);
 
-  const url = await internal.videos.get_url(id);
+  const url = await services.videos.get_url(id);
   if (!url) {
     throw createError({ statusCode: 404 });
   }

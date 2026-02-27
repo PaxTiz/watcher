@@ -1,6 +1,7 @@
+import { AbstractService } from "#framework";
 import { youtube_v3 } from "googleapis";
 
-export default class GoogleYoutubeVideosService {
+export default class GoogleYoutubeVideosService extends AbstractService {
   async get_latest_videos(token: string, channel_id: string) {
     try {
       const playlist_videos = await this.get_uploads_playlist_id(token, channel_id);

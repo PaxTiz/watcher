@@ -1,13 +1,16 @@
+import { AbstractService } from "#framework";
 import type { ServiceCredentials } from "#shared/types/credentials";
 import { formatISO } from "date-fns";
 import { Google, generateState, generateCodeVerifier } from "arctic";
 
 const verifiers: Record<string, string> = {};
 
-export default class GoogleOAuthService {
+export default class GoogleOAuthService extends AbstractService {
   private client: Google;
 
   constructor() {
+    super();
+
     const config = useRuntimeConfig();
     this.client = new Google(
       config.google.clientId,

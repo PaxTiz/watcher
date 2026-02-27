@@ -4,6 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
 
+  // typescript: {
+  //   strict: true,
+  //   typeCheck: true,
+  // },
+
   devtools: { enabled: true },
 
   components: [{ path: "~/components", pathPrefix: false }],
@@ -22,6 +27,7 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    // @ts-expect-error
     plugins: [tailwindcss()],
   },
 

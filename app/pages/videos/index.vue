@@ -1,7 +1,10 @@
 <script lang="ts" setup>
-const { data } = await useFetch("/api/videos");
+import type { Paginated } from "#shared/types/shared";
+import type { VideoResource } from "#shared/resources/videos";
+
+const { data } = await useAppFetch<Paginated<VideoResource>>("/api/videos");
 </script>
 
 <template>
-  <VideosList :videos="data ?? []" />
+  <VideosList :videos="data ?? { total: 0, items: [] }" />
 </template>

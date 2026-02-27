@@ -1,6 +1,7 @@
+import { AbstractService } from "#framework";
 import type { Twitch } from "#shared/types/twitch";
 
-export default class TwitchUsersService {
+export default class TwitchUsersService extends AbstractService {
   async list(params: {
     token: string;
     clientId: string;

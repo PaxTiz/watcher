@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-const { data } = await useFetch("/api/subscriptions");
+import type { SubscriptionResource } from "#shared/resources/subscriptions";
+
+const { data } = await useAppFetch<Array<SubscriptionResource>>("/api/subscriptions");
 </script>
 
 <template>

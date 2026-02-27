@@ -1,7 +1,8 @@
+import { AbstractService } from "#framework";
+import { services } from "#framework/server";
 import type { Twitch } from "#shared/types/twitch";
-import { external } from "..";
 
-export default class TwitchFollowersService {
+export default class TwitchFollowersService extends AbstractService {
   async list(params: {
     token: string;
     clientId: string;
@@ -24,7 +25,7 @@ export default class TwitchFollowersService {
         },
       });
 
-      const users = await external.twitch.users.list({
+      const users = await services.external.twitch.users.list({
         clientId: params.clientId,
         token: params.token,
         userIds: followers.data.map((e) => e.broadcaster_id),

@@ -1,11 +1,13 @@
 <script lang="ts" setup>
+import type { VideoResource } from "#shared/resources/videos";
+
 const route = useRoute();
 
-const { data } = await useFetch(`/api/videos/${route.params.id}`);
+const { data } = await useAppFetch<VideoResource>(`/api/videos/${route.params.id}`);
 </script>
 
 <template>
-  <VideoPlayer :video="data" />
+  <VideoPlayer :video="data!" />
 
-  <VideoMeta :video="data" class="mt-8" />
+  <VideoMeta :video="data!" class="mt-8" />
 </template>

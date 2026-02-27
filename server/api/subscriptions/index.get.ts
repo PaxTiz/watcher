@@ -1,5 +1,5 @@
-import { internal } from "#server/lib/internal";
+import { services } from "#framework/server";
 
 export default defineEventHandler(async (event) => {
-  return internal.subscriptions.find_all();
+  return services.subscriptions.find_all();
 });

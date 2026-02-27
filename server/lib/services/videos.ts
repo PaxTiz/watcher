@@ -1,9 +1,10 @@
+import { AbstractService } from "#framework";
+import { services } from "#framework/server";
 import type { Paginated } from "#shared/types/shared";
 import type { VideoResource } from "#shared/resources/videos";
 import { useDatabase } from "#server/database";
-import { external } from "../external";
 
-export default class VideosService {
+export default class VideosService extends AbstractService {
   async get_by_id(id: number): Promise<VideoResource> {
     const database = useDatabase();
 
@@ -59,7 +60,7 @@ export default class VideosService {
       .executeTakeFirstOrThrow();
 
     if (video.service === "twitch") {
-      return external.twitch.videos.get_graphql_video_url(video.service_id);
+      return services.external.twitch.videos.get_graphql_video_url(video.service_id);
     } else if (video.service === "youtube") {
       return video.url;
     }
