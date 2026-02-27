@@ -124,7 +124,7 @@ export default class VideosService extends AbstractService {
     }
 
     return {
-      total: total?.total ?? 0,
+      total: Number(total?.total ?? 0),
       items: mapped_items,
     };
   }

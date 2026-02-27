@@ -1,8 +1,11 @@
 import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { videosValidatorsSchema } from "~~/shared/validators/videos";
 
 export default defineRoute({
-  async handler() {
-    return services.videos.find_all({ page: 1 });
+  query: videosValidatorsSchema.list.query,
+
+  async handler(event, { query }) {
+    return services.videos.find_all({ page: query.page });
   },
 });

@@ -8,6 +8,12 @@ export const videosValidatorsSchema = defineValidator({
     }),
   },
 
+  list: {
+    query: z.object({
+      page: z.coerce.number().check(z.gte(1)),
+    }),
+  },
+
   url: {
     params: z.object({
       id: z.coerce.number(),

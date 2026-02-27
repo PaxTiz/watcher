@@ -14,8 +14,11 @@ export function useAppFetch<T>(url: string | (() => string), options?: UseAppFet
 
   const response = useFetch(url, {
     ...options,
-    $fetch: useNuxtApp().$api as typeof $fetch,
-    query,
+    query: query.value,
+  });
+
+  watch(query, () => {
+    response.refresh();
   });
 
   watch(
