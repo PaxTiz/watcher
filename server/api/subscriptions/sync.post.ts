@@ -1,5 +1,8 @@
+import { defineRoute } from "#framework";
 import { services } from "#framework/server";
 
-export default defineEventHandler(async (event) => {
-  await services.subscriptions.sync();
+export default defineRoute({
+  async handler() {
+    await services.subscriptions.sync();
+  },
 });

@@ -1,7 +1,10 @@
+import { defineRoute } from "#framework";
 import { services } from "#framework/server";
 
-export default defineEventHandler(async (event) => {
-  const url = await services.external.twitch.oauth.get_authorization_url();
+export default defineRoute({
+  async handler(event) {
+    const url = await services.external.twitch.oauth.get_authorization_url();
 
-  return sendRedirect(event, url);
+    return sendRedirect(event, url, 302);
+  },
 });

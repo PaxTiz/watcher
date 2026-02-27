@@ -1,12 +1,17 @@
-export default defineEventHandler(async (event) => {
-  const path = getRouterParam(event, "path");
-  const query = getQuery(event);
+import { defineRoute } from "#framework";
+import { videosValidatorsSchema } from "#shared/validators/videos";
 
-  const base_url = query.base_url as string;
+export default defineRoute({
+  query: videosValidatorsSchema.segment.query,
+  params: videosValidatorsSchema.segment.params,
 
-  const last_slash = base_url.lastIndexOf("/");
-  const base_path = base_url.slice(0, last_slash);
-  const real_path = `${base_path}/${path}`;
+  async handler(event, { query, params }) {
+    const base_url = query.base_url;
 
-  return fetch(real_path).then((res) => res.blob());
+    const last_slash = base_url.lastIndexOf("/");
+    const base_path = base_url.slice(0, last_slash);
+    const real_path = `${base_path}/${params.path}`;
+
+    return fetch(real_path).then((res) => res.blob());
+  },
 });

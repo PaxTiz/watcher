@@ -1,11 +1,14 @@
+import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { oauthValidatorsSchema } from "#shared/validators/oauth";
 
-export default defineEventHandler(async (event) => {
-  const query = getQuery(event);
-  const code = query.code as string;
+export default defineRoute({
+  query: oauthValidatorsSchema.callback.query,
 
-  const tokens = await services.external.twitch.oauth.get_tokens(code);
-  await services.credentials.replace(tokens);
+  async handler(event, { query }) {
+    const tokens = await services.external.twitch.oauth.get_tokens(query.code);
+    await services.credentials.replace(tokens);
 
-  return sendRedirect(event, "/");
+    return sendRedirect(event, "/", 302);
+  },
 });

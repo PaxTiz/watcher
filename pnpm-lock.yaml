@@ -26,6 +26,9 @@ importers:
       googleapis:
         specifier: ^171.4.0
         version: 171.4.0
+      h3:
+        specifier: 1.15.5
+        version: 1.15.5
       hls-video-element:
         specifier: ^1.5.10
         version: 1.5.10

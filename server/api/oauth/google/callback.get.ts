@@ -1,12 +1,14 @@
+import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { oauthValidatorsSchema } from "#shared/validators/oauth";
 
-export default defineEventHandler(async (event) => {
-  const query = getQuery(event);
-  const code = query.code as string;
-  const state = query.state as string;
+export default defineRoute({
+  query: oauthValidatorsSchema.callback.query,
 
-  const tokens = await services.external.google.oauth.get_tokens(state, code);
-  await services.credentials.replace(tokens);
+  async handler(event, { query }) {
+    const tokens = await services.external.google.oauth.get_tokens(query.state, query.code);
+    await services.credentials.replace(tokens);
 
-  return sendRedirect(event, "/");
+    return sendRedirect(event, "/", 302);
+  },
 });

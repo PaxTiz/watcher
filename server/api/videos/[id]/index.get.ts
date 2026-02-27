@@ -1,8 +1,11 @@
+import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { videosValidatorsSchema } from "#shared/validators/videos";
 
-export default defineEventHandler(async (event) => {
-  const param = getRouterParam(event, "id");
-  const id = Number(param);
+export default defineRoute({
+  params: videosValidatorsSchema.find.params,
 
-  return services.videos.get_by_id(id);
+  async handler(event, { params }) {
+    return services.videos.get_by_id(params.id);
+  },
 });
