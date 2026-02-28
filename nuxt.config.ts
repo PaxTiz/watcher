@@ -15,7 +15,7 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/app.css"],
 
-  modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxt/scripts", "@vueuse/nuxt"],
+  modules: ["@nuxt/fonts", "@nuxt/icon", "@vueuse/nuxt"],
 
   fonts: {
     provider: "bunny",
