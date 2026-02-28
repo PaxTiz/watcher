@@ -2,7 +2,7 @@ import type { SubscriptionTable, VideoTable } from "#server/database/schema";
 
 export type Sync = {
   Subscription: Omit<SubscriptionTable, "id">;
-  SubscriptionsList: Array<Sync["Subscription"]>;
+  SubscriptionsList: Array<Sync["Subscription"] & { local_logo: string }>;
 
   Video: Omit<VideoTable, "id">;
   VideosList: Array<Sync["Video"]>;

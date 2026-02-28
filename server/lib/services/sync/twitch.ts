@@ -80,6 +80,7 @@ export default class SyncTwitch extends AbstractService {
           name: subscription.broadcaster_name,
           url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
           logo: subscription.logo,
+          local_logo: `/uploads/twitch/channels/${subscription.broadcaster_id}/logo.jpg`,
         });
       }
 

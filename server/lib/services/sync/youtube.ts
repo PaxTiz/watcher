@@ -2,7 +2,14 @@ import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import type { VideoTable } from "#server/database/schema";
-import type { Sync, SyncSubscriptionsUpsert } from "#shared/types/sync";
+import type { Sync, SyncSubscriptionsUpsert, SyncVideosUpsert } from "#shared/types/sync";
+import { existsSync, mkdirSync } from "node:fs";
+import { writeFile, rmdir } from "node:fs/promises";
+import { join } from "node:path";
+import { chunk } from "es-toolkit";
+import { parse, toSeconds } from "iso8601-duration";
+
+const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");
 
 export default class SyncYoutube extends AbstractService {
   async sync() {
@@ -60,7 +67,40 @@ export default class SyncYoutube extends AbstractService {
         .execute();
     });
 
+    await this.sync_subscriptions_images(sync);
+
     return sync;
+  }
+
+  private async sync_subscriptions_images(subscriptions: SyncSubscriptionsUpsert) {
+    this.createImageDirectory("channels");
+
+    const promises = [];
+
+    for (const subscription of subscriptions.removed) {
+      promises.push(rmdir(join(UPLOADS_DIRECTORY, "channels", subscription)));
+    }
+
+    for (const subscription of subscriptions.upsert) {
+      const callback = async (subscription: Sync["Subscription"]) => {
+        this.createImageDirectory("channels", subscription.service_id);
+
+        const image = await fetch(subscription.logo).then((res) => res.arrayBuffer());
+        await writeFile(
+          join(UPLOADS_DIRECTORY, "channels", subscription.service_id, `logo.jpg`),
+          Buffer.from(image),
+        );
+
+        this.createImageDirectory("channels", subscription.service_id, "videos");
+      };
+
+      promises.push(callback(subscription));
+    }
+
+    const chunks = chunk(promises, 100);
+    for (const chk of chunks) {
+      await Promise.all(chk);
+    }
   }
 
   private async get_subscriptions(token: string) {
@@ -75,6 +115,7 @@ export default class SyncYoutube extends AbstractService {
           name: subscription.snippet.title,
           url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
           logo: subscription.snippet.thumbnails.default.url,
+          local_logo: `/uploads/youtube/channels/${subscription.snippet.resourceId.channelId}/logo.png`,
         });
       }
 
@@ -106,12 +147,24 @@ export default class SyncYoutube extends AbstractService {
       }
     }
 
+    const sync: SyncVideosUpsert = {
+      upsert: allVideos,
+      removed: [],
+    };
+
     await database.transaction().execute(async (tx) => {
       if (subscriptions.removed.length > 0) {
+        sync.removed = await tx
+          .selectFrom("videos")
+          .select("service_id")
+          .where("videos.subscription_id", "in", subscriptions.removed)
+          .execute()
+          .then((res) => res.map((e) => e.service_id));
+
         await tx
           .deleteFrom("videos")
-          .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
-          .where("videos.subscription_id", "in", subscriptions.removed)
+          .where("service", "=", "youtube")
+          .where("service_id", "in", sync.removed)
           .execute();
       }
 
@@ -129,6 +182,42 @@ export default class SyncYoutube extends AbstractService {
         )
         .execute();
     });
+
+    // TODO: Crash when sync video images
+    // Connect Timeout Error (attempted addresses: 2a00:1450:4007:809::2016:443, 172.217.22.150:443, 2a00:1450:4007:81b::2016:443, 172.217.22.214:443, 2a00:1450:4007:811::2016:443, 172.217.22.86:443, 2a00:1450:4007:810::2016:443, 142.251.142.22:443, 172.217.22.118:443, 172.217.22.182:443, 172.217.20.54:443, 142.251.39.118:443, 142.251.209.150:443, 142.251.39.214:443, timeout: 10000ms)
+    // await this.sync_videos_images(sync);
+  }
+
+  private async sync_videos_images(videos: SyncVideosUpsert) {
+    const promises = [];
+
+    // TODO: Remove deleted videos thumbnails
+    // for (const video of videos.removed) {
+    //   promises.push(unlink(join(UPLOADS_DIRECTORY, "channels", video, "videos", `${video}.jpg`)));
+    // }
+
+    for (const video of videos.upsert) {
+      const callback = async (video: Sync["Video"]) => {
+        const image = await fetch(video.thumbnail).then((res) => res.arrayBuffer());
+        await writeFile(
+          join(
+            UPLOADS_DIRECTORY,
+            "channels",
+            video.subscription_id,
+            "videos",
+            `${video.service_id}.jpg`,
+          ),
+          Buffer.from(image),
+        );
+      };
+
+      promises.push(callback(video));
+    }
+
+    const chunks = chunk(promises, 100);
+    for (const chk of chunks) {
+      await Promise.all(chk);
+    }
   }
 
   private async get_videos_by_channel_id(token: string, channel_id: string) {
@@ -149,10 +238,18 @@ export default class SyncYoutube extends AbstractService {
         created_at: video.snippet.publishedAt,
         url: `https://www.youtube.com/watch?v=${video.id}`,
         thumbnail: video.snippet.thumbnails.medium.url,
-        duration: 0, // TODO: Parse duration
+        duration: toSeconds(parse(video.contentDetails.duration)),
       });
     }
 
     return videos;
+  }
+
+  private createImageDirectory(...path: Array<string>) {
+    const _path = join(UPLOADS_DIRECTORY, ...path);
+
+    if (!existsSync(_path)) {
+      mkdirSync(_path, { recursive: true });
+    }
   }
 }
