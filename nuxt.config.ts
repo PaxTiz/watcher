@@ -68,34 +68,4 @@ export default defineNuxtConfig({
       clientSecret: "",
     },
   },
-
-  vue: {
-    compilerOptions: {
-      isCustomElement: (tag) =>
-        [
-          "media-controller",
-          "hls-video",
-          "youtube-video",
-          "media-loading-indicator",
-          "media-control-bar",
-          "media-play-button",
-          "media-seek-backward-button",
-          "media-seek-forward-button",
-          "media-mute-button",
-          "media-volume-range",
-          "media-time-range",
-          "media-time-display",
-          "media-playback-rate-button",
-          "media-fullscreen-button",
-          "media-captions-menu-button",
-          "media-captions-menu",
-          "media-rendition-menu-button",
-          "media-playback-rate-menu-button",
-          "media-settings-menu",
-          "media-settings-menu-item",
-          "media-rendition-menu",
-          "media-playback-rate-menu",
-        ].includes(tag),
-    },
-  },
 });
