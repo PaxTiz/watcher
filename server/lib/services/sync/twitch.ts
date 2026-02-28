@@ -73,7 +73,10 @@ export default class SyncTwitch extends AbstractService {
             service_id: subscription.broadcaster_id,
             name: subscription.broadcaster_name,
             url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
-            logo: subscription.logo,
+            logo:
+              differenceInHours(new Date(), existingSub.channel.last_synced_at) < 24
+                ? existingSub.channel.logo
+                : subscription.logo,
             last_synced_at: formatISO(new Date()),
           };
         } else {
@@ -186,7 +189,10 @@ export default class SyncTwitch extends AbstractService {
             description: video.description,
             created_at: video.created_at,
             url: video.url,
-            thumbnail: video.thumbnail_url,
+            thumbnail:
+              differenceInHours(new Date(), existingVid.video.last_synced_at) < 3
+                ? existingVid.video.thumbnail
+                : video.thumbnail_url,
             duration: this.parseDurationToSeconds(video.duration),
             last_synced_at: formatISO(new Date()),
           };
@@ -275,10 +281,7 @@ export default class SyncTwitch extends AbstractService {
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
-    if (
-      subscription.status === "updated" &&
-      differenceInHours(new Date(), subscription.channel.last_synced_at) < 24
-    ) {
+    if (subscription.channel.logo.startsWith("/")) {
       return subscription.channel.logo;
     }
 
@@ -320,10 +323,7 @@ export default class SyncTwitch extends AbstractService {
   }
 
   private async sync_video_thumbnail(video: Sync["Video"]) {
-    if (
-      video.status === "updated" &&
-      differenceInHours(new Date(), video.video.last_synced_at) < 3
-    ) {
+    if (video.video.thumbnail.startsWith("/")) {
       return video.video.thumbnail;
     }
 

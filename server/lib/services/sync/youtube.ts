@@ -61,7 +61,10 @@ export default class SyncYoutube extends AbstractService {
             service_id: subscription.snippet.resourceId.channelId,
             name: subscription.snippet.title,
             url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
-            logo: subscription.snippet.thumbnails.default.url,
+            logo:
+              differenceInHours(new Date(), existingSub.channel.last_synced_at) < 24
+                ? existingSub.channel.logo
+                : subscription.snippet.thumbnails.default.url,
             last_synced_at: formatISO(new Date()),
           };
         } else {
@@ -172,7 +175,10 @@ export default class SyncYoutube extends AbstractService {
           created_at: video.snippet.publishedAt,
           url: `https://www.youtube.com/watch?v=${video.id}`,
           duration: toSeconds(parse(video.contentDetails.duration)),
-          thumbnail: video.snippet.thumbnails.medium.url,
+          thumbnail:
+            differenceInHours(new Date(), existingVid.video.last_synced_at) < 3
+              ? existingVid.video.thumbnail
+              : video.snippet.thumbnails.medium.url,
           last_synced_at: formatISO(new Date()),
         };
       } else {
@@ -248,10 +254,7 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
-    if (
-      subscription.status === "updated" &&
-      differenceInHours(new Date(), subscription.channel.last_synced_at) < 24
-    ) {
+    if (subscription.channel.logo.startsWith("/")) {
       return subscription.channel.logo;
     }
 
@@ -293,10 +296,7 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_video_thumbnail(video: Sync["Video"]) {
-    if (
-      video.status === "updated" &&
-      differenceInHours(new Date(), video.video.last_synced_at) < 3
-    ) {
+    if (video.video.thumbnail.startsWith("/")) {
       return video.video.thumbnail;
     }
 
