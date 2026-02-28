@@ -68,20 +68,20 @@ export default class SyncYoutube extends AbstractService {
 
     let response = await services.external.google.youtubeSubscriptions.list(token);
     while (true) {
-      for (const subscription of response.data.items ?? []) {
+      for (const subscription of response.items ?? []) {
         subscriptions.push({
           service: "youtube",
-          service_id: subscription.snippet!.resourceId!.channelId!,
-          name: subscription.snippet!.title!,
-          url: `https://www.youtube.com/channel/${subscription.snippet!.resourceId!.channelId}`,
-          logo: subscription.snippet!.thumbnails!.default!.url!,
+          service_id: subscription.snippet.resourceId.channelId,
+          name: subscription.snippet.title,
+          url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
+          logo: subscription.snippet.thumbnails.default.url,
         });
       }
 
-      if (response.data.nextPageToken) {
+      if (response.nextPageToken) {
         response = await services.external.google.youtubeSubscriptions.list(
           token,
-          response.data.nextPageToken,
+          response.nextPageToken,
         );
       } else {
         break;
@@ -142,13 +142,13 @@ export default class SyncYoutube extends AbstractService {
     for (const video of all_videos) {
       videos.push({
         service: "youtube",
-        service_id: video.id!,
+        service_id: video.id,
         subscription_id: channel_id,
-        title: video.snippet!.title!,
-        description: video.snippet!.description!,
-        created_at: video.snippet!.publishedAt!,
+        title: video.snippet.title,
+        description: video.snippet.description,
+        created_at: video.snippet.publishedAt,
         url: `https://www.youtube.com/watch?v=${video.id}`,
-        thumbnail: video.snippet!.thumbnails!.medium!.url!,
+        thumbnail: video.snippet.thumbnails.medium.url,
         duration: 0, // TODO: Parse duration
       });
     }
