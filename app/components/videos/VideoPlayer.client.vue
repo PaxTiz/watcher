@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import "media-chrome";
+import "media-chrome/menu";
+import "media-chrome/lang/fr.js";
 
 import type { VideoResource } from "#shared/resources/videos";
 
@@ -22,7 +24,12 @@ const loadPolicy = {
 </script>
 
 <template>
-  <media-controller class="w-full aspect-video">
+  <media-controller
+    lang="fr"
+    defaultsubtitles="false"
+    defaultstreamtype="on-demand"
+    class="w-full aspect-video"
+  >
     <hls-video
       v-if="video.service === 'twitch'"
       :src="`/api/videos/${video.id}/url`"
@@ -41,13 +48,39 @@ const loadPolicy = {
     </hls-video>
 
     <youtube-video
+      ref="video"
       v-else-if="video.service === 'youtube'"
       :src="video.url"
+      :config="{
+        cc_load_policy: 0, // Disable default subtitles
+        rel: 0, // Don't show recommendations at end of video
+      }"
       slot="media"
-      crossorigin
     ></youtube-video>
 
-    <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
+    <media-settings-menu hidden anchor="auto">
+      <media-settings-menu-item>
+        Vitesse
+        <media-playback-rate-menu slot="submenu" hidden>
+          <div slot="title">Speed</div>
+        </media-playback-rate-menu>
+      </media-settings-menu-item>
+
+      <media-settings-menu-item>
+        Qualité
+        <media-rendition-menu slot="submenu" hidden>
+          <div slot="title">Quality</div>
+        </media-rendition-menu>
+      </media-settings-menu-item>
+
+      <media-settings-menu-item>
+        Sous-titres
+        <media-captions-menu slot="submenu" hidden>
+          <div slot="title">Captions</div>
+        </media-captions-menu>
+      </media-settings-menu-item>
+    </media-settings-menu>
+
     <media-control-bar>
       <media-play-button></media-play-button>
       <media-seek-backward-button></media-seek-backward-button>
@@ -56,7 +89,8 @@ const loadPolicy = {
       <media-volume-range></media-volume-range>
       <media-time-range></media-time-range>
       <media-time-display showduration remaining></media-time-display>
-      <media-playback-rate-button></media-playback-rate-button>
+
+      <media-settings-menu-button></media-settings-menu-button>
       <media-fullscreen-button></media-fullscreen-button>
     </media-control-bar>
   </media-controller>
