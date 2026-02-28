@@ -56,6 +56,14 @@ export default class SyncYoutube extends AbstractService {
 
         if (existingSub) {
           existingSub.status = "updated";
+          existingSub.channel = {
+            service: "youtube",
+            service_id: subscription.snippet.resourceId.channelId,
+            name: subscription.snippet.title,
+            url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
+            logo: subscription.snippet.thumbnails.default.url,
+            last_synced_at: formatISO(new Date()),
+          };
         } else {
           subscriptions.push({
             status: "created",
@@ -155,6 +163,18 @@ export default class SyncYoutube extends AbstractService {
 
       if (existingVid) {
         existingVid.status = "updated";
+        existingVid.video = {
+          service: "youtube",
+          service_id: video.id,
+          subscription_id: channel_id,
+          title: video.snippet.title,
+          description: video.snippet.description,
+          created_at: video.snippet.publishedAt,
+          url: `https://www.youtube.com/watch?v=${video.id}`,
+          duration: toSeconds(parse(video.contentDetails.duration)),
+          thumbnail: video.snippet.thumbnails.medium.url,
+          last_synced_at: formatISO(new Date()),
+        };
       } else {
         videos.push({
           status: "created",

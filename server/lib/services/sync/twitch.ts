@@ -68,6 +68,14 @@ export default class SyncTwitch extends AbstractService {
 
         if (existingSub) {
           existingSub.status = "updated";
+          existingSub.channel = {
+            service: "twitch",
+            service_id: subscription.broadcaster_id,
+            name: subscription.broadcaster_name,
+            url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
+            logo: subscription.logo,
+            last_synced_at: formatISO(new Date()),
+          };
         } else {
           subscriptions.push({
             status: "created",
@@ -170,6 +178,18 @@ export default class SyncTwitch extends AbstractService {
 
         if (existingVid) {
           existingVid.status = "updated";
+          existingVid.video = {
+            service: "twitch",
+            service_id: video.id,
+            subscription_id: channel_id,
+            title: video.title,
+            description: video.description,
+            created_at: video.created_at,
+            url: video.url,
+            thumbnail: video.thumbnail_url,
+            duration: this.parseDurationToSeconds(video.duration),
+            last_synced_at: formatISO(new Date()),
+          };
         } else {
           videos.push({
             status: "created",
@@ -182,7 +202,7 @@ export default class SyncTwitch extends AbstractService {
               created_at: video.created_at,
               url: video.url,
               thumbnail: video.thumbnail_url,
-              duration: 0, // TODO: Parse duration
+              duration: this.parseDurationToSeconds(video.duration),
               last_synced_at: formatISO(new Date()),
             },
           });
@@ -330,5 +350,20 @@ export default class SyncTwitch extends AbstractService {
     if (!existsSync(_path)) {
       mkdirSync(_path, { recursive: true });
     }
+  }
+
+  private parseDurationToSeconds(duration: string): number {
+    const regex = /(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/;
+    const match = duration.match(regex);
+
+    if (!match || !match[0]) {
+      return 0;
+    }
+
+    const hours = parseInt(match[1] ?? "0", 10);
+    const minutes = parseInt(match[2] ?? "0", 10);
+    const seconds = parseInt(match[3] ?? "0", 10);
+
+    return hours * 3600 + minutes * 60 + seconds;
   }
 }
