@@ -1,17 +1,15 @@
 import type { SubscriptionTable, VideoTable } from "#server/database/schema";
 
 export type Sync = {
-  Subscription: Omit<SubscriptionTable, "id">;
-  SubscriptionsList: Array<Sync["Subscription"] & { local_logo: string }>;
+  Subscription: {
+    status: "created" | "updated" | "deleted";
+    channel: Omit<SubscriptionTable, "id">;
+  };
+  SubscriptionsList: Array<Sync["Subscription"]>;
 
-  Video: Omit<VideoTable, "id">;
+  Video: {
+    status: "created" | "updated" | "deleted";
+    video: Omit<VideoTable, "id">;
+  };
   VideosList: Array<Sync["Video"]>;
 };
-
-type SyncUpsert<T> = {
-  upsert: T;
-  removed: Array<string>;
-};
-
-export type SyncSubscriptionsUpsert = SyncUpsert<Sync["SubscriptionsList"]>;
-export type SyncVideosUpsert = SyncUpsert<Sync["VideosList"]>;

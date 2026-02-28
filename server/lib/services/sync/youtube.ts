@@ -1,12 +1,11 @@
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
-import type { VideoTable } from "#server/database/schema";
-import type { Sync, SyncSubscriptionsUpsert, SyncVideosUpsert } from "#shared/types/sync";
+import type { Sync } from "#shared/types/sync";
+import type { ServiceCredentials } from "#shared/types/credentials";
 import { existsSync, mkdirSync } from "node:fs";
-import { writeFile, rmdir } from "node:fs/promises";
+import { writeFile, rmdir, unlink } from "node:fs/promises";
 import { join } from "node:path";
-import { chunk } from "es-toolkit";
 import { parse, toSeconds } from "iso8601-duration";
 
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");
@@ -18,110 +17,60 @@ export default class SyncYoutube extends AbstractService {
       throw createError({ statusCode: 403 });
     }
 
-    const subscriptions = await this.sync_subscriptions(token);
-    await this.sync_videos(token, subscriptions);
+    const subscriptions = await this.get_subscriptions(token);
+    for (const subscription of subscriptions) {
+      await this.sync_subscription(token, subscription);
+    }
   }
 
-  private async sync_subscriptions(token: ServiceCredentials) {
+  private async get_subscriptions(credentials: ServiceCredentials) {
     const database = useDatabase();
-
-    const existing_subscriptions = await database
+    const subscriptions: Sync["SubscriptionsList"] = await database
       .selectFrom("subscriptions")
-      .select(["service_id"])
+      .selectAll()
       .where("service", "=", "youtube")
-      .execute();
+      .execute()
+      .then((subs) =>
+        subs.map((sub) => ({
+          status: "deleted",
+          channel: {
+            service: sub.service,
+            service_id: sub.service_id,
+            name: sub.name,
+            url: sub.url,
+            logo: sub.logo,
+          },
+        })),
+      );
 
-    const subscriptions = await this.get_subscriptions(token.access_token);
-
-    const sync: SyncSubscriptionsUpsert = {
-      upsert: subscriptions,
-      removed: [],
-    };
-
-    for (const existing of existing_subscriptions) {
-      const exists = subscriptions.find((e) => e.service_id === existing.service_id);
-      if (!exists) {
-        sync.removed.push(existing.service_id);
-      }
-    }
-
-    await database.transaction().execute(async (tx) => {
-      if (sync.removed.length > 0) {
-        await tx
-          .deleteFrom("subscriptions")
-          .where("service", "=", "youtube")
-          .where("service_id", "in", sync.removed)
-          .execute();
-      }
-
-      await tx
-        .insertInto("subscriptions")
-        .values(sync.upsert)
-        .onConflict((row) =>
-          row.columns(["service", "service_id"]).doUpdateSet({
-            logo: (c) => c.ref("excluded.logo"),
-            url: (c) => c.ref("excluded.url"),
-            name: (c) => c.ref("excluded.name"),
-          }),
-        )
-        .execute();
-    });
-
-    await this.sync_subscriptions_images(sync);
-
-    return sync;
-  }
-
-  private async sync_subscriptions_images(subscriptions: SyncSubscriptionsUpsert) {
-    this.createImageDirectory("channels");
-
-    const promises = [];
-
-    for (const subscription of subscriptions.removed) {
-      promises.push(rmdir(join(UPLOADS_DIRECTORY, "channels", subscription)));
-    }
-
-    for (const subscription of subscriptions.upsert) {
-      const callback = async (subscription: Sync["Subscription"]) => {
-        this.createImageDirectory("channels", subscription.service_id);
-
-        const image = await fetch(subscription.logo).then((res) => res.arrayBuffer());
-        await writeFile(
-          join(UPLOADS_DIRECTORY, "channels", subscription.service_id, `logo.jpg`),
-          Buffer.from(image),
-        );
-
-        this.createImageDirectory("channels", subscription.service_id, "videos");
-      };
-
-      promises.push(callback(subscription));
-    }
-
-    const chunks = chunk(promises, 100);
-    for (const chk of chunks) {
-      await Promise.all(chk);
-    }
-  }
-
-  private async get_subscriptions(token: string) {
-    const subscriptions: Sync["SubscriptionsList"] = [];
-
-    let response = await services.external.google.youtubeSubscriptions.list(token);
+    let response = await services.external.google.youtubeSubscriptions.list(
+      credentials.access_token,
+    );
     while (true) {
       for (const subscription of response.items ?? []) {
-        subscriptions.push({
-          service: "youtube",
-          service_id: subscription.snippet.resourceId.channelId,
-          name: subscription.snippet.title,
-          url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
-          logo: subscription.snippet.thumbnails.default.url,
-          local_logo: `/uploads/youtube/channels/${subscription.snippet.resourceId.channelId}/logo.png`,
-        });
+        const existingSub = subscriptions.find(
+          (e) => e.channel.service === subscription.snippet.resourceId.channelId,
+        );
+
+        if (existingSub) {
+          existingSub.status = "updated";
+        } else {
+          subscriptions.push({
+            status: "created",
+            channel: {
+              service: "youtube",
+              service_id: subscription.snippet.resourceId.channelId,
+              name: subscription.snippet.title,
+              url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
+              logo: subscription.snippet.thumbnails.default.url,
+            },
+          });
+        }
       }
 
       if (response.nextPageToken) {
         response = await services.external.google.youtubeSubscriptions.list(
-          token,
+          credentials.access_token,
           response.nextPageToken,
         );
       } else {
@@ -132,117 +81,188 @@ export default class SyncYoutube extends AbstractService {
     return subscriptions;
   }
 
-  private async sync_videos(token: ServiceCredentials, subscriptions: SyncSubscriptionsUpsert) {
+  private async sync_subscription(
+    credentials: ServiceCredentials,
+    subscription: Sync["Subscription"],
+  ) {
     const database = useDatabase();
 
-    const allVideos: Sync["VideosList"] = [];
-    for (const subscription of subscriptions.upsert) {
-      const videos = await this.get_videos_by_channel_id(
-        token.access_token,
-        subscription.service_id,
+    if (subscription.status === "deleted") {
+      return await this.delete_subscription(subscription);
+    }
+
+    if (subscription.status === "created") {
+      subscription.channel.logo = await this.sync_subscription_logo(subscription);
+    }
+
+    await database
+      .insertInto("subscriptions")
+      .values(subscription.channel)
+      .onConflict((row) =>
+        row.columns(["service", "service_id"]).doUpdateSet({
+          logo: (c) => c.ref("excluded.logo"),
+          url: (c) => c.ref("excluded.url"),
+          name: (c) => c.ref("excluded.name"),
+        }),
+      )
+      .execute();
+
+    const videos = await this.get_videos_by_channel_id(
+      credentials,
+      subscription.channel.service_id,
+    );
+
+    for (const video of videos) {
+      await this.sync_video(video);
+    }
+  }
+
+  private async get_videos_by_channel_id(credentials: ServiceCredentials, channel_id: string) {
+    const database = useDatabase();
+    const videos: Sync["VideosList"] = await database
+      .selectFrom("videos")
+      .selectAll()
+      .where("service", "=", "youtube")
+      .execute()
+      .then((subs) =>
+        subs.map((sub) => ({
+          status: "deleted",
+          video: {
+            service: sub.service,
+            service_id: sub.service_id,
+            subscription_id: channel_id,
+            title: sub.title,
+            description: sub.description,
+            created_at: sub.created_at,
+            url: sub.url,
+            duration: sub.duration,
+            thumbnail: sub.thumbnail,
+          },
+        })),
       );
 
-      for (const video of videos) {
-        allVideos.push(video);
-      }
-    }
-
-    const sync: SyncVideosUpsert = {
-      upsert: allVideos,
-      removed: [],
-    };
-
-    await database.transaction().execute(async (tx) => {
-      if (subscriptions.removed.length > 0) {
-        sync.removed = await tx
-          .selectFrom("videos")
-          .select("service_id")
-          .where("videos.subscription_id", "in", subscriptions.removed)
-          .execute()
-          .then((res) => res.map((e) => e.service_id));
-
-        await tx
-          .deleteFrom("videos")
-          .where("service", "=", "youtube")
-          .where("service_id", "in", sync.removed)
-          .execute();
-      }
-
-      await tx
-        .insertInto("videos")
-        .values(allVideos)
-        .onConflict((row) =>
-          row.columns(["service", "service_id"]).doUpdateSet({
-            title: (c) => c.ref("excluded.title"),
-            description: (c) => c.ref("excluded.description"),
-            url: (c) => c.ref("excluded.url"),
-            duration: (c) => c.ref("excluded.duration"),
-            thumbnail: (c) => c.ref("excluded.thumbnail"),
-          }),
-        )
-        .execute();
-    });
-
-    // TODO: Crash when sync video images
-    // Connect Timeout Error (attempted addresses: 2a00:1450:4007:809::2016:443, 172.217.22.150:443, 2a00:1450:4007:81b::2016:443, 172.217.22.214:443, 2a00:1450:4007:811::2016:443, 172.217.22.86:443, 2a00:1450:4007:810::2016:443, 142.251.142.22:443, 172.217.22.118:443, 172.217.22.182:443, 172.217.20.54:443, 142.251.39.118:443, 142.251.209.150:443, 142.251.39.214:443, timeout: 10000ms)
-    // await this.sync_videos_images(sync);
-  }
-
-  private async sync_videos_images(videos: SyncVideosUpsert) {
-    const promises = [];
-
-    // TODO: Remove deleted videos thumbnails
-    // for (const video of videos.removed) {
-    //   promises.push(unlink(join(UPLOADS_DIRECTORY, "channels", video, "videos", `${video}.jpg`)));
-    // }
-
-    for (const video of videos.upsert) {
-      const callback = async (video: Sync["Video"]) => {
-        const image = await fetch(video.thumbnail).then((res) => res.arrayBuffer());
-        await writeFile(
-          join(
-            UPLOADS_DIRECTORY,
-            "channels",
-            video.subscription_id,
-            "videos",
-            `${video.service_id}.jpg`,
-          ),
-          Buffer.from(image),
-        );
-      };
-
-      promises.push(callback(video));
-    }
-
-    const chunks = chunk(promises, 100);
-    for (const chk of chunks) {
-      await Promise.all(chk);
-    }
-  }
-
-  private async get_videos_by_channel_id(token: string, channel_id: string) {
-    const videos: Array<Omit<VideoTable, "id">> = [];
-
     const all_videos = await services.external.google.youtubeVideos.get_latest_videos(
-      token,
+      credentials.access_token,
       channel_id,
     );
 
     for (const video of all_videos) {
-      videos.push({
-        service: "youtube",
-        service_id: video.id,
-        subscription_id: channel_id,
-        title: video.snippet.title,
-        description: video.snippet.description,
-        created_at: video.snippet.publishedAt,
-        url: `https://www.youtube.com/watch?v=${video.id}`,
-        thumbnail: video.snippet.thumbnails.medium.url,
-        duration: toSeconds(parse(video.contentDetails.duration)),
-      });
+      const existingVid = videos.find((e) => e.video.service_id === video.id);
+
+      if (existingVid) {
+        existingVid.status = "updated";
+      } else {
+        videos.push({
+          status: "created",
+          video: {
+            service: "youtube",
+            service_id: video.id,
+            subscription_id: channel_id,
+            title: video.snippet.title,
+            description: video.snippet.description,
+            created_at: video.snippet.publishedAt,
+            url: `https://www.youtube.com/watch?v=${video.id}`,
+            duration: toSeconds(parse(video.contentDetails.duration)),
+            thumbnail: video.snippet.thumbnails.medium.url,
+          },
+        });
+      }
     }
 
     return videos;
+  }
+
+  private async sync_video(video: Sync["Video"]) {
+    const database = useDatabase();
+
+    if (video.status === "deleted") {
+      return await this.delete_video(video);
+    }
+
+    if (video.status === "created") {
+      video.video.thumbnail = await this.sync_video_thumbnail(video);
+    }
+
+    await database
+      .insertInto("videos")
+      .values(video.video)
+      .onConflict((row) =>
+        row.columns(["service", "service_id"]).doUpdateSet({
+          title: (c) => c.ref("excluded.title"),
+          description: (c) => c.ref("excluded.description"),
+          url: (c) => c.ref("excluded.url"),
+          duration: (c) => c.ref("excluded.duration"),
+          thumbnail: (c) => c.ref("excluded.thumbnail"),
+        }),
+      )
+      .execute();
+  }
+
+  private async delete_subscription(subscription: Sync["Subscription"]) {
+    const database = useDatabase();
+
+    await database
+      .deleteFrom("subscriptions")
+      .where("service", "=", "youtube")
+      .where("service_id", "=", subscription.channel.service_id)
+      .execute();
+
+    await database
+      .deleteFrom("videos")
+      .where("service", "=", "youtube")
+      .where("subscription_id", "=", subscription.channel.service_id)
+      .execute();
+
+    await rmdir(join(UPLOADS_DIRECTORY, "channels", subscription.channel.service_id));
+  }
+
+  private async sync_subscription_logo(subscription: Sync["Subscription"]) {
+    this.createImageDirectory("channels", subscription.channel.service_id);
+
+    const image = await fetch(subscription.channel.logo).then((res) => res.arrayBuffer());
+    await writeFile(
+      join(UPLOADS_DIRECTORY, "channels", subscription.channel.service_id, `logo.jpg`),
+      Buffer.from(image),
+    );
+
+    this.createImageDirectory("channels", subscription.channel.service_id, "videos");
+
+    return `/uploads/youtube/channels/${subscription.channel.service_id}/logo.jpg`;
+  }
+
+  private async delete_video(video: Sync["Video"]) {
+    const database = useDatabase();
+
+    await database
+      .deleteFrom("videos")
+      .where("service", "=", "youtube")
+      .where("service_id", "=", video.video.service_id)
+      .execute();
+
+    await unlink(
+      join(
+        UPLOADS_DIRECTORY,
+        "channels",
+        video.video.subscription_id,
+        `${video.video.service_id}.jpg`,
+      ),
+    );
+  }
+
+  private async sync_video_thumbnail(video: Sync["Video"]) {
+    const image = await fetch(video.video.thumbnail).then((res) => res.arrayBuffer());
+
+    await writeFile(
+      join(
+        UPLOADS_DIRECTORY,
+        "channels",
+        video.video.subscription_id,
+        `${video.video.service_id}.jpg`,
+      ),
+      Buffer.from(image),
+    );
+
+    return `/uploads/youtube/channels/${video.video.subscription_id}/${video.video.service_id}.jpg`;
   }
 
   private createImageDirectory(...path: Array<string>) {
