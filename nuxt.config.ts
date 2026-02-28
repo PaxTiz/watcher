@@ -1,4 +1,5 @@
 import tailwindcss from "@tailwindcss/vite";
+import { join } from "node:path";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -15,7 +16,18 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/app.css"],
 
-  modules: ["@nuxt/fonts", "@nuxt/icon", "@vueuse/nuxt"],
+  modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxt/image", "@vueuse/nuxt"],
+
+  image: {
+    provider: "ipx",
+    ipx: {
+      baseURL: "/uploads",
+      fs: {
+        dir: join(process.cwd(), ".storage", "uploads"),
+        maxAge: 3600 * 12, // 12 hours
+      },
+    },
+  },
 
   fonts: {
     provider: "bunny",

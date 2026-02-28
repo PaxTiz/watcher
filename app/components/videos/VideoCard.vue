@@ -5,21 +5,6 @@ import { useFormatter } from "#shared/utils/useFormatter";
 const { video } = defineProps<{ video: VideoResource }>();
 
 const { dates } = useFormatter();
-
-const thumbnail = computed(() => {
-  switch (video.author.channel.service) {
-    case "youtube":
-      return video.thumbnail;
-    case "twitch":
-      if (video.thumbnail.startsWith("https://vod-secure.twitch.tv/")) {
-        // Twitch API is currently limited for sizes of thumbnails, see
-        // https://dev.twitch.tv/docs/api/reference/#get-videos
-        return video.thumbnail.replace("%{width}", "320").replace("%{height}", "180");
-      }
-
-      return video.thumbnail.replace("%{width}", "380").replace("%{height}", "210");
-  }
-});
 </script>
 
 <template>
@@ -27,18 +12,26 @@ const thumbnail = computed(() => {
     class="block p-2 bg-ui-bg rounded border focus:outline-alt"
     :to="`/videos/${video.id}`"
   >
-    <img
+    <NuxtImg
       class="aspect-video w-full object-cover rounded"
-      :src="thumbnail"
       loading="lazy"
+      format="avif,webp"
+      width="380"
+      quality="100"
+      :src="video.thumbnail"
+      :placeholder="[380, 180, 100, 20]"
       :alt="`Image de la vidéo #${video.id}`"
     />
 
     <div class="grid grid-cols-[2rem_1fr] gap-4 mt-4">
       <div>
-        <img
+        <NuxtImg
+          class="w-full rounded"
           loading="lazy"
-          class="rounded w-8 h-8"
+          format="avif,webp"
+          width="32"
+          height="32"
+          densities="x1"
           :src="video.author.channel.logo"
           :alt="`Logo de ${video.author.name}`"
         />

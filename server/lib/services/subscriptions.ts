@@ -26,9 +26,7 @@ export default class SubscriptionsService extends AbstractService {
   }
 
   async sync() {
-    // TODO: Store logos in local to avoid rate limit
-
     await services.sync.youtube.sync();
-    // await services.sync.twitch.sync();
+    await services.sync.twitch.sync();
   }
 }

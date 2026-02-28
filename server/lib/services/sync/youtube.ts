@@ -4,9 +4,10 @@ import { useDatabase } from "#server/database";
 import type { Sync } from "#shared/types/sync";
 import type { ServiceCredentials } from "#shared/types/credentials";
 import { existsSync, mkdirSync } from "node:fs";
-import { writeFile, rmdir, unlink } from "node:fs/promises";
+import { writeFile, rm, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { parse, toSeconds } from "iso8601-duration";
+import { formatISO, differenceInHours } from "date-fns";
 
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");
 
@@ -39,6 +40,7 @@ export default class SyncYoutube extends AbstractService {
             name: sub.name,
             url: sub.url,
             logo: sub.logo,
+            last_synced_at: sub.last_synced_at,
           },
         })),
       );
@@ -49,7 +51,7 @@ export default class SyncYoutube extends AbstractService {
     while (true) {
       for (const subscription of response.items ?? []) {
         const existingSub = subscriptions.find(
-          (e) => e.channel.service === subscription.snippet.resourceId.channelId,
+          (e) => e.channel.service_id === subscription.snippet.resourceId.channelId,
         );
 
         if (existingSub) {
@@ -63,6 +65,7 @@ export default class SyncYoutube extends AbstractService {
               name: subscription.snippet.title,
               url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
               logo: subscription.snippet.thumbnails.default.url,
+              last_synced_at: formatISO(new Date()),
             },
           });
         }
@@ -91,9 +94,7 @@ export default class SyncYoutube extends AbstractService {
       return await this.delete_subscription(subscription);
     }
 
-    if (subscription.status === "created") {
-      subscription.channel.logo = await this.sync_subscription_logo(subscription);
-    }
+    subscription.channel.logo = await this.sync_subscription_logo(subscription);
 
     await database
       .insertInto("subscriptions")
@@ -103,6 +104,7 @@ export default class SyncYoutube extends AbstractService {
           logo: (c) => c.ref("excluded.logo"),
           url: (c) => c.ref("excluded.url"),
           name: (c) => c.ref("excluded.name"),
+          last_synced_at: (c) => c.ref("excluded.last_synced_at"),
         }),
       )
       .execute();
@@ -123,20 +125,22 @@ export default class SyncYoutube extends AbstractService {
       .selectFrom("videos")
       .selectAll()
       .where("service", "=", "youtube")
+      .where("subscription_id", "=", channel_id)
       .execute()
-      .then((subs) =>
-        subs.map((sub) => ({
+      .then((videos) =>
+        videos.map((vid) => ({
           status: "deleted",
           video: {
-            service: sub.service,
-            service_id: sub.service_id,
+            service: vid.service,
+            service_id: vid.service_id,
             subscription_id: channel_id,
-            title: sub.title,
-            description: sub.description,
-            created_at: sub.created_at,
-            url: sub.url,
-            duration: sub.duration,
-            thumbnail: sub.thumbnail,
+            title: vid.title,
+            description: vid.description,
+            created_at: vid.created_at,
+            url: vid.url,
+            duration: vid.duration,
+            thumbnail: vid.thumbnail,
+            last_synced_at: vid.last_synced_at,
           },
         })),
       );
@@ -164,6 +168,7 @@ export default class SyncYoutube extends AbstractService {
             url: `https://www.youtube.com/watch?v=${video.id}`,
             duration: toSeconds(parse(video.contentDetails.duration)),
             thumbnail: video.snippet.thumbnails.medium.url,
+            last_synced_at: formatISO(new Date()),
           },
         });
       }
@@ -179,9 +184,7 @@ export default class SyncYoutube extends AbstractService {
       return await this.delete_video(video);
     }
 
-    if (video.status === "created") {
-      video.video.thumbnail = await this.sync_video_thumbnail(video);
-    }
+    video.video.thumbnail = await this.sync_video_thumbnail(video);
 
     await database
       .insertInto("videos")
@@ -193,6 +196,7 @@ export default class SyncYoutube extends AbstractService {
           url: (c) => c.ref("excluded.url"),
           duration: (c) => c.ref("excluded.duration"),
           thumbnail: (c) => c.ref("excluded.thumbnail"),
+          last_synced_at: (c) => c.ref("excluded.last_synced_at"),
         }),
       )
       .execute();
@@ -213,10 +217,24 @@ export default class SyncYoutube extends AbstractService {
       .where("subscription_id", "=", subscription.channel.service_id)
       .execute();
 
-    await rmdir(join(UPLOADS_DIRECTORY, "channels", subscription.channel.service_id));
+    try {
+      await rm(join(UPLOADS_DIRECTORY, "channels", subscription.channel.service_id), {
+        force: true,
+        recursive: true,
+      });
+    } catch {
+      // Don't throw an error if could not delete subscription directory
+    }
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
+    if (
+      subscription.status === "updated" &&
+      differenceInHours(new Date(), subscription.channel.last_synced_at) < 24
+    ) {
+      return subscription.channel.logo;
+    }
+
     this.createImageDirectory("channels", subscription.channel.service_id);
 
     const image = await fetch(subscription.channel.logo).then((res) => res.arrayBuffer());
@@ -227,7 +245,7 @@ export default class SyncYoutube extends AbstractService {
 
     this.createImageDirectory("channels", subscription.channel.service_id, "videos");
 
-    return `/uploads/youtube/channels/${subscription.channel.service_id}/logo.jpg`;
+    return `/youtube/channels/${subscription.channel.service_id}/logo.jpg`;
   }
 
   private async delete_video(video: Sync["Video"]) {
@@ -239,17 +257,29 @@ export default class SyncYoutube extends AbstractService {
       .where("service_id", "=", video.video.service_id)
       .execute();
 
-    await unlink(
-      join(
-        UPLOADS_DIRECTORY,
-        "channels",
-        video.video.subscription_id,
-        `${video.video.service_id}.jpg`,
-      ),
-    );
+    try {
+      await unlink(
+        join(
+          UPLOADS_DIRECTORY,
+          "channels",
+          video.video.subscription_id,
+          "videos",
+          `${video.video.service_id}.jpg`,
+        ),
+      );
+    } catch {
+      // Don't throw an error is count not delete video file
+    }
   }
 
   private async sync_video_thumbnail(video: Sync["Video"]) {
+    if (
+      video.status === "updated" &&
+      differenceInHours(new Date(), video.video.last_synced_at) < 3
+    ) {
+      return video.video.thumbnail;
+    }
+
     const image = await fetch(video.video.thumbnail).then((res) => res.arrayBuffer());
 
     await writeFile(
@@ -257,12 +287,13 @@ export default class SyncYoutube extends AbstractService {
         UPLOADS_DIRECTORY,
         "channels",
         video.video.subscription_id,
+        "videos",
         `${video.video.service_id}.jpg`,
       ),
       Buffer.from(image),
     );
 
-    return `/uploads/youtube/channels/${video.video.subscription_id}/${video.video.service_id}.jpg`;
+    return `/youtube/channels/${video.video.subscription_id}/videos/${video.video.service_id}.jpg`;
   }
 
   private createImageDirectory(...path: Array<string>) {

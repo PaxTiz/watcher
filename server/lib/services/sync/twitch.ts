@@ -1,8 +1,18 @@
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
-import type { VideoTable } from "#server/database/schema";
-import type { Sync, SyncSubscriptionsUpsert } from "#shared/types/sync";
+import type { Sync } from "#shared/types/sync";
+import { existsSync, mkdirSync } from "node:fs";
+import { writeFile, rm, unlink } from "node:fs/promises";
+import { join } from "node:path";
+import { formatISO, differenceInHours } from "date-fns";
+import { ServiceCredentials } from "~~/shared/types/credentials";
+
+type TwitchCredentials = ServiceCredentials & {
+  client_id: string;
+};
+
+const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "twitch");
 
 export default class SyncTwitch extends AbstractService {
   async sync() {
@@ -12,84 +22,73 @@ export default class SyncTwitch extends AbstractService {
       throw createError({ statusCode: 403 });
     }
 
-    const subscriptions = await this.sync_subscriptions(token, config.twitch.clientId);
-    await this.sync_videos(token, config.twitch.clientId, subscriptions);
-  }
-
-  private async sync_subscriptions(token: ServiceCredentials, clientId: string) {
-    const database = useDatabase();
-
-    const existing_subscriptions = await database
-      .selectFrom("subscriptions")
-      .select(["service_id"])
-      .where("service", "=", "twitch")
-      .execute();
-
-    const subscriptions = await this.get_subscriptions(token, clientId);
-
-    const sync: SyncSubscriptionsUpsert = {
-      upsert: subscriptions,
-      removed: [],
+    const credentials: TwitchCredentials = {
+      ...token,
+      client_id: config.twitch.clientId,
     };
 
-    for (const existing of existing_subscriptions) {
-      const exists = subscriptions.find((e) => e.service_id === existing.service_id);
-      if (!exists) {
-        sync.removed.push(existing.service_id);
-      }
+    const subscriptions = await this.get_subscriptions(credentials);
+    for (const subscription of subscriptions) {
+      await this.sync_subscription(credentials, subscription);
     }
-
-    await database.transaction().execute(async (tx) => {
-      if (sync.removed.length > 0) {
-        await tx
-          .deleteFrom("subscriptions")
-          .where("service", "=", "twitch")
-          .where("service_id", "in", sync.removed)
-          .execute();
-      }
-
-      await tx
-        .insertInto("subscriptions")
-        .values(sync.upsert)
-        .onConflict((row) =>
-          row.columns(["service", "service_id"]).doUpdateSet({
-            logo: (c) => c.ref("excluded.logo"),
-            url: (c) => c.ref("excluded.url"),
-            name: (c) => c.ref("excluded.name"),
-          }),
-        )
-        .execute();
-    });
-
-    return sync;
   }
 
-  private async get_subscriptions(token: ServiceCredentials, clientId: string) {
-    const subscriptions: Sync["SubscriptionsList"] = [];
+  private async get_subscriptions(credentials: TwitchCredentials) {
+    const database = useDatabase();
+    const subscriptions: Sync["SubscriptionsList"] = await database
+      .selectFrom("subscriptions")
+      .selectAll()
+      .where("service", "=", "twitch")
+      .execute()
+      .then((subs) =>
+        subs.map((sub) => ({
+          status: "deleted",
+          channel: {
+            service: sub.service,
+            service_id: sub.service_id,
+            name: sub.name,
+            url: sub.url,
+            logo: sub.logo,
+            last_synced_at: sub.last_synced_at,
+          },
+        })),
+      );
 
     let response = await services.external.twitch.followers.list({
-      userId: token.userId,
-      token: token.access_token,
-      clientId,
+      userId: credentials.userId,
+      token: credentials.access_token,
+      clientId: credentials.client_id,
     });
+
     while (true) {
       for (const subscription of response.data) {
-        subscriptions.push({
-          service: "twitch",
-          service_id: subscription.broadcaster_id,
-          name: subscription.broadcaster_name,
-          url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
-          logo: subscription.logo,
-          local_logo: `/uploads/twitch/channels/${subscription.broadcaster_id}/logo.jpg`,
-        });
+        const existingSub = subscriptions.find(
+          (e) => e.channel.service_id === subscription.broadcaster_id,
+        );
+
+        if (existingSub) {
+          existingSub.status = "updated";
+        } else {
+          subscriptions.push({
+            status: "created",
+            channel: {
+              service: "twitch",
+              service_id: subscription.broadcaster_id,
+              name: subscription.broadcaster_name,
+              url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
+              logo: subscription.logo,
+              last_synced_at: formatISO(new Date()),
+            },
+          });
+        }
       }
 
       if (response.pagination.cursor) {
         response = await services.external.twitch.followers.list({
-          userId: token.userId,
-          token: token.access_token,
+          userId: credentials.userId,
+          token: credentials.access_token,
+          clientId: credentials.client_id,
           cursor: response.pagination.cursor,
-          clientId,
         });
       } else {
         break;
@@ -99,80 +98,103 @@ export default class SyncTwitch extends AbstractService {
     return subscriptions;
   }
 
-  private async sync_videos(
-    token: ServiceCredentials,
-    clientId: string,
-    subscriptions: SyncSubscriptionsUpsert,
+  private async sync_subscription(
+    credentials: TwitchCredentials,
+    subscription: Sync["Subscription"],
   ) {
     const database = useDatabase();
 
-    const allVideos: Sync["VideosList"] = [];
-    for (const subscription of subscriptions.upsert) {
-      const videos = await this.get_videos_by_channel_id(token, clientId, subscription.service_id);
-
-      for (const video of videos) {
-        allVideos.push(video);
-      }
+    if (subscription.status === "deleted") {
+      return await this.delete_subscription(subscription);
     }
 
-    await database.transaction().execute(async (tx) => {
-      if (subscriptions.removed.length > 0) {
-        await tx
-          .deleteFrom("videos")
-          .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
-          .where("videos.subscription_id", "in", subscriptions.removed)
-          .execute();
-      }
+    subscription.channel.logo = await this.sync_subscription_logo(subscription);
 
-      await tx
-        .insertInto("videos")
-        .values(allVideos)
-        .onConflict((row) =>
-          row.columns(["service", "service_id"]).doUpdateSet({
-            title: (c) => c.ref("excluded.title"),
-            description: (c) => c.ref("excluded.description"),
-            url: (c) => c.ref("excluded.url"),
-            duration: (c) => c.ref("excluded.duration"),
-            thumbnail: (c) => c.ref("excluded.thumbnail"),
-          }),
-        )
-        .execute();
-    });
+    await database
+      .insertInto("subscriptions")
+      .values(subscription.channel)
+      .onConflict((row) =>
+        row.columns(["service", "service_id"]).doUpdateSet({
+          logo: (c) => c.ref("excluded.logo"),
+          url: (c) => c.ref("excluded.url"),
+          name: (c) => c.ref("excluded.name"),
+          last_synced_at: (c) => c.ref("excluded.last_synced_at"),
+        }),
+      )
+      .execute();
+
+    const videos = await this.get_videos_by_channel_id(
+      credentials,
+      subscription.channel.service_id,
+    );
+
+    for (const video of videos) {
+      await this.sync_video(video);
+    }
   }
 
-  private async get_videos_by_channel_id(
-    token: ServiceCredentials,
-    clientId: string,
-    steamerId: string,
-  ) {
-    const videos: Array<Omit<VideoTable, "id">> = [];
+  private async get_videos_by_channel_id(credentials: TwitchCredentials, channel_id: string) {
+    const database = useDatabase();
+    const videos: Sync["VideosList"] = await database
+      .selectFrom("videos")
+      .selectAll()
+      .where("service", "=", "twitch")
+      .where("subscription_id", "=", channel_id)
+      .execute()
+      .then((videos) =>
+        videos.map((vid) => ({
+          status: "deleted",
+          video: {
+            service: vid.service,
+            service_id: vid.service_id,
+            subscription_id: channel_id,
+            title: vid.title,
+            description: vid.description,
+            created_at: vid.created_at,
+            url: vid.url,
+            duration: vid.duration,
+            thumbnail: vid.thumbnail,
+            last_synced_at: vid.last_synced_at,
+          },
+        })),
+      );
 
     let response = await services.external.twitch.videos.list({
-      userId: steamerId,
-      token: token.access_token,
-      clientId,
+      userId: channel_id,
+      token: credentials.access_token,
+      clientId: credentials.client_id,
     });
     while (true) {
       for (const video of response.data) {
-        videos.push({
-          service: "twitch",
-          service_id: video.id,
-          subscription_id: steamerId,
-          title: video.title,
-          description: video.description,
-          created_at: video.created_at,
-          url: video.url,
-          thumbnail: video.thumbnail_url,
-          duration: 0, // TODO: Parse duration
-        });
+        const existingVid = videos.find((e) => e.video.service_id === video.id);
+
+        if (existingVid) {
+          existingVid.status = "updated";
+        } else {
+          videos.push({
+            status: "created",
+            video: {
+              service: "twitch",
+              service_id: video.id,
+              subscription_id: channel_id,
+              title: video.title,
+              description: video.description,
+              created_at: video.created_at,
+              url: video.url,
+              thumbnail: video.thumbnail_url,
+              duration: 0, // TODO: Parse duration
+              last_synced_at: formatISO(new Date()),
+            },
+          });
+        }
       }
 
       if (response.pagination.cursor) {
         response = await services.external.twitch.videos.list({
-          userId: token.userId,
-          token: token.access_token,
+          userId: channel_id,
+          token: credentials.access_token,
+          clientId: credentials.client_id,
           cursor: response.pagination.cursor,
-          clientId,
         });
       } else {
         break;
@@ -180,5 +202,133 @@ export default class SyncTwitch extends AbstractService {
     }
 
     return videos;
+  }
+
+  private async sync_video(video: Sync["Video"]) {
+    const database = useDatabase();
+
+    if (video.status === "deleted") {
+      return await this.delete_video(video);
+    }
+
+    video.video.thumbnail = await this.sync_video_thumbnail(video);
+
+    await database
+      .insertInto("videos")
+      .values(video.video)
+      .onConflict((row) =>
+        row.columns(["service", "service_id"]).doUpdateSet({
+          title: (c) => c.ref("excluded.title"),
+          description: (c) => c.ref("excluded.description"),
+          url: (c) => c.ref("excluded.url"),
+          duration: (c) => c.ref("excluded.duration"),
+          thumbnail: (c) => c.ref("excluded.thumbnail"),
+          last_synced_at: (c) => c.ref("excluded.last_synced_at"),
+        }),
+      )
+      .execute();
+  }
+
+  private async delete_subscription(subscription: Sync["Subscription"]) {
+    const database = useDatabase();
+
+    await database
+      .deleteFrom("subscriptions")
+      .where("service", "=", "twitch")
+      .where("service_id", "=", subscription.channel.service_id)
+      .execute();
+
+    await database
+      .deleteFrom("videos")
+      .where("service", "=", "twitch")
+      .where("subscription_id", "=", subscription.channel.service_id)
+      .execute();
+
+    try {
+      await rm(join(UPLOADS_DIRECTORY, "channels", subscription.channel.service_id), {
+        force: true,
+        recursive: true,
+      });
+    } catch {
+      // Don't throw an error if could not delete subscription directory
+    }
+  }
+
+  private async sync_subscription_logo(subscription: Sync["Subscription"]) {
+    if (
+      subscription.status === "updated" &&
+      differenceInHours(new Date(), subscription.channel.last_synced_at) < 24
+    ) {
+      return subscription.channel.logo;
+    }
+
+    this.createImageDirectory("channels", subscription.channel.service_id);
+
+    const image = await fetch(subscription.channel.logo).then((res) => res.arrayBuffer());
+    await writeFile(
+      join(UPLOADS_DIRECTORY, "channels", subscription.channel.service_id, `logo.jpg`),
+      Buffer.from(image),
+    );
+
+    this.createImageDirectory("channels", subscription.channel.service_id, "videos");
+
+    return `/twitch/channels/${subscription.channel.service_id}/logo.jpg`;
+  }
+
+  private async delete_video(video: Sync["Video"]) {
+    const database = useDatabase();
+
+    await database
+      .deleteFrom("videos")
+      .where("service", "=", "twitch")
+      .where("service_id", "=", video.video.service_id)
+      .execute();
+
+    try {
+      await unlink(
+        join(
+          UPLOADS_DIRECTORY,
+          "channels",
+          video.video.subscription_id,
+          "videos",
+          `${video.video.service_id}.jpg`,
+        ),
+      );
+    } catch {
+      // Don't throw an error is count not delete video file
+    }
+  }
+
+  private async sync_video_thumbnail(video: Sync["Video"]) {
+    if (
+      video.status === "updated" &&
+      differenceInHours(new Date(), video.video.last_synced_at) < 3
+    ) {
+      return video.video.thumbnail;
+    }
+
+    const url = video.video.thumbnail.replace("%{width}", "320").replace("%{height}", "180");
+    const image = await fetch(url).then((res) => res.arrayBuffer());
+
+    await writeFile(
+      join(
+        UPLOADS_DIRECTORY,
+        "channels",
+        video.video.subscription_id,
+        "videos",
+        `${video.video.service_id}.jpg`,
+      ),
+      Buffer.from(image),
+    );
+
+    return `/twitch/channels/${video.video.subscription_id}/videos/${video.video.service_id}.jpg`;
+  }
+
+  private createImageDirectory(...path: Array<string>) {
+    const _path = join(UPLOADS_DIRECTORY, ...path);
+
+    if (!existsSync(_path)) {
+      mkdirSync(_path, { recursive: true });
+    }
   }
 }

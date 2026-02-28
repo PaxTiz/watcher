@@ -14,6 +14,8 @@ export type SubscriptionTable = {
   url: string;
 
   logo: string;
+
+  last_synced_at: string;
 };
 
 export type CredentialTable = {
@@ -50,6 +52,8 @@ export type VideoTable = {
   thumbnail: string;
 
   created_at: string;
+
+  last_synced_at: string;
 };
 
 export type Database = {

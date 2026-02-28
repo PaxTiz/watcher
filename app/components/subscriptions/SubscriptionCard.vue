@@ -15,9 +15,13 @@ defineProps<{ subscription: SubscriptionResource }>();
     target="_blank"
     external
   >
-    <img
+    <NuxtImg
       class="w-full rounded"
       loading="lazy"
+      format="avif,webp"
+      width="71"
+      height="71"
+      densities="x1"
       :src="subscription.channel.logo"
       :alt="`Logo de ${subscription.name}`"
     />
