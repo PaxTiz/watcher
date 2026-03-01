@@ -3,7 +3,13 @@ import type { VideoResource } from "#shared/resources/videos";
 
 const { video } = defineProps<{ video: VideoResource }>();
 
+const { dates } = useFormatter();
+
 const description = computed(() => {
+  if (!video.description || video.description.length == 0) {
+    return null;
+  }
+
   const escaped = video.description
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -41,11 +47,35 @@ const description = computed(() => {
   <div>
     <h1 class="text-4xl text-white font-bold">{{ video.title }}</h1>
 
-    <p class="text-white mt-4">// TODO: Afficher l'auteur et un lien vers la vidéo directe</p>
+    <div class="flex flex-wrap items-center justify-between mt-4">
+      <div class="flex items-center gap-4">
+        <NuxtImg
+          class="w-full rounded"
+          loading="lazy"
+          format="avif,webp"
+          width="48"
+          height="48"
+          densities="x1"
+          :src="video.author.channel.logo"
+          :alt="`Logo de ${video.author.name}`"
+        />
+
+        <div class="shrink-0">
+          <p class="text-white font-semibold">{{ video.author.name }}</p>
+          <p class="text-ui-text text-sm">Publié le {{ dates.format(video.created_at) }}</p>
+        </div>
+      </div>
+
+      <div>
+        <Button v-if="video.service === 'youtube'" label="Lire sur YouTube" icon="lucide:youtube" :to="video.url" />
+        <Button v-if="video.service === 'twitch'" label="Lire sur Twitch" icon="lucide:twitch"" :to="video.url" />
+      </div>
+    </div>
 
     <div
+      v-if="description"
       v-html="description"
-      class="text-ui-text leading-snug mt-4 [&>p]:mt-4 [&>p]:leading-relaxed"
+      class="text-ui-text leading-snug [&>p]:mt-4 [&>p]:leading-relaxed mt-8"
     />
   </div>
 </template>

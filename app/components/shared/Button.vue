@@ -37,7 +37,7 @@ const classes = computed(() => {
     :to="to"
     :class="classes"
     :disabled="disabled"
-    class="flex items-center justify-center rounded border border-transparent not-disabled:hover:opacity-75 transition-all duration-300"
+    class="flex items-center justify-center gap-2 rounded border border-transparent not-disabled:hover:opacity-75 transition-all duration-300"
   >
     <Icon v-if="icon" :name="icon" />
 

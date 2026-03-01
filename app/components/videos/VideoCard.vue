@@ -66,10 +66,6 @@ const { dates, numbers } = useFormatter();
           <span class="text-ui-text"> - </span>
 
           <span class="text-ui-text text-sm">{{ dates.ago(video.created_at) }} </span>
-
-          <span class="text-ui-text"> - </span>
-
-          <span class="text-ui-text text-sm">// TODO: durée</span>
         </div>
       </div>
     </div>

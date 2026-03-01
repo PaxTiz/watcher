@@ -1,5 +1,7 @@
 import { fr } from "date-fns/locale";
-import { formatDistance, setDefaultOptions } from "date-fns";
+import { format, formatDistance, setDefaultOptions } from "date-fns";
+
+type AnyDate = Date | string | number;
 
 export const useFormatter = () => {
   setDefaultOptions({ locale: fr });
@@ -23,6 +25,10 @@ export const useFormatter = () => {
     },
 
     dates: {
+      format: (date: AnyDate) => {
+        return format(date, "dd/MM/yyyy");
+      },
+
       ago: (date: string) => {
         return formatDistance(date, new Date(), { addSuffix: true });
       },
