@@ -1,17 +1,19 @@
 <script lang="ts" setup>
 const currentPage = defineModel<number>("page", { required: true });
-
 const { totalItems, perPage } = defineProps<{
   totalItems: number;
   perPage: number;
 }>();
 
+const router = useRouter();
 const totalPages = computed(() => Math.floor(totalItems / perPage));
 
-function changePage(page: number) {
+const changePage = async (page: number) => {
   if (page < 1 || page > totalPages.value || page === currentPage.value) return;
   currentPage.value = page;
-}
+
+  await router.replace({ query: { page } });
+};
 
 const pages = computed(() => {
   const count = Math.min(3, totalPages.value);
