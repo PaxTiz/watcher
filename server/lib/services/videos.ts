@@ -60,9 +60,15 @@ export default class VideosService extends AbstractService {
       .executeTakeFirstOrThrow();
 
     if (video.service === "twitch") {
-      return services.external.twitch.videos.get_graphql_video_url(video.service_id);
+      return {
+        service: "twitch",
+        url: await services.external.twitch.videos.get_master_playlist(video.service_id),
+      };
     } else if (video.service === "youtube") {
-      return video.url;
+      return {
+        service: "youtube",
+        url: video.url,
+      };
     }
 
     throw new Error(`Could not get URL for video fo service type : ${video.service}`);

@@ -19,7 +19,7 @@ const url = computed(() => {
 });
 
 const player = useTemplateRef("player");
-const defaultOptions: Record<string, unknown> = {
+const plyrOptions: Record<string, unknown> = {
   settings: ["captions", "quality", "speed", "loop"],
   keyboard: {
     focused: true,
@@ -40,7 +40,7 @@ watch(
     }
 
     if (video.service === "youtube") {
-      new Plyr(p, defaultOptions);
+      new Plyr(p, plyrOptions);
     }
 
     const videoElement = p.querySelector("video")!;
@@ -53,7 +53,7 @@ watch(
         const availableQualities = hls.levels.map((l) => l.height);
         availableQualities.unshift(0);
 
-        defaultOptions.quality = {
+        plyrOptions.quality = {
           default: 0,
           options: availableQualities,
           forced: true,
@@ -70,7 +70,7 @@ watch(
           },
         };
 
-        defaultOptions.i18n = {
+        plyrOptions.i18n = {
           qualityLabel: { 0: "Auto" },
         };
 
@@ -85,13 +85,13 @@ watch(
           }
         });
 
-        new Plyr(videoElement, defaultOptions);
+        new Plyr(videoElement, plyrOptions);
       });
 
       hls.attachMedia(videoElement);
     } else {
       videoElement.src = url.value;
-      new Plyr(videoElement, defaultOptions);
+      new Plyr(videoElement, plyrOptions);
     }
   },
   { deep: true, flush: "post" },

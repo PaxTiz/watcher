@@ -6,14 +6,19 @@ export default defineRoute({
   params: videosValidatorsSchema.url.params,
 
   async handler(event, { params }) {
-    const url = await services.videos.get_url(params.id);
-    if (!url) {
+    const response = await services.videos.get_url(params.id);
+    if (!response.url) {
       throw createError({ statusCode: 404 });
     }
 
-    const response = await fetch(url).then((res) => res.text());
-    return response
-      .replaceAll(/(.*\.mp4)/g, `$1?base_url=${url}`)
-      .replaceAll(/(.*\.ts)/g, `$1?base_url=${url}`);
+    if (response.service === "youtube") {
+      return response.url;
+    }
+
+    setHeader(event, "Content-Type", "application/vnd.apple.mpegurl");
+    return response.url.replaceAll(
+      /((.*)\/(.*)\/((.*)\.m3u8))/g,
+      `/api/videos/${params.id}/segments/$3/$4?base_url=$1`,
+    );
   },
 });

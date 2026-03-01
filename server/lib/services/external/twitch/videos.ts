@@ -42,7 +42,7 @@ export default class TwitchVideosService extends AbstractService {
     }
   }
 
-  async get_graphql_video_url(videoId: string) {
+  async get_master_playlist(videoId: string) {
     try {
       const video = await this.get_graphql_video_by_id(videoId);
 
@@ -52,6 +52,8 @@ export default class TwitchVideosService extends AbstractService {
       const vod_special_id = paths[paths.findIndex((p) => p.includes("storyboards")) - 1];
       const broadcast_type = video.broadcastType.toLowerCase();
       const channel_login = video.owner.login;
+
+      const available_levels: Array<{ key: string; url: string; codec: string }> = [];
 
       for (const [resKey] of Object.entries(DEFAULT_RESOLUTIONS)) {
         const url = this.build_playlist_url(
@@ -65,13 +67,14 @@ export default class TwitchVideosService extends AbstractService {
         );
 
         const codec = await this.check_quality(url);
-
         if (codec) {
-          return url;
+          available_levels.push({ key: resKey, url, codec });
         }
       }
 
-      return null;
+      if (available_levels.length === 0) return null;
+
+      return this.build_master_playlist(available_levels);
     } catch (e) {
       throw new Error("Failed to get Twitch video url", { cause: e });
     }
@@ -154,5 +157,36 @@ export default class TwitchVideosService extends AbstractService {
     }
 
     return null;
+  }
+
+  private build_master_playlist(levels: Array<{ key: string; url: string; codec: string }>) {
+    const lines = ["#EXTM3U"];
+
+    for (const { key, url, codec } of levels) {
+      const meta = DEFAULT_RESOLUTIONS[key as keyof typeof DEFAULT_RESOLUTIONS];
+      const bandwidth = this.get_bandwidth(key);
+      const resolution = meta.resolution !== "chunked" ? `RESOLUTION=${meta.resolution},` : "";
+
+      lines.push(
+        `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},${resolution}FRAME-RATE=${meta.frameRate},CODECS="${codec}"`,
+        url,
+      );
+    }
+
+    return lines.join("\n");
+  }
+
+  private get_bandwidth(resKey: string): number {
+    const bandwidths: Record<string, number> = {
+      chunked: 8_000_000,
+      "1440p60": 6_000_000,
+      "1080p60": 4_500_000,
+      "720p60": 3_000_000,
+      "480p30": 1_500_000,
+      "360p30": 800_000,
+      "160p30": 300_000,
+    };
+
+    return bandwidths[resKey] ?? 1_000_000;
   }
 }

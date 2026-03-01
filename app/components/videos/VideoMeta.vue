@@ -67,8 +67,18 @@ const description = computed(() => {
       </div>
 
       <div>
-        <Button v-if="video.service === 'youtube'" label="Lire sur YouTube" icon="lucide:youtube" :to="video.url" />
-        <Button v-if="video.service === 'twitch'" label="Lire sur Twitch" icon="lucide:twitch"" :to="video.url" />
+        <Button
+          v-if="video.service === 'youtube'"
+          label="Lire sur YouTube"
+          icon="lucide:youtube"
+          :to="video.url"
+        />
+        <Button
+          v-if="video.service === 'twitch'"
+          label="Lire sur Twitch"
+          icon="lucide:twitch"
+          :to="video.url"
+        />
       </div>
     </div>
 

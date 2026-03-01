@@ -27,6 +27,7 @@ export const videosValidatorsSchema = defineValidator({
     params: z.object({
       id: z.coerce.number(),
       path: z.string(),
+      quality: z.string(),
     }),
   },
 });
