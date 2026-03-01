@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { parse, toSeconds } from "iso8601-duration";
 import { formatISO, differenceInHours } from "date-fns";
 
+const SHORT_DURATION_THRESOLD = 200; // Videos shorter than 200 seconds (3 minutes + 20 seconds of thresold) are considered as shorts
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");
 
 export default class SyncYoutube extends AbstractService {
@@ -156,12 +157,38 @@ export default class SyncYoutube extends AbstractService {
         })),
       );
 
-    const all_videos = await services.external.google.youtubeVideos.get_latest_videos(
+    const current_videos = [];
+
+    let all_videos = await services.external.google.youtubeVideos.get_latest_videos(
       credentials.access_token,
       channel_id,
     );
 
-    for (const video of all_videos) {
+    while (true) {
+      for (const video of all_videos.items) {
+        if (this.is_maybe_a_short(video)) {
+          continue;
+        }
+
+        current_videos.push(video);
+      }
+
+      if (current_videos.length >= 50) {
+        break;
+      }
+
+      if (all_videos.nextPageToken) {
+        all_videos = await services.external.google.youtubeVideos.get_latest_videos(
+          credentials.access_token,
+          channel_id,
+          all_videos.nextPageToken,
+        );
+      } else {
+        break;
+      }
+    }
+
+    for (const video of current_videos) {
       const existingVid = videos.find((e) => e.video.service_id === video.id);
 
       if (existingVid) {
@@ -322,5 +349,10 @@ export default class SyncYoutube extends AbstractService {
     if (!existsSync(_path)) {
       mkdirSync(_path, { recursive: true });
     }
+  }
+
+  private is_maybe_a_short(video: Youtube["Videos"]["Item"]) {
+    const duration = toSeconds(parse(video.contentDetails.duration));
+    return duration < SHORT_DURATION_THRESOLD;
   }
 }

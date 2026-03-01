@@ -14,6 +14,7 @@ export type Youtube = {
     };
 
     List: {
+      nextPageToken?: string;
       items: Array<Youtube["Videos"]["Item"]>;
       pageInfo: Youtube["__PageInfo"];
     };

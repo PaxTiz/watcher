@@ -2,13 +2,12 @@ import { AbstractService } from "#framework";
 import type { Youtube } from "#shared/types/youtube";
 
 export default class GoogleYoutubeVideosService extends AbstractService {
-  async get_latest_videos(token: string, channel_id: string) {
+  async get_latest_videos(token: string, channel_id: string, cursor?: string) {
     try {
       const playlist_videos = await this.get_uploads_playlist_id(token, channel_id);
       const video_ids = playlist_videos.map((v) => v.contentDetails!.videoId!);
 
-      const videos = await this.get_videos_by_ids(token, video_ids);
-      return videos.items;
+      return await this.get_videos_by_ids(token, video_ids, cursor);
     } catch (e) {
       throw new Error(`Failed to get latest Youtube videos for channel #${channel_id}`, {
         cause: e,
@@ -16,12 +15,16 @@ export default class GoogleYoutubeVideosService extends AbstractService {
     }
   }
 
-  private async get_videos_by_ids(token: string, video_ids: Array<string>) {
+  private async get_videos_by_ids(token: string, video_ids: Array<string>, cursor?: string) {
     try {
       const url = new URL("https://www.googleapis.com/youtube/v3/videos");
       url.searchParams.set("part", "contentDetails,snippet");
       url.searchParams.set("id", video_ids.join(","));
       url.searchParams.set("access_token", token);
+
+      if (cursor) {
+        url.searchParams.set("pageToken", cursor);
+      }
 
       const response = await $fetch<Youtube["Videos"]["List"]>(url.toString());
 
