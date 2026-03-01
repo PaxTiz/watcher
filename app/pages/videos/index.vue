@@ -17,5 +17,7 @@ watch(page, () => {
 </script>
 
 <template>
+  <VideosFilters class="mb-8" />
+
   <VideosList v-model:page="page" :videos="data ?? { total: 0, items: [] }" />
 </template>
