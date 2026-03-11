@@ -3,7 +3,7 @@ export type Youtube = {
     Item: {
       id: string;
       contentDetails: {
-        duration: string;
+        duration?: string;
       };
       snippet: {
         title: string;

@@ -201,7 +201,7 @@ export default class SyncYoutube extends AbstractService {
           description: video.snippet.description,
           created_at: video.snippet.publishedAt,
           url: `https://www.youtube.com/watch?v=${video.id}`,
-          duration: toSeconds(parse(video.contentDetails.duration)),
+          duration: this.parse_duration(video.contentDetails.duration),
           thumbnail:
             differenceInHours(new Date(), existingVid.video.last_synced_at) < 3
               ? existingVid.video.thumbnail
@@ -219,7 +219,7 @@ export default class SyncYoutube extends AbstractService {
             description: video.snippet.description,
             created_at: video.snippet.publishedAt,
             url: `https://www.youtube.com/watch?v=${video.id}`,
-            duration: toSeconds(parse(video.contentDetails.duration)),
+            duration: this.parse_duration(video.contentDetails.duration),
             thumbnail: video.snippet.thumbnails.medium.url,
             last_synced_at: formatISO(new Date()),
           },
@@ -352,7 +352,15 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private is_maybe_a_short(video: Youtube["Videos"]["Item"]) {
-    const duration = toSeconds(parse(video.contentDetails.duration));
+    const duration = this.parse_duration(video.contentDetails.duration);
     return duration < SHORT_DURATION_THRESOLD;
+  }
+
+  private parse_duration(duration?: string) {
+    if (!duration) {
+      return 0;
+    }
+
+    return toSeconds(parse(duration));
   }
 }
