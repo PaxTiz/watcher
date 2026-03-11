@@ -1,7 +1,10 @@
 <script lang="ts" setup>
 import { Tippy } from "vue-tippy";
 
-defineProps<{
+const { filters } = useVideosFilters();
+
+const props = defineProps<{
+  type: VideoFilterType,
   label: string;
   options: Array<{
     label: string;
@@ -9,6 +12,10 @@ defineProps<{
     icon?: string;
   }>;
 }>();
+
+const onEmit = (value: string) => {
+  filters.value[props.type] = value as any;
+}
 </script>
 
 <template>
@@ -26,7 +33,7 @@ defineProps<{
           v-for="option in options"
           :key="option.value"
           class="flex items-center gap-2 text-ui-text text-sm text-left w-full p-1 hover:bg-ui-bg rounded cursor-pointer"
-          @click="() => {}"
+          @click="() => onEmit(option.value)"
         >
           <Icon v-if="option.icon" :name="option.icon" />
           <span>{{ option.label }}</span>

@@ -3,10 +3,11 @@ import type { Paginated } from "#shared/types/shared";
 import type { VideoResource } from "#shared/resources/videos";
 
 const route = useRoute();
+const { filters } = useVideosFilters();
 
 const page = ref(await get_number_query_var(route, "page"));
 const { data } = await useAppFetch<Paginated<VideoResource>>("/api/videos", {
-  query: { page },
+  query: computed(() => ({ page: page.value, ...filters.value })),
 });
 
 watch(page, () => {

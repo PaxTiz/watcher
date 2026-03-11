@@ -16,6 +16,7 @@ import { Tippy } from "vue-tippy";
     <template #content>
       <div class="shadow-2xl flex flex-col gap-0.5 w-full min-w-[150px] bg-ui-border p-1 rounded">
         <VideosFiltersInner
+          type="service"
           label="Service"
           :options="[
             { label: 'YouTube', value: 'youtube', icon: 'lucide:youtube' },
@@ -24,6 +25,7 @@ import { Tippy } from "vue-tippy";
         />
 
         <VideosFiltersInner
+          type="duration"
           label="Duréé"
           :options="[
             { label: '< 10 min', value: 'less_than_10_minutes' },
@@ -34,6 +36,7 @@ import { Tippy } from "vue-tippy";
         />
 
         <VideosFiltersInner
+          type="date"
           label="Date"
           :options="[
             { label: 'Aujourd\'hui', value: 'today' },
@@ -50,14 +53,6 @@ import { Tippy } from "vue-tippy";
           <span>Chaîne</span>
           <Icon name="lucide:chevron-right" />
         </div>
-
-        <VideosFiltersInner
-          label="Groupe"
-          :options="[
-            { label: 'Et', value: 'and' },
-            { label: 'Ou', value: 'or' },
-          ]"
-        />
       </div>
     </template>
   </Tippy>

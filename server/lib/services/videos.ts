@@ -3,6 +3,9 @@ import { services } from "#framework/server";
 import type { Paginated } from "#shared/types/shared";
 import type { VideoResource } from "#shared/resources/videos";
 import { useDatabase } from "#server/database";
+import { VideosValidators } from "~~/shared/validators/videos";
+import { SelectQueryBuilder } from "kysely";
+import { Database } from "~~/server/database/schema";
 
 export default class VideosService extends AbstractService {
   async get_by_id(id: number): Promise<VideoResource> {
@@ -74,12 +77,14 @@ export default class VideosService extends AbstractService {
     throw new Error(`Could not get URL for video fo service type : ${video.service}`);
   }
 
-  async find_all(params: { page: number }): Promise<Paginated<VideoResource>> {
+  async find_all(params: VideosValidators['list']['query']): Promise<Paginated<VideoResource>> {
     const database = useDatabase();
 
     const total = await database
       .selectFrom("videos")
       .select(({ fn }) => [fn.count<number>("id").as("total")])
+      .$if(!!params.service, (qb) => qb.where('videos.service', '=', params.service!))
+      .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
       .executeTakeFirst();
 
     const items = await database
@@ -103,6 +108,8 @@ export default class VideosService extends AbstractService {
         "subscriptions.url as subscription_url",
         "subscriptions.logo as subscription_logo",
       ])
+      .$if(!!params.service, (qb) => qb.where('videos.service', '=', params.service!))
+      .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
       .execute();
 
     const mapped_items: Array<VideoResource> = [];
@@ -133,5 +140,24 @@ export default class VideosService extends AbstractService {
       total: Number(total?.total ?? 0),
       items: mapped_items,
     };
+  }
+
+  private parse_duration_filter(qb: SelectQueryBuilder<Database, 'videos', any>, value: VideosValidators['list']['query']['duration']) {
+    if (!value) {
+      return qb;
+    }
+
+    switch (value) {
+      case 'less_than_10_minutes': return qb.where('videos.duration', '<=', 60 * 10)
+      case 'between_10_30_minutes': return qb.where((inner) => inner.and([
+        qb.where('videos.duration', '>', 60 * 10),
+        qb.where('videos.duration', '<=', 60 * 30),
+      ]));
+      case 'between_30_60_minutes': return qb.where((inner) => inner.and([
+        qb.where('videos.duration', '>', 60 * 30),
+        qb.where('videos.duration', '<=', 60 * 60),
+      ]));
+      case 'greater_than_1_hour': return qb.where('videos.duration', '>=', 60 * 60)
+    }
   }
 }
