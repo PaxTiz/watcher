@@ -8,11 +8,17 @@
   --radius-*: initial;
   --radius: 0.25rem;
 
-  --color-ui-bg: var(--color-slate-900);
-  --color-ui-border: var(--color-slate-800);
-  --color-ui-text: var(--color-slate-400);
-  --color-alt: var(--color-orange-500);
-  --color-highlight: var(--color-yellow-400);
+  --color-ui-bg: #1e1e2e;
+  --color-ui-border: #313244;
+  --color-ui-text: #cdd6f4;
+  --color-alt: #fe640b;
+  --color-highlight: #df8e1d;
+}
+
+:root {
+  --body-background: #11111b;
+  --navbar-gradient-top: #181825;
+  --navbar-gradient-bottom: #11111b;
 }
 
 @utility container {
@@ -26,7 +32,7 @@
 }
 
 body {
-  background-color: var(--color-slate-950);
+  background-color: var(--body-background);
 }
 
 input,

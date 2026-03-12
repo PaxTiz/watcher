@@ -25,7 +25,7 @@ const classes = computed(() => {
   return {
     "min-h-[38px] text-sm py-2 px-3": size === "normal",
     "min-h-[30px] text-sm py-1 px-2": size === "sm",
-    "bg-ui-border text-ui-text not-disabled:hover:border-alt not-disabled:hover:text-alt":
+    "bg-[#11111b] border-2 border-ui-border text-ui-text not-disabled:hover:border-alt not-disabled:hover:text-alt":
       color === "primary",
     "bg-alt/75 text-white": color === "secondary",
     "cursor-pointer": !disabled,
