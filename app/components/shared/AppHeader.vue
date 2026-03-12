@@ -22,7 +22,9 @@ const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
 </script>
 
 <template>
-  <header class="bg-linear-to-b from-[--navbar-gradient-top] to-[--navbar-gradient-bottom] border-b-3 border-ui-border py-4">
+  <header
+    class="border-ui-border border-b-3 bg-linear-to-b from-[--navbar-gradient-top] to-[--navbar-gradient-bottom] py-4"
+  >
     <div class="container">
       <div class="flex items-center gap-8">
         <Link label="Accueil" to="/" :is-active="route.path === '/'" />

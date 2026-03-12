@@ -1,6 +1,6 @@
 import { PostgresDialect } from "kysely";
-import { Pool } from "pg";
 import { defineConfig } from "kysely-ctl";
+import { Pool } from "pg";
 
 export default defineConfig({
   destroyOnExit: true,

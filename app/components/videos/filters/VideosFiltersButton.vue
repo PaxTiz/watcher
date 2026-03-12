@@ -14,7 +14,7 @@ import { Tippy } from "vue-tippy";
     <Button label="Ajouter un filtre" />
 
     <template #content>
-      <div class="shadow-2xl flex flex-col gap-0.5 w-full min-w-[150px] bg-ui-border p-1 rounded">
+      <div class="bg-ui-border flex w-full min-w-[150px] flex-col gap-0.5 rounded p-1 shadow-2xl">
         <VideosFiltersInner
           type="service"
           label="Service"
@@ -48,7 +48,7 @@ import { Tippy } from "vue-tippy";
         />
 
         <div
-          class="flex items-center justify-between text-ui-text text-sm p-1 hover:bg-ui-bg rounded"
+          class="text-ui-text hover:bg-ui-bg flex items-center justify-between rounded p-1 text-sm"
         >
           <span>Chaîne</span>
           <Icon name="lucide:chevron-right" />

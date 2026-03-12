@@ -1,7 +1,8 @@
+import { Google, generateState, generateCodeVerifier } from "arctic";
+import { formatISO } from "date-fns";
+
 import { AbstractService } from "#framework";
 import type { ServiceCredentials } from "#shared/types/credentials";
-import { formatISO } from "date-fns";
-import { Google, generateState, generateCodeVerifier } from "arctic";
 
 const verifiers: Record<string, string> = {};
 

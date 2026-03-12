@@ -6,7 +6,7 @@ defineProps<{ subscription: SubscriptionResource }>();
 
 <template>
   <nuxt-link
-    class="block p-2 bg-ui-bg rounded border focus:outline-alt"
+    class="bg-ui-bg focus:outline-alt block rounded border p-2"
     :class="{
       'border-highlight': subscription.isFavorite,
       'border-ui-border': !subscription.isFavorite,
@@ -25,7 +25,7 @@ defineProps<{ subscription: SubscriptionResource }>();
       :src="subscription.channel.logo"
       :alt="`Logo de ${subscription.name}`"
     />
-    <p class="flex items-center justify-center text-center text-xs text-slate-400 mt-2">
+    <p class="mt-2 flex items-center justify-center text-center text-xs text-slate-400">
       <Icon
         class="shrink-0"
         :name="subscription.channel.service === 'youtube' ? 'lucide:youtube' : 'lucide:twitch'"

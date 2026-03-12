@@ -1,5 +1,6 @@
-import { type InferValidators, defineValidator } from "#framework";
 import { z } from "zod/mini";
+
+import { type InferValidators, defineValidator } from "#framework";
 
 export const oauthValidatorsSchema = defineValidator({
   callback: {

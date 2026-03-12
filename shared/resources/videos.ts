@@ -1,5 +1,6 @@
-import type { SubscriptionResource } from "./subscriptions";
 import type { SubscriptionType } from "#shared/types/subscriptions";
+
+import type { SubscriptionResource } from "./subscriptions";
 
 export type VideoResource = {
   id: number;

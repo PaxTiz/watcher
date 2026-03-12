@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import type { VideoResource } from "#shared/resources/videos";
 import Hls from "hls.js";
-
 // @ts-ignore
 import Plyr from "plyr";
+
+import type { VideoResource } from "#shared/resources/videos";
+
 import "plyr/css";
 
 const { video } = defineProps<{ video: VideoResource }>();

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { Paginated } from "#shared/types/shared";
 import type { VideoResource } from "#shared/resources/videos";
+import type { Paginated } from "#shared/types/shared";
 
 const modelValue = defineModel<number>("page", { required: true });
 const { videos } = defineProps<{ videos: Paginated<VideoResource> }>();
@@ -11,7 +11,7 @@ const { videos } = defineProps<{ videos: Paginated<VideoResource> }>();
     <VideoCard v-for="video in videos.items" :id="video.id" :video="video" />
   </div>
 
-  <div class="flex justify-center mt-8">
+  <div class="mt-8 flex justify-center">
     <Pagination v-model:page="modelValue" :total-items="videos.total" :per-page="21" />
   </div>
 </template>

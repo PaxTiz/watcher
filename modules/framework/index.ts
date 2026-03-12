@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
+
 import { createResolver, defineNuxtModule } from "nuxt/kit";
 
 import { buildIndex } from "./builders/build_index";

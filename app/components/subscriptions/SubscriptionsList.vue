@@ -23,7 +23,7 @@ watchDebounced(
 </script>
 
 <template>
-  <div class="flex gap-4 mb-8">
+  <div class="mb-8 flex gap-4">
     <input v-model="filter.name" placeholder="Rechercher par nom.." class="flex-1" />
 
     <select v-model="filter.service" name="" id="">

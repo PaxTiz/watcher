@@ -1,7 +1,8 @@
 <script lang="ts" setup>
+import { formatDuration } from "date-fns";
+
 import type { VideoResource } from "#shared/resources/videos";
 import { useFormatter } from "#shared/utils/useFormatter";
-import { formatDuration } from "date-fns";
 
 const { video } = defineProps<{ video: VideoResource }>();
 
@@ -10,12 +11,12 @@ const { dates, numbers } = useFormatter();
 
 <template>
   <nuxt-link
-    class="group block p-2 bg-ui-bg rounded border focus:outline-alt"
+    class="group bg-ui-bg focus:outline-alt block rounded border p-2"
     :to="`/videos/${video.id}`"
   >
     <div class="relative z-1">
       <NuxtImg
-        class="border-2 border-transparent group-hover:border-alt aspect-video w-full object-cover rounded transition-all duration-300"
+        class="group-hover:border-alt aspect-video w-full rounded border-2 border-transparent object-cover transition-all duration-300"
         loading="lazy"
         format="avif,webp"
         width="380"
@@ -26,7 +27,7 @@ const { dates, numbers } = useFormatter();
       />
 
       <div
-        class="absolute z-2 bottom-1 right-1 bg-black/75 text-white text-sm font-medium px-1 py-0.5 rounded"
+        class="absolute right-1 bottom-1 z-2 rounded bg-black/75 px-1 py-0.5 text-sm font-medium text-white"
       >
         {{ numbers.displaySeconds(video.duration) }}
       </div>
@@ -47,11 +48,11 @@ const { dates, numbers } = useFormatter();
       </div>
 
       <div class="-mt-0.5">
-        <h2 class="text-lg text-white font-medium leading-snug">
+        <h2 class="text-lg leading-snug font-medium text-white">
           {{ video.title }}
         </h2>
 
-        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
+        <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
           <div class="flex items-center gap-1">
             <Icon
               class="text-ui-text"

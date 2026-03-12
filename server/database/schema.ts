@@ -1,4 +1,5 @@
 import type { Generated } from "kysely";
+
 import type { CredentialsType } from "#shared/types/credentials";
 import type { SubscriptionType } from "#shared/types/subscriptions";
 

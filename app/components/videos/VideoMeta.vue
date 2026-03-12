@@ -45,9 +45,9 @@ const description = computed(() => {
 
 <template>
   <div>
-    <h1 class="text-4xl text-white font-bold">{{ video.title }}</h1>
+    <h1 class="text-4xl font-bold text-white">{{ video.title }}</h1>
 
-    <div class="flex flex-wrap items-center justify-between mt-4">
+    <div class="mt-4 flex flex-wrap items-center justify-between">
       <div class="flex items-center gap-4">
         <NuxtImg
           class="w-full rounded"
@@ -61,7 +61,7 @@ const description = computed(() => {
         />
 
         <div class="shrink-0">
-          <p class="text-white font-semibold">{{ video.author.name }}</p>
+          <p class="font-semibold text-white">{{ video.author.name }}</p>
           <p class="text-ui-text text-sm">Publié le {{ dates.format(video.created_at) }}</p>
         </div>
       </div>
@@ -85,7 +85,7 @@ const description = computed(() => {
     <div
       v-if="description"
       v-html="description"
-      class="text-ui-text leading-snug [&>p]:mt-4 [&>p]:leading-relaxed mt-8"
+      class="text-ui-text mt-8 leading-snug [&>p]:mt-4 [&>p]:leading-relaxed"
     />
   </div>
 </template>

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { RouteLocationRaw } from "vue-router";
+
 import { NuxtLink } from "#components";
 
 const {
@@ -36,7 +37,7 @@ const classes = computed(() => {
 
 <template>
   <component
-    class="group flex items-center justify-center gap-2 rounded border border-transparent not-disabled:hover:opacity-75 transition-all duration-300"
+    class="group flex items-center justify-center gap-2 rounded border border-transparent transition-all duration-300 not-disabled:hover:opacity-75"
     :is="component"
     :to="to"
     :class="classes"
@@ -44,7 +45,7 @@ const classes = computed(() => {
   >
     <Icon v-if="icon" :name="icon" />
 
-    <span v-if="tag" class="text-[10px] p-1 bg-ui-bg rounded">
+    <span v-if="tag" class="bg-ui-bg rounded p-1 text-[10px]">
       {{ tag }}
     </span>
 

@@ -1,13 +1,15 @@
-import { AbstractService } from "#framework";
-import { services } from "#framework/server";
-import { useDatabase } from "#server/database";
-import type { Sync } from "#shared/types/sync";
-import type { ServiceCredentials } from "#shared/types/credentials";
 import { existsSync, mkdirSync } from "node:fs";
 import { writeFile, rm, unlink } from "node:fs/promises";
 import { join } from "node:path";
-import { parse, toSeconds } from "iso8601-duration";
+
 import { formatISO, differenceInHours } from "date-fns";
+import { parse, toSeconds } from "iso8601-duration";
+
+import { AbstractService } from "#framework";
+import { services } from "#framework/server";
+import { useDatabase } from "#server/database";
+import type { ServiceCredentials } from "#shared/types/credentials";
+import type { Sync } from "#shared/types/sync";
 
 const SHORT_DURATION_THRESOLD = 200; // Videos shorter than 200 seconds (3 minutes + 20 seconds of thresold) are considered as shorts
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");

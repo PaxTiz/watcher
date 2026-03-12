@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { Paginated } from "#shared/types/shared";
 import type { VideoResource } from "#shared/resources/videos";
+import type { Paginated } from "#shared/types/shared";
 
 const route = useRoute();
 const { filters } = useVideosFilters();

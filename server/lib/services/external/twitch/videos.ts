@@ -1,6 +1,7 @@
+import { isAfter } from "date-fns";
+
 import { AbstractService } from "#framework";
 import type { Twitch } from "#shared/types/twitch";
-import { isAfter } from "date-fns";
 
 const DEFAULT_RESOLUTIONS = {
   chunked: { name: "Source", resolution: "chunked", frameRate: 60 },

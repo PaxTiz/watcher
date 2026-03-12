@@ -1,5 +1,6 @@
 import { glob, appendFile } from "node:fs/promises";
 import { join, sep } from "node:path";
+
 import { camelCase } from "scule";
 
 function writeNestedServices(services: Record<string, unknown>): string {

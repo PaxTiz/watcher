@@ -1,7 +1,8 @@
+import { Twitch, generateState } from "arctic";
+import { formatISO } from "date-fns";
+
 import { AbstractService } from "#framework";
 import type { ServiceCredentials } from "#shared/types/credentials";
-import { formatISO } from "date-fns";
-import { Twitch, generateState } from "arctic";
 
 export default class TwitchOAuthService extends AbstractService {
   private client: Twitch;

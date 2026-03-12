@@ -1,6 +1,7 @@
-import type { Database } from "./schema";
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
+
+import type { Database } from "./schema";
 
 let _db: Kysely<Database>;
 

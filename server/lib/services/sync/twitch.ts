@@ -1,12 +1,14 @@
-import { AbstractService } from "#framework";
-import { services } from "#framework/server";
-import { useDatabase } from "#server/database";
-import type { Sync } from "#shared/types/sync";
-import type { ServiceCredentials } from "#shared/types/credentials";
 import { existsSync, mkdirSync } from "node:fs";
 import { writeFile, rm, unlink } from "node:fs/promises";
 import { join } from "node:path";
+
 import { formatISO, differenceInHours } from "date-fns";
+
+import { AbstractService } from "#framework";
+import { services } from "#framework/server";
+import { useDatabase } from "#server/database";
+import type { ServiceCredentials } from "#shared/types/credentials";
+import type { Sync } from "#shared/types/sync";
 
 type TwitchCredentials = ServiceCredentials & {
   client_id: string;
