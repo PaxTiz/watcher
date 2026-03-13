@@ -1,3 +1,4 @@
+import { formatISO, startOfDay, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import { ExpressionBuilder, SelectQueryBuilder, sql } from "kysely";
 
 import { AbstractService } from "#framework";
@@ -86,6 +87,7 @@ export default class VideosService extends AbstractService {
       .select(({ fn }) => [fn.count<number>("id").as("total")])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
       .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
+      .$if(!!params.date, (qb) => this.parse_date_filter(qb, params.date!))
       .executeTakeFirst();
 
     const items = await database
@@ -111,6 +113,7 @@ export default class VideosService extends AbstractService {
       ])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
       .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
+      .$if(!!params.date, (qb) => this.parse_date_filter(qb, params.date!))
       .execute();
 
     const mapped_items: Array<VideoResource> = [];
@@ -148,7 +151,7 @@ export default class VideosService extends AbstractService {
     value: VideosValidators["list"]["query"]["duration"],
   ) {
     if (!value) {
-      return sql`1 = 1`;
+      return qb;
     }
 
     switch (value) {
@@ -165,5 +168,28 @@ export default class VideosService extends AbstractService {
       case "greater_than_1_hour":
         return qb.where("videos.duration", ">=", 60 * 60);
     }
+  }
+
+  private parse_date_filter(
+    qb: SelectQueryBuilder<Database, "videos", any>,
+    value: VideosValidators["list"]["query"]["date"],
+  ) {
+    if (!value) {
+      return qb;
+    }
+
+    const date = {
+      today: () => formatISO(startOfDay(new Date())),
+      weekly: () => formatISO(startOfWeek(new Date())),
+      monthly: () => formatISO(startOfMonth(new Date())),
+      yearly: () => formatISO(startOfYear(new Date())),
+      older: () => formatISO(startOfYear(new Date())),
+    }[value];
+
+    if (value === "older") {
+      return qb.where("videos.created_at", "<=", date());
+    }
+
+    return qb.where("videos.created_at", ">=", date());
   }
 }
