@@ -11,6 +11,7 @@ export default defineRoute({
       service: query.service,
       duration: query.duration,
       date: query.date,
+      subscription_id: query.subscription_id,
     });
   },
 });

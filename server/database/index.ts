@@ -1,4 +1,4 @@
-import { Kysely, PostgresDialect } from "kysely";
+import { DeduplicateJoinsPlugin, Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
 
 import type { Database } from "./schema";
@@ -11,6 +11,7 @@ export const useDatabase = () => {
 
     _db = new Kysely<Database>({
       log: ["error", "query"],
+      plugins: [new DeduplicateJoinsPlugin()],
       dialect: new PostgresDialect({
         pool: new Pool({
           database: config.database.name,

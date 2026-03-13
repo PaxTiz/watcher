@@ -1,6 +1,6 @@
-import type { VideosValidators } from "~~/shared/validators/videos";
+import type { VideosValidators } from "#shared/validators/videos";
 
-export type VideoFilterType = "service" | "duration" | "date";
+export type VideoFilterType = "service" | "duration" | "date" | "subscription_id";
 export type VideoFilterEmit = {
   type: VideoFilterType;
   value: VideosValidators["list"]["query"][VideoFilterType];
@@ -13,6 +13,7 @@ export const useVideosFilters = () => {
       service: undefined,
       duration: undefined,
       date: undefined,
+      subscription_id: undefined,
     }),
   );
 

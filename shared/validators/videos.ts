@@ -22,6 +22,7 @@ export const videosValidatorsSchema = defineValidator({
         ]),
       ),
       date: z.optional(z.enum(["today", "weekly", "monthly", "yearly", "older"])),
+      subscription_id: z.optional(z.coerce.number()),
     }),
   },
 

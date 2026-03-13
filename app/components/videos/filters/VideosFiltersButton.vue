@@ -1,9 +1,19 @@
 <script lang="ts" setup>
 import { Tippy } from "vue-tippy";
+
+import type { SubscriptionResource } from "#shared/resources/subscriptions";
+
+const { data: subscriptions } = await useAppFetch<Array<SubscriptionResource>>(
+  "/api/subscriptions",
+  {
+    key: "subscriptions",
+  },
+);
 </script>
 
 <template>
   <Tippy
+    ref="tippy"
     placement="bottom-start"
     trigger="click"
     :delay="0"
@@ -47,12 +57,12 @@ import { Tippy } from "vue-tippy";
           ]"
         />
 
-        <div
-          class="text-ui-text hover:bg-ui-bg flex items-center justify-between rounded p-1 text-sm"
-        >
-          <span>Chaîne</span>
-          <Icon name="lucide:chevron-right" />
-        </div>
+        <VideosFiltersInner
+          type="subscription_id"
+          label="Chaîne"
+          :options="(subscriptions ?? []).map((sub) => ({ label: sub.name, value: sub.id }))"
+          allow-search
+        />
       </div>
     </template>
   </Tippy>

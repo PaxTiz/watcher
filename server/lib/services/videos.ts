@@ -84,10 +84,15 @@ export default class VideosService extends AbstractService {
 
     const total = await database
       .selectFrom("videos")
-      .select(({ fn }) => [fn.count<number>("id").as("total")])
+      .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
       .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
       .$if(!!params.date, (qb) => this.parse_date_filter(qb, params.date!))
+      .$if(!!params.subscription_id, (qb) =>
+        qb
+          .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
+          .where("subscriptions.id", "=", params.subscription_id!),
+      )
       .executeTakeFirst();
 
     const items = await database
@@ -114,6 +119,11 @@ export default class VideosService extends AbstractService {
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
       .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
       .$if(!!params.date, (qb) => this.parse_date_filter(qb, params.date!))
+      .$if(!!params.subscription_id, (qb) =>
+        qb
+          .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
+          .where("subscriptions.id", "=", params.subscription_id!),
+      )
       .execute();
 
     const mapped_items: Array<VideoResource> = [];
