@@ -1,4 +1,4 @@
-import { SelectQueryBuilder } from "kysely";
+import { ExpressionBuilder, SelectQueryBuilder, sql } from "kysely";
 
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
@@ -148,25 +148,19 @@ export default class VideosService extends AbstractService {
     value: VideosValidators["list"]["query"]["duration"],
   ) {
     if (!value) {
-      return qb;
+      return sql`1 = 1`;
     }
 
     switch (value) {
       case "less_than_10_minutes":
         return qb.where("videos.duration", "<=", 60 * 10);
       case "between_10_30_minutes":
-        return qb.where((inner) =>
-          inner.and([
-            qb.where("videos.duration", ">", 60 * 10),
-            qb.where("videos.duration", "<=", 60 * 30),
-          ]),
+        return qb.where((q) =>
+          q.and([q("videos.duration", ">", 60 * 10), q("videos.duration", "<=", 60 * 30)]),
         );
       case "between_30_60_minutes":
-        return qb.where((inner) =>
-          inner.and([
-            qb.where("videos.duration", ">", 60 * 30),
-            qb.where("videos.duration", "<=", 60 * 60),
-          ]),
+        return qb.where((q) =>
+          q.and([q("videos.duration", ">", 60 * 30), q("videos.duration", "<=", 60 * 60)]),
         );
       case "greater_than_1_hour":
         return qb.where("videos.duration", ">=", 60 * 60);
