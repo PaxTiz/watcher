@@ -17,6 +17,18 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/app.css"],
 
+  app: {
+    head: {
+      link: [
+        {
+          rel: "icon",
+          type: "image/svg+xml",
+          href: "/images/favicon.svg",
+        },
+      ],
+    },
+  },
+
   modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxt/image", "@vueuse/nuxt"],
 
   image: {

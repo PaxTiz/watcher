@@ -27,6 +27,8 @@ const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
   >
     <div class="container">
       <div class="flex items-center gap-8">
+        <Logo />
+
         <Link label="Accueil" to="/" :is-active="route.path === '/'" />
         <Link
           label="Abonnements"
