@@ -9,6 +9,10 @@ const filter = ref({
   service: "",
 });
 
+watch(
+  () => subscriptions,
+  (s) => (filtered.value = s),
+);
 watchDebounced(
   filter,
   (f) => {

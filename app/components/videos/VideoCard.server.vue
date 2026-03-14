@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { formatDuration } from "date-fns";
-
 import type { VideoResource } from "#shared/resources/videos";
 import { useFormatter } from "#shared/utils/useFormatter";
 
@@ -22,7 +20,6 @@ const { dates, numbers } = useFormatter();
         width="380"
         quality="100"
         :src="video.thumbnail"
-        :placeholder="[380, 180, 100, 20]"
         :alt="`Image de la vidéo #${video.id}`"
       />
 
