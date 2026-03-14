@@ -15,16 +15,8 @@ defineProps<{ subscription: SubscriptionResource }>();
     target="_blank"
     external
   >
-    <NuxtImg
-      class="w-full rounded"
-      loading="lazy"
-      format="avif,webp"
-      width="71"
-      height="71"
-      densities="x1"
-      :src="subscription.channel.logo"
-      :alt="`Logo de ${subscription.name}`"
-    />
+    <SubscriptionImage :subscription="subscription" />
+
     <p class="mt-2 flex items-center justify-center text-center text-xs text-slate-400">
       <Icon
         class="shrink-0"

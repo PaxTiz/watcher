@@ -19,6 +19,8 @@
   --body-background: #11111b;
   --navbar-gradient-top: #181825;
   --navbar-gradient-bottom: #11111b;
+
+  --subscription-image-size: 71px;
 }
 
 @utility container {

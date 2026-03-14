@@ -40,8 +40,10 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    // @ts-expect-error
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: ["embla-carousel-vue"],
+    },
   },
 
   runtimeConfig: {

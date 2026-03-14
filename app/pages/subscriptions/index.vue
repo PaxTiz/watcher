@@ -5,5 +5,5 @@ const { data } = await useAppFetch<Array<SubscriptionResource>>("/api/subscripti
 </script>
 
 <template>
-  <SubscriptionsCarousel :subscriptions="data ?? []" />
+  <SubscriptionsList :subscriptions="data ?? []" />
 </template>
