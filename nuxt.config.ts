@@ -54,7 +54,7 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
-      include: ["embla-carousel-vue"],
+      include: ["embla-carousel-vue", "vue-tippy", "date-fns", "date-fns/locale"],
     },
   },
 
