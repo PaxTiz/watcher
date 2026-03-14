@@ -1,5 +1,5 @@
 import { formatISO, startOfDay, startOfMonth, startOfWeek, startOfYear } from "date-fns";
-import { ExpressionBuilder, SelectQueryBuilder, sql } from "kysely";
+import { SelectQueryBuilder } from "kysely";
 
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
@@ -7,6 +7,7 @@ import { useDatabase } from "#server/database";
 import { Database } from "#server/database/schema";
 import type { VideoResource } from "#shared/resources/videos";
 import type { Paginated } from "#shared/types/shared";
+import { SubscriptionType } from "#shared/types/subscriptions";
 import { VideosValidators } from "#shared/validators/videos";
 
 export default class VideosService extends AbstractService {
@@ -56,7 +57,7 @@ export default class VideosService extends AbstractService {
     };
   }
 
-  async get_url(id: number) {
+  async get_url(id: number): Promise<{ service: SubscriptionType; url: string | null }> {
     const database = useDatabase();
     const video = await database
       .selectFrom("videos")
@@ -69,14 +70,12 @@ export default class VideosService extends AbstractService {
         service: "twitch",
         url: await services.external.twitch.videos.get_master_playlist(video.service_id),
       };
-    } else if (video.service === "youtube") {
-      return {
-        service: "youtube",
-        url: video.url,
-      };
     }
 
-    throw new Error(`Could not get URL for video fo service type : ${video.service}`);
+    return {
+      service: "youtube",
+      url: video.url,
+    };
   }
 
   async find_all(params: VideosValidators["list"]["query"]): Promise<Paginated<VideoResource>> {

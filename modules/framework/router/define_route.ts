@@ -44,8 +44,13 @@ export const defineRoute = <
 ) => {
   return defineEventHandler(async (event) => {
     const [body, query, params] = await Promise.all([
+      // oxlint-disable-next-line
       route.body ? readValidatedBody(event, route.body.parse) : Promise.resolve(null),
+
+      // oxlint-disable-next-line
       route.query ? getValidatedQuery(event, route.query.parse) : Promise.resolve(null),
+
+      // oxlint-disable-next-line
       route.params ? getValidatedRouterParams(event, route.params.parse) : Promise.resolve(null),
     ]);
 

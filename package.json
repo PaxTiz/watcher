@@ -11,7 +11,7 @@
     "db:migrations:run": "./node_modules/kysely-ctl/dist/bin.mjs migrate up",
     "db:migrations:rollback": "./node_modules/kysely-ctl/dist/bin.mjs migrate down",
     "db:migrations:create": "./node_modules/kysely-ctl/dist/bin.mjs migrate make",
-    "lint": "pnpm oxlint -c ./.oxlintrc.json --type-aware",
+    "lint": "pnpm oxlint --fix --fix-suggestions -c ./.oxlintrc.json --type-aware",
     "format": "pnpm oxfmt -c ./.oxfmtrc.json"
   },
   "dependencies": {
@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.94",
+    "@oxlint/plugins": "^1.55.0",
     "@tailwindcss/vite": "^4.2.1",
     "@types/pg": "^8.16.0",
     "@vueuse/core": "^14.2.1",

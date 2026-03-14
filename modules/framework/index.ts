@@ -13,7 +13,7 @@ export default defineNuxtModule({
   },
 
   async setup(_options, nuxt) {
-    const resolver = createResolver(import.meta.url);
+    const _ = createResolver(import.meta.url);
 
     const rootDir = join(nuxt.options.rootDir, ".framework");
     if (existsSync(rootDir)) {

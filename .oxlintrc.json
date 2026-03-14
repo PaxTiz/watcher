@@ -1,8 +1,11 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["eslint", "typescript", "unicorn", "import", "node", "promise", "vue"],
+  "jsPlugins": ["./shared/utils/oxlint_import_alias.js"],
   "categories": {},
-  "rules": {},
+  "rules": {
+    "nuxt-imports/import-alias": "error"
+  },
   "settings": {
     "vitest": {
       "typecheck": false
