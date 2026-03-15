@@ -10,8 +10,8 @@ const humanize = (times: string[]) => {
   return orderTimes.join(separator);
 };
 
-const time = (start: number) => {
-  const delta = Date.now() - start;
+const time = (start: Date) => {
+  const delta = Date.now() - start.getTime();
   return humanize([delta < 1000 ? delta + "ms" : Math.round(delta / 1000) + "s"]);
 };
 
@@ -20,6 +20,9 @@ const canLog = (event: H3Event) => {
     return false;
   }
   if (event.path.startsWith("/api/_nuxt_icon")) {
+    return false;
+  }
+  if (event.path.startsWith("/uploads")) {
     return false;
   }
   if (!event.path.startsWith("/api")) {
@@ -31,14 +34,16 @@ const canLog = (event: H3Event) => {
 
 export default defineNitroPlugin((app) => {
   app.hooks.hook("request", (event) => {
-    event.context.__time = Date.now();
+    event.context.__time = new Date();
   });
 
   app.hooks.hook("afterResponse", (event) => {
-    const startDate = event.context.__time as number;
+    const startDate = event.context.__time as Date;
 
     if (canLog(event)) {
-      console.log(`${event.method} ${event.path} ${getResponseStatus(event)} ${time(startDate)}`);
+      console.log(
+        `${startDate.toISOString()} ${event.method} ${event.path} ${getResponseStatus(event)} ${time(startDate)}`,
+      );
     }
   });
 });
