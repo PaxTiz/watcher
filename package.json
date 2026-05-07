@@ -8,11 +8,13 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
     "db:migrations:run": "./node_modules/kysely-ctl/dist/bin.mjs migrate up",
     "db:migrations:rollback": "./node_modules/kysely-ctl/dist/bin.mjs migrate down",
     "db:migrations:create": "./node_modules/kysely-ctl/dist/bin.mjs migrate make",
     "lint": "pnpm oxlint --fix --fix-suggestions -c ./.oxlintrc.json --type-aware",
-    "format": "pnpm oxfmt -c ./.oxfmtrc.json"
+    "format": "pnpm oxfmt -c ./.oxfmtrc.json",
+    "prepare": "husky"
   },
   "dependencies": {
     "@nuxt/fonts": "0.14.0",
@@ -42,6 +44,7 @@
     "@types/pg": "^8.20.0",
     "@vueuse/core": "^14.3.0",
     "@vueuse/nuxt": "^14.3.0",
+    "husky": "^9.1.7",
     "kysely-ctl": "^0.20.0",
     "oxfmt": "^0.40.0",
     "oxlint": "^1.63.0",
