@@ -27,7 +27,7 @@ const onSubmit = (event: FormSubmitEvent<typeof oauthValidatorsSchema.loginWithB
         :schema="oauthValidatorsSchema.loginWithBluesky.body"
         @submit="onSubmit"
       >
-        <AppFormField label="Handle BlueSky" name="handle">
+        <AppFormField label="Identifiant BlueSky" name="handle">
           <AppFormInput v-model="state.handle" class="w-full" />
         </AppFormField>
 

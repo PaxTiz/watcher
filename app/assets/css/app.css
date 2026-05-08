@@ -8,6 +8,7 @@
   --radius-*: initial;
   --radius: 0.25rem;
 
+  --color-background: #11111b;
   --color-ui-bg: #1e1e2e;
   --color-ui-border: #313244;
   --color-ui-text: #cdd6f4;
@@ -16,9 +17,9 @@
 }
 
 :root {
-  --body-background: #11111b;
+  --body-background: var(--color-background);
   --navbar-gradient-top: #181825;
-  --navbar-gradient-bottom: #11111b;
+  --navbar-gradient-bottom: var(--color-background);
 
   --subscription-image-size: 71px;
 }

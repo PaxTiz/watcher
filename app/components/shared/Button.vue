@@ -15,7 +15,7 @@ const {
   label?: string;
   to?: RouteLocationRaw;
   icon?: string;
-  size?: "sm" | "normal";
+  size?: "sm" | "normal" | "lg";
   disabled?: boolean;
   color?: "primary" | "secondary";
   allowRemove?: boolean;
@@ -26,6 +26,7 @@ const component = computed(() => (to ? NuxtLink : "button"));
 
 const classes = computed(() => {
   return {
+    "min-h-[46px] text-sm py-3 px-4": size === "lg",
     "min-h-[38px] text-sm py-2 px-3": size === "normal",
     "min-h-[30px] text-sm py-1 px-2": size === "sm",
     "bg-[#11111b] border-2 border-ui-border text-ui-text not-disabled:hover:border-alt not-disabled:hover:text-alt":
