@@ -1,17 +1,20 @@
 <script lang="ts" setup>
+import { NuxtLink } from "#components";
 import type { SubscriptionResource } from "#shared/resources/subscriptions";
 
 defineProps<{ subscription: SubscriptionResource }>();
 </script>
 
 <template>
-  <nuxt-link
+  <Card
     class="bg-ui-bg focus:outline-alt block rounded border p-2"
+    :tag="NuxtLink"
     :class="{
       'border-highlight': subscription.isFavorite,
       'border-ui-border': !subscription.isFavorite,
     }"
     :to="subscription.channel.url"
+    size="sm"
     target="_blank"
     external
   >
@@ -25,5 +28,5 @@ defineProps<{ subscription: SubscriptionResource }>();
 
       <span class="ml-1 truncate">{{ subscription.name }}</span>
     </p>
-  </nuxt-link>
+  </Card>
 </template>

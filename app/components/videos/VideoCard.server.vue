@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { NuxtLink } from "#components";
 import type { VideoResource } from "#shared/resources/videos";
 import { useFormatter } from "#shared/utils/useFormatter";
 
@@ -8,10 +9,7 @@ const { dates, numbers } = useFormatter();
 </script>
 
 <template>
-  <nuxt-link
-    class="group bg-ui-bg focus:outline-alt block rounded border p-2"
-    :to="`/videos/${video.id}`"
-  >
+  <Card :tag="NuxtLink" :to="`/videos/${video.id}`" size="sm">
     <div class="relative z-1">
       <NuxtImg
         class="group-hover:border-alt aspect-video w-full rounded border-2 border-transparent object-cover transition-all duration-300"
@@ -67,5 +65,5 @@ const { dates, numbers } = useFormatter();
         </div>
       </div>
     </div>
-  </nuxt-link>
+  </Card>
 </template>

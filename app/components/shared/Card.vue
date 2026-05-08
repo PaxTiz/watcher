@@ -1,11 +1,19 @@
 <script lang="ts" setup>
-import type { VNode } from "vue";
+import type { Component, VNode } from "vue";
 
+const { tag = "div", size = "normal" } = defineProps<{
+  tag?: keyof HTMLElementTagNameMap | Component;
+  size?: "sm" | "normal";
+}>();
 defineSlots<{ default: () => VNode }>();
 </script>
 
 <template>
-  <div class="group bg-ui-bg focus:outline-alt block rounded border p-4">
+  <component
+    class="group bg-ui-bg focus:outline-alt block rounded border"
+    :class="{ 'p-2': size === 'sm', 'p-4': size === 'normal' }"
+    :is="tag"
+  >
     <slot />
-  </div>
+  </component>
 </template>
