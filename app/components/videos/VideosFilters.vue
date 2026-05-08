@@ -10,15 +10,15 @@ const format_label = <K extends VideoFilterType, V extends VideosValidators["lis
   v: V,
 ) => {
   if (k === "service") {
-    return videos.filters.service(v);
+    return videos.filters.service(v as VideosValidators["list"]["query"]["service"]);
   }
 
   if (k === "duration") {
-    return videos.filters.duration(v);
+    return videos.filters.duration(v as VideosValidators["list"]["query"]["duration"]);
   }
 
   if (k === "date") {
-    return videos.filters.date(v);
+    return videos.filters.date(v as VideosValidators["list"]["query"]["date"]);
   }
 
   const { data } = useNuxtData<Array<SubscriptionResource>>("subscriptions");
@@ -31,7 +31,7 @@ const format_label = <K extends VideoFilterType, V extends VideosValidators["lis
     <Button
       v-for="[k, v] in Object.entries(filters).filter(([_, v]) => !!v)"
       :label="format_label(k as VideoFilterType, v)"
-      :tag="videos.filters.name(k)"
+      :tag="videos.filters.name(k as keyof typeof filters)"
       @click="() => (filters[k as VideoFilterType] = undefined)"
       allow-remove
     />

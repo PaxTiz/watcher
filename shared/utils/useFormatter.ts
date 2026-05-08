@@ -38,7 +38,7 @@ export const useFormatter = () => {
 
     videos: {
       filters: {
-        name: (key: Omit<VideosValidators["list"]["query"], "page">) => {
+        name: (key: keyof Omit<VideosValidators["list"]["query"], "page">) => {
           switch (key) {
             case "service":
               return "Service";
@@ -46,7 +46,7 @@ export const useFormatter = () => {
               return "Duree";
             case "date":
               return "Date";
-            case "subscriptionId":
+            case "subscription_id":
               return "Chaîne";
             default:
               return "N/A";

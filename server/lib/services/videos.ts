@@ -1,14 +1,14 @@
 import { formatISO, startOfDay, startOfMonth, startOfWeek, startOfYear } from "date-fns";
-import { SelectQueryBuilder } from "kysely";
+import type { SelectQueryBuilder } from "kysely";
 
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
-import { Database } from "#server/database/schema";
+import type { Database } from "#server/database/schema";
 import type { VideoResource } from "#shared/resources/videos";
 import type { Paginated } from "#shared/types/shared";
-import { SubscriptionType } from "#shared/types/subscriptions";
-import { VideosValidators } from "#shared/validators/videos";
+import type { SubscriptionType } from "#shared/types/subscriptions";
+import type { VideosValidators } from "#shared/validators/videos";
 
 export default class VideosService extends AbstractService {
   async get_by_id(id: number): Promise<VideoResource> {

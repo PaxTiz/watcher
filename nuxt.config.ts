@@ -6,10 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
 
-  // typescript: {
-  //   strict: true,
-  //   typeCheck: true,
-  // },
+  typescript: {
+    strict: true,
+  },
 
   devtools: { enabled: true },
 
