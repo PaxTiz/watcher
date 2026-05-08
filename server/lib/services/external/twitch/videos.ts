@@ -91,7 +91,7 @@ export default class TwitchVideosService extends AbstractService {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Client-Id": config.twitch.playerClientId,
+            "Client-Id": config.oauth.twitch.playerClientId,
             Accept: "application/json",
           },
           body: {

@@ -12,8 +12,8 @@ export default class TwitchOAuthService extends AbstractService {
 
     const config = useRuntimeConfig();
     this.client = new Twitch(
-      config.twitch.clientId,
-      config.twitch.clientSecret,
+      config.oauth.twitch.clientId,
+      config.oauth.twitch.clientSecret,
       "http://localhost:3000/api/oauth/twitch/callback",
     );
   }

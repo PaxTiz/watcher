@@ -26,7 +26,7 @@ export default class SyncTwitch extends AbstractService {
 
     const credentials: TwitchCredentials = {
       ...token,
-      client_id: config.twitch.clientId,
+      client_id: config.oauth.twitch.clientId,
     };
 
     const subscriptions = await this.get_subscriptions(credentials);

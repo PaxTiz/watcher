@@ -89,25 +89,21 @@ export default defineNuxtConfig({
       name: "",
     },
 
-    google: {
-      clientId: "",
-      clientSecret: "",
-    },
-
-    twitch: {
-      playerClientId: "",
-      clientId: "",
-      clientSecret: "",
-    },
-
-    atproto: {
-      clientId: "",
-      clientSecret: "",
-    },
-
     oauth: {
+      google: {
+        clientId: "",
+        clientSecret: "",
+      },
+
+      twitch: {
+        playerClientId: "",
+        clientId: "",
+        clientSecret: "",
+      },
+
       bluesky: {
         scope: ["atproto", "transition:generic", "transition:email"],
+        clientId: "",
       },
     },
   },

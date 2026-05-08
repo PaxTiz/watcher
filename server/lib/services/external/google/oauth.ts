@@ -14,8 +14,8 @@ export default class GoogleOAuthService extends AbstractService {
 
     const config = useRuntimeConfig();
     this.client = new Google(
-      config.google.clientId,
-      config.google.clientSecret,
+      config.oauth.google.clientId,
+      config.oauth.google.clientSecret,
       "http://localhost:3000/api/oauth/google/callback",
     );
   }
