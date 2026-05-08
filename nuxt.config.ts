@@ -71,6 +71,7 @@ export default defineNuxtConfig({
         "hls.js",
         "plyr",
         "vue-sonner",
+        "zod/mini",
       ],
     },
   },

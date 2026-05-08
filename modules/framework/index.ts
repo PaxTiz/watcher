@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { createResolver, defineNuxtModule } from "nuxt/kit";
 
+import { buildClient } from "./builders/build_client";
 import { buildIndex } from "./builders/build_index";
 import { buildServer } from "./builders/build_server";
 
@@ -21,10 +22,12 @@ export default defineNuxtModule({
     }
     mkdirSync(rootDir);
 
-    nuxt.options.alias["#framework"] = join(rootDir, "index.ts");
+    nuxt.options.alias["#framework/client"] = join(rootDir, "client.ts");
     nuxt.options.alias["#framework/server"] = join(rootDir, "server.ts");
+    nuxt.options.alias["#framework"] = join(rootDir, "index.ts");
 
     await buildIndex(rootDir);
+    await buildClient(rootDir);
     await buildServer(nuxt.options.rootDir, rootDir);
   },
 });
