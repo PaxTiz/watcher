@@ -2,6 +2,7 @@
 import type { RouteLocationRaw } from "vue-router";
 
 import { NuxtLink } from "#components";
+import { HAS_FORM_ERRORS_SYMBOL } from "#shared/types/forms";
 
 const {
   to,
@@ -34,15 +35,17 @@ const classes = computed(() => {
     "cursor-not-allowed opacity-50": disabled,
   };
 });
+
+const hasFormErrors = inject<ComputedRef<boolean>>(HAS_FORM_ERRORS_SYMBOL);
 </script>
 
 <template>
   <component
-    class="group flex items-center justify-center gap-2 rounded border border-transparent transition-all duration-300 not-disabled:hover:opacity-75"
+    class="group flex items-center justify-center gap-2 rounded border border-transparent transition-all duration-300 not-disabled:hover:opacity-75 disabled:cursor-not-allowed disabled:opacity-75"
     :is="component"
     :to="to"
     :class="classes"
-    :disabled="disabled"
+    :disabled="hasFormErrors || disabled"
     :type="type"
   >
     <Icon v-if="icon" :name="icon" />

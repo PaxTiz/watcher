@@ -2,10 +2,12 @@ import { z } from "zod/mini";
 
 import { type InferValidators, defineValidator } from "#framework/client";
 
+import { blueskyHandleSchema } from "./shared";
+
 export const oauthValidatorsSchema = defineValidator({
   loginWithBluesky: {
     body: z.object({
-      handle: z.string(),
+      handle: blueskyHandleSchema,
     }),
   },
 

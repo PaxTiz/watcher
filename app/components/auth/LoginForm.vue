@@ -1,12 +1,13 @@
 <script lang="ts" setup>
+import type { FormSubmitEvent } from "#shared/types/forms";
 import { type OAuthValidators, oauthValidatorsSchema } from "#shared/validators/oauth";
 
 const state = ref<OAuthValidators["loginWithBluesky"]["body"]>({
   handle: "",
 });
 
-const onSubmit = (data: OAuthValidators["loginWithBluesky"]["body"]) => {
-  console.log(data);
+const onSubmit = (data: FormSubmitEvent<typeof oauthValidatorsSchema.loginWithBluesky.body>) => {
+  console.log(data.data);
 };
 </script>
 
