@@ -36,7 +36,10 @@ const classes = computed(() => {
   };
 });
 
-const hasFormErrors = inject<ComputedRef<boolean>>(HAS_FORM_ERRORS_SYMBOL);
+const hasFormErrors = inject<ComputedRef<boolean>>(
+  HAS_FORM_ERRORS_SYMBOL,
+  computed(() => false),
+);
 </script>
 
 <template>
