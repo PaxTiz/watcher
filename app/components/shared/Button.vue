@@ -18,6 +18,7 @@ const {
   disabled?: boolean;
   color?: "primary" | "secondary";
   allowRemove?: boolean;
+  type?: "submit" | "button";
 }>();
 
 const component = computed(() => (to ? NuxtLink : "button"));
@@ -42,6 +43,7 @@ const classes = computed(() => {
     :to="to"
     :class="classes"
     :disabled="disabled"
+    :type="type"
   >
     <Icon v-if="icon" :name="icon" />
 

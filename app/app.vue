@@ -9,9 +9,5 @@ import "vue-sonner/style.css";
 
   <NuxtLoadingIndicator />
 
-  <AppHeader />
-
-  <main class="container py-16">
-    <NuxtPage />
-  </main>
+  <NuxtLayout />
 </template>
