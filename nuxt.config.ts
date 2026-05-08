@@ -28,7 +28,17 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxt/image", "@vueuse/nuxt"],
+  modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxt/image", "@vueuse/nuxt", "nuxt-auth-utils"],
+
+  devServer: {
+    // Used with atproto oauth
+    // https://atproto.com/specs/oauth#localhost-client-development
+    host: "127.0.0.1",
+  },
+
+  auth: {
+    atproto: true,
+  },
 
   image: {
     provider: "ipx",
@@ -53,7 +63,15 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
-      include: ["embla-carousel-vue", "vue-tippy", "date-fns", "date-fns/locale", "hls.js", "plyr"],
+      include: [
+        "embla-carousel-vue",
+        "vue-tippy",
+        "date-fns",
+        "date-fns/locale",
+        "hls.js",
+        "plyr",
+        "vue-sonner",
+      ],
     },
   },
 
