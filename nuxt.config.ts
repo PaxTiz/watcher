@@ -77,6 +77,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    public: {
+      environment: "local", // 'local' | 'production'
+    },
+
     database: {
       host: "",
       port: "",
