@@ -18,7 +18,7 @@ export type UserTable = {
 };
 
 export type SubscriptionTable = {
-  id: Generated<number>;
+  id: Generated<string>;
 
   service_id: string;
 
@@ -34,8 +34,6 @@ export type SubscriptionTable = {
 };
 
 export type CredentialTable = {
-  id: Generated<number>;
-
   service: CredentialsType;
 
   access_token: string;
@@ -48,7 +46,7 @@ export type CredentialTable = {
 };
 
 export type VideoTable = {
-  id: Generated<number>;
+  id: Generated<string>;
 
   service: SubscriptionType;
 

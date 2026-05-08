@@ -5,7 +5,7 @@ import { type InferValidators, defineValidator } from "#framework/client";
 export const videosValidatorsSchema = defineValidator({
   find: {
     params: z.object({
-      id: z.coerce.number(),
+      id: z.uuidv7(),
     }),
   },
 
@@ -22,13 +22,13 @@ export const videosValidatorsSchema = defineValidator({
         ]),
       ),
       date: z.optional(z.enum(["today", "weekly", "monthly", "yearly", "older"])),
-      subscription_id: z.optional(z.coerce.number()),
+      subscription_id: z.optional(z.uuidv7()),
     }),
   },
 
   url: {
     params: z.object({
-      id: z.coerce.number(),
+      id: z.uuidv7(),
     }),
   },
 
@@ -37,7 +37,7 @@ export const videosValidatorsSchema = defineValidator({
       base_url: z.string(),
     }),
     params: z.object({
-      id: z.coerce.number(),
+      id: z.uuidv7(),
       path: z.string(),
       quality: z.string(),
     }),

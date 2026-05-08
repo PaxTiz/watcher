@@ -1,7 +1,7 @@
 import type { SubscriptionType } from "#shared/types/subscriptions";
 
 export type SubscriptionResource = {
-  id: number;
+  id: string;
 
   name: string;
 

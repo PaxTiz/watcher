@@ -1,9 +1,11 @@
 import { sql, type Kysely } from "kysely";
 
+import { defaultUUIDV7 } from "../helpers";
+
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable("users")
-    .addColumn("id", "uuid", (c) => c.primaryKey().defaultTo(sql`UUIDV7()`))
+    .addColumn("id", "uuid", (c) => defaultUUIDV7(c.primaryKey()))
     .addColumn("name", "varchar", (c) => c.notNull())
     .addColumn("bluesky_did", "varchar", (c) => c.notNull().unique())
     .addColumn("bluesky_handle", "varchar", (c) => c.notNull().unique())

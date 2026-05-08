@@ -1,9 +1,11 @@
-import type { Kysely } from "kysely";
+import { type Kysely } from "kysely";
+
+import { defaultUUIDV7 } from "../helpers";
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable("subscriptions")
-    .addColumn("id", "serial", (c) => c.primaryKey())
+    .addColumn("id", "uuid", (c) => defaultUUIDV7(c.primaryKey()))
     .addColumn("service_id", "varchar", (c) => c.notNull())
     .addColumn("service", "varchar", (c) => c.notNull())
     .addColumn("url", "varchar", (c) => c.notNull())

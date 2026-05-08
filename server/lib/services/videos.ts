@@ -11,7 +11,7 @@ import type { SubscriptionType } from "#shared/types/subscriptions";
 import type { VideosValidators } from "#shared/validators/videos";
 
 export default class VideosService extends AbstractService {
-  async get_by_id(id: number): Promise<VideoResource> {
+  async get_by_id(id: string): Promise<VideoResource> {
     const database = useDatabase();
 
     const video = await database
@@ -57,7 +57,7 @@ export default class VideosService extends AbstractService {
     };
   }
 
-  async get_url(id: number): Promise<{ service: SubscriptionType; url: string | null }> {
+  async get_url(id: string): Promise<{ service: SubscriptionType; url: string | null }> {
     const database = useDatabase();
     const video = await database
       .selectFrom("videos")
