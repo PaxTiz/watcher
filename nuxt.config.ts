@@ -100,5 +100,11 @@ export default defineNuxtConfig({
       clientId: "",
       clientSecret: "",
     },
+
+    oauth: {
+      bluesky: {
+        scope: ["atproto", "transition:generic", "transition:email"],
+      },
+    },
   },
 });

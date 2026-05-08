@@ -2,6 +2,7 @@ import { toast } from "vue-sonner";
 
 export const useOAuthRedirectionHandler = () => {
   const route = useRoute();
+  const router = useRouter();
 
   const providers: Record<string, string> = {
     bluesky: "BlueSky",
@@ -26,4 +27,6 @@ export const useOAuthRedirectionHandler = () => {
   };
 
   toast[data.color](data.message);
+
+  return router.replace({ query: { provider: undefined, "oauth-state": undefined } });
 };

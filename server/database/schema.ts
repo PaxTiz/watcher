@@ -1,7 +1,21 @@
-import type { Generated } from "kysely";
+import type { ColumnType, Generated } from "kysely";
 
 import type { CredentialsType } from "#shared/types/credentials";
 import type { SubscriptionType } from "#shared/types/subscriptions";
+
+export type UserTable = {
+  id: Generated<string>;
+
+  name: string;
+
+  bluesky_did: string;
+
+  bluesky_handle: string;
+
+  created_at: ColumnType<string, string | undefined, never>;
+
+  last_login_at: ColumnType<string, string | undefined, never>;
+};
 
 export type SubscriptionTable = {
   id: Generated<number>;
@@ -58,6 +72,7 @@ export type VideoTable = {
 };
 
 export type Database = {
+  users: UserTable;
   subscriptions: SubscriptionTable;
   credentials: CredentialTable;
   videos: VideoTable;

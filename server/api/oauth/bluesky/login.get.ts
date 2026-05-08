@@ -1,35 +1,56 @@
 import { useLogger } from "#framework";
+import { useDatabase } from "#server/database";
+import { useBluesky } from "#server/lib/bluesky";
 
 const SESSION_DURATION = 3600 * 24 * 7; // 1 week
 
 export default defineOAuthBlueskyEventHandler({
   config: {
-    scope: ["atproto", "transition:email"],
+    scope: ["atproto", "transition:generic", "transition:email"],
   },
 
-  async onSuccess(event, { user, tokens }) {
-    // TODO: Récupérer les infos depuis Bluesky
-    // https://docs.bsky.app/docs/api/app-bsky-actor-get-profile
+  async onSuccess(event, { user }) {
+    try {
+      const bluesky = useBluesky();
+      const database = useDatabase();
 
-    // TODO: Enregistrer l'utilisateur en base de données
+      const profile = await bluesky.getProfile({ actor: user.did });
 
-    console.log(user);
+      const name = profile.data.displayName ?? "";
+      await database
+        .insertInto("users")
+        .values({
+          bluesky_did: profile.data.did,
+          bluesky_handle: profile.data.handle,
+          name,
+        })
+        .onConflict((oc) =>
+          oc.column("bluesky_did").doUpdateSet({
+            name: profile.data.displayName,
+          }),
+        )
+        .execute();
 
-    // TODO: Enregistrer la session
-    await setUserSession(
-      event,
-      {
-        user: {},
-      },
-      { maxAge: SESSION_DURATION },
-    );
+      await setUserSession(
+        event,
+        {
+          user: {
+            did: profile.data.did,
+            name,
+          },
+        },
+        { maxAge: SESSION_DURATION },
+      );
 
-    return sendRedirect(event, "/?provider=bluesky&oauth-state=success");
+      return sendRedirect(event, "/?provider=bluesky&oauth-state=success");
+    } catch (error) {
+      useLogger("oauth.bluesky.onSuccess").error(error);
+      return sendRedirect(event, "/?provider=bluesky&oauth-state=error");
+    }
   },
 
   onError(event, error) {
-    useLogger("oauth.bluesky").error(error);
-
+    useLogger("oauth.bluesky.onError").error(error);
     return sendRedirect(event, "/?provider=bluesky&oauth-state=error");
   },
 });

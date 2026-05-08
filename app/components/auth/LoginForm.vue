@@ -6,8 +6,8 @@ const state = ref<OAuthValidators["loginWithBluesky"]["body"]>({
   handle: "",
 });
 
-const onSubmit = (data: FormSubmitEvent<typeof oauthValidatorsSchema.loginWithBluesky.body>) => {
-  console.log(data.data);
+const onSubmit = (event: FormSubmitEvent<typeof oauthValidatorsSchema.loginWithBluesky.body>) => {
+  window.open(`/api/oauth/bluesky/login?handle=${event.data.handle}`, "_self");
 };
 </script>
 
