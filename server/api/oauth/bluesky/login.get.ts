@@ -16,7 +16,8 @@ export default defineOAuthBlueskyEventHandler({
 
       const profile = await bluesky.getProfile({ actor: user.did });
 
-      const name = profile.data.displayName ?? "";
+      const isNameEmpty = profile.data.displayName?.trim().length === 0;
+      const name = (isNameEmpty ? profile.data.handle : profile.data.displayName) ?? "";
       await database
         .insertInto("users")
         .values({
@@ -27,6 +28,7 @@ export default defineOAuthBlueskyEventHandler({
         .onConflict((oc) =>
           oc.column("bluesky_did").doUpdateSet({
             name: profile.data.displayName,
+            bluesky_handle: profile.data.handle,
           }),
         )
         .execute();
