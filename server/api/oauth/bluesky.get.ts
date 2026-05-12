@@ -31,6 +31,7 @@ export default defineOAuthBlueskyEventHandler({
             bluesky_handle: profile.data.handle,
           }),
         )
+
         .execute();
 
       await setUserSession(

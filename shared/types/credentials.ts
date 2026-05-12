@@ -2,8 +2,14 @@ export type CredentialsType = "google" | "twitch";
 
 export type ServiceCredentials = {
   service: CredentialsType;
+
   userId: string;
+
   access_token: string;
+
+  access_token_expires_at: string;
+
   refresh_token: string;
-  expires_at: string;
+
+  refresh_token_expires_at: string;
 };

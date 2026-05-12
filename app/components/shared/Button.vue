@@ -20,6 +20,7 @@ const {
   color?: "primary" | "secondary";
   allowRemove?: boolean;
   type?: "submit" | "button";
+  external?: boolean;
 }>();
 
 const component = computed(() => (to ? NuxtLink : "button"));
@@ -51,6 +52,7 @@ const hasFormErrors = inject<ComputedRef<boolean>>(
     :class="classes"
     :disabled="hasFormErrors || disabled"
     :type="type"
+    :external="external"
   >
     <Icon v-if="icon" :name="icon" />
 

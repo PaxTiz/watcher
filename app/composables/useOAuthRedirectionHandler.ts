@@ -6,6 +6,8 @@ export const useOAuthRedirectionHandler = () => {
 
   const providers: Record<string, string> = {
     bluesky: "BlueSky",
+    google: "Google",
+    twitch: "Twitch",
   };
 
   const provider = providers[route.query.provider as string];

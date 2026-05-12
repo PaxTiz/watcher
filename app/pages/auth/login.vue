@@ -32,9 +32,23 @@ const onShowBlueskyModal = () => {
           @click="onShowBlueskyModal"
         />
 
-        <!-- <Button label="Connexion avec Google" icon="fa7-brands:youtube" size="lg" class="w-full" />
+        <Button
+          to="/api/oauth/google"
+          label="Connexion avec Google"
+          icon="fa7-brands:youtube"
+          size="lg"
+          class="w-full"
+          external
+        />
 
-        <Button label="Connexion avec Twitch" icon="fa7-brands:twitch" size="lg" class="w-full" /> -->
+        <Button
+          to="/api/oauth/twitch"
+          label="Connexion avec Twitch"
+          icon="fa7-brands:twitch"
+          size="lg"
+          class="w-full"
+          external
+        />
       </Card>
     </section>
   </div>

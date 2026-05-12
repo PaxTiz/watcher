@@ -8,9 +8,9 @@ export type UserTable = {
 
   name: string;
 
-  bluesky_did: string;
+  bluesky_did: string | null;
 
-  bluesky_handle: string;
+  bluesky_handle: string | null;
 
   created_at: ColumnType<string, string | undefined, never>;
 
@@ -36,11 +36,15 @@ export type SubscriptionTable = {
 export type CredentialTable = {
   service: CredentialsType;
 
+  service_id: string;
+
   access_token: string;
+
+  access_token_expires_at: string;
 
   refresh_token: string;
 
-  expires_at: string;
+  refresh_token_expires_at: string;
 
   user_id: string;
 };

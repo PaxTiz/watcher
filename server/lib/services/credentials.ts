@@ -6,13 +6,18 @@ import { useDatabase } from "#server/database";
 import type { ServiceCredentials, CredentialsType } from "#shared/types/credentials";
 
 export default class CredentialsService extends AbstractService {
-  async get(service: CredentialsType, refresh = true): Promise<ServiceCredentials | null> {
+  async get(
+    user_id: string,
+    service: CredentialsType,
+    refresh = true,
+  ): Promise<ServiceCredentials | null> {
     const database = useDatabase();
 
     const credentials = await database
       .selectFrom("credentials")
       .selectAll()
       .where("service", "=", service)
+      .where("user_id", "=", user_id)
       .executeTakeFirst();
 
     if (!credentials) {
@@ -22,59 +27,54 @@ export default class CredentialsService extends AbstractService {
     const serviceCredentials = {
       service: credentials.service,
       access_token: credentials.access_token,
+      access_token_expires_at: credentials.access_token_expires_at,
       refresh_token: credentials.refresh_token,
-      expires_at: credentials.access_token,
+      refresh_token_expires_at: credentials.refresh_token_expires_at,
       userId: credentials.user_id,
     };
 
     if (refresh) {
-      return this.refresh_if_needed(service, serviceCredentials);
+      return this.refresh_if_needed(user_id, service, serviceCredentials);
     }
 
     return serviceCredentials;
   }
 
-  async replace(data: ServiceCredentials) {
+  async replace(user_id: string, data: ServiceCredentials) {
     const database = useDatabase();
 
-    const exists = await database
-      .selectFrom("credentials")
-      .selectAll()
-      .where("service", "=", data.service)
-      .executeTakeFirst();
+    // TODO: Data encryption for tokens
 
-    if (exists) {
-      await database
-        .updateTable("credentials")
-        .set({
+    await database
+      .insertInto("credentials")
+      .values({
+        service: data.service,
+        service_id: data.userId,
+        access_token: data.access_token,
+        access_token_expires_at: data.access_token_expires_at,
+        refresh_token: data.refresh_token,
+        refresh_token_expires_at: data.refresh_token_expires_at,
+        user_id,
+      })
+      .onConflict((oc) =>
+        oc.columns(["service", "user_id"]).doUpdateSet({
           access_token: data.access_token,
+          access_token_expires_at: data.access_token_expires_at,
           refresh_token: data.refresh_token,
-          expires_at: data.expires_at,
-          user_id: data.userId,
-        })
-        .where("service", "=", exists.service)
-        .execute();
-    } else {
-      await database
-        .insertInto("credentials")
-        .values({
-          service: data.service,
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-          expires_at: data.expires_at,
-          user_id: data.userId,
-        })
-        .execute();
-    }
+          refresh_token_expires_at: data.refresh_token_expires_at,
+        }),
+      )
+      .execute();
 
     return data;
   }
 
   async refresh_if_needed(
+    user_id: string,
     service: CredentialsType,
     credentials: ServiceCredentials,
   ): Promise<ServiceCredentials> {
-    if (isBefore(new Date(), parseISO(credentials.expires_at))) {
+    if (isBefore(new Date(), parseISO(credentials.access_token_expires_at))) {
       // Token is still valid, do nothing..
       return credentials;
     }
@@ -86,7 +86,7 @@ export default class CredentialsService extends AbstractService {
 
     const handler = callback[service]!;
     const response = await handler(credentials.refresh_token);
-    await this.replace(response);
+    await this.replace(user_id, response);
 
     return response;
   }
