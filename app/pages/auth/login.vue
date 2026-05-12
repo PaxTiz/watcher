@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { LazyLoginModal } from "#components";
+
 definePageMeta({ layout: "auth" });
 
 const { loggedIn } = useUserSession();
@@ -6,19 +8,15 @@ if (loggedIn.value) {
   await navigateTo("/");
 }
 
-const showBlueskyModal = ref(false);
+const overlay = useOverlay();
 
 const onShowBlueskyModal = () => {
-  showBlueskyModal.value = !showBlueskyModal.value;
+  overlay.create(LazyLoginModal).open();
 };
 </script>
 
 <template>
-  <!-- <LoginForm class="mt-32" /> -->
-
   <div class="relative">
-    <LoginModal v-model="showBlueskyModal" />
-
     <section class="mt-32">
       <Logo />
 

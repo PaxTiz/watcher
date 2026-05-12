@@ -2,6 +2,7 @@
 import type { FormSubmitEvent } from "#shared/types/forms";
 import { type OAuthValidators, oauthValidatorsSchema } from "#shared/validators/oauth";
 
+const input = useTemplateRef("input");
 const state = ref<OAuthValidators["loginWithBluesky"]["body"]>({
   handle: "",
 });
@@ -9,6 +10,10 @@ const state = ref<OAuthValidators["loginWithBluesky"]["body"]>({
 const onSubmit = (event: FormSubmitEvent<typeof oauthValidatorsSchema.loginWithBluesky.body>) => {
   window.open(`/api/oauth/bluesky/login?handle=${event.data.handle}`, "_self");
 };
+
+onMounted(() => {
+  input.value?.focus();
+});
 </script>
 
 <template>
@@ -28,7 +33,7 @@ const onSubmit = (event: FormSubmitEvent<typeof oauthValidatorsSchema.loginWithB
         @submit="onSubmit"
       >
         <AppFormField label="Identifiant BlueSky" name="handle">
-          <AppFormInput v-model="state.handle" class="w-full" />
+          <AppFormInput ref="input" v-model="state.handle" class="w-full" />
         </AppFormField>
 
         <Button label="Me connecter" type="submit" class="mt-4" />

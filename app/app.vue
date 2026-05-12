@@ -7,6 +7,8 @@ import "vue-sonner/style.css";
 <template>
   <Toaster rich-colors close-button />
 
+  <Overlays />
+
   <NuxtLoadingIndicator />
 
   <NuxtLayout />
