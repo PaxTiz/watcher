@@ -1,5 +1,4 @@
 import { Google } from "arctic";
-import { formatISO } from "date-fns";
 
 import { AbstractService } from "#framework";
 import type { ServiceCredentials } from "#shared/types/credentials";
@@ -24,10 +23,12 @@ export default class GoogleOAuthService extends AbstractService {
 
     return {
       service: "google",
+      service_id: user.userId,
       userId: user.userId,
       access_token: response.accessToken(),
       refresh_token: token,
-      expires_at: formatISO(response.accessTokenExpiresAt()),
+      access_token_expires_at: response.accessTokenExpiresAt(),
+      refresh_token_expires_at: response.accessTokenExpiresAt(),
     };
   }
 

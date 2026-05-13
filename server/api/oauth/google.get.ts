@@ -1,4 +1,4 @@
-import { add, formatISO } from "date-fns";
+import { add } from "date-fns";
 
 import { useLogger } from "#framework";
 import { services } from "#framework/server";
@@ -29,13 +29,12 @@ export default defineOAuthGoogleEventHandler({
 
       await services.credentials.replace(database_user.id, {
         service: "google",
-        userId: user.sub,
+        service_id: user.sub,
+        userId: database_user.id,
         access_token: tokens.access_token,
-        access_token_expires_at: formatISO(add(new Date(), { seconds: tokens.expires_in })),
+        access_token_expires_at: add(new Date(), { seconds: tokens.expires_in }),
         refresh_token: tokens.refresh_token,
-        refresh_token_expires_at: formatISO(
-          add(new Date(), { seconds: tokens.refresh_token_expires_in }),
-        ),
+        refresh_token_expires_at: add(new Date(), { seconds: tokens.refresh_token_expires_in }),
       });
 
       const integration = Boolean(getQuery(event).integration);

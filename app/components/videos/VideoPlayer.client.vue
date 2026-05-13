@@ -5,6 +5,7 @@ import Plyr from "plyr";
 
 import type { VideoResource } from "#shared/resources/videos";
 
+// @ts-ignore
 import "plyr/css";
 
 const { video } = defineProps<{ video: VideoResource }>();

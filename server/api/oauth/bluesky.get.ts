@@ -18,7 +18,8 @@ export default defineOAuthBlueskyEventHandler({
 
       const isNameEmpty = profile.data.displayName?.trim().length === 0;
       const name = (isNameEmpty ? profile.data.handle : profile.data.displayName) ?? "";
-      await database
+
+      const created_user = await database
         .insertInto("users")
         .values({
           bluesky_did: profile.data.did,
@@ -31,15 +32,24 @@ export default defineOAuthBlueskyEventHandler({
             bluesky_handle: profile.data.handle,
           }),
         )
-
-        .execute();
+        .returningAll()
+        .executeTakeFirstOrThrow();
 
       await setUserSession(
         event,
         {
           user: {
-            did: profile.data.did,
-            name,
+            id: created_user.id,
+            name: created_user.name,
+            bluesky: {
+              did: created_user.bluesky_did,
+              handle: created_user.bluesky_handle,
+            },
+            created_at: created_user.created_at,
+            last_login_at: created_user.last_login_at,
+            loginWith: {
+              integration: "bluesky",
+            },
           },
         },
         { maxAge: SESSION_DURATION },

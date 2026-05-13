@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import { formatISO, differenceInHours } from "date-fns";
 
+import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
@@ -17,11 +18,11 @@ type TwitchCredentials = ServiceCredentials & {
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "twitch");
 
 export default class SyncTwitch extends AbstractService {
-  async sync() {
+  async sync(user: User) {
     const config = useRuntimeConfig();
-    const token = await services.credentials.get("twitch");
+    const token = await services.credentials.get(user.id, "twitch");
     if (!token) {
-      throw createError({ statusCode: 403 });
+      return;
     }
 
     const credentials: TwitchCredentials = {
@@ -57,7 +58,7 @@ export default class SyncTwitch extends AbstractService {
       );
 
     let response = await services.external.twitch.followers.list({
-      userId: credentials.userId,
+      userId: credentials.service_id,
       token: credentials.access_token,
       clientId: credentials.client_id,
     });
@@ -98,7 +99,7 @@ export default class SyncTwitch extends AbstractService {
 
       if (response.pagination.cursor) {
         response = await services.external.twitch.followers.list({
-          userId: credentials.userId,
+          userId: credentials.service_id,
           token: credentials.access_token,
           clientId: credentials.client_id,
           cursor: response.pagination.cursor,

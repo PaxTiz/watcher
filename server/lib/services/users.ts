@@ -2,6 +2,7 @@ import { AbstractService } from "#framework";
 import { useDatabase } from "#server/database";
 import type { UserTable } from "#server/database/schema";
 import type { UserResource } from "#shared/resources/users";
+import type { CredentialsType } from "#shared/types/credentials";
 
 export default class UsersService extends AbstractService {
   async find_by_service_id({

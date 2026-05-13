@@ -4,9 +4,9 @@ export type UserResource = {
   name: string;
 
   bluesky: {
-    did: string;
+    did: string | null;
 
-    handle: string;
+    handle: string | null;
   };
 
   created_at: string;

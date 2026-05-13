@@ -1,5 +1,4 @@
 import { Twitch } from "arctic";
-import { formatISO } from "date-fns";
 
 import { AbstractService } from "#framework";
 import type { ServiceCredentials } from "#shared/types/credentials";
@@ -24,10 +23,12 @@ export default class TwitchOAuthService extends AbstractService {
 
     return {
       service: "twitch",
+      service_id: user.userId,
       userId: user.userId,
       access_token: response.accessToken(),
       refresh_token: response.refreshToken(),
-      expires_at: formatISO(response.accessTokenExpiresAt()),
+      access_token_expires_at: response.accessTokenExpiresAt(),
+      refresh_token_expires_at: response.accessTokenExpiresAt(),
     };
   }
 

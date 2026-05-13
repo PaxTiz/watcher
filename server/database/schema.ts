@@ -40,11 +40,11 @@ export type CredentialTable = {
 
   access_token: string;
 
-  access_token_expires_at: string;
+  access_token_expires_at: Date;
 
   refresh_token: string;
 
-  refresh_token_expires_at: string;
+  refresh_token_expires_at: Date;
 
   user_id: string;
 };

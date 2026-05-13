@@ -1,3 +1,4 @@
+import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
@@ -25,8 +26,8 @@ export default class SubscriptionsService extends AbstractService {
     }));
   }
 
-  async sync() {
-    await services.sync.youtube.sync();
-    await services.sync.twitch.sync();
+  async sync(user: User) {
+    await services.sync.youtube.sync(user);
+    await services.sync.twitch.sync(user);
   }
 }

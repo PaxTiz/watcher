@@ -1,4 +1,4 @@
-import { isBefore, parseISO } from "date-fns";
+import { isBefore } from "date-fns";
 
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
@@ -24,8 +24,9 @@ export default class CredentialsService extends AbstractService {
       return null;
     }
 
-    const serviceCredentials = {
+    const serviceCredentials: ServiceCredentials = {
       service: credentials.service,
+      service_id: credentials.service_id,
       access_token: credentials.access_token,
       access_token_expires_at: credentials.access_token_expires_at,
       refresh_token: credentials.refresh_token,
@@ -74,7 +75,7 @@ export default class CredentialsService extends AbstractService {
     service: CredentialsType,
     credentials: ServiceCredentials,
   ): Promise<ServiceCredentials> {
-    if (isBefore(new Date(), parseISO(credentials.access_token_expires_at))) {
+    if (isBefore(new Date(), credentials.access_token_expires_at)) {
       // Token is still valid, do nothing..
       return credentials;
     }
