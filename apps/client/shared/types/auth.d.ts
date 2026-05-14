@@ -2,8 +2,9 @@ import type { UserResource } from "../resources/users";
 
 declare module "#auth-utils" {
   interface User extends UserResource {
-    loginWith: {
+    login_with: {
       integration: "google" | "twitch" | "bluesky";
+      id: string;
     };
   }
 

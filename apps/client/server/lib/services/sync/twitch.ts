@@ -8,36 +8,27 @@ import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
-import type { ServiceCredentials } from "#shared/types/credentials";
+import { useTwitch } from "#server/lib/twitch";
 import type { Sync } from "#shared/types/sync";
-
-type TwitchCredentials = ServiceCredentials & {
-  client_id: string;
-};
 
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "twitch");
 
 export default class SyncTwitch extends AbstractService {
   async sync(user: User) {
-    const config = useRuntimeConfig();
     const token = await services.credentials.get(user.id, "twitch");
     if (!token) {
       return;
     }
 
-    const credentials: TwitchCredentials = {
-      ...token,
-      client_id: config.oauth.twitch.clientId,
-    };
-
-    const subscriptions = await this.get_subscriptions(credentials);
+    const subscriptions = await this.get_subscriptions(user, token.service_id);
     for (const subscription of subscriptions) {
-      await this.sync_subscription(credentials, subscription);
+      await this.sync_subscription(user, subscription);
     }
   }
 
-  private async get_subscriptions(credentials: TwitchCredentials) {
+  private async get_subscriptions(user: User, service_id: string) {
     const database = useDatabase();
+
     const subscriptions: Sync["SubscriptionsList"] = await database
       .selectFrom("subscriptions")
       .selectAll()
@@ -57,11 +48,12 @@ export default class SyncTwitch extends AbstractService {
         })),
       );
 
-    let response = await services.external.twitch.followers.list({
-      userId: credentials.service_id,
-      token: credentials.access_token,
-      clientId: credentials.client_id,
-    });
+    let response = await services.external.twitch.helpers.get_followers(
+      {
+        user_id: service_id,
+      },
+      { service_id: user.login_with.id },
+    );
 
     while (true) {
       for (const subscription of response.data) {
@@ -98,12 +90,13 @@ export default class SyncTwitch extends AbstractService {
       }
 
       if (response.pagination.cursor) {
-        response = await services.external.twitch.followers.list({
-          userId: credentials.service_id,
-          token: credentials.access_token,
-          clientId: credentials.client_id,
-          cursor: response.pagination.cursor,
-        });
+        response = await services.external.twitch.helpers.get_followers(
+          {
+            user_id: service_id,
+            cursor: response.pagination.cursor,
+          },
+          { service_id: user.login_with.id },
+        );
       } else {
         break;
       }
@@ -112,10 +105,7 @@ export default class SyncTwitch extends AbstractService {
     return subscriptions;
   }
 
-  private async sync_subscription(
-    credentials: TwitchCredentials,
-    subscription: Sync["Subscription"],
-  ) {
+  private async sync_subscription(user: User, subscription: Sync["Subscription"]) {
     const database = useDatabase();
 
     if (subscription.status === "deleted") {
@@ -137,18 +127,17 @@ export default class SyncTwitch extends AbstractService {
       )
       .execute();
 
-    const videos = await this.get_videos_by_channel_id(
-      credentials,
-      subscription.channel.service_id,
-    );
+    const videos = await this.get_videos_by_channel_id(user, subscription.channel.service_id);
 
     for (const video of videos) {
       await this.sync_video(video);
     }
   }
 
-  private async get_videos_by_channel_id(credentials: TwitchCredentials, channel_id: string) {
+  private async get_videos_by_channel_id(user: User, channel_id: string) {
     const database = useDatabase();
+    const twitch = useTwitch();
+
     const videos: Sync["VideosList"] = await database
       .selectFrom("videos")
       .selectAll()
@@ -173,11 +162,11 @@ export default class SyncTwitch extends AbstractService {
         })),
       );
 
-    let response = await services.external.twitch.videos.list({
-      userId: channel_id,
-      token: credentials.access_token,
-      clientId: credentials.client_id,
-    });
+    let response = await twitch.videos.list(
+      { user_id: channel_id },
+      { service_id: user.login_with.id },
+    );
+
     while (true) {
       for (const video of response.data) {
         const existingVid = videos.find((e) => e.video.service_id === video.id);
@@ -219,12 +208,10 @@ export default class SyncTwitch extends AbstractService {
       }
 
       if (response.pagination.cursor) {
-        response = await services.external.twitch.videos.list({
-          userId: channel_id,
-          token: credentials.access_token,
-          clientId: credentials.client_id,
-          cursor: response.pagination.cursor,
-        });
+        response = await twitch.videos.list(
+          { user_id: channel_id, cursor: response.pagination.cursor },
+          { service_id: user.login_with.id },
+        );
       } else {
         break;
       }

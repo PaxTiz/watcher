@@ -47,8 +47,9 @@ export default defineOAuthBlueskyEventHandler({
             },
             created_at: created_user.created_at,
             last_login_at: created_user.last_login_at,
-            loginWith: {
+            login_with: {
               integration: "bluesky",
+              id: user.did,
             },
           },
         },

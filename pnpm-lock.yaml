@@ -25,6 +25,9 @@ catalogs:
     iso8601-duration:
       specifier: ^2.1.3
       version: 2.1.3
+    ofetch:
+      specifier: ^1.5.1
+      version: 1.5.1
     oxfmt:
       specifier: ^0.48.0
       version: 0.48.0
@@ -51,6 +54,9 @@ importers:
       iso8601-duration:
         specifier: 'catalog:'
         version: 2.1.3
+      ofetch:
+        specifier: 'catalog:'
+        version: 1.5.1
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -188,7 +194,14 @@ importers:
 
   packages/google: {}
 
-  packages/twitch: {}
+  packages/twitch:
+    dependencies:
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.1.0
+      ofetch:
+        specifier: 'catalog:'
+        version: 1.5.1
 
 packages:
 

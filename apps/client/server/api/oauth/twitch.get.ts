@@ -42,8 +42,9 @@ export default defineOAuthTwitchEventHandler({
           {
             user: {
               ...database_user,
-              loginWith: {
+              login_with: {
                 integration: "twitch",
+                id: user.id,
               },
             },
           },

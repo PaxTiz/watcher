@@ -1,0 +1,14 @@
+{
+  "name": "@watcher/integration-twitch",
+  "type": "module",
+  "exports": {
+    ".": [
+      "./src/index.ts",
+      "./types.ts"
+    ]
+  },
+  "dependencies": {
+    "date-fns": "catalog:",
+    "ofetch": "catalog:"
+  }
+}

@@ -1,7 +1,9 @@
 import { isAfter } from "date-fns";
+import { ofetch } from "ofetch";
 
-import { AbstractService } from "#framework";
-import type { Twitch } from "#shared/types/twitch";
+import type { Twitch } from "../types";
+import { type ClientSettings } from "./internal/client";
+import { type TwitchServiceRequest, TwitchService } from "./internal/service";
 
 const DEFAULT_RESOLUTIONS = {
   chunked: { name: "Source", resolution: "chunked", frameRate: 60 },
@@ -13,39 +15,39 @@ const DEFAULT_RESOLUTIONS = {
   "160p30": { name: "160p", resolution: "284x160", frameRate: 30 },
 };
 
-export default class TwitchVideosService extends AbstractService {
-  async list(params: {
-    token: string;
-    clientId: string;
-    userId: string;
-    cursor?: string;
-  }): Promise<Twitch["Videos"]["List"]> {
-    try {
+export class VideosService extends TwitchService {
+  constructor(settings: ClientSettings) {
+    super(settings);
+  }
+
+  public async list(
+    data: { user_id: string; cursor?: string },
+    config: TwitchServiceRequest,
+  ): Promise<Twitch["Videos"]["List"]> {
+    return await this.perform_request(config.service_id, async (token) => {
       const url = new URL("https://api.twitch.tv/helix/videos");
       url.searchParams.set("first", "100");
       url.searchParams.set("archive", "archive");
       url.searchParams.set("sort", "time");
       url.searchParams.set("period", "all");
-      url.searchParams.set("user_id", params.userId);
+      url.searchParams.set("user_id", data.user_id);
 
-      if (params.cursor) {
-        url.searchParams.set("after", params.cursor);
+      if (data.cursor) {
+        url.searchParams.set("after", data.cursor);
       }
 
-      return await $fetch<Twitch["Videos"]["List"]>(url.toString(), {
+      return await ofetch<Twitch["Videos"]["List"]>(url.toString(), {
         headers: {
-          Authorization: `Bearer ${params.token}`,
-          "Client-Id": params.clientId,
+          Authorization: `Bearer ${token}`,
+          "Client-Id": this.settings.client_id,
         },
       });
-    } catch (e) {
-      throw new Error("Failed to fetch videos by streamer id", { cause: e });
-    }
+    });
   }
 
-  async get_master_playlist(videoId: string) {
+  public async get_master_playlist(video_id: string, player_client_id: string) {
     try {
-      const video = await this.get_graphql_video_by_id(videoId);
+      const video = await this.get_graphql_video_by_id(video_id, player_client_id);
 
       const preview_url = new URL(video.seekPreviewsURL);
       const domain = preview_url.host;
@@ -59,7 +61,7 @@ export default class TwitchVideosService extends AbstractService {
       for (const [resKey] of Object.entries(DEFAULT_RESOLUTIONS)) {
         const url = this.build_playlist_url(
           domain,
-          videoId,
+          video_id,
           vod_special_id,
           channel_login,
           broadcast_type,
@@ -81,22 +83,20 @@ export default class TwitchVideosService extends AbstractService {
     }
   }
 
-  private async get_graphql_video_by_id(videoId: string) {
-    const config = useRuntimeConfig();
-
+  private async get_graphql_video_by_id(video_id: string, player_client_id: string) {
     try {
-      const response = await $fetch<Twitch["Videos"]["__INTERNAL__"]["GetSingleVideo"]>(
+      const response = await ofetch<Twitch["Videos"]["__INTERNAL__"]["GetSingleVideo"]>(
         "https://gql.twitch.tv/gql",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Client-Id": config.oauth.twitch.playerClientId,
+            "Client-Id": player_client_id,
             Accept: "application/json",
           },
           body: {
             query: `query {
-              video(id: "${videoId}") {
+              video(id: "${video_id}") {
                 broadcastType
                 createdAt
                 seekPreviewsURL

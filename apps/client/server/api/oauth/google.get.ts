@@ -44,8 +44,9 @@ export default defineOAuthGoogleEventHandler({
           {
             user: {
               ...database_user,
-              loginWith: {
+              login_with: {
                 integration: "google",
+                id: user.sub,
               },
             },
           },

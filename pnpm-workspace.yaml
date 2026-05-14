@@ -12,6 +12,7 @@ catalog:
   date-fns: ^4.1.0
   iso8601-duration: ^2.1.3
   zod: ^4.4.3
+  ofetch: ^1.5.1
 
 catalogs:
   bluesky:

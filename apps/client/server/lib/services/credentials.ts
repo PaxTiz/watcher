@@ -80,12 +80,19 @@ export default class CredentialsService extends AbstractService {
       return credentials;
     }
 
-    const callback: Record<CredentialsType, (token: string) => Promise<ServiceCredentials>> = {
+    const callback: Record<
+      CredentialsType,
+      ((token: string) => Promise<ServiceCredentials>) | null
+    > = {
       google: (token: string) => services.external.google.oauth.refresh_access_token(token),
-      twitch: (token: string) => services.external.twitch.oauth.refresh_access_token(token),
+      twitch: null,
     };
 
-    const handler = callback[service]!;
+    const handler = callback[service];
+    if (!handler) {
+      throw new Error("Refresh token handler not available for " + service);
+    }
+
     const response = await handler(credentials.refresh_token);
     await this.replace(user_id, response);
 

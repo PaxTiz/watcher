@@ -2,9 +2,9 @@ import { formatISO, startOfDay, startOfMonth, startOfWeek, startOfYear } from "d
 import type { SelectQueryBuilder } from "kysely";
 
 import { AbstractService } from "#framework";
-import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import type { Database } from "#server/database/schema";
+import { useTwitch } from "#server/lib/twitch";
 import type { VideoResource } from "#shared/resources/videos";
 import type { Paginated } from "#shared/types/shared";
 import type { SubscriptionType } from "#shared/types/subscriptions";
@@ -59,6 +59,9 @@ export default class VideosService extends AbstractService {
 
   async get_url(id: string): Promise<{ service: SubscriptionType; url: string | null }> {
     const database = useDatabase();
+    const twitch = useTwitch();
+    const config = useRuntimeConfig();
+
     const video = await database
       .selectFrom("videos")
       .select(["service", "service_id", "url"])
@@ -68,7 +71,10 @@ export default class VideosService extends AbstractService {
     if (video.service === "twitch") {
       return {
         service: "twitch",
-        url: await services.external.twitch.videos.get_master_playlist(video.service_id),
+        url: await twitch.videos.get_master_playlist(
+          video.service_id,
+          config.oauth.twitch.playerClientId,
+        ),
       };
     }
 

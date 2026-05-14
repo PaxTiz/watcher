@@ -27,7 +27,7 @@ export default class SubscriptionsService extends AbstractService {
   }
 
   async sync(user: User) {
-    await services.sync.youtube.sync(user);
+    // await services.sync.youtube.sync(user);
     await services.sync.twitch.sync(user);
   }
 }

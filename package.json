@@ -7,6 +7,7 @@
   "dependencies": {
     "date-fns": "catalog:",
     "iso8601-duration": "catalog:",
+    "ofetch": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
