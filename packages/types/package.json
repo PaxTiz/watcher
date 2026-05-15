@@ -1,0 +1,9 @@
+{
+  "name": "@watcher/types",
+  "type": "module",
+  "exports": {
+    ".": [
+      "./src/index.ts"
+    ]
+  }
+}

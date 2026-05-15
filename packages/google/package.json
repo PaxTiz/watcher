@@ -10,5 +10,8 @@
   "dependencies": {
     "date-fns": "catalog:",
     "ofetch": "catalog:"
+  },
+  "devDependencies": {
+    "@watcher/types": "workspace:"
   }
 }

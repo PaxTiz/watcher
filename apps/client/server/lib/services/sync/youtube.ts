@@ -2,6 +2,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import { writeFile, rm, unlink } from "node:fs/promises";
 import { join } from "node:path";
 
+import type { Google } from "@watcher/types";
 import { formatISO, differenceInHours } from "date-fns";
 import { parse, toSeconds } from "iso8601-duration";
 
@@ -9,10 +10,9 @@ import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
+import { useGoogle } from "#server/lib/google";
 import type { ServiceCredentials } from "#shared/types/credentials";
 import type { Sync } from "#shared/types/sync";
-
-import { useGoogle } from "../../google";
 
 const SHORT_DURATION_THRESOLD = 200; // Videos shorter than 200 seconds (3 minutes + 20 seconds of thresold) are considered as shorts
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");
@@ -355,7 +355,7 @@ export default class SyncYoutube extends AbstractService {
     }
   }
 
-  private is_maybe_a_short(video: Youtube["Videos"]["Item"]) {
+  private is_maybe_a_short(video: Google["Youtube"]["Videos"]["Item"]) {
     const duration = this.parse_duration(video.contentDetails.duration);
     return duration < SHORT_DURATION_THRESOLD;
   }

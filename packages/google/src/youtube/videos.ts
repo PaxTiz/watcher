@@ -1,6 +1,6 @@
+import type { Google } from "@watcher/types";
 import { ofetch } from "ofetch";
 
-import type { Google } from "../../types";
 import type { ClientSettings } from "../internal/client";
 import { GoogleService, type GoogleServiceRequest } from "../internal/service";
 import { YoutubePlaylistItemsService } from "./playlist_items";
@@ -16,11 +16,9 @@ export class YoutubeVideosService extends GoogleService {
       config,
     );
 
-    return await this.perform_request(config.service_id, async (token) => {
-      const video_ids = playlist_videos.map((v) => v.contentDetails!.videoId!);
+    const video_ids = playlist_videos.map((v) => v.contentDetails!.videoId!);
 
-      return await this.get_by_ids({ video_ids, cursor: data.cursor }, config);
-    });
+    return await this.get_by_ids({ video_ids, cursor: data.cursor }, config);
   }
 
   private async get_by_ids(

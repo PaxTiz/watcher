@@ -1,6 +1,7 @@
+import type { Twitch } from "@watcher/types";
+
 import { AbstractService } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
-import type { Twitch } from "#shared/types/twitch";
 
 export default class TwitcHelpersService extends AbstractService {
   async get_followers(

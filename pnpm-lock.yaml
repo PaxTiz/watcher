@@ -97,6 +97,9 @@ importers:
       '@watcher/integration-twitch':
         specifier: 'workspace:'
         version: link:../../packages/twitch
+      '@watcher/types':
+        specifier: 'workspace:'
+        version: link:../../packages/types
       arctic:
         specifier: ^3.7.0
         version: 3.7.0
@@ -200,6 +203,10 @@ importers:
       ofetch:
         specifier: 'catalog:'
         version: 1.5.1
+    devDependencies:
+      '@watcher/types':
+        specifier: 'workspace:'
+        version: link:../types
 
   packages/twitch:
     dependencies:
@@ -209,6 +216,12 @@ importers:
       ofetch:
         specifier: 'catalog:'
         version: 1.5.1
+    devDependencies:
+      '@watcher/types':
+        specifier: 'workspace:'
+        version: link:../types
+
+  packages/types: {}
 
 packages:
 

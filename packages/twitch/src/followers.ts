@@ -1,6 +1,6 @@
+import type { Twitch } from "@watcher/types";
 import { ofetch } from "ofetch";
 
-import type { Twitch } from "../types";
 import { type ClientSettings } from "./internal/client";
 import { type TwitchServiceRequest, TwitchService } from "./internal/service";
 

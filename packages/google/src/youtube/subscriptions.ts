@@ -1,6 +1,6 @@
+import type { Google } from "@watcher/types";
 import { ofetch } from "ofetch";
 
-import type { Google } from "../../types";
 import type { ClientSettings } from "../internal/client";
 import { GoogleService, type GoogleServiceRequest } from "../internal/service";
 
