@@ -11,7 +11,8 @@ import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import type { ServiceCredentials } from "#shared/types/credentials";
 import type { Sync } from "#shared/types/sync";
-import type { Youtube } from "#shared/types/youtube";
+
+import { useGoogle } from "../../google";
 
 const SHORT_DURATION_THRESOLD = 200; // Videos shorter than 200 seconds (3 minutes + 20 seconds of thresold) are considered as shorts
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");
@@ -23,14 +24,16 @@ export default class SyncYoutube extends AbstractService {
       return;
     }
 
-    const subscriptions = await this.get_subscriptions(token);
+    const subscriptions = await this.get_subscriptions(user);
     for (const subscription of subscriptions) {
-      await this.sync_subscription(token, subscription);
+      await this.sync_subscription(user, token, subscription);
     }
   }
 
-  private async get_subscriptions(credentials: ServiceCredentials) {
+  private async get_subscriptions(user: User) {
     const database = useDatabase();
+    const google = useGoogle();
+
     const subscriptions: Sync["SubscriptionsList"] = await database
       .selectFrom("subscriptions")
       .selectAll()
@@ -50,9 +53,7 @@ export default class SyncYoutube extends AbstractService {
         })),
       );
 
-    let response = await services.external.google.youtubeSubscriptions.list(
-      credentials.access_token,
-    );
+    let response = await google.youtube.subscriptions.list({}, { service_id: user.login_with.id });
     while (true) {
       for (const subscription of response.items ?? []) {
         const existingSub = subscriptions.find(
@@ -88,9 +89,9 @@ export default class SyncYoutube extends AbstractService {
       }
 
       if (response.nextPageToken) {
-        response = await services.external.google.youtubeSubscriptions.list(
-          credentials.access_token,
-          response.nextPageToken,
+        response = await google.youtube.subscriptions.list(
+          { cursor: response.nextPageToken },
+          { service_id: user.login_with.id },
         );
       } else {
         break;
@@ -101,6 +102,7 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_subscription(
+    user: User,
     credentials: ServiceCredentials,
     subscription: Sync["Subscription"],
   ) {
@@ -125,18 +127,17 @@ export default class SyncYoutube extends AbstractService {
       )
       .execute();
 
-    const videos = await this.get_videos_by_channel_id(
-      credentials,
-      subscription.channel.service_id,
-    );
+    const videos = await this.get_videos_by_channel_id(user, subscription.channel.service_id);
 
     for (const video of videos) {
       await this.sync_video(video);
     }
   }
 
-  private async get_videos_by_channel_id(credentials: ServiceCredentials, channel_id: string) {
+  private async get_videos_by_channel_id(user: User, channel_id: string) {
     const database = useDatabase();
+    const google = useGoogle();
+
     const videos: Sync["VideosList"] = await database
       .selectFrom("videos")
       .selectAll()
@@ -163,9 +164,9 @@ export default class SyncYoutube extends AbstractService {
 
     const current_videos = [];
 
-    let all_videos = await services.external.google.youtubeVideos.get_latest_videos(
-      credentials.access_token,
-      channel_id,
+    let all_videos = await google.youtube.videos.get_latests(
+      { channel_id },
+      { service_id: user.login_with.id },
     );
 
     while (true) {
@@ -182,10 +183,9 @@ export default class SyncYoutube extends AbstractService {
       }
 
       if (all_videos.nextPageToken) {
-        all_videos = await services.external.google.youtubeVideos.get_latest_videos(
-          credentials.access_token,
-          channel_id,
-          all_videos.nextPageToken,
+        all_videos = await google.youtube.videos.get_latests(
+          { channel_id, cursor: all_videos.nextPageToken },
+          { service_id: user.login_with.id },
         );
       } else {
         break;

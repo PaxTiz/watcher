@@ -2,6 +2,7 @@ import type { UserResource } from "../resources/users";
 
 declare module "#auth-utils" {
   interface User extends UserResource {
+    // TODO: Include all user ids in session
     login_with: {
       integration: "google" | "twitch" | "bluesky";
       id: string;

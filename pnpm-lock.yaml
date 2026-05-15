@@ -192,7 +192,14 @@ importers:
         specifier: ^3.2.8
         version: 3.2.8(typescript@6.0.3)
 
-  packages/google: {}
+  packages/google:
+    dependencies:
+      date-fns:
+        specifier: 'catalog:'
+        version: 4.1.0
+      ofetch:
+        specifier: 'catalog:'
+        version: 1.5.1
 
   packages/twitch:
     dependencies:

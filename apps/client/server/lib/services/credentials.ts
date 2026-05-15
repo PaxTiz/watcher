@@ -1,16 +1,9 @@
-import { isBefore } from "date-fns";
-
 import { AbstractService } from "#framework";
-import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
-import type { ServiceCredentials, CredentialsType } from "#shared/types/credentials";
+import type { CredentialsType, ServiceCredentials } from "#shared/types/credentials";
 
 export default class CredentialsService extends AbstractService {
-  async get(
-    user_id: string,
-    service: CredentialsType,
-    refresh = true,
-  ): Promise<ServiceCredentials | null> {
+  async get(user_id: string, service: CredentialsType): Promise<ServiceCredentials | null> {
     const database = useDatabase();
 
     const credentials = await database
@@ -24,7 +17,7 @@ export default class CredentialsService extends AbstractService {
       return null;
     }
 
-    const serviceCredentials: ServiceCredentials = {
+    return {
       service: credentials.service,
       service_id: credentials.service_id,
       access_token: credentials.access_token,
@@ -32,13 +25,7 @@ export default class CredentialsService extends AbstractService {
       refresh_token: credentials.refresh_token,
       refresh_token_expires_at: credentials.refresh_token_expires_at,
       userId: credentials.user_id,
-    };
-
-    if (refresh) {
-      return this.refresh_if_needed(user_id, service, serviceCredentials);
-    }
-
-    return serviceCredentials;
+    } as ServiceCredentials;
   }
 
   async replace(user_id: string, data: ServiceCredentials) {
@@ -68,34 +55,5 @@ export default class CredentialsService extends AbstractService {
       .execute();
 
     return data;
-  }
-
-  async refresh_if_needed(
-    user_id: string,
-    service: CredentialsType,
-    credentials: ServiceCredentials,
-  ): Promise<ServiceCredentials> {
-    if (isBefore(new Date(), credentials.access_token_expires_at)) {
-      // Token is still valid, do nothing..
-      return credentials;
-    }
-
-    const callback: Record<
-      CredentialsType,
-      ((token: string) => Promise<ServiceCredentials>) | null
-    > = {
-      google: (token: string) => services.external.google.oauth.refresh_access_token(token),
-      twitch: null,
-    };
-
-    const handler = callback[service];
-    if (!handler) {
-      throw new Error("Refresh token handler not available for " + service);
-    }
-
-    const response = await handler(credentials.refresh_token);
-    await this.replace(user_id, response);
-
-    return response;
   }
 }
