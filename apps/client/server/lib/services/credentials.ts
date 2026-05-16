@@ -53,7 +53,7 @@ export default class CredentialsService extends AbstractService {
       refresh_token: credentials.refresh_token,
       refresh_token_expires_at: credentials.refresh_token_expires_at,
       userId: credentials.user_id,
-    };
+    } as ServiceCredentials;
   }
 
   async replace(user_id: string, data: ServiceCredentials) {
@@ -83,5 +83,15 @@ export default class CredentialsService extends AbstractService {
       .execute();
 
     return data;
+  }
+
+  async delete(user_id: string, service: CredentialsType) {
+    const database = useDatabase();
+
+    await database
+      .deleteFrom("credentials")
+      .where("user_id", "=", user_id)
+      .where("service", "=", service)
+      .execute();
   }
 }

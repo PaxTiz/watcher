@@ -114,4 +114,13 @@ export default class UsersService extends AbstractService {
 
     return (await this.find_by_id(id))!;
   }
+
+  async delete(id: string) {
+    const database = useDatabase();
+
+    await database
+      .deleteFrom("users")
+      .where("id", "=", id as any)
+      .execute();
+  }
 }
