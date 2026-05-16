@@ -30,6 +30,7 @@ export default class VideosService extends AbstractService {
         "videos.created_at as video_created_at",
         "subscriptions.id as subscription_id",
         "subscriptions.name as subscription_name",
+        "subscriptions.slug as subscription_slug",
         "subscriptions.service as subscription_service",
         "subscriptions.url as subscription_url",
         "subscriptions.logo as subscription_logo",
@@ -48,6 +49,7 @@ export default class VideosService extends AbstractService {
       author: {
         id: video.subscription_id,
         name: video.subscription_name,
+        slug: video.subscription_slug,
         isFavorite: false,
         channel: {
           service: video.subscription_service,
@@ -124,6 +126,7 @@ export default class VideosService extends AbstractService {
         "videos.created_at as video_created_at",
         "subscriptions.id as subscription_id",
         "subscriptions.name as subscription_name",
+        "subscriptions.slug as subscription_slug",
         "subscriptions.service as subscription_service",
         "subscriptions.url as subscription_url",
         "subscriptions.logo as subscription_logo",
@@ -151,6 +154,7 @@ export default class VideosService extends AbstractService {
         author: {
           id: item.subscription_id,
           name: item.subscription_name,
+          slug: item.subscription_slug,
           isFavorite: item.subscription_is_favorite,
           channel: {
             service: item.subscription_service,

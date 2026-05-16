@@ -13,7 +13,7 @@ defineProps<{ subscription: SubscriptionResource }>();
       'border-highlight': subscription.isFavorite,
       'border-ui-border': !subscription.isFavorite,
     }"
-    :to="subscription.channel.url"
+    :to="`/subscription/${subscription.slug}`"
     size="sm"
     target="_blank"
     external

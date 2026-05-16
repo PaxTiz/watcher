@@ -1,4 +1,5 @@
 export type CredentialsType = "google" | "twitch";
+export type ServiceType<T extends CredentialsType> = T extends "google" ? "youtube" : T;
 
 export type ServiceCredentials = {
   service: CredentialsType;

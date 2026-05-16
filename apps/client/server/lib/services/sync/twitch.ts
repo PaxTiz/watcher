@@ -10,6 +10,7 @@ import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import { useTwitch } from "#server/lib/twitch";
 import type { Sync } from "#shared/types/sync";
+import { to_subscription_slug } from "#shared/utils/subscriptions";
 
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "twitch");
 
@@ -36,7 +37,7 @@ export default class SyncTwitch extends AbstractService {
     const user_subscriptions: Sync["SubscriptionsList"] = await database
       .selectFrom("user_subscriptions")
       .innerJoin("subscriptions", "subscriptions.id", "user_subscriptions.subscription_id")
-      .select(["service", "service_id", "name", "url", "logo", "last_synced_at"])
+      .select(["service", "service_id", "name", "url", "logo", "last_synced_at", "slug"])
       .where("service", "=", "twitch")
       .execute()
       .then((subs) =>
@@ -46,6 +47,7 @@ export default class SyncTwitch extends AbstractService {
             service: sub.service,
             service_id: sub.service_id,
             name: sub.name,
+            slug: sub.slug,
             url: sub.url,
             logo: sub.logo,
             last_synced_at: sub.last_synced_at,
@@ -72,6 +74,7 @@ export default class SyncTwitch extends AbstractService {
             service: "twitch",
             service_id: subscription.broadcaster_id,
             name: subscription.broadcaster_name,
+            slug: to_subscription_slug("twitch", subscription.broadcaster_name),
             url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
             logo:
               differenceInHours(new Date(), existing_subscription.channel.last_synced_at) < 24
@@ -86,6 +89,7 @@ export default class SyncTwitch extends AbstractService {
               service: "twitch",
               service_id: subscription.broadcaster_id,
               name: subscription.broadcaster_name,
+              slug: to_subscription_slug("twitch", subscription.broadcaster_name),
               url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
               logo: subscription.logo,
               last_synced_at: formatISO(new Date()),

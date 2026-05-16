@@ -15,6 +15,7 @@ export default class SubscriptionsService extends AbstractService {
       .select([
         "subscriptions.id",
         "subscriptions.name",
+        "subscriptions.slug",
         "subscriptions.service",
         "subscriptions.url",
         "subscriptions.logo",
@@ -26,6 +27,7 @@ export default class SubscriptionsService extends AbstractService {
     return subscriptions.map((sub) => ({
       id: sub.id,
       name: sub.name,
+      slug: sub.slug,
       isFavorite: sub.is_favorite,
       channel: {
         service: sub.service,

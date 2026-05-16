@@ -12,6 +12,7 @@ import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import { useGoogle } from "#server/lib/google";
 import type { Sync } from "#shared/types/sync";
+import { to_subscription_slug } from "#shared/utils/subscriptions";
 
 const SHORT_DURATION_THRESOLD = 200; // Videos shorter than 200 seconds (3 minutes + 20 seconds of thresold) are considered as shorts
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");
@@ -40,7 +41,7 @@ export default class SyncYoutube extends AbstractService {
     const user_subscriptions: Sync["SubscriptionsList"] = await database
       .selectFrom("user_subscriptions")
       .innerJoin("subscriptions", "subscriptions.id", "user_subscriptions.subscription_id")
-      .select(["service", "service_id", "name", "url", "logo", "last_synced_at"])
+      .select(["service", "service_id", "name", "url", "logo", "last_synced_at", "slug"])
       .where("service", "=", "youtube")
       .execute()
       .then((subs) =>
@@ -50,6 +51,7 @@ export default class SyncYoutube extends AbstractService {
             service: sub.service,
             service_id: sub.service_id,
             name: sub.name,
+            slug: sub.slug,
             url: sub.url,
             logo: sub.logo,
             last_synced_at: sub.last_synced_at,
@@ -70,6 +72,7 @@ export default class SyncYoutube extends AbstractService {
             service: "youtube",
             service_id: subscription.snippet.resourceId.channelId,
             name: subscription.snippet.title,
+            slug: to_subscription_slug("youtube", subscription.snippet.title),
             url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
             logo:
               differenceInHours(new Date(), existing_subscription.channel.last_synced_at) < 24
@@ -84,6 +87,7 @@ export default class SyncYoutube extends AbstractService {
               service: "youtube",
               service_id: subscription.snippet.resourceId.channelId,
               name: subscription.snippet.title,
+              slug: to_subscription_slug("youtube", subscription.snippet.title),
               url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
               logo: subscription.snippet.thumbnails.default.url,
               last_synced_at: formatISO(new Date()),

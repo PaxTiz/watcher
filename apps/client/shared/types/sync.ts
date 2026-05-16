@@ -1,9 +1,9 @@
-import type { SubscriptionTable, VideoTable } from "#server/database/schema";
+import type { SubscriptionTableInsert, VideoTable } from "#server/database/schema";
 
 export type Sync = {
   Subscription: {
     status: "created" | "updated" | "deleted";
-    channel: Omit<SubscriptionTable, "id">;
+    channel: Omit<SubscriptionTableInsert, "id">;
   };
   SubscriptionsList: Array<Sync["Subscription"]>;
 

@@ -1,4 +1,4 @@
-import type { ColumnType, Generated } from "kysely";
+import type { ColumnType, Generated, Insertable } from "kysely";
 
 import type { CredentialsType } from "#shared/types/credentials";
 import type { SubscriptionType } from "#shared/types/subscriptions";
@@ -31,6 +31,8 @@ export type SubscriptionTable = {
   logo: string;
 
   last_synced_at: string;
+
+  slug: ColumnType<string, string, never>;
 };
 
 export type CredentialTable = {
@@ -88,3 +90,5 @@ export type Database = {
   credentials: CredentialTable;
   videos: VideoTable;
 };
+
+export type SubscriptionTableInsert = Insertable<SubscriptionTable>;
