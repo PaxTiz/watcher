@@ -33,6 +33,7 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
     const response = await ofetch<{
       access_token: string;
       refresh_token: string;
+      expires_in: number;
       scope: Array<string>;
       token_type: "bearer";
     }>("https://id.twitch.tv/oauth2/token", {

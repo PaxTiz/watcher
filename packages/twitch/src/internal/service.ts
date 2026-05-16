@@ -1,4 +1,4 @@
-import { isBefore, sub } from "date-fns";
+import { add, isBefore, sub } from "date-fns";
 
 import type { ClientSettings } from "./client";
 import { oauth } from "./oauth";
@@ -38,6 +38,7 @@ export class TwitchService {
     const patched_credentials = {
       ...credentials,
       access_token: updated_credentials.access_token,
+      access_token_expires_at: add(new Date(), { seconds: updated_credentials.expires_in }),
       refresh_token: updated_credentials.refresh_token,
     };
 

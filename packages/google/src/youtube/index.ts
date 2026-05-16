@@ -1,4 +1,4 @@
-import type { ClientSettings } from "../../../twitch/src/internal/client";
+import type { ClientSettings } from "../internal/client";
 import { GoogleService } from "../internal/service";
 import { YoutubeChannelsService } from "./channels";
 import { YoutubePlaylistItemsService } from "./playlist_items";

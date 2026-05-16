@@ -13,7 +13,6 @@ export class YoutubeSubscriptionsService extends GoogleService {
     return await this.perform_request(config.service_id, async (token) => {
       const url = new URL("https://www.googleapis.com/youtube/v3/subscriptions");
       url.searchParams.set("part", "snippet");
-      url.searchParams.set("part", "snippet");
       url.searchParams.set("mine", "true");
       url.searchParams.set("maxResults", "50");
       url.searchParams.set("access_token", token);
