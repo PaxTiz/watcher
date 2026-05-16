@@ -38,6 +38,7 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
       scope: Array<string>;
       token_type: "Bearer";
     }>("https://oauth2.googleapis.com/token", {
+      method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },

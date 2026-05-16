@@ -37,6 +37,7 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
       scope: Array<string>;
       token_type: "bearer";
     }>("https://id.twitch.tv/oauth2/token", {
+      method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
