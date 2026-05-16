@@ -22,7 +22,6 @@
     "@watcher/integration-google": "workspace:",
     "@watcher/integration-twitch": "workspace:",
     "@watcher/types": "workspace:",
-    "arctic": "^3.7.0",
     "date-fns": "catalog:",
     "embla-carousel-vue": "^8.6.0",
     "hls.js": "^1.6.16",
