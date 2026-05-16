@@ -1,10 +1,10 @@
 import type { SubscriptionResource } from "#shared/resources/subscriptions";
 
 export const useSubscriptions = () => {
-  const { data, error, refresh, status, clear } = useAsyncData<Array<SubscriptionResource>>(
-    "subscriptions.all",
-    () => $fetch("/api/subscriptions"),
+  const { data, error, refresh, status, clear } = useAppFetch<Array<SubscriptionResource>>(
+    "/api/subscriptions",
     {
+      key: "subscriptions.all",
       getCachedData(k) {
         const { data } = useNuxtData<Array<SubscriptionResource>>(k);
         return data.value;
