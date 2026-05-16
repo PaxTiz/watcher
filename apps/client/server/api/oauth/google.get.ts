@@ -50,26 +50,9 @@ export default defineOAuthGoogleEventHandler({
 
       database_user = (await services.users.find_by_id(database_user.id))!;
 
-      await setUserSession(event, {
-        user: {
-          id: database_user.id,
-          name: database_user.name,
-          bluesky: {
-            did: database_user.bluesky.did,
-            handle: database_user.bluesky.handle,
-          },
-          integrations: {
-            google: database_user.integrations.google,
-            twitch: database_user.integrations.twitch,
-            bluesky: database_user.integrations.bluesky,
-          },
-          created_at: database_user.created_at,
-          last_login_at: database_user.last_login_at,
-          login_with: {
-            integration: "google",
-            id: user.sub,
-          },
-        },
+      await set_user_session(event, database_user, {
+        integration: "google",
+        id: user.sub,
       });
 
       return sendRedirect(event, "/?provider=google&oauth-state=success");

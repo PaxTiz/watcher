@@ -31,8 +31,6 @@ const isLinked = (providerId: (typeof providers)[number]["id"]) => {
 </script>
 
 <template>
-  <pre class="text-white"><code>{{ user }}</code></pre>
-
   <div class="mx-auto max-w-4xl">
     <h1 class="text-4xl font-bold text-white">Paramètres</h1>
     <p class="mt-2 text-gray-400">Gérez vos intégrations et les paramètres de votre compte.</p>
