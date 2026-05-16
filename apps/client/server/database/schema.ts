@@ -73,9 +73,18 @@ export type VideoTable = {
   last_synced_at: string;
 };
 
+export type UserSubscriptionTable = {
+  user_id: string;
+
+  subscription_id: string;
+
+  is_favorite: boolean;
+};
+
 export type Database = {
   users: UserTable;
   subscriptions: SubscriptionTable;
+  user_subscriptions: UserSubscriptionTable;
   credentials: CredentialTable;
   videos: VideoTable;
 };

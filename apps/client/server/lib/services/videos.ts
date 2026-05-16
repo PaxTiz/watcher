@@ -1,6 +1,7 @@
 import { formatISO, startOfDay, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import type { SelectQueryBuilder } from "kysely";
 
+import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { useDatabase } from "#server/database";
 import type { Database } from "#server/database/schema";
@@ -84,28 +85,34 @@ export default class VideosService extends AbstractService {
     };
   }
 
-  async find_all(params: VideosValidators["list"]["query"]): Promise<Paginated<VideoResource>> {
+  async find_all(
+    user: User,
+    params: VideosValidators["list"]["query"],
+  ): Promise<Paginated<VideoResource>> {
     const database = useDatabase();
 
     const total = await database
       .selectFrom("videos")
+      .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
+      .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
+      .where("user_subscriptions.user_id", "=", user.id)
       .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
       .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
       .$if(!!params.date, (qb) => this.parse_date_filter(qb, params.date!))
       .$if(!!params.subscription_id, (qb) =>
-        qb
-          .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
-          .where("subscriptions.id", "=", params.subscription_id!),
+        qb.where("subscriptions.id", "=", params.subscription_id!),
       )
       .executeTakeFirst();
 
     const items = await database
       .selectFrom("videos")
       .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
+      .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
+      .where("user_subscriptions.user_id", "=", user.id)
       .offset((params.page - 1) * 21)
       .limit(21)
-      .orderBy("created_at", "desc")
+      .orderBy("videos.created_at", "desc")
       .select([
         "videos.id as video_id",
         "videos.service as video_service",
@@ -120,14 +127,13 @@ export default class VideosService extends AbstractService {
         "subscriptions.service as subscription_service",
         "subscriptions.url as subscription_url",
         "subscriptions.logo as subscription_logo",
+        "user_subscriptions.is_favorite as subscription_is_favorite",
       ])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
       .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
       .$if(!!params.date, (qb) => this.parse_date_filter(qb, params.date!))
       .$if(!!params.subscription_id, (qb) =>
-        qb
-          .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
-          .where("subscriptions.id", "=", params.subscription_id!),
+        qb.where("subscriptions.id", "=", params.subscription_id!),
       )
       .execute();
 
@@ -145,7 +151,7 @@ export default class VideosService extends AbstractService {
         author: {
           id: item.subscription_id,
           name: item.subscription_name,
-          isFavorite: false,
+          isFavorite: item.subscription_is_favorite,
           channel: {
             service: item.subscription_service,
             url: item.subscription_url,

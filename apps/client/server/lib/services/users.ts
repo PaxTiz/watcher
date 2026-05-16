@@ -106,11 +106,7 @@ export default class UsersService extends AbstractService {
   ) {
     const database = useDatabase();
 
-    await database
-      .updateTable("users")
-      .set(data)
-      .where("id", "=", id as any)
-      .execute();
+    await database.updateTable("users").set(data).where("id", "=", id).execute();
 
     return (await this.find_by_id(id))!;
   }
@@ -118,9 +114,6 @@ export default class UsersService extends AbstractService {
   async delete(id: string) {
     const database = useDatabase();
 
-    await database
-      .deleteFrom("users")
-      .where("id", "=", id as any)
-      .execute();
+    await database.deleteFrom("users").where("id", "=", id).execute();
   }
 }

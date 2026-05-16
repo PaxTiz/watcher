@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync } from "node:fs";
-import { writeFile, rm, unlink } from "node:fs/promises";
+import { writeFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 
 import type { Google } from "@watcher/types";
@@ -11,7 +11,6 @@ import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import { useGoogle } from "#server/lib/google";
-import type { ServiceCredentials } from "#shared/types/credentials";
 import type { Sync } from "#shared/types/sync";
 
 const SHORT_DURATION_THRESOLD = 200; // Videos shorter than 200 seconds (3 minutes + 20 seconds of thresold) are considered as shorts
@@ -19,6 +18,8 @@ const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");
 
 export default class SyncYoutube extends AbstractService {
   async sync(user: User) {
+    this.assert_google(user);
+
     const token = await services.credentials.get(user.id, "google");
     if (!token) {
       return;
@@ -26,17 +27,20 @@ export default class SyncYoutube extends AbstractService {
 
     const subscriptions = await this.get_subscriptions(user);
     for (const subscription of subscriptions) {
-      await this.sync_subscription(user, token, subscription);
+      await this.sync_subscription(user, subscription);
     }
   }
 
   private async get_subscriptions(user: User) {
+    const google_id = this.assert_google(user);
+
     const database = useDatabase();
     const google = useGoogle();
 
-    const subscriptions: Sync["SubscriptionsList"] = await database
-      .selectFrom("subscriptions")
-      .selectAll()
+    const user_subscriptions: Sync["SubscriptionsList"] = await database
+      .selectFrom("user_subscriptions")
+      .innerJoin("subscriptions", "subscriptions.id", "user_subscriptions.subscription_id")
+      .select(["service", "service_id", "name", "url", "logo", "last_synced_at"])
       .where("service", "=", "youtube")
       .execute()
       .then((subs) =>
@@ -53,28 +57,28 @@ export default class SyncYoutube extends AbstractService {
         })),
       );
 
-    let response = await google.youtube.subscriptions.list({}, { service_id: user.login_with.id });
+    let response = await google.youtube.subscriptions.list({}, { service_id: google_id });
     while (true) {
       for (const subscription of response.items ?? []) {
-        const existingSub = subscriptions.find(
+        const existing_subscription = user_subscriptions.find(
           (e) => e.channel.service_id === subscription.snippet.resourceId.channelId,
         );
 
-        if (existingSub) {
-          existingSub.status = "updated";
-          existingSub.channel = {
+        if (existing_subscription) {
+          existing_subscription.status = "updated";
+          existing_subscription.channel = {
             service: "youtube",
             service_id: subscription.snippet.resourceId.channelId,
             name: subscription.snippet.title,
             url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
             logo:
-              differenceInHours(new Date(), existingSub.channel.last_synced_at) < 24
-                ? existingSub.channel.logo
+              differenceInHours(new Date(), existing_subscription.channel.last_synced_at) < 24
+                ? existing_subscription.channel.logo
                 : subscription.snippet.thumbnails.default.url,
             last_synced_at: formatISO(new Date()),
           };
         } else {
-          subscriptions.push({
+          user_subscriptions.push({
             status: "created",
             channel: {
               service: "youtube",
@@ -91,41 +95,50 @@ export default class SyncYoutube extends AbstractService {
       if (response.nextPageToken) {
         response = await google.youtube.subscriptions.list(
           { cursor: response.nextPageToken },
-          { service_id: user.login_with.id },
+          { service_id: google_id },
         );
       } else {
         break;
       }
     }
 
-    return subscriptions;
+    return user_subscriptions;
   }
 
-  private async sync_subscription(
-    user: User,
-    credentials: ServiceCredentials,
-    subscription: Sync["Subscription"],
-  ) {
+  private async sync_subscription(user: User, subscription: Sync["Subscription"]) {
     const database = useDatabase();
 
     if (subscription.status === "deleted") {
-      return await this.delete_subscription(subscription);
+      return;
     }
 
     subscription.channel.logo = await this.sync_subscription_logo(subscription);
 
-    await database
-      .insertInto("subscriptions")
-      .values(subscription.channel)
-      .onConflict((row) =>
-        row.columns(["service", "service_id"]).doUpdateSet({
-          logo: (c) => c.ref("excluded.logo"),
-          url: (c) => c.ref("excluded.url"),
-          name: (c) => c.ref("excluded.name"),
-          last_synced_at: (c) => c.ref("excluded.last_synced_at"),
-        }),
-      )
-      .execute();
+    await database.transaction().execute(async (tx) => {
+      const patched_subscription = await tx
+        .insertInto("subscriptions")
+        .values(subscription.channel)
+        .onConflict((row) =>
+          row.columns(["service", "service_id"]).doUpdateSet({
+            logo: (c) => c.ref("excluded.logo"),
+            url: (c) => c.ref("excluded.url"),
+            name: (c) => c.ref("excluded.name"),
+            last_synced_at: (c) => c.ref("excluded.last_synced_at"),
+          }),
+        )
+        .returning("id")
+        .executeTakeFirstOrThrow();
+
+      await tx
+        .insertInto("user_subscriptions")
+        .values({
+          user_id: user.id,
+          subscription_id: patched_subscription.id,
+          is_favorite: false,
+        })
+        .onConflict((oc) => oc.doNothing())
+        .execute();
+    });
 
     const videos = await this.get_videos_by_channel_id(user, subscription.channel.service_id);
 
@@ -135,6 +148,8 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async get_videos_by_channel_id(user: User, channel_id: string) {
+    const google_id = this.assert_google(user);
+
     const database = useDatabase();
     const google = useGoogle();
 
@@ -166,7 +181,7 @@ export default class SyncYoutube extends AbstractService {
 
     let all_videos = await google.youtube.videos.get_latests(
       { channel_id },
-      { service_id: user.login_with.id },
+      { service_id: google_id },
     );
 
     while (true) {
@@ -185,7 +200,7 @@ export default class SyncYoutube extends AbstractService {
       if (all_videos.nextPageToken) {
         all_videos = await google.youtube.videos.get_latests(
           { channel_id, cursor: all_videos.nextPageToken },
-          { service_id: user.login_with.id },
+          { service_id: google_id },
         );
       } else {
         break;
@@ -257,31 +272,6 @@ export default class SyncYoutube extends AbstractService {
         }),
       )
       .execute();
-  }
-
-  private async delete_subscription(subscription: Sync["Subscription"]) {
-    const database = useDatabase();
-
-    await database
-      .deleteFrom("subscriptions")
-      .where("service", "=", "youtube")
-      .where("service_id", "=", subscription.channel.service_id)
-      .execute();
-
-    await database
-      .deleteFrom("videos")
-      .where("service", "=", "youtube")
-      .where("subscription_id", "=", subscription.channel.service_id)
-      .execute();
-
-    try {
-      await rm(join(UPLOADS_DIRECTORY, "channels", subscription.channel.service_id), {
-        force: true,
-        recursive: true,
-      });
-    } catch {
-      // Don't throw an error if could not delete subscription directory
-    }
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
@@ -366,5 +356,13 @@ export default class SyncYoutube extends AbstractService {
     }
 
     return toSeconds(parse(duration));
+  }
+
+  private assert_google(user: User): string {
+    if (!user.integrations.google) {
+      throw new Error("Google integration not available for user");
+    }
+
+    return user.integrations.google!;
   }
 }
