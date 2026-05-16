@@ -28,6 +28,34 @@ export default class CredentialsService extends AbstractService {
     } as ServiceCredentials;
   }
 
+  async find_by_service(
+    service: CredentialsType,
+    service_id: string,
+  ): Promise<ServiceCredentials | null> {
+    const database = useDatabase();
+
+    const credentials = await database
+      .selectFrom("credentials")
+      .selectAll()
+      .where("service", "=", service)
+      .where("service_id", "=", service_id)
+      .executeTakeFirst();
+
+    if (!credentials) {
+      return null;
+    }
+
+    return {
+      service: credentials.service,
+      service_id: credentials.service_id,
+      access_token: credentials.access_token,
+      access_token_expires_at: credentials.access_token_expires_at,
+      refresh_token: credentials.refresh_token,
+      refresh_token_expires_at: credentials.refresh_token_expires_at,
+      userId: credentials.user_id,
+    };
+  }
+
   async replace(user_id: string, data: ServiceCredentials) {
     const database = useDatabase();
 
@@ -37,7 +65,7 @@ export default class CredentialsService extends AbstractService {
       .insertInto("credentials")
       .values({
         service: data.service,
-        service_id: data.userId,
+        service_id: data.service_id,
         access_token: data.access_token,
         access_token_expires_at: data.access_token_expires_at,
         refresh_token: data.refresh_token,

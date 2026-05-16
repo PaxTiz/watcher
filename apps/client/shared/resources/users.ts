@@ -9,6 +9,12 @@ export type UserResource = {
     handle: string | null;
   };
 
+  integrations: {
+    google: string | null;
+    twitch: string | null;
+    bluesky: string | null;
+  };
+
   created_at: string;
 
   last_login_at: string;

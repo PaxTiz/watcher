@@ -20,15 +20,30 @@ export const useOAuthRedirectionHandler = () => {
     return;
   }
 
+  const error = route.query.error as string;
+
+  const messages: Record<string, string> = {
+    already_linked: `Ce compte ${provider} est déjà lié à un autre compte Watcher.`,
+    default_error: `Une erreur est survenue lors de la connexion à votre compte ${provider}`,
+  };
+
   const data = {
     color: state,
     message:
       state === "success"
         ? `Votre compte ${provider} est désormais connecté`
-        : `Une erreur est survenue lors de la connexion à votre compte ${provider}`,
+        : (messages[error] ?? messages.default_error),
   };
 
-  toast[data.color](data.message);
+  if (data.message) {
+    toast[data.color](data.message);
+  }
 
-  return router.replace({ query: { provider: undefined, "oauth-state": undefined } });
+  return router.replace({
+    query: {
+      "oauth-state": undefined,
+      provider: undefined,
+      error: undefined,
+    },
+  });
 };

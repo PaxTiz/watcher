@@ -26,12 +26,55 @@ export default class UsersService extends AbstractService {
       return null;
     }
 
+    return this.find_by_id(user.id);
+  }
+
+  async find_by_bluesky_did(did: string): Promise<UserResource | null> {
+    const database = useDatabase();
+
+    const user = await database
+      .selectFrom("users")
+      .selectAll()
+      .where("bluesky_did", "=", did)
+      .executeTakeFirst();
+
+    if (!user) {
+      return null;
+    }
+
+    return this.find_by_id(user.id);
+  }
+
+  async find_by_id(id: string): Promise<UserResource | null> {
+    const database = useDatabase();
+
+    const user = await database
+      .selectFrom("users")
+      .selectAll()
+      .where("id", "=", id)
+      .executeTakeFirst();
+
+    if (!user) {
+      return null;
+    }
+
+    const credentials = await database
+      .selectFrom("credentials")
+      .select(["service", "service_id"])
+      .where("user_id", "=", id)
+      .execute();
+
     return {
       id: user.id,
       name: user.name,
       bluesky: {
         handle: user.bluesky_handle,
         did: user.bluesky_did,
+      },
+      integrations: {
+        google: credentials.find((c) => c.service === "google")?.service_id ?? null,
+        twitch: credentials.find((c) => c.service === "twitch")?.service_id ?? null,
+        bluesky: user.bluesky_did,
       },
       created_at: user.created_at,
       last_login_at: user.last_login_at,
@@ -54,15 +97,21 @@ export default class UsersService extends AbstractService {
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    return {
-      id: user.id,
-      name: user.name,
-      bluesky: {
-        handle: user.bluesky_handle,
-        did: user.bluesky_did,
-      },
-      created_at: user.created_at,
-      last_login_at: user.last_login_at,
-    };
+    return (await this.find_by_id(user.id))!;
+  }
+
+  async update(
+    id: string,
+    data: Partial<Pick<UserTable, "name" | "bluesky_handle" | "bluesky_did">>,
+  ) {
+    const database = useDatabase();
+
+    await database
+      .updateTable("users")
+      .set(data)
+      .where("id", "=", id as any)
+      .execute();
+
+    return (await this.find_by_id(id))!;
   }
 }

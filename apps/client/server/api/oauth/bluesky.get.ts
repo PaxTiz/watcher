@@ -1,5 +1,5 @@
 import { useLogger } from "#framework";
-import { useDatabase } from "#server/database";
+import { services } from "#framework/server";
 import { useBluesky } from "#server/lib/bluesky";
 
 const SESSION_DURATION = 3600 * 24 * 7; // 1 week
@@ -12,41 +12,49 @@ export default defineOAuthBlueskyEventHandler({
   async onSuccess(event, { user }) {
     try {
       const bluesky = useBluesky();
-      const database = useDatabase();
-
       const profile = await bluesky.getProfile({ actor: user.did });
 
       const isNameEmpty = profile.data.displayName?.trim().length === 0;
       const name = (isNameEmpty ? profile.data.handle : profile.data.displayName) ?? "";
 
-      const created_user = await database
-        .insertInto("users")
-        .values({
+      const { user: sessionUser } = await getUserSession(event);
+
+      let database_user = await services.users.find_by_bluesky_did(user.did);
+
+      if (sessionUser) {
+        if (database_user && database_user.id !== sessionUser.id) {
+          return sendRedirect(event, "/?provider=bluesky&oauth-state=error&error=already_linked");
+        }
+
+        database_user = await services.users.update(sessionUser.id, {
           bluesky_did: profile.data.did,
           bluesky_handle: profile.data.handle,
+        });
+      } else if (!database_user) {
+        database_user = await services.users.create({
           name,
-        })
-        .onConflict((oc) =>
-          oc.column("bluesky_did").doUpdateSet({
-            name: profile.data.displayName,
-            bluesky_handle: profile.data.handle,
-          }),
-        )
-        .returningAll()
-        .executeTakeFirstOrThrow();
+          bluesky_did: profile.data.did,
+          bluesky_handle: profile.data.handle,
+        });
+      }
 
       await setUserSession(
         event,
         {
           user: {
-            id: created_user.id,
-            name: created_user.name,
+            id: database_user.id,
+            name: database_user.name,
             bluesky: {
-              did: created_user.bluesky_did,
-              handle: created_user.bluesky_handle,
+              did: database_user.bluesky.did,
+              handle: database_user.bluesky.handle,
             },
-            created_at: created_user.created_at,
-            last_login_at: created_user.last_login_at,
+            integrations: {
+              google: database_user.integrations.google,
+              twitch: database_user.integrations.twitch,
+              bluesky: database_user.integrations.bluesky,
+            },
+            created_at: database_user.created_at,
+            last_login_at: database_user.last_login_at,
             login_with: {
               integration: "bluesky",
               id: user.did,
