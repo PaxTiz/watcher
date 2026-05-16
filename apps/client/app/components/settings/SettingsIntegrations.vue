@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { toast } from "vue-sonner";
 
+import { LazyLoginModal } from "#components";
+
 const { user, fetch, clear } = useUserSession();
 
 const providers = [
@@ -45,6 +47,20 @@ const on_disconnect = async (provider_id: (typeof providers)[number]["id"]) => {
     toast.success(`Le compte ${provider} a été déconnecté`);
   }
 };
+
+const on_link = (provider_id: (typeof providers)[number]["id"]) => {
+  if (provider_id !== "bluesky") {
+    const link = providers.find((e) => e.id === provider_id)!.linkUrl;
+    window.open(link, "_self");
+  } else {
+    useOverlay().create(LazyLoginModal).open({
+      title: "Lier mon compte BlueSky",
+      description: "Saisissez votre identifiant BlueSky pour vous connecter et lier votre compte.",
+      button: "Lier mon compte",
+      link: true,
+    });
+  }
+};
 </script>
 
 <template>
@@ -73,11 +89,11 @@ const on_disconnect = async (provider_id: (typeof providers)[number]["id"]) => {
         <div class="mt-6">
           <template v-if="!is_linked(provider.id)">
             <Button
-              :to="provider.linkUrl"
               :label="`Lier mon compte ${provider.name}`"
               size="sm"
               class="w-full"
               external
+              @click="on_link(provider.id)"
             />
           </template>
           <template v-else>

@@ -2,13 +2,30 @@
 import type { FormSubmitEvent } from "#shared/types/forms";
 import { type OAuthValidators, oauthValidatorsSchema } from "#shared/validators/oauth";
 
+const {
+  title = "Connexion avec BlueSky",
+  description = "Veuillez vous connecter avec votre compte BlueSky afin d'accéder à Watcher.",
+  button = "Me connecter",
+  link = false,
+} = defineProps<{
+  title?: string;
+  description?: string;
+  button?: string;
+  link?: boolean;
+}>();
+
 const input = useTemplateRef("input");
 const state = ref<OAuthValidators["loginWithBluesky"]["body"]>({
   handle: "",
 });
 
 const onSubmit = (event: FormSubmitEvent<typeof oauthValidatorsSchema.loginWithBluesky.body>) => {
-  window.open(`/api/oauth/bluesky?handle=${event.data.handle}`, "_self");
+  let url = `/api/oauth/bluesky?handle=${event.data.handle}`;
+  if (link) {
+    url += "&integration=true";
+  }
+
+  window.open(url, "_self");
 };
 
 onMounted(() => {
@@ -20,9 +37,9 @@ onMounted(() => {
   <section>
     <Logo />
 
-    <h1 class="mt-4 text-4xl font-bold text-white">Connexion avec BlueSky</h1>
+    <h1 class="mt-4 text-4xl font-bold text-white">{{ title }}</h1>
     <p class="mt-1 text-gray-300">
-      Veuillez vous connecter avec votre compte BlueSky afin d'accéder à Watcher.
+      {{ description }}
     </p>
 
     <Card class="mt-4">
@@ -36,7 +53,7 @@ onMounted(() => {
           <AppFormInput ref="input" v-model="state.handle" class="w-full" />
         </AppFormField>
 
-        <Button label="Me connecter" type="submit" class="mt-4" />
+        <Button :label="button" type="submit" class="mt-4" />
       </AppForm>
     </Card>
   </section>

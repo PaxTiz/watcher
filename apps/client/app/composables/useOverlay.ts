@@ -39,7 +39,7 @@ export const useOverlay = () => {
     });
 
     return {
-      open: (p: P = {} as P) => open(id, p),
+      open: (p: P = {} as P) => open(id, { props: p }),
     };
   };
 
