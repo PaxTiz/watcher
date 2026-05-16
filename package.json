@@ -1,7 +1,8 @@
 {
+  "type": "module",
   "scripts": {
-    "lint": "pnpm oxlint --fix --fix-suggestions -c ./.oxlintrc.json --type-aware",
-    "format": "pnpm oxfmt -c ./.oxfmtrc.json",
+    "lint": "pnpm oxlint --fix --fix-suggestions -c ./oxlint.config.ts --type-aware",
+    "format": "pnpm oxfmt -c ./oxfmt.config.ts",
     "prepare": "husky"
   },
   "dependencies": {
