@@ -49,19 +49,23 @@ const description = computed(() => {
 
     <div class="mt-4 flex flex-wrap items-center justify-between">
       <div class="flex items-center gap-4">
-        <NuxtImg
-          class="w-full rounded"
-          loading="lazy"
-          format="avif,webp"
-          width="48"
-          height="48"
-          densities="x1"
-          :src="video.author.channel.logo"
-          :alt="`Logo de ${video.author.name}`"
-        />
+        <nuxt-link :to="`/subscriptions/${video.author.slug}`">
+          <NuxtImg
+            class="w-full rounded"
+            loading="lazy"
+            format="avif,webp"
+            width="48"
+            height="48"
+            densities="x1"
+            :src="video.author.channel.logo"
+            :alt="`Logo de ${video.author.name}`"
+          />
+        </nuxt-link>
 
         <div class="shrink-0">
-          <p class="font-semibold text-white">{{ video.author.name }}</p>
+          <nuxt-link :to="`/subscriptions/${video.author.slug}`" class="font-semibold text-white">
+            {{ video.author.name }}
+          </nuxt-link>
           <p class="text-ui-text text-sm">Publié le {{ dates.format(video.created_at) }}</p>
         </div>
       </div>
@@ -69,13 +73,13 @@ const description = computed(() => {
       <div>
         <Button
           v-if="video.service === 'youtube'"
-          label="Lire sur YouTube"
+          label="Ouvrir sur YouTube"
           icon="lucide:youtube"
           :to="video.url"
         />
         <Button
           v-if="video.service === 'twitch'"
-          label="Lire sur Twitch"
+          label="Ouvrir sur Twitch"
           icon="lucide:twitch"
           :to="video.url"
         />
