@@ -1,4 +1,4 @@
-import type { ClientSettings } from "../internal/client";
+import { GoogleClient } from "../internal/client";
 import { GoogleService } from "../internal/service";
 import { YoutubeChannelsService } from "./channels";
 import { YoutubePlaylistItemsService } from "./playlist_items";
@@ -11,12 +11,12 @@ export class YoutubeService extends GoogleService {
   public subscriptions: YoutubeSubscriptionsService;
   public videos: YoutubeVideosService;
 
-  constructor(options: ClientSettings) {
-    super(options);
+  constructor(client: GoogleClient) {
+    super(client);
 
-    this.channels = new YoutubeChannelsService(options);
-    this.playlist_items = new YoutubePlaylistItemsService(options);
-    this.subscriptions = new YoutubeSubscriptionsService(options);
-    this.videos = new YoutubeVideosService(options);
+    this.channels = new YoutubeChannelsService(client);
+    this.playlist_items = new YoutubePlaylistItemsService(client);
+    this.subscriptions = new YoutubeSubscriptionsService(client);
+    this.videos = new YoutubeVideosService(client);
   }
 }

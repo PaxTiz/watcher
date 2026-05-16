@@ -12,7 +12,12 @@ async function get_current_user(settings: ClientSettings, config: GoogleServiceR
     }
 
     const response = await ofetch<Google["OAuth"]["User"]>(
-      `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokens.access_token}`,
+      `https://www.googleapis.com/oauth2/v1/userinfo`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokens.access_token}`,
+        },
+      },
     );
 
     return response;

@@ -21,9 +21,12 @@ export type ClientSettings = {
 };
 
 export class GoogleClient {
+  public readonly settings: ClientSettings;
+
   public youtube: YoutubeService;
 
   constructor(options: ClientSettings) {
-    this.youtube = new YoutubeService(options);
+    this.settings = options;
+    this.youtube = new YoutubeService(this);
   }
 }

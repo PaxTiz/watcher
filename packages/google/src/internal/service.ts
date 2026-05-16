@@ -1,6 +1,6 @@
 import { add, isBefore, sub } from "date-fns";
 
-import type { ClientSettings } from "./client";
+import type { GoogleClient } from "./client";
 import { oauth } from "./oauth";
 
 export type GoogleServiceRequest = {
@@ -8,7 +8,7 @@ export type GoogleServiceRequest = {
 };
 
 export class GoogleService {
-  constructor(protected settings: ClientSettings) {}
+  constructor(protected client: GoogleClient) {}
 
   protected async perform_request<T>(
     user_id: string,
@@ -20,7 +20,7 @@ export class GoogleService {
   }
 
   private async refresh_token_if_needed(service_id: string) {
-    const credentials = await this.settings.onRequest(service_id);
+    const credentials = await this.client.settings.onRequest(service_id);
     if (!credentials) {
       throw new Error("User session has expired");
     }
@@ -31,7 +31,7 @@ export class GoogleService {
     }
 
     const updated_credentials = await oauth.refresh_access_token(
-      this.settings,
+      this.client.settings,
       credentials.refresh_token,
     );
 
@@ -42,7 +42,7 @@ export class GoogleService {
       refresh_token: credentials.refresh_token,
     };
 
-    await this.settings.onRefreshToken({
+    await this.client.settings.onRefreshToken({
       tokens: patched_credentials,
       service_id,
     });

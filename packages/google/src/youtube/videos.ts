@@ -1,17 +1,16 @@
 import type { Google } from "@watcher/types";
 import { ofetch } from "ofetch";
 
-import type { ClientSettings } from "../internal/client";
+import type { GoogleClient } from "../internal/client";
 import { GoogleService, type GoogleServiceRequest } from "../internal/service";
-import { YoutubePlaylistItemsService } from "./playlist_items";
 
 export class YoutubeVideosService extends GoogleService {
-  constructor(options: ClientSettings) {
-    super(options);
+  constructor(client: GoogleClient) {
+    super(client);
   }
 
   async get_latests(data: { channel_id: string; cursor?: string }, config: GoogleServiceRequest) {
-    const playlist_videos = await new YoutubePlaylistItemsService(this.settings).get_uploads_id(
+    const playlist_videos = await this.client.youtube.playlist_items.get_uploads_id(
       { channel_id: data.channel_id },
       config,
     );
@@ -29,13 +28,16 @@ export class YoutubeVideosService extends GoogleService {
       const url = new URL("https://www.googleapis.com/youtube/v3/videos");
       url.searchParams.set("part", "contentDetails,snippet");
       url.searchParams.set("id", data.video_ids.join(","));
-      url.searchParams.set("access_token", token);
 
       if (data.cursor) {
         url.searchParams.set("pageToken", data.cursor);
       }
 
-      const response = await ofetch<Google["Youtube"]["Videos"]["List"]>(url.toString());
+      const response = await ofetch<Google["Youtube"]["Videos"]["List"]>(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       return response;
     });
