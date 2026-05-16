@@ -23,13 +23,16 @@ export type ClientSettings = {
 };
 
 export class TwitchClient {
+  public readonly settings: ClientSettings;
+
   public followers: FollowersService;
   public users: UsersService;
   public videos: VideosService;
 
   constructor(options: ClientSettings) {
-    this.followers = new FollowersService(options);
-    this.users = new UsersService(options);
-    this.videos = new VideosService(options);
+    this.settings = options;
+    this.followers = new FollowersService(this);
+    this.users = new UsersService(this);
+    this.videos = new VideosService(this);
   }
 }

@@ -1,12 +1,12 @@
 import type { Twitch } from "@watcher/types";
 import { ofetch } from "ofetch";
 
-import { type ClientSettings } from "./internal/client";
+import type { TwitchClient } from "./internal/client";
 import { type TwitchServiceRequest, TwitchService } from "./internal/service";
 
 export class UsersService extends TwitchService {
-  constructor(settings: ClientSettings) {
-    super(settings);
+  constructor(client: TwitchClient) {
+    super(client);
   }
 
   async list(
@@ -22,7 +22,7 @@ export class UsersService extends TwitchService {
       return await ofetch<Twitch["Users"]["List"]>(url.toString(), {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Client-Id": this.settings.client_id,
+          "Client-Id": this.client.settings.client_id,
         },
       });
     });

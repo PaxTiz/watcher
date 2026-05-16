@@ -2,7 +2,7 @@ import type { Twitch } from "@watcher/types";
 import { isAfter } from "date-fns";
 import { ofetch } from "ofetch";
 
-import { type ClientSettings } from "./internal/client";
+import type { TwitchClient } from "./internal/client";
 import { type TwitchServiceRequest, TwitchService } from "./internal/service";
 
 const DEFAULT_RESOLUTIONS = {
@@ -16,8 +16,8 @@ const DEFAULT_RESOLUTIONS = {
 };
 
 export class VideosService extends TwitchService {
-  constructor(settings: ClientSettings) {
-    super(settings);
+  constructor(client: TwitchClient) {
+    super(client);
   }
 
   public async list(
@@ -39,7 +39,7 @@ export class VideosService extends TwitchService {
       return await ofetch<Twitch["Videos"]["List"]>(url.toString(), {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Client-Id": this.settings.client_id,
+          "Client-Id": this.client.settings.client_id,
         },
       });
     });
