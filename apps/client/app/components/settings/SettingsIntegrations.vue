@@ -3,7 +3,7 @@ import { toast } from "vue-sonner";
 
 import { LazyLoginModal } from "#components";
 
-const { user, fetch, clear } = useUserSession();
+const { user, fetch } = useUserSession();
 
 const providers = [
   {
@@ -34,6 +34,17 @@ const is_linked = (provider_id: (typeof providers)[number]["id"]) => {
 };
 
 const on_disconnect = async (provider_id: (typeof providers)[number]["id"]) => {
+  const name = providers.find((e) => e.id === provider_id)!.name;
+  const ok = await useConfirm({
+    title: `Déconnexion de votre compte ${name}`,
+    description:
+      "Si vous déconnectez votre compte, vos abonnements ainsi que les vidéos liées à vos abonnements ne seront plus mis à jour.",
+  });
+
+  if (!ok) {
+    return;
+  }
+
   const { error } = await useAppFetch(`/api/integrations/${provider_id}/disconnect`, {
     method: "DELETE",
   });

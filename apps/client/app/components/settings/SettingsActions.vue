@@ -3,11 +3,14 @@ import { toast } from "vue-sonner";
 
 const { clear } = useUserSession();
 
-// TOOD: useConfirm modal instead of browser-native confirm
 const on_delete_account = async () => {
-  if (
-    !confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.")
-  ) {
+  const ok = await useConfirm({
+    title: "Supprimer mon compte",
+    description:
+      "Êtes-vous sûr(e) de vouloir supprimer votre compte ? Cette action est irréversible.",
+  });
+
+  if (!ok) {
     return;
   }
 
