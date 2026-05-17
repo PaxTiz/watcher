@@ -9,26 +9,43 @@ const { dates, numbers } = useFormatter();
 </script>
 
 <template>
-  <Card :tag="NuxtLink" :to="`/videos/${video.id}`" size="sm">
-    <div class="relative z-1">
-      <NuxtImg
-        class="group-hover:border-alt aspect-video w-full rounded border-2 border-transparent object-cover transition-all duration-300"
-        loading="lazy"
-        format="avif,webp"
-        width="380"
-        quality="100"
-        :src="video.thumbnail"
-        :alt="`Image de la vidéo #${video.id}`"
-      />
+  <Card
+    :tag="NuxtLink"
+    :to="`/videos/${video.id}`"
+    size="flat"
+    class="hover:border-alt border-2 border-transparent transition-all duration-300"
+  >
+    <div class="relative z-2">
+      <div class="relative z-3">
+        <NuxtImg
+          class="aspect-video w-full rounded object-cover"
+          loading="lazy"
+          format="avif,webp"
+          width="380"
+          quality="100"
+          :src="video.thumbnail"
+          :alt="`Image de la vidéo #${video.id}`"
+        />
+
+        <div
+          class="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 transition-all duration-300 group-hover:opacity-100"
+        >
+          <div
+            class="ring-ui-text flex size-[50px] items-center justify-center rounded-full bg-black/75 ring"
+          >
+            <Icon name="lucide:play" class="text-ui-text text-2xl" />
+          </div>
+        </div>
+      </div>
 
       <div
-        class="absolute right-1 bottom-1 z-2 rounded bg-black/75 px-1 py-0.5 text-sm font-medium text-white"
+        class="absolute right-1 bottom-1 z-4 rounded bg-black/75 px-1 py-0.5 text-sm font-medium text-white"
       >
         {{ numbers.displaySeconds(video.duration) }}
       </div>
     </div>
 
-    <div class="grid grid-cols-[2rem_1fr] gap-4 py-4">
+    <div class="grid grid-cols-[2rem_1fr] gap-4 p-4">
       <div>
         <NuxtImg
           class="w-full rounded"
