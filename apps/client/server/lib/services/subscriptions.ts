@@ -28,7 +28,7 @@ export default class SubscriptionsService extends AbstractService {
       id: sub.id,
       name: sub.name,
       slug: sub.slug,
-      isFavorite: sub.is_favorite,
+      is_favorite: sub.is_favorite,
       channel: {
         service: sub.service,
         url: sub.url,
@@ -47,5 +47,16 @@ export default class SubscriptionsService extends AbstractService {
     }
 
     await Promise.all(sync);
+  }
+
+  async toggle_favorite(user: User, subscription_id: string) {
+    const database = useDatabase();
+
+    await database
+      .updateTable("user_subscriptions")
+      .set({ is_favorite: (c) => c.not(c.ref("is_favorite")) })
+      .where("subscription_id", "=", subscription_id)
+      .where("user_id", "=", user.id)
+      .execute();
   }
 }

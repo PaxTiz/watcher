@@ -50,7 +50,7 @@ export default class VideosService extends AbstractService {
         id: video.subscription_id,
         name: video.subscription_name,
         slug: video.subscription_slug,
-        isFavorite: false,
+        is_favorite: false,
         channel: {
           service: video.subscription_service,
           url: video.subscription_url,
@@ -155,7 +155,7 @@ export default class VideosService extends AbstractService {
           id: item.subscription_id,
           name: item.subscription_name,
           slug: item.subscription_slug,
-          isFavorite: item.subscription_is_favorite,
+          is_favorite: item.subscription_is_favorite,
           channel: {
             service: item.subscription_service,
             url: item.subscription_url,

@@ -13,7 +13,7 @@
   --color-ui-border: #313244;
   --color-ui-text: #cdd6f4;
   --color-alt: #fe640b;
-  --color-highlight: #df8e1d;
+  --color-highlight: oklch(82.8% 0.189 84.429);
 }
 
 :root {

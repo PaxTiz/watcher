@@ -7,7 +7,7 @@ export type SubscriptionResource = {
 
   slug: string;
 
-  isFavorite: boolean;
+  is_favorite: boolean;
 
   channel: {
     service: SubscriptionType;

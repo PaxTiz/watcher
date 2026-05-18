@@ -22,9 +22,7 @@ const goToNextSlide = () => emblaApi.value?.scrollNext();
       <div class="embla__viewport" ref="emblaRef">
         <div class="embla__container">
           <div v-for="subscription in subscriptions" :key="subscription.id" class="embla__slide">
-            <nuxt-link :to="`/subscriptions/${subscription.slug}`">
-              <SubscriptionImage :subscription="subscription" />
-            </nuxt-link>
+            <SubscriptionCard :subscription="subscription" flat />
           </div>
         </div>
       </div>

@@ -5,12 +5,20 @@ export const useSubscriptions = () => {
     "/api/subscriptions",
     {
       key: "subscriptions.all",
-      getCachedData(k) {
+      getCachedData(k, nuxtApp, { cause }) {
+        if (cause === "refresh:manual") {
+          return undefined;
+        }
+
         const { data } = useNuxtData<Array<SubscriptionResource>>(k);
         return data.value;
       },
     },
   );
+
+  const forceRefresh = async () => {
+    return refresh({ cause: "refresh:manual" });
+  };
 
   const youtube = computed(() => data.value?.filter((e) => e.channel.service === "youtube") ?? []);
   const twitch = computed(() => data.value?.filter((e) => e.channel.service === "twitch") ?? []);
@@ -19,6 +27,7 @@ export const useSubscriptions = () => {
     data,
     error,
     refresh,
+    forceRefresh,
     status,
     clear,
 
