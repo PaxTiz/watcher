@@ -6,7 +6,7 @@ const { subscriptions } = defineProps<{ subscriptions: Array<SubscriptionResourc
 const filtered = ref(subscriptions);
 const filter = ref({
   name: "",
-  service: "",
+  service: undefined,
 });
 
 watch(
@@ -18,6 +18,10 @@ watchDebounced(
   (f) => {
     const n = f.name.toLowerCase();
     filtered.value = subscriptions.filter((sub) => {
+      if (!f.service) {
+        return true;
+      }
+
       const name = sub.name.toLowerCase();
       return name.includes(n) && sub.channel.service.includes(f.service);
     });
@@ -30,11 +34,15 @@ watchDebounced(
   <div class="mb-8 flex gap-4">
     <input v-model="filter.name" placeholder="Rechercher par nom.." class="flex-1" />
 
-    <select v-model="filter.service" name="" id="">
-      <option value="">Tous les services</option>
-      <option value="youtube">YouTube</option>
-      <option value="twitch">Twitch</option>
-    </select>
+    <AppFormSelect
+      v-model="filter.service"
+      class="min-w-[150px]"
+      placeholder="Tous les services"
+      :items="[
+        { label: 'YouTube', value: 'youtube' },
+        { label: 'Twitch', value: 'twitch' },
+      ]"
+    />
   </div>
 
   <div class="infinite-grid-[88px] gap-4">

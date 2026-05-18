@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+// TODO: Refactor with `@headlessui/vue`
 import { Tippy } from "vue-tippy";
 
 import type { SubscriptionResource } from "#shared/resources/subscriptions";
