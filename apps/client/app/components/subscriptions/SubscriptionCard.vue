@@ -16,7 +16,10 @@ const { pressed } = useMousePressed({ target: card });
 onLongPress(
   card,
   async () => {
-    await useAppFetch(`/api/subscriptions/${subscription.id}/favorite`, { method: "POST" });
+    await useAppFetch(`/api/subscriptions/${subscription.id}/favorite`, {
+      key: new Date().toISOString(),
+      method: "POST",
+    });
 
     if (subscription.is_favorite) {
       toast.success(`${subscription.name} a été retiré de vos favoris`);
