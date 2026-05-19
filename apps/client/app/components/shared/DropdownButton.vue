@@ -1,13 +1,26 @@
-<script lang="ts" generic="T extends string" setup>
-import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+<script lang="ts" generic="K extends string, T extends string" setup>
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuRoot,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "reka-ui";
 
+import { AppFormInput, Icon } from "#components";
 import Button from "~/components/shared/Button.vue";
 
-defineProps<{
+const emit = defineEmits<{ select: [key: K, value: T] }>();
+const props = defineProps<{
   label?: string;
   icon?: string;
   items: Array<{
+    key: K;
     label: string;
+    allowSearch?: boolean;
     children: Array<{
       label: string;
       value: T;
@@ -16,61 +29,107 @@ defineProps<{
     }>;
   }>;
 }>();
+
+const isOpen = ref(false);
+
+const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>(
+  (props) => {
+    const searchQuery = ref("");
+    const availableChildren = computed(() => {
+      let items = props.item.children;
+      if (props.item.allowSearch) {
+        const query = searchQuery.value.toLowerCase();
+        items = items.filter((e) => e.label.toLowerCase().includes(query));
+      }
+
+      return items;
+    });
+
+    return () =>
+      h(
+        DropdownMenuSubContent,
+        {
+          sideOffset: 8,
+          alignOffset: -4,
+          class:
+            "bg-ui-bg border-ui-border relative z-1000 flex max-h-[200px] min-w-[125px] flex-col gap-1 overflow-y-scroll rounded border p-1 shadow shadow-black",
+        },
+        () => [
+          props.item.allowSearch &&
+            h(
+              "div",
+              {
+                class: "fixed z-1001 top-0 left-0 p-1 w-full bg-ui-bg rounded-t",
+              },
+              h(AppFormInput, {
+                placeholder: "Rechercher une chaîne",
+                class: "!bg-ui-border w-full",
+                size: "sm",
+                modelValue: searchQuery.value,
+                "onUpdate:modelValue": (v) => (searchQuery.value = v),
+              }),
+            ),
+          props.item.allowSearch && h("div", { class: "w-full mt-8" }),
+          ...availableChildren.value.map((child) =>
+            h(
+              DropdownMenuItem,
+              {
+                key: child.value,
+                class:
+                  "text-ui-text hover:bg-ui-border flex w-full min-w-[100px] items-center gap-2 rounded p-1 text-start text-sm",
+                onClick: () => emit("select", props.item.key, child.value),
+              },
+              () => [child.icon && h(Icon, { name: child.icon }), h("span", child.label)],
+            ),
+          ),
+        ],
+      );
+  },
+  { props: ["item"] },
+);
 </script>
 
 <template>
   <div class="relative">
-    <Menu v-slot="{ open }">
-      <MenuButton ref="element" as="template">
+    <DropdownMenuRoot v-model:open="isOpen">
+      <DropdownMenuTrigger :aria-label="label" as="template">
         <Button :label="label" :icon="icon" />
-      </MenuButton>
+      </DropdownMenuTrigger>
 
-      <Transition appear>
-        <MenuItems
-          class="bg-ui-bg border-ui-border absolute z-1000 mt-2 flex w-full flex-col gap-1 rounded border p-1 shadow shadow-black"
-        >
-          <MenuItem
-            v-for="item in items"
-            :key="item.label"
-            :disabled="item.children.length === 0"
-            class="relative aria-disabled:opacity-50"
+      <DropdownMenuPortal>
+        <Transition appear>
+          <DropdownMenuContent
+            align="start"
+            class="bg-ui-bg border-ui-border absolute z-1000 mt-2 flex min-w-[125px] flex-col gap-1 rounded border p-1 shadow shadow-black"
           >
-            <Menu as="div" horizontal>
-              <MenuButton
-                class="text-ui-text hover:bg-ui-border flex w-full items-center justify-between gap-2 rounded p-1 text-start text-sm"
+            <DropdownMenuSub v-for="item in items" :key="item.label">
+              <DropdownMenuSubTrigger
+                :value="item.label"
                 as="button"
+                class="text-ui-text hover:bg-ui-border flex w-full items-center justify-between gap-2 rounded p-1 text-start text-sm"
+                :class="{ 'opacity-50': item.children.length === 0 }"
+                :disabled="item.children.length === 0"
               >
                 <span>{{ item.label }}</span>
 
                 <Icon name="lucide:chevron-right" />
-              </MenuButton>
+              </DropdownMenuSubTrigger>
 
-              <Transition appear>
-                <MenuItems
-                  class="bg-ui-bg border-ui-border absolute -top-1 left-[calc(100%+0.5rem)] z-1000 flex flex-col gap-1 rounded border p-1 shadow shadow-black"
-                >
-                  <MenuItem
-                    v-for="child in item.children"
-                    :key="child.value"
-                    as="button"
-                    class="text-ui-text hover:bg-ui-border flex w-full min-w-[100px] items-center justify-between gap-2 rounded p-1 text-start text-sm"
-                  >
-                    {{ child.label }}
-                  </MenuItem>
-                </MenuItems>
-              </Transition>
-            </Menu>
-          </MenuItem>
-        </MenuItems>
-      </Transition>
-    </Menu>
+              <DropdownMenuPortal>
+                <DropdownChild :item="item" />
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          </DropdownMenuContent>
+        </Transition>
+      </DropdownMenuPortal>
+    </DropdownMenuRoot>
   </div>
 </template>
 
 <style scoped>
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.1s ease;
 }
 .v-enter-from,
 .v-leave-to {

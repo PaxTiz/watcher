@@ -32,7 +32,14 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["@nuxt/fonts", "@nuxt/icon", "@nuxt/image", "@vueuse/nuxt", "nuxt-auth-utils"],
+  modules: [
+    "@nuxt/fonts",
+    "@nuxt/icon",
+    "@nuxt/image",
+    "@vueuse/nuxt",
+    "nuxt-auth-utils",
+    "reka-ui/nuxt",
+  ],
 
   devServer: {
     // Used with atproto oauth
@@ -69,7 +76,6 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         "embla-carousel-vue",
-        "vue-tippy",
         "date-fns",
         "date-fns/locale",
         "hls.js",

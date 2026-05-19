@@ -38,14 +38,21 @@ body {
   background-color: var(--body-background);
 }
 
-input,
-select {
+input {
   background-color: var(--color-ui-bg);
   border: 1px solid var(--color-ui-border);
   border-radius: var(--radius);
-  padding: --spacing(1) --spacing(2);
   color: var(--color-ui-text);
-  min-height: 38px;
+
+  &.size__normal {
+    padding: --spacing(1) --spacing(2);
+    min-height: 38px;
+  }
+  &.size__sm {
+    padding: --spacing(1);
+    font-size: 0.9rem;
+    min-height: 32px;
+  }
 
   &:focus {
     outline-color: var(--color-alt);
