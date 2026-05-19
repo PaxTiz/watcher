@@ -13,6 +13,33 @@ const { data: subscriptions } = await useAppFetch<Array<SubscriptionResource>>(
 </script>
 
 <template>
+  <DropdownButton
+    label="Ajouter un filtre"
+    :items="[
+      {
+        label: 'Service',
+        children: [
+          { label: 'YouTube', value: 'youtube', icon: 'lucide:youtube' },
+          { label: 'Twitch', value: 'twitch', icon: 'lucide:twitch' },
+        ],
+      },
+      {
+        label: 'Durée',
+        children: [],
+      },
+      {
+        label: 'Date',
+        children: [],
+      },
+      {
+        label: 'Chaîne',
+        children: [],
+      },
+    ]"
+  >
+    <!--  -->
+  </DropdownButton>
+
   <Tippy
     ref="tippy"
     placement="bottom-start"
