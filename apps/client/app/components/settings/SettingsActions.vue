@@ -14,7 +14,7 @@ const on_delete_account = async () => {
     return;
   }
 
-  const { error } = await useAppFetch("/api/auth/delete", {
+  const { error } = await usePost("/api/auth/delete", {
     method: "DELETE",
   });
 

@@ -1,37 +1,13 @@
-import type { UseFetchOptions } from "nuxt/app";
+import type { AsyncDataOptions, UseFetchOptions } from "nuxt/app";
+import { type FetchOptions, $fetch } from "ofetch";
 
-type UseAppFetchOptions<T> = UseFetchOptions<T> & { to?: string };
-
-export function useAppFetch<T>(url: string | (() => string), options?: UseAppFetchOptions<T>) {
-  if (options?.to) {
-    const { setError } = useFormErrors(options.to);
-    setError(null);
-  }
-
-  const query = computed(() => ({
-    ...unref(options?.query),
-  }));
-
-  const response = useFetch(url, {
-    ...options,
-    query,
-  });
+export function useAppFetch<T>(url: string | (() => string), options?: UseFetchOptions<T>) {
+  const response = useFetch(url, options);
 
   watch(
     response.error,
     (error) => {
       if (!error) {
-        return;
-      }
-
-      if (error.statusCode === 422 && options?.to) {
-        const { setError } = useFormErrors(options.to);
-        setError(error.data.message);
-
-        return;
-      }
-
-      if (error.statusCode === 429) {
         return;
       }
 
@@ -41,4 +17,41 @@ export function useAppFetch<T>(url: string | (() => string), options?: UseAppFet
   );
 
   return response;
+}
+
+export function usePost<T>(
+  url: string,
+  options?: { key?: string; to?: string } & FetchOptions<"json", T>,
+  asyncDataOptions?: AsyncDataOptions<T>,
+) {
+  return useAsyncData(
+    options?.key ?? url,
+    () =>
+      $fetch(url, {
+        ...options,
+
+        onRequest() {
+          if (options?.to) {
+            const { setError } = useFormErrors(options.to);
+            setError(null);
+          }
+        },
+
+        onRequestError(response) {
+          if (!response.error) {
+            return;
+          }
+
+          if (response.response?.status === 422 && options?.to) {
+            const { setError } = useFormErrors(options.to);
+            setError(response.error.message);
+
+            return;
+          }
+
+          throw createError({ statusCode: response.response?.status, fatal: true });
+        },
+      }),
+    asyncDataOptions,
+  );
 }

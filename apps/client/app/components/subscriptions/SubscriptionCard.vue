@@ -12,14 +12,19 @@ const { subscription, flat = false } = defineProps<{
 const card = useTemplateRef("card");
 const { forceRefresh } = useSubscriptions();
 
+const { execute } = usePost(
+  `/api/subscriptions/${subscription.id}/favorite`,
+  {
+    method: "POST",
+  },
+  { immediate: false },
+);
+
 const { pressed } = useMousePressed({ target: card });
 onLongPress(
   card,
   async () => {
-    await useAppFetch(`/api/subscriptions/${subscription.id}/favorite`, {
-      key: new Date().toISOString(),
-      method: "POST",
-    });
+    await execute();
 
     if (subscription.is_favorite) {
       toast.success(`${subscription.name} a été retiré de vos favoris`);

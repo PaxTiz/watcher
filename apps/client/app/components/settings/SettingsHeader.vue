@@ -4,7 +4,7 @@ import { toast } from "vue-sonner";
 const { clear } = useUserSession();
 
 const on_logout = async () => {
-  const { error } = await useAppFetch("/api/auth/logout", {
+  const { error } = await usePost("/api/auth/logout", {
     method: "POST",
   });
 
