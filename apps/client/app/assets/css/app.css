@@ -25,8 +25,13 @@
   --ui-text: #0f172a;
   --ui-text-muted: #64748b;
 
-  --navbar-gradient-top: #ffffff;
-  --navbar-gradient-bottom: #f1f5f9;
+  --navbar-bg: rgba(255, 255, 255, 0.8);
+  --navbar-border: #ccc;
+
+  --card-gradient-top: #ffffff;
+  --card-gradient-bottom: #f8fafc;
+  --bg-gradient-radial: radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 100%);
+  --btn-secondary-gradient: linear-gradient(135deg, #fe640b 0%, #ff8c42 100%);
 
   --subscription-image-size: 71px;
 }
@@ -38,8 +43,13 @@
   --ui-text: #cdd6f4;
   --ui-text-muted: #94a3b8;
 
-  --navbar-gradient-top: #181825;
-  --navbar-gradient-bottom: #11111b;
+  --navbar-bg: rgba(17, 17, 27, 0.8);
+  --navbar-border: rgba(255, 255, 255, 0.1);
+
+  --card-gradient-top: #232336;
+  --card-gradient-bottom: #1e1e2e;
+  --bg-gradient-radial: radial-gradient(circle at 50% 0%, #1e1e2e 0%, #11111b 100%);
+  --btn-secondary-gradient: linear-gradient(135deg, #fe640b 0%, #d45100 100%);
 }
 
 @utility container {
@@ -54,7 +64,10 @@
 
 body {
   background-color: var(--background);
+  background-image: var(--bg-gradient-radial);
+  background-attachment: fixed;
   color: var(--ui-text);
+  font-weight: 500;
   transition:
     background-color 0.3s,
     color 0.3s;
@@ -65,7 +78,6 @@ input {
   border: 1px solid var(--ui-border);
   border-radius: var(--radius);
   color: var(--ui-text);
-  padding: 0 calc(var(--spacing) * 2);
 
   &::placeholder {
     color: var(--ui-text-muted);

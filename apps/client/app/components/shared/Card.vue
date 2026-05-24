@@ -15,7 +15,7 @@ defineSlots<{ default: () => VNode }>();
 
 <template>
   <component
-    class="group focus:outline-alt relative z-1 block rounded border"
+    class="group focus:outline-alt border-ui-border relative z-1 block rounded border"
     :class="{ 'p-2': size === 'sm', 'p-4': size === 'normal', 'bg-ui-bg': !transparent }"
     :is="tag"
   >

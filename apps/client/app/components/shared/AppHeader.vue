@@ -12,7 +12,9 @@ const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
           to: props.to,
           "aria-active": props.isActive,
           class:
-            "border-b border-transparent aria-active:text-alt aria-active:border-alt not-aria-active:text-ui-text hover:text-alt",
+            "px-4 py-2 rounded-lg transition-all duration-300 text-sm flex items-center gap-2 " +
+            "aria-active:bg-alt/10 aria-active:text-alt " +
+            "not-aria-active:text-ui-text-muted not-aria-active:hover:text-ui-text not-aria-active:hover:bg-ui-border/40 rounded",
         },
         () => props.label,
       );
@@ -23,21 +25,23 @@ const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
 
 <template>
   <header
-    class="border-ui-border border-b-3 bg-linear-to-b from-[var(--navbar-gradient-top)] to-[var(--navbar-gradient-bottom)] py-4"
+    class="sticky top-0 z-50 border-b border-[var(--navbar-border)] bg-[var(--navbar-bg)] backdrop-blur-xl transition-all duration-300"
   >
-    <div class="container">
-      <div class="flex items-center gap-8">
-        <Logo />
+    <div class="container py-5">
+      <div class="flex items-center">
+        <Logo class="mr-12" />
 
-        <Link label="Accueil" to="/" :is-active="route.path === '/'" />
-        <Link
-          label="Abonnements"
-          to="/subscriptions"
-          :is-active="route.path.startsWith('/subscriptions')"
-        />
-        <Link label="Vidéos" to="/videos" :is-active="route.path.startsWith('/videos')" />
+        <nav class="hidden items-center gap-4 md:flex">
+          <Link label="Accueil" to="/" :is-active="route.path === '/'" />
+          <Link
+            label="Abonnements"
+            to="/subscriptions"
+            :is-active="route.path.startsWith('/subscriptions')"
+          />
+          <Link label="Vidéos" to="/videos" :is-active="route.path.startsWith('/videos')" />
+        </nav>
 
-        <div class="ml-auto">
+        <div class="ml-auto flex items-center gap-6">
           <UserDropdown />
         </div>
       </div>
