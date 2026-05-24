@@ -36,10 +36,17 @@ export default defineNuxtConfig({
     "@nuxt/fonts",
     "@nuxt/icon",
     "@nuxt/image",
+    "@nuxtjs/color-mode",
     "@vueuse/nuxt",
     "nuxt-auth-utils",
     "reka-ui/nuxt",
   ],
+
+  colorMode: {
+    preference: "system",
+    fallback: "dark",
+    classSuffix: "",
+  },
 
   devServer: {
     // Used with atproto oauth
