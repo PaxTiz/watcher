@@ -53,7 +53,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
           sideOffset: 8,
           alignOffset: -4,
           class:
-            "bg-ui-bg border-ui-border relative z-1000 flex max-h-[200px] min-w-[var(--reka-dropdown-menu-trigger-width)] w-max flex-col gap-1 overflow-y-scroll rounded border p-1 shadow shadow-ui-border dark:shadow-black",
+            "bg-ui-bg border-ui-border relative z-1000 flex max-h-[200px] min-w-[var(--reka-dropdown-menu-trigger-width)] w-max flex-col overflow-y-scroll rounded border p-1 shadow shadow-ui-border dark:shadow-black",
         },
         () => [
           props.item.allowSearch &&
@@ -102,7 +102,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
           <DropdownMenuContent
             align="start"
             :side-offset="5"
-            class="bg-ui-bg border-ui-border shadow-ui-border absolute z-1000 mt-2 flex w-max min-w-[var(--reka-dropdown-menu-trigger-width)] flex-col gap-1 rounded border p-1 shadow dark:shadow-black"
+            class="bg-ui-bg border-ui-border shadow-ui-border absolute z-1000 mt-2 flex w-max min-w-[var(--reka-dropdown-menu-trigger-width)] flex-col rounded border p-1 shadow dark:shadow-black"
           >
             <template v-for="item in items" :key="item.label">
               <DropdownMenuSub v-if="item.children && item.children.length > 0">

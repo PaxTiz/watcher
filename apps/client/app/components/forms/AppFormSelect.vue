@@ -64,7 +64,7 @@ defineExpose({
       <SelectPortal>
         <Transition appear>
           <SelectContent
-            class="bg-ui-bg border-ui-border shadow-ui-border absolute z-1000 mt-2 flex w-max min-w-[var(--reka-select-trigger-width)] flex-col gap-1 rounded border p-1 shadow dark:shadow-black"
+            class="bg-ui-bg border-ui-border shadow-ui-border absolute z-1000 mt-2 flex w-max min-w-[var(--reka-select-trigger-width)] flex-col rounded border p-1 shadow dark:shadow-black"
             position="popper"
             :side-offset="5"
           >
