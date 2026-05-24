@@ -10,7 +10,7 @@ const emit = defineEmits<{ close: [boolean] }>();
 <template>
   <Modal :ui="{ body: 'w-full max-w-[450px]' }">
     <div class="flex flex-col items-center">
-      <h2 class="text-center text-2xl font-bold text-white">{{ title }}</h2>
+      <h2 class="text-ui-text text-center text-2xl font-bold">{{ title }}</h2>
       <p class="text-ui-text mt-4 text-center">
         {{ description }}
       </p>

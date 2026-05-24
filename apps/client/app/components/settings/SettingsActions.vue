@@ -31,13 +31,13 @@ const on_delete_account = async () => {
 <template>
   <section class="border-t border-red-900/20 pt-8">
     <h2 class="text-2xl font-semibold text-red-500">Zone de danger</h2>
-    <p class="text-gray-400">Actions irréversibles concernant votre compte.</p>
+    <p class="text-ui-text-muted">Actions irréversibles concernant votre compte.</p>
 
     <Card class="mt-6 border-red-900/20">
       <div class="flex items-center justify-between">
         <div>
-          <h3 class="font-medium text-white">Supprimer mon compte</h3>
-          <p class="text-sm text-gray-500">
+          <h3 class="text-ui-text font-medium">Supprimer mon compte</h3>
+          <p class="text-ui-text-muted text-sm">
             Toutes vos données et abonnements seront supprimés définitivement.
           </p>
         </div>

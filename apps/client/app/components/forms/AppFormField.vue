@@ -17,7 +17,7 @@ provide(HAS_FORM_SINGLE_ERROR_SYMBOL, hasError);
 
 <template>
   <div>
-    <label v-if="label" :for="name" class="text-gray-300">{{ label }}</label>
+    <label v-if="label" :for="name" class="text-ui-text-muted">{{ label }}</label>
 
     <div class="mt-1">
       <slot name="default" />

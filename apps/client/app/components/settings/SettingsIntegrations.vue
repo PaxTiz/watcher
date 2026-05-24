@@ -26,8 +26,8 @@ const providers = [
 
 <template>
   <section>
-    <h2 class="text-2xl font-semibold text-white">Comptes liés</h2>
-    <p class="text-gray-400">Liez vos comptes sociaux pour synchroniser vos abonnements.</p>
+    <h2 class="text-ui-text text-2xl font-semibold">Comptes liés</h2>
+    <p class="text-ui-text-muted">Liez vos comptes sociaux pour synchroniser vos abonnements.</p>
 
     <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <SettingsIntegrationCard

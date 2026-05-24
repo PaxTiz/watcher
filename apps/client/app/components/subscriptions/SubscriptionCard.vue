@@ -67,8 +67,8 @@ onLongPress(
       v-if="!flat"
       class="mt-2 flex items-center justify-center text-center text-xs"
       :class="{
-        'text-white': subscription.is_favorite,
-        'text-slate-400': !subscription.is_favorite,
+        'text-ui-text': subscription.is_favorite,
+        'text-ui-text-muted': !subscription.is_favorite,
       }"
     >
       <Icon

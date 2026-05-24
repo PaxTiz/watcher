@@ -71,9 +71,9 @@ const on_link = () => {
         <Icon :name="integration.icon" class="text-2xl" />
       </div>
       <div>
-        <h3 class="font-medium text-white">{{ integration.name }}</h3>
+        <h3 class="text-ui-text font-medium">{{ integration.name }}</h3>
         <p v-if="is_linked" class="text-xs text-green-400">Connecté</p>
-        <p v-else class="text-xs text-gray-500">Non connecté</p>
+        <p v-else class="text-ui-text-muted text-xs">Non connecté</p>
       </div>
     </div>
 

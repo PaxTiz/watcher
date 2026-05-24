@@ -20,8 +20,10 @@ const on_logout = async () => {
 <template>
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-4xl font-bold text-white">Paramètres</h1>
-      <p class="mt-2 text-gray-400">Gérez vos intégrations et les paramètres de votre compte.</p>
+      <h1 class="text-ui-text text-4xl font-bold">Paramètres</h1>
+      <p class="text-ui-text-muted mt-2">
+        Gérez vos intégrations et les paramètres de votre compte.
+      </p>
     </div>
     <Button label="Me déconnecter" color="primary" icon="lucide:log-out" @click="on_logout" />
   </div>

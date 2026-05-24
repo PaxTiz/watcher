@@ -60,7 +60,7 @@ const { dates, numbers } = useFormatter();
       </div>
 
       <div class="-mt-0.5">
-        <h2 class="text-lg leading-snug font-medium text-white">
+        <h2 class="text-ui-text text-lg leading-snug font-medium">
           {{ video.title }}
         </h2>
 

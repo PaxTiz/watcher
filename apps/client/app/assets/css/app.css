@@ -8,20 +8,41 @@
   --radius-*: initial;
   --radius: 0.5rem;
 
-  --color-background: #11111b;
-  --color-ui-bg: #1e1e2e;
-  --color-ui-border: #313244;
-  --color-ui-text: #cdd6f4;
+  /* Mapping des couleurs aux variables CSS */
+  --color-background: var(--background);
+  --color-ui-bg: var(--ui-bg);
+  --color-ui-border: var(--ui-border);
+  --color-ui-text: var(--ui-text);
+  --color-ui-text-muted: var(--ui-text-muted);
+
   --color-alt: #fe640b;
   --color-highlight: oklch(82.8% 0.189 84.429);
 }
 
 :root {
-  --body-background: var(--color-background);
-  --navbar-gradient-top: #181825;
-  --navbar-gradient-bottom: var(--color-background);
+  /* Thème Clair (Moderne & Pro) */
+  --background: #f8fafc; /* Slate 50 */
+  --ui-bg: #ffffff;
+  --ui-border: #e2e8f0; /* Slate 200 */
+  --ui-text: #0f172a; /* Slate 900 */
+  --ui-text-muted: #64748b; /* Slate 500 */
+
+  --navbar-gradient-top: #ffffff;
+  --navbar-gradient-bottom: #f1f5f9;
 
   --subscription-image-size: 71px;
+}
+
+.dark {
+  /* Thème Sombre (Existant, légèrement ajusté) */
+  --background: #11111b;
+  --ui-bg: #1e1e2e;
+  --ui-border: #313244;
+  --ui-text: #cdd6f4;
+  --ui-text-muted: #94a3b8;
+
+  --navbar-gradient-top: #181825;
+  --navbar-gradient-bottom: #11111b;
 }
 
 @utility container {
@@ -35,14 +56,22 @@
 }
 
 body {
-  background-color: var(--body-background);
+  background-color: var(--background);
+  color: var(--ui-text);
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
 
 input {
-  background-color: var(--color-ui-bg);
-  border: 1px solid var(--color-ui-border);
+  background-color: var(--ui-bg);
+  border: 1px solid var(--ui-border);
   border-radius: var(--radius);
-  color: var(--color-ui-text);
+  color: var(--ui-text);
+
+  &::placeholder {
+    color: var(--ui-text-muted);
+  }
 
   &.size__normal {
     padding: --spacing(1) --spacing(2);
