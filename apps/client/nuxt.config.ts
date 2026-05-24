@@ -89,7 +89,6 @@ export default defineNuxtConfig({
         "plyr",
         "vue-sonner",
         "zod/mini",
-        "@headlessui/vue",
       ],
     },
   },

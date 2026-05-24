@@ -77,7 +77,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
               {
                 key: child.value,
                 class:
-                  "text-ui-text hover:bg-ui-border/75 flex w-full min-w-[100px] items-center gap-2 rounded p-1 text-start text-sm",
+                  "text-ui-text hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 flex w-full min-w-[100px] items-center gap-2 rounded p-1.5 text-start text-sm outline-none cursor-pointer",
                 onClick: () => emit("select", props.item.key, child.value),
               },
               () => [child.icon && h(Icon, { name: child.icon }), h("span", child.label)],
@@ -101,6 +101,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
         <Transition appear>
           <DropdownMenuContent
             align="start"
+            :side-offset="5"
             class="bg-ui-bg border-ui-border shadow-ui-border absolute z-1000 mt-2 flex w-max min-w-[var(--reka-dropdown-menu-trigger-width)] flex-col gap-1 rounded border p-1 shadow dark:shadow-black"
           >
             <template v-for="item in items" :key="item.label">
@@ -108,7 +109,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
                 <DropdownMenuSubTrigger
                   :value="item.label"
                   as="button"
-                  class="text-ui-text hover:bg-ui-border/75 flex w-full items-center justify-between gap-2 rounded p-1 text-start text-sm"
+                  class="text-ui-text hover:bg-ui-border/75 data-[state=open]:bg-ui-border/75 flex w-full cursor-pointer items-center justify-between gap-2 rounded p-1.5 text-start text-sm outline-none"
                 >
                   <div class="flex items-center gap-2">
                     <Icon v-if="item.icon" :name="item.icon" />
@@ -125,7 +126,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
 
               <DropdownMenuItem
                 v-else
-                class="text-ui-text hover:bg-ui-border/75 flex w-full items-center gap-2 rounded p-1 text-start text-sm"
+                class="text-ui-text hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 flex w-full cursor-pointer items-center gap-2 rounded p-1.5 text-start text-sm outline-none"
                 @click="emit('select', item.key, item.value as T)"
               >
                 <Icon v-if="item.icon" :name="item.icon" />
