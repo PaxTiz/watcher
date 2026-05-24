@@ -32,7 +32,7 @@ watchDebounced(
 
 <template>
   <div class="mb-8 flex gap-4">
-    <input v-model="filter.name" placeholder="Rechercher par nom.." class="flex-1" />
+    <input v-model="filter.name" placeholder="Rechercher par nom.." class="size__normal flex-1" />
 
     <AppFormSelect
       v-model="filter.service"

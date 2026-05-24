@@ -13,7 +13,7 @@ const { dates, numbers } = useFormatter();
     :tag="NuxtLink"
     :to="`/videos/${video.id}`"
     size="flat"
-    class="hover:border-alt border-2 border-transparent transition-all duration-300"
+    class="hover:border-alt shadow-ui-border border-2 border-transparent shadow transition-all duration-300"
   >
     <div class="relative z-2">
       <div class="relative z-3">

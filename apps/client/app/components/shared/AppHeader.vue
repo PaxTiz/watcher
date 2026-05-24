@@ -23,7 +23,7 @@ const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
 
 <template>
   <header
-    class="border-ui-border border-b-3 bg-linear-to-b from-[--navbar-gradient-top] to-[--navbar-gradient-bottom] py-4"
+    class="border-ui-border border-b-3 bg-linear-to-b from-[var(--navbar-gradient-top)] to-[var(--navbar-gradient-bottom)] py-4"
   >
     <div class="container">
       <div class="flex items-center gap-8">

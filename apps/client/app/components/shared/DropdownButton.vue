@@ -53,7 +53,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
           sideOffset: 8,
           alignOffset: -4,
           class:
-            "bg-ui-bg border-ui-border relative z-1000 flex max-h-[200px] min-w-[125px] flex-col gap-1 overflow-y-scroll rounded border p-1 shadow shadow-black",
+            "bg-ui-bg border-ui-border relative z-1000 flex max-h-[200px] min-w-[var(--reka-dropdown-menu-trigger-width)] w-max flex-col gap-1 overflow-y-scroll rounded border p-1 shadow shadow-ui-border dark:shadow-black",
         },
         () => [
           props.item.allowSearch &&
@@ -77,7 +77,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
               {
                 key: child.value,
                 class:
-                  "text-ui-text hover:bg-ui-border flex w-full min-w-[100px] items-center gap-2 rounded p-1 text-start text-sm",
+                  "text-ui-text hover:bg-ui-border/75 flex w-full min-w-[100px] items-center gap-2 rounded p-1 text-start text-sm",
                 onClick: () => emit("select", props.item.key, child.value),
               },
               () => [child.icon && h(Icon, { name: child.icon }), h("span", child.label)],
@@ -101,14 +101,14 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
         <Transition appear>
           <DropdownMenuContent
             align="start"
-            class="bg-ui-bg border-ui-border absolute z-1000 mt-2 flex min-w-[125px] flex-col gap-1 rounded border p-1 shadow shadow-black"
+            class="bg-ui-bg border-ui-border shadow-ui-border absolute z-1000 mt-2 flex w-max min-w-[var(--reka-dropdown-menu-trigger-width)] flex-col gap-1 rounded border p-1 shadow dark:shadow-black"
           >
             <template v-for="item in items" :key="item.label">
               <DropdownMenuSub v-if="item.children && item.children.length > 0">
                 <DropdownMenuSubTrigger
                   :value="item.label"
                   as="button"
-                  class="text-ui-text hover:bg-ui-border flex w-full items-center justify-between gap-2 rounded p-1 text-start text-sm"
+                  class="text-ui-text hover:bg-ui-border/75 flex w-full items-center justify-between gap-2 rounded p-1 text-start text-sm"
                 >
                   <div class="flex items-center gap-2">
                     <Icon v-if="item.icon" :name="item.icon" />
@@ -125,7 +125,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
 
               <DropdownMenuItem
                 v-else
-                class="text-ui-text hover:bg-ui-border flex w-full items-center gap-2 rounded p-1 text-start text-sm"
+                class="text-ui-text hover:bg-ui-border/75 flex w-full items-center gap-2 rounded p-1 text-start text-sm"
                 @click="emit('select', item.key, item.value as T)"
               >
                 <Icon v-if="item.icon" :name="item.icon" />

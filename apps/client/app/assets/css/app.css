@@ -8,7 +8,6 @@
   --radius-*: initial;
   --radius: 0.5rem;
 
-  /* Mapping des couleurs aux variables CSS */
   --color-background: var(--background);
   --color-ui-bg: var(--ui-bg);
   --color-ui-border: var(--ui-border);
@@ -20,12 +19,11 @@
 }
 
 :root {
-  /* Thème Clair (Moderne & Pro) */
-  --background: #f8fafc; /* Slate 50 */
+  --background: #f8fafc;
   --ui-bg: #ffffff;
-  --ui-border: #e2e8f0; /* Slate 200 */
-  --ui-text: #0f172a; /* Slate 900 */
-  --ui-text-muted: #64748b; /* Slate 500 */
+  --ui-border: #e2e8f0;
+  --ui-text: #0f172a;
+  --ui-text-muted: #64748b;
 
   --navbar-gradient-top: #ffffff;
   --navbar-gradient-bottom: #f1f5f9;
@@ -34,7 +32,6 @@
 }
 
 .dark {
-  /* Thème Sombre (Existant, légèrement ajusté) */
   --background: #11111b;
   --ui-bg: #1e1e2e;
   --ui-border: #313244;
@@ -68,6 +65,7 @@ input {
   border: 1px solid var(--ui-border);
   border-radius: var(--radius);
   color: var(--ui-text);
+  padding: 0 calc(var(--spacing) * 2);
 
   &::placeholder {
     color: var(--ui-text-muted);
