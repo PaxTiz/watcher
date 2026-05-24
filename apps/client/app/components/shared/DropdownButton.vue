@@ -10,8 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "reka-ui";
 
-import { AppFormInput, Icon } from "#components";
-import Button from "~/components/shared/Button.vue";
+import { AppFormInput, Button, Icon } from "#components";
 
 const emit = defineEmits<{ select: [key: K, value: T] }>();
 const props = defineProps<{
@@ -20,8 +19,10 @@ const props = defineProps<{
   items: Array<{
     key: K;
     label: string;
+    value?: T;
+    icon?: string;
     allowSearch?: boolean;
-    children: Array<{
+    children?: Array<{
       label: string;
       value: T;
       disabled?: boolean;
@@ -36,7 +37,7 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
   (props) => {
     const searchQuery = ref("");
     const availableChildren = computed(() => {
-      let items = props.item.children;
+      let items = props.item.children ?? [];
       if (props.item.allowSearch) {
         const query = searchQuery.value.toLowerCase();
         items = items.filter((e) => e.label.toLowerCase().includes(query));
@@ -102,23 +103,35 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
             align="start"
             class="bg-ui-bg border-ui-border absolute z-1000 mt-2 flex min-w-[125px] flex-col gap-1 rounded border p-1 shadow shadow-black"
           >
-            <DropdownMenuSub v-for="item in items" :key="item.label">
-              <DropdownMenuSubTrigger
-                :value="item.label"
-                as="button"
-                class="text-ui-text hover:bg-ui-border flex w-full items-center justify-between gap-2 rounded p-1 text-start text-sm"
-                :class="{ 'opacity-50': item.children.length === 0 }"
-                :disabled="item.children.length === 0"
+            <template v-for="item in items" :key="item.label">
+              <DropdownMenuSub v-if="item.children && item.children.length > 0">
+                <DropdownMenuSubTrigger
+                  :value="item.label"
+                  as="button"
+                  class="text-ui-text hover:bg-ui-border flex w-full items-center justify-between gap-2 rounded p-1 text-start text-sm"
+                >
+                  <div class="flex items-center gap-2">
+                    <Icon v-if="item.icon" :name="item.icon" />
+                    <span>{{ item.label }}</span>
+                  </div>
+
+                  <Icon name="lucide:chevron-right" />
+                </DropdownMenuSubTrigger>
+
+                <DropdownMenuPortal>
+                  <DropdownChild :item="item" />
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              <DropdownMenuItem
+                v-else
+                class="text-ui-text hover:bg-ui-border flex w-full items-center gap-2 rounded p-1 text-start text-sm"
+                @click="emit('select', item.key, item.value as T)"
               >
+                <Icon v-if="item.icon" :name="item.icon" />
                 <span>{{ item.label }}</span>
-
-                <Icon name="lucide:chevron-right" />
-              </DropdownMenuSubTrigger>
-
-              <DropdownMenuPortal>
-                <DropdownChild :item="item" />
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
+              </DropdownMenuItem>
+            </template>
           </DropdownMenuContent>
         </Transition>
       </DropdownMenuPortal>

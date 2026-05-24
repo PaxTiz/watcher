@@ -37,13 +37,9 @@ const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
         />
         <Link label="Vidéos" to="/videos" :is-active="route.path.startsWith('/videos')" />
 
-        <Link
-          label="Paramètres"
-          to="/settings"
-          :is-active="route.path.startsWith('/settings')"
-          class="ml-auto"
-        />
-        <Button label="Synchroniser" />
+        <div class="ml-auto">
+          <UserDropdown />
+        </div>
       </div>
     </div>
   </header>
