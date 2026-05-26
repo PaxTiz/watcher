@@ -5,6 +5,11 @@ import type { VideosValidators } from "#shared/validators/videos";
 const { videos } = useFormatter();
 const { filters } = useVideosFilters();
 
+const { hide = [] } = defineProps<{
+  hide?: Array<VideoFilterType>;
+  color?: "primary" | "secondary" | "gradient";
+}>();
+
 const format_label = <K extends VideoFilterType, V extends VideosValidators["list"]["query"][K]>(
   k: K,
   v: V,
@@ -29,13 +34,15 @@ const format_label = <K extends VideoFilterType, V extends VideosValidators["lis
 <template>
   <div class="text-ui-text flex flex-wrap items-center gap-2">
     <Button
-      v-for="[k, v] in Object.entries(filters).filter(([_, v]) => !!v)"
+      v-for="[k, v] in Object.entries(filters).filter(
+        ([k, v]) => !!v && !hide.includes(k as VideoFilterType),
+      )"
       :label="format_label(k as VideoFilterType, v)"
       :tag="videos.filters.name(k as keyof typeof filters)"
       @click="() => (filters[k as VideoFilterType] = undefined)"
       allow-remove
     />
 
-    <VideosFiltersButton />
+    <VideosFiltersButton :hide="hide" :color="color" />
   </div>
 </template>

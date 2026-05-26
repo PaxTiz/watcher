@@ -3,6 +3,7 @@ import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import type { SubscriptionResource } from "#shared/resources/subscriptions";
+import { is_uuid, parse_slug_params } from "#shared/utils/random";
 
 export default class SubscriptionsService extends AbstractService {
   async find_all(user: User): Promise<Array<SubscriptionResource>> {
@@ -37,6 +38,40 @@ export default class SubscriptionsService extends AbstractService {
     }));
   }
 
+  async find_one(user: User, id_or_slug: string): Promise<SubscriptionResource> {
+    const database = useDatabase();
+
+    const is_params_uuid = is_uuid(id_or_slug);
+    const sub = await database
+      .selectFrom("subscriptions")
+      .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
+      .select([
+        "subscriptions.id",
+        "subscriptions.name",
+        "subscriptions.slug",
+        "subscriptions.service",
+        "subscriptions.url",
+        "subscriptions.logo",
+        "user_subscriptions.is_favorite",
+      ])
+      .where("user_subscriptions.user_id", "=", user.id)
+      .$if(is_params_uuid, (qb) => qb.where("id", "=", id_or_slug))
+      .$if(!is_params_uuid, (qb) => qb.where("slug", "=", parse_slug_params(id_or_slug)))
+      .executeTakeFirstOrThrow();
+
+    return {
+      id: sub.id,
+      name: sub.name,
+      slug: sub.slug,
+      is_favorite: sub.is_favorite,
+      channel: {
+        service: sub.service,
+        url: sub.url,
+        logo: sub.logo,
+      },
+    };
+  }
+
   async sync(user: User) {
     const sync = [];
     if (user.integrations.google) {
@@ -49,14 +84,20 @@ export default class SubscriptionsService extends AbstractService {
     await Promise.all(sync);
   }
 
-  async toggle_favorite(user: User, subscription_id: string) {
+  async toggle_favorite(user: User, id_or_slug: string) {
     const database = useDatabase();
 
+    const is_params_uuid = is_uuid(id_or_slug);
     await database
       .updateTable("user_subscriptions")
+      .from("subscriptions")
       .set({ is_favorite: (c) => c.not(c.ref("is_favorite")) })
-      .where("subscription_id", "=", subscription_id)
+      .whereRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
       .where("user_id", "=", user.id)
+      .$if(is_params_uuid, (qb) => qb.where("subscriptions.id", "=", id_or_slug))
+      .$if(!is_params_uuid, (qb) =>
+        qb.where("subscriptions.slug", "=", parse_slug_params(id_or_slug)),
+      )
       .execute();
   }
 }

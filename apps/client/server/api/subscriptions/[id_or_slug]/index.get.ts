@@ -5,12 +5,12 @@ import { services } from "#framework/server";
 
 export default defineRoute({
   params: z.object({
-    id: z.uuidv7(),
+    id_or_slug: z.string(),
   }),
 
   async handler(event, { params }) {
     const { user } = await requireUserSession(event);
 
-    await services.subscriptions.toggle_favorite(user, params.id);
+    return services.subscriptions.find_one(user, params.id_or_slug);
   },
 });

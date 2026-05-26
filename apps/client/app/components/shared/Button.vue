@@ -17,7 +17,7 @@ const {
   icon?: string;
   size?: "sm" | "normal" | "lg";
   disabled?: boolean;
-  color?: "primary" | "secondary";
+  color?: "primary" | "secondary" | "yellow";
   allowRemove?: boolean;
   type?: "submit" | "button";
   external?: boolean;
@@ -30,8 +30,10 @@ const classes = computed(() => {
     "min-h-[46px] text-sm py-3 px-4": size === "lg",
     "min-h-[38px] text-sm py-2 px-3": size === "normal",
     "min-h-[30px] text-sm py-1 px-2": size === "sm",
-    "bg-ui-bg border-2 border-ui-border text-ui-text not-disabled:hover:border-alt not-disabled:hover:text-alt":
+    "bg-ui-bg border-2 border-ui-border text-ui-text not-disabled:hover:border-alt not-disabled:hover:text-alt not-disabled:hover:opacity-75":
       color === "primary",
+    "bg-ui-bg hover:bg-yellow-500/10 border-2 border-yellow-400 text-yellow-400 not-disabled:hover:border-yellow-500 not-disabled:hover:text-yellow-500":
+      color === "yellow",
     "bg-alt/75 text-white": color === "secondary",
     "cursor-pointer": !disabled,
     "cursor-not-allowed opacity-50": disabled,
@@ -46,7 +48,7 @@ const hasFormErrors = inject<ComputedRef<boolean>>(
 
 <template>
   <component
-    class="group flex items-center justify-center gap-2 rounded border border-transparent transition-all duration-300 not-disabled:hover:opacity-75 disabled:cursor-not-allowed disabled:opacity-75"
+    class="group flex items-center justify-center gap-2 rounded border border-transparent transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-75"
     :is="component"
     :to="to"
     :class="classes"

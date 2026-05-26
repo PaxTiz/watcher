@@ -2,6 +2,8 @@
 import type { VideoResource } from "#shared/resources/videos";
 import type { Paginated } from "#shared/types/shared";
 
+const VIDEOS_PER_PAGE = 21;
+
 const modelValue = defineModel<number>("page", { required: true });
 const { videos } = defineProps<{ videos: Paginated<VideoResource> }>();
 </script>
@@ -12,8 +14,12 @@ const { videos } = defineProps<{ videos: Paginated<VideoResource> }>();
       <VideoCard v-for="video in videos.items" :id="video.id" :video="video" />
     </div>
 
-    <div class="mt-8 flex justify-center">
-      <Pagination v-model:page="modelValue" :total-items="videos.total" :per-page="21" />
+    <div v-if="videos.total > VIDEOS_PER_PAGE" class="mt-8 flex justify-center">
+      <Pagination
+        v-model:page="modelValue"
+        :total-items="videos.total"
+        :per-page="VIDEOS_PER_PAGE"
+      />
     </div>
   </template>
 

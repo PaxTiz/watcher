@@ -54,12 +54,9 @@ onLongPress(
       'bg-highlight/15 border-highlight': subscription.is_favorite,
       'bg-ui-bg border-ui-border': !subscription.is_favorite,
     }"
-    :to="`/subscription/${subscription.slug}`"
+    :to="`/subscriptions/${subscription.slug}`"
     :size="flat ? 'flat' : 'sm'"
-    target="_blank"
-    external
     transparent
-    @click.stop
   >
     <SubscriptionImage :subscription="subscription" />
 
