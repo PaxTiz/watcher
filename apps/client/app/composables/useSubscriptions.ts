@@ -23,6 +23,18 @@ export const useSubscriptions = () => {
   const youtube = computed(() => data.value?.filter((e) => e.channel.service === "youtube") ?? []);
   const twitch = computed(() => data.value?.filter((e) => e.channel.service === "twitch") ?? []);
 
+  const favorites = computed(() => {
+    return (
+      data.value?.filter((e) => e.is_favorite).sort((a, b) => a.name.localeCompare(b.name)) ?? []
+    );
+  });
+
+  const others = computed(() => {
+    return (
+      data.value?.filter((e) => !e.is_favorite).sort((a, b) => a.name.localeCompare(b.name)) ?? []
+    );
+  });
+
   return {
     data,
     error,
@@ -33,5 +45,7 @@ export const useSubscriptions = () => {
 
     youtube,
     twitch,
+    favorites,
+    others,
   };
 };

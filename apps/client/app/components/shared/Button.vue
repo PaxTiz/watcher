@@ -10,6 +10,7 @@ const {
   size = "normal",
   color = "primary",
   allowRemove = false,
+  loading = false,
 } = defineProps<{
   tag?: string;
   label?: string;
@@ -21,6 +22,7 @@ const {
   allowRemove?: boolean;
   type?: "submit" | "button";
   external?: boolean;
+  loading?: boolean;
 }>();
 
 const component = computed(() => (to ? NuxtLink : "button"));
@@ -35,8 +37,8 @@ const classes = computed(() => {
     "bg-ui-bg hover:bg-yellow-500/10 border-2 border-yellow-400 text-yellow-400 not-disabled:hover:border-yellow-500 not-disabled:hover:text-yellow-500":
       color === "yellow",
     "bg-alt/75 text-white": color === "secondary",
-    "cursor-pointer": !disabled,
-    "cursor-not-allowed opacity-50": disabled,
+    "cursor-pointer": !disabled && !loading,
+    "cursor-not-allowed opacity-50": disabled || loading,
   };
 });
 
@@ -52,11 +54,12 @@ const hasFormErrors = inject<ComputedRef<boolean>>(
     :is="component"
     :to="to"
     :class="classes"
-    :disabled="hasFormErrors || disabled"
+    :disabled="hasFormErrors || disabled || loading"
     :type="type"
     :external="external"
   >
-    <Icon v-if="icon" :name="icon" />
+    <Icon v-if="loading" name="lucide:loader-2" class="animate-spin" />
+    <Icon v-else-if="icon" :name="icon" />
 
     <span v-if="tag" class="bg-ui-bg rounded p-1 text-[10px]">
       {{ tag }}

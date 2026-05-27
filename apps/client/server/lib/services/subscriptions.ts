@@ -20,6 +20,7 @@ export default class SubscriptionsService extends AbstractService {
         "subscriptions.service",
         "subscriptions.url",
         "subscriptions.logo",
+        "subscriptions.last_synced_at",
         "user_subscriptions.is_favorite",
       ])
       .orderBy("name", "asc")
@@ -30,6 +31,7 @@ export default class SubscriptionsService extends AbstractService {
       name: sub.name,
       slug: sub.slug,
       is_favorite: sub.is_favorite,
+      last_synced_at: sub.last_synced_at,
       channel: {
         service: sub.service,
         url: sub.url,
@@ -52,6 +54,7 @@ export default class SubscriptionsService extends AbstractService {
         "subscriptions.service",
         "subscriptions.url",
         "subscriptions.logo",
+        "subscriptions.last_synced_at",
         "user_subscriptions.is_favorite",
       ])
       .where("user_subscriptions.user_id", "=", user.id)
@@ -64,6 +67,7 @@ export default class SubscriptionsService extends AbstractService {
       name: sub.name,
       slug: sub.slug,
       is_favorite: sub.is_favorite,
+      last_synced_at: sub.last_synced_at,
       channel: {
         service: sub.service,
         url: sub.url,

@@ -9,6 +9,8 @@ export type SubscriptionResource = {
 
   is_favorite: boolean;
 
+  last_synced_at: string;
+
   channel: {
     service: SubscriptionType;
     url: string;
