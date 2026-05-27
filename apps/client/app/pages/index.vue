@@ -85,21 +85,23 @@ const sync = async () => {
 </script>
 
 <template>
-  <div class="space-y-12">
+  <div class="space-y-8 md:space-y-12">
     <!-- Header simple -->
-    <div class="border-ui-border flex items-center justify-between border-b pb-8">
+    <div
+      class="border-ui-border flex flex-col gap-4 border-b pb-8 md:flex-row md:items-center md:justify-between"
+    >
       <div>
-        <h1 class="text-ui-text text-3xl font-black tracking-tight">Tableau de bord</h1>
-        <p class="text-ui-text-muted mt-1 font-medium">
+        <h1 class="text-ui-text text-2xl font-black tracking-tight md:text-3xl">Tableau de bord</h1>
+        <p class="text-ui-text-muted mt-1 text-sm font-medium md:text-base">
           Découvrez les dernières sorties de vos créateurs.
         </p>
       </div>
 
       <div
         v-if="lastSyncedAt"
-        class="text-ui-text-muted flex items-center gap-2 text-sm font-medium"
+        class="text-ui-text-muted flex items-center gap-2 text-xs font-medium md:text-sm"
       >
-        <Icon name="lucide:history" class="text-lg" />
+        <Icon name="lucide:history" class="text-base md:text-lg" />
         <span>Dernière synchronisation {{ dates.ago(lastSyncedAt) }}</span>
       </div>
     </div>

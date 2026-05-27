@@ -2,6 +2,11 @@
 import { NuxtLink } from "#components";
 
 const route = useRoute();
+const { create } = useOverlay();
+
+const openSidebar = () => {
+  create(resolveComponent("SubscriptionsSidebarSlideover")).open();
+};
 
 const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
   (props) => {
@@ -29,6 +34,13 @@ const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
   >
     <div class="container py-5">
       <div class="flex items-center">
+        <button
+          class="bg-ui-border/40 text-ui-text mr-4 flex items-center justify-center rounded-lg p-2 lg:hidden"
+          @click="openSidebar"
+        >
+          <Icon name="lucide:menu" class="text-xl" />
+        </button>
+
         <Logo class="mr-12" />
 
         <nav class="hidden items-center gap-4 md:flex">

@@ -40,7 +40,7 @@ const toggleService = (service: "youtube" | "twitch") => {
           v-model="search"
           type="text"
           placeholder="Rechercher..."
-          class="bg-ui-bg border-ui-border focus:border-alt focus:ring-alt w-full rounded-lg py-2 pr-4 pl-10 text-sm outline-hidden transition-all focus:ring-1"
+          class="bg-ui-bg border-ui-border focus:border-alt focus:ring-alt w-full rounded-lg py-2 pr-4 pl-10 text-base outline-hidden transition-all focus:ring-1 lg:text-sm"
         />
       </div>
 
