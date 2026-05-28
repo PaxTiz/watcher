@@ -1,11 +1,13 @@
 <script lang="ts" setup>
+import type { SubscriptionResource } from "#shared/resources/subscriptions";
+
 const { favorites, others } = useSubscriptions();
 
 const search = ref("");
 const serviceFilter = ref<"youtube" | "twitch" | null>(null);
 const showAll = ref(false);
 
-const filterList = (list: any[]) => {
+const filterList = (list: Array<SubscriptionResource>) => {
   return list.filter((sub) => {
     const matchesSearch = sub.name.toLowerCase().includes(search.value.toLowerCase());
     const matchesService = !serviceFilter.value || sub.channel.service === serviceFilter.value;
@@ -29,7 +31,6 @@ const toggleService = (service: "youtube" | "twitch") => {
   <aside
     class="scrollbar-thumb-ui-border sticky top-24 h-[calc(100vh-120px)] w-64 shrink-0 scrollbar-thin overflow-y-auto pr-4"
   >
-    <!-- Filtres -->
     <div class="mb-6 space-y-3 px-2">
       <div class="relative">
         <Icon
@@ -57,6 +58,7 @@ const toggleService = (service: "youtube" | "twitch") => {
           <Icon name="fa7-brands:youtube" />
           YouTube
         </button>
+
         <button
           @click="toggleService('twitch')"
           class="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 py-1.5 text-xs font-bold transition-all"
@@ -78,7 +80,13 @@ const toggleService = (service: "youtube" | "twitch") => {
       </h3>
       <ul class="space-y-1">
         <li v-for="sub in filteredFavorites" :key="sub.id">
-          <SubscriptionsSidebarItem :subscription="sub" />
+          <SubscriptionImageWithAuthor
+            :slug="sub.slug"
+            :name="sub.name"
+            :image="sub.channel.logo"
+            size="sm"
+            with-hover
+          />
         </li>
       </ul>
     </div>
@@ -89,21 +97,27 @@ const toggleService = (service: "youtube" | "twitch") => {
       </h3>
       <ul class="space-y-1">
         <li v-for="sub in filteredOthers.slice(0, showAll ? undefined : 10)" :key="sub.id">
-          <SubscriptionsSidebarItem :subscription="sub" />
+          <SubscriptionImageWithAuthor
+            :slug="sub.slug"
+            :name="sub.name"
+            :image="sub.channel.logo"
+            size="sm"
+            with-hover
+          />
         </li>
       </ul>
 
-      <button
-        v-if="filteredOthers.length > 10"
-        class="text-alt mt-2 flex w-full items-center gap-1 px-2 text-left text-xs font-semibold hover:underline"
-        @click="showAll = !showAll"
-      >
-        <Icon :name="showAll ? 'lucide:chevron-up' : 'lucide:chevron-down'" />
-        {{ showAll ? "Voir moins" : `Voir tout (${filteredOthers.length})` }}
-      </button>
+      <div v-if="filteredOthers.length > 10" class="my-8 flex w-full justify-center">
+        <button
+          class="text-alt inline-flex items-center gap-1 px-2 text-left text-xs font-semibold hover:underline"
+          @click="showAll = !showAll"
+        >
+          <Icon :name="showAll ? 'lucide:chevron-up' : 'lucide:chevron-down'" />
+          {{ showAll ? "Voir moins" : `Voir tout (${filteredOthers.length})` }}
+        </button>
+      </div>
     </div>
 
-    <!-- État vide -->
     <div
       v-if="filteredFavorites.length === 0 && filteredOthers.length === 0"
       class="px-2 py-8 text-center"

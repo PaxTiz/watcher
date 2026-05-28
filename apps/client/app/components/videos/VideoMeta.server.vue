@@ -48,27 +48,15 @@ const description = computed(() => {
     <h1 class="text-ui-text text-4xl font-bold">{{ video.title }}</h1>
 
     <div class="mt-4 flex flex-wrap items-center justify-between">
-      <div class="flex items-center gap-4">
-        <nuxt-link :to="`/subscriptions/${video.author.slug}`">
-          <NuxtImg
-            class="w-full rounded"
-            loading="lazy"
-            format="avif,webp"
-            width="48"
-            height="48"
-            densities="x1"
-            :src="video.author.channel.logo"
-            :alt="`Logo de ${video.author.name}`"
-          />
-        </nuxt-link>
-
-        <div class="shrink-0">
-          <nuxt-link :to="`/subscriptions/${video.author.slug}`" class="text-ui-text font-semibold">
-            {{ video.author.name }}
-          </nuxt-link>
+      <SubscriptionImageWithAuthor
+        :slug="video.author.slug"
+        :image="video.author.channel.logo"
+        :name="video.author.name"
+      >
+        <template #bottom>
           <p class="text-ui-text text-sm">Publié le {{ dates.format(video.created_at) }}</p>
-        </div>
-      </div>
+        </template>
+      </SubscriptionImageWithAuthor>
 
       <div>
         <Button

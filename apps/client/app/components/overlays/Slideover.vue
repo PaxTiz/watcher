@@ -38,7 +38,7 @@ onKeyStroke("Escape", () => __CLOSE__?.());
     >
       <div
         ref="overlay"
-        class="bg-background relative flex h-full flex-col justify-between overflow-hidden rounded-t p-8 shadow shadow-black"
+        class="bg-background relative flex h-full flex-col justify-between overflow-hidden rounded p-8 shadow shadow-black"
       >
         <slot />
       </div>
