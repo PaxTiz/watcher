@@ -5,6 +5,8 @@ import { toast } from "vue-sonner";
 import type { VideoResource } from "#shared/resources/videos";
 import type { Paginated } from "#shared/types/shared";
 
+definePageMeta({ name: pages.home });
+
 const { data: subscriptions, refresh: refreshSubscriptions } = useSubscriptions();
 
 const { dates } = useFormatter();
@@ -91,7 +93,7 @@ const sync = async () => {
       class="border-ui-border flex flex-col gap-4 border-b pb-8 md:flex-row md:items-center md:justify-between"
     >
       <div>
-        <h1 class="text-ui-text text-2xl font-black tracking-tight md:text-3xl">Tableau de bord</h1>
+        <h1 class="page-title">Tableau de bord</h1>
         <p class="text-ui-text-muted mt-1 text-sm font-medium md:text-base">
           Découvrez les dernières sorties de vos créateurs.
         </p>

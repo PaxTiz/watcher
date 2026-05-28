@@ -2,6 +2,8 @@
 import type { VideoResource } from "#shared/resources/videos";
 import type { Paginated } from "#shared/types/shared";
 
+definePageMeta({ name: pages.videos_index });
+
 const route = useRoute();
 const { filters } = useVideosFilters();
 
@@ -18,7 +20,11 @@ watch(page, () => {
 </script>
 
 <template>
-  <VideosFilters class="mb-8" />
+  <div class="mb-8 flex items-center justify-between">
+    <h1 class="page-title">Vidéos de vos abonnements</h1>
+
+    <VideosFilters />
+  </div>
 
   <VideosList v-model:page="page" :videos="data ?? { total: 0, items: [] }" />
 </template>

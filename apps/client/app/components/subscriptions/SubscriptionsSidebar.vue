@@ -29,21 +29,10 @@ const toggleService = (service: "youtube" | "twitch") => {
 
 <template>
   <aside
-    class="scrollbar-thumb-ui-border sticky top-24 h-[calc(100vh-120px)] w-64 shrink-0 scrollbar-thin overflow-y-auto pr-4"
+    class="scrollbar-thumb-ui-border sticky top-28 h-[calc(100vh-120px)] w-64 shrink-0 scrollbar-thin overflow-y-auto pt-1 pr-4"
   >
     <div class="mb-6 space-y-3 px-2">
-      <div class="relative">
-        <Icon
-          name="lucide:search"
-          class="text-ui-text-muted absolute top-1/2 left-3 -translate-y-1/2"
-        />
-        <input
-          v-model="search"
-          type="text"
-          placeholder="Rechercher..."
-          class="bg-ui-bg border-ui-border focus:border-alt focus:ring-alt w-full rounded-lg py-2 pr-4 pl-10 text-base outline-hidden transition-all focus:ring-1 lg:text-sm"
-        />
-      </div>
+      <AppFormInput v-model="search" placeholder="Rechercher" class="w-full" />
 
       <div class="flex gap-2">
         <button
@@ -96,7 +85,7 @@ const toggleService = (service: "youtube" | "twitch") => {
         Abonnements
       </h3>
       <ul class="space-y-1">
-        <li v-for="sub in filteredOthers.slice(0, showAll ? undefined : 10)" :key="sub.id">
+        <li v-for="sub in filteredOthers.slice(0, showAll ? undefined : 8)" :key="sub.id">
           <SubscriptionImageWithAuthor
             :slug="sub.slug"
             :name="sub.name"

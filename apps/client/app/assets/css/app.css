@@ -97,3 +97,13 @@ input {
     outline-color: var(--color-alt);
   }
 }
+
+.page-title {
+  color: var(--color-ui-text);
+  font-size: var(--text-2xl);
+  font-weight: 900;
+
+  @media screen and (min-width: theme(breakpoint.md)) {
+    font-size: var(--text-3xl);
+  }
+}

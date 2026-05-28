@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { NuxtLink } from "#components";
+import { NuxtLink, LazySubscriptionsSidebarSlideover } from "#components";
 
 const route = useRoute();
-const { create } = useOverlay();
+const overlay = useOverlay();
 
 const openSidebar = () => {
-  create(resolveComponent("SubscriptionsSidebarSlideover")).open();
+  overlay.create(LazySubscriptionsSidebarSlideover).open();
 };
 
 const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
@@ -45,11 +45,6 @@ const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
 
         <nav class="hidden items-center gap-4 md:flex">
           <Link label="Accueil" to="/" :is-active="route.path === '/'" />
-          <Link
-            label="Abonnements"
-            to="/subscriptions"
-            :is-active="route.path.startsWith('/subscriptions')"
-          />
           <Link label="Vidéos" to="/videos" :is-active="route.path.startsWith('/videos')" />
         </nav>
 
