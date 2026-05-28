@@ -18,7 +18,7 @@ const {
   icon?: string;
   size?: "sm" | "normal" | "lg";
   disabled?: boolean;
-  color?: "primary" | "secondary" | "yellow";
+  color?: "primary" | "secondary" | "yellow" | "ghost";
   allowRemove?: boolean;
   type?: "submit" | "button";
   external?: boolean;
@@ -37,6 +37,7 @@ const classes = computed(() => {
     "bg-ui-bg hover:bg-yellow-500/10 border-2 border-yellow-400 text-yellow-400 not-disabled:hover:border-yellow-500 not-disabled:hover:text-yellow-500":
       color === "yellow",
     "bg-alt/75 text-white": color === "secondary",
+    "bg-transparent border-none text-ui-text-muted hover:text-ui-text": color === "ghost",
     "cursor-pointer": !disabled && !loading,
     "cursor-not-allowed opacity-50": disabled || loading,
   };

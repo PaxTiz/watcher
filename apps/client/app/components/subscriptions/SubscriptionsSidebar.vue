@@ -7,6 +7,26 @@ const search = ref("");
 const serviceFilter = ref<"youtube" | "twitch" | null>(null);
 const showAll = ref(false);
 
+const serviceItems = [
+  { key: "service", label: "Tous les services", value: "all", icon: "lucide:layers" },
+  { key: "service", label: "YouTube", value: "youtube", icon: "fa7-brands:youtube" },
+  { key: "service", label: "Twitch", value: "twitch", icon: "fa7-brands:twitch" },
+];
+
+const currentServiceIcon = computed(() => {
+  if (serviceFilter.value === "youtube") return "fa7-brands:youtube";
+  if (serviceFilter.value === "twitch") return "fa7-brands:twitch";
+  return "lucide:layers";
+});
+
+const onServiceSelect = (_key: string, value: string) => {
+  if (value === "all") {
+    serviceFilter.value = null;
+  } else {
+    serviceFilter.value = value as "youtube" | "twitch";
+  }
+};
+
 const filterList = (list: Array<SubscriptionResource>) => {
   return list.filter((sub) => {
     const matchesSearch = sub.name.toLowerCase().includes(search.value.toLowerCase());
@@ -17,49 +37,25 @@ const filterList = (list: Array<SubscriptionResource>) => {
 
 const filteredFavorites = computed(() => filterList(favorites.value));
 const filteredOthers = computed(() => filterList(others.value));
-
-const toggleService = (service: "youtube" | "twitch") => {
-  if (serviceFilter.value === service) {
-    serviceFilter.value = null;
-  } else {
-    serviceFilter.value = service;
-  }
-};
 </script>
 
 <template>
   <aside
     class="scrollbar-thumb-ui-border sticky top-28 h-[calc(100vh-120px)] w-64 shrink-0 scrollbar-thin overflow-y-auto pt-1 pr-4"
   >
-    <div class="mb-6 space-y-3 px-2">
-      <AppFormInput v-model="search" placeholder="Rechercher" class="w-full" />
-
-      <div class="flex gap-2">
-        <button
-          @click="toggleService('youtube')"
-          class="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 py-1.5 text-xs font-bold transition-all"
-          :class="
-            serviceFilter === 'youtube'
-              ? 'border-red-500 bg-red-500/10 text-red-500'
-              : 'border-ui-border bg-ui-bg text-ui-text-muted hover:border-ui-border-hover'
-          "
-        >
-          <Icon name="fa7-brands:youtube" />
-          YouTube
-        </button>
-
-        <button
-          @click="toggleService('twitch')"
-          class="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 py-1.5 text-xs font-bold transition-all"
-          :class="
-            serviceFilter === 'twitch'
-              ? 'border-purple-500 bg-purple-500/10 text-purple-500'
-              : 'border-ui-border bg-ui-bg text-ui-text-muted hover:border-ui-border-hover'
-          "
-        >
-          <Icon name="fa7-brands:twitch" />
-          Twitch
-        </button>
+    <div class="mb-6 px-2">
+      <div class="relative flex items-center">
+        <AppFormInput v-model="search" placeholder="Rechercher" class="w-full border-2" />
+        <div class="absolute right-1">
+          <DropdownButton
+            :items="serviceItems"
+            :icon="currentServiceIcon"
+            :value="serviceFilter ?? 'all'"
+            color="ghost"
+            align="center"
+            @select="onServiceSelect"
+          />
+        </div>
       </div>
     </div>
 

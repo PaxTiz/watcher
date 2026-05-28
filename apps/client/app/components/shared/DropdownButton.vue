@@ -16,6 +16,10 @@ const emit = defineEmits<{ select: [key: K, value: T] }>();
 const props = defineProps<{
   label?: string;
   icon?: string;
+  color?: "primary" | "secondary" | "yellow" | "ghost";
+  size?: "sm" | "normal" | "lg";
+  value?: T;
+  align?: "start" | "center" | "end";
   items: Array<{
     key: K;
     label: string;
@@ -77,7 +81,10 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
               {
                 key: child.value,
                 class:
-                  "text-ui-text hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 flex w-full min-w-[100px] items-center gap-2 rounded p-1.5 text-start text-sm outline-none cursor-pointer",
+                  "hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 flex w-full min-w-[100px] items-center gap-2 rounded p-1.5 text-start text-sm outline-none cursor-pointer transition-colors " +
+                  (props.value === child.value
+                    ? "bg-alt/10 text-alt"
+                    : "text-ui-text-muted hover:text-ui-text"),
                 onClick: () => emit("select", props.item.key, child.value),
               },
               () => [child.icon && h(Icon, { name: child.icon }), h("span", child.label)],
@@ -93,16 +100,16 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
 <template>
   <div class="relative">
     <DropdownMenuRoot v-model:open="isOpen">
-      <DropdownMenuTrigger :aria-label="label" as="template">
-        <Button :label="label" :icon="icon" />
+      <DropdownMenuTrigger :aria-label="label">
+        <Button :label="label" :icon="icon" :color="color" :size="size" />
       </DropdownMenuTrigger>
 
       <DropdownMenuPortal>
         <Transition appear>
           <DropdownMenuContent
-            align="start"
+            :align="align ?? 'start'"
             :side-offset="5"
-            class="bg-ui-bg border-ui-border shadow-ui-border absolute z-1000 mt-2 flex w-max min-w-[var(--reka-dropdown-menu-trigger-width)] flex-col rounded border p-1 shadow dark:shadow-black"
+            class="bg-ui-bg border-ui-border shadow-ui-border z-1000 flex w-max min-w-[var(--reka-dropdown-menu-trigger-width)] flex-col rounded border p-1 shadow dark:shadow-black"
           >
             <template v-for="item in items" :key="item.label">
               <DropdownMenuSub v-if="item.children && item.children.length > 0">
@@ -126,7 +133,12 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
 
               <DropdownMenuItem
                 v-else
-                class="text-ui-text hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 flex w-full cursor-pointer items-center gap-2 rounded p-1.5 text-start text-sm outline-none"
+                class="hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 flex w-full cursor-pointer items-center gap-2 rounded p-1.5 text-start text-sm transition-colors outline-none"
+                :class="
+                  value === item.value
+                    ? 'bg-alt/10 text-alt'
+                    : 'text-ui-text-muted hover:text-ui-text'
+                "
                 @click="emit('select', item.key, item.value as T)"
               >
                 <Icon v-if="item.icon" :name="item.icon" />
