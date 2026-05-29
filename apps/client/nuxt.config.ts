@@ -39,7 +39,6 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@vueuse/nuxt",
     "nuxt-auth-utils",
-    "reka-ui/nuxt",
   ],
 
   colorMode: {

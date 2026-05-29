@@ -115,8 +115,8 @@ export default class VideosService extends AbstractService {
       .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
       .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
       .where("user_subscriptions.user_id", "=", user.id)
-      .offset((params.page - 1) * 21)
-      .limit(21)
+      .offset((params.page - 1) * params.per_page)
+      .limit(params.per_page)
       .orderBy("videos.created_at", "desc")
       .select([
         "videos.id as video_id",

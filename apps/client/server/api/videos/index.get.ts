@@ -10,6 +10,7 @@ export default defineRoute({
 
     return services.videos.find_all(user, {
       page: query.page,
+      per_page: query.per_page,
       service: query.service,
       duration: query.duration,
       date: query.date,
