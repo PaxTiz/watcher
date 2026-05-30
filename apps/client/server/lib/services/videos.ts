@@ -100,7 +100,7 @@ export default class VideosService extends AbstractService {
       .where("user_subscriptions.user_id", "=", user.id)
       .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
-      .$if(params.is_favorite !== undefined, (qb) =>
+      .$if(params.is_favorite === true, (qb) =>
         qb.where("user_subscriptions.is_favorite", "=", params.is_favorite!),
       )
       .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
@@ -136,7 +136,7 @@ export default class VideosService extends AbstractService {
         "user_subscriptions.is_favorite as subscription_is_favorite",
       ])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
-      .$if(params.is_favorite !== undefined, (qb) =>
+      .$if(params.is_favorite === true, (qb) =>
         qb.where("user_subscriptions.is_favorite", "=", params.is_favorite!),
       )
       .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))

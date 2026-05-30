@@ -8,3 +8,16 @@ export const blueskyHandleSchema = z
       { error: "Le format de l'identifiant semble invalide" },
     ),
   );
+
+export const booleanSchema = z.union([
+  z.literal(true),
+  z.pipe(
+    z.literal("true"),
+    z.transform((_) => true),
+  ),
+  z.literal(false),
+  z.pipe(
+    z.literal("false"),
+    z.transform((_) => false),
+  ),
+]);

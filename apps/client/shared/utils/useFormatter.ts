@@ -48,6 +48,8 @@ export const useFormatter = () => {
               return "Date";
             case "subscription_id":
               return "Chaîne";
+            case "is_favorite":
+              return "En favoris uniquement";
             default:
               return "N/A";
           }
@@ -91,6 +93,17 @@ export const useFormatter = () => {
               return "Cette année";
             case "older":
               return "Plus ancien";
+            default:
+              return "N/A";
+          }
+        },
+
+        is_favorite: (key: VideosValidators["list"]["query"]["is_favorite"]) => {
+          switch (key) {
+            case true:
+              return "Oui";
+            case false:
+              return "Non";
             default:
               return "N/A";
           }

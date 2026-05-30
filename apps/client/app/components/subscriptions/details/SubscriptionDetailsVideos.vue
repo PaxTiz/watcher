@@ -36,7 +36,7 @@ onUnmounted(() => {
 
       <div class="flex items-center gap-2">
         <AppFormInput v-model="query" placeholder="Rechercher une vidéo" class="w-[250px]" />
-        <VideosFilters :hide="['subscription_id', 'service']" />
+        <VideosFilters :hide="['subscription_id', 'service', 'is_favorite']" />
       </div>
     </div>
 

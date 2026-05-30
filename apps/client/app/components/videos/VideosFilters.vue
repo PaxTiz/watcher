@@ -26,6 +26,10 @@ const format_label = <K extends VideoFilterType, V extends VideosValidators["lis
     return videos.filters.date(v as VideosValidators["list"]["query"]["date"]);
   }
 
+  if (k === "is_favorite") {
+    return videos.filters.is_favorite(v as VideosValidators["list"]["query"]["is_favorite"]);
+  }
+
   const { data } = useNuxtData<Array<SubscriptionResource>>("subscriptions");
   return data.value?.find((e) => e.id === v)?.name ?? "N/A";
 };
@@ -35,7 +39,7 @@ const format_label = <K extends VideoFilterType, V extends VideosValidators["lis
   <div class="text-ui-text flex flex-wrap items-center gap-2">
     <Button
       v-for="[k, v] in Object.entries(filters).filter(
-        ([k, v]) => !!v && !hide.includes(k as VideoFilterType),
+        ([k, v]) => v !== undefined && !hide.includes(k as VideoFilterType),
       )"
       :label="format_label(k as VideoFilterType, v)"
       :tag="videos.filters.name(k as keyof typeof filters)"

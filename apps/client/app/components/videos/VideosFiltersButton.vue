@@ -60,6 +60,20 @@ const items = computed(() =>
         icon: sub.channel.service === "youtube" ? "lucide:youtube" : "lucide:twitch",
       })),
     },
+    {
+      key: "is_favorite",
+      label: "En favoris uniquement",
+      children: [
+        {
+          label: "Oui",
+          value: true,
+        },
+        {
+          label: "Non",
+          value: false,
+        },
+      ],
+    },
   ].filter((item) => !hide.includes(item.key as VideoFilterType)),
 );
 </script>
