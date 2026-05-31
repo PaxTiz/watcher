@@ -24,7 +24,10 @@ watch(page, () => {
   <div class="mb-8 flex items-center justify-between">
     <h1 class="page-title">Vidéos de vos abonnements</h1>
 
-    <VideosFilters v-model="filters" />
+    <div class="flex items-center gap-2">
+      <AppFormInput v-model="filters.query" placeholder="Rechercher une vidéo" class="w-[250px]" />
+      <VideosFilters v-model="filters" />
+    </div>
   </div>
 
   <VideosList v-model:page="page" :videos="data ?? { total: 0, items: [] }" />

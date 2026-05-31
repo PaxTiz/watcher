@@ -1,5 +1,5 @@
 import { formatISO, startOfDay, startOfMonth, startOfWeek, startOfYear } from "date-fns";
-import type { SelectQueryBuilder } from "kysely";
+import { sql, type SelectQueryBuilder } from "kysely";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
@@ -119,7 +119,9 @@ export default class VideosService extends AbstractService {
       .$if(!!params.subscription_id, (qb) =>
         qb.where("subscriptions.id", "=", params.subscription_id!),
       )
-      .$if(!!params.query, (qb) => qb.where("videos.title", "ilike", `%${params.query}%`))
+      .$if(!!params.query, (qb) =>
+        qb.where("videos.title", "@@", sql<string>`(to_tsquery(${params.query!}))`),
+      )
       .executeTakeFirst();
 
     const items = await database
@@ -167,7 +169,9 @@ export default class VideosService extends AbstractService {
       .$if(!!params.subscription_id, (qb) =>
         qb.where("subscriptions.id", "=", params.subscription_id!),
       )
-      .$if(!!params.query, (qb) => qb.where("videos.title", "ilike", `%${params.query}%`))
+      .$if(!!params.query, (qb) =>
+        qb.where("videos.title", "@@", sql<string>`(to_tsquery(${params.query!}))`),
+      )
       .execute();
 
     const mapped_items: Array<VideoResource> = [];

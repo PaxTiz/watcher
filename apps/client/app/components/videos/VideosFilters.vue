@@ -11,6 +11,20 @@ const { hide = [] } = defineProps<{
   color?: "primary" | "secondary" | "gradient";
 }>();
 
+const filtered_filters = computed(() => {
+  return Object.entries(modelValue.value).filter(([k, v]) => {
+    if (k === "query") {
+      return false;
+    }
+
+    if (hide.includes(k as VideoFilterType)) {
+      return false;
+    }
+
+    return v !== undefined;
+  });
+});
+
 const format_label = <K extends VideoFilterType, V extends VideosValidators["list"]["query"][K]>(
   k: K,
   v: V,
@@ -39,9 +53,7 @@ const format_label = <K extends VideoFilterType, V extends VideosValidators["lis
 <template>
   <div class="text-ui-text flex flex-wrap items-center gap-2">
     <Button
-      v-for="[k, v] in Object.entries(modelValue).filter(
-        ([k, v]) => v !== undefined && !hide.includes(k as VideoFilterType),
-      )"
+      v-for="[k, v] in filtered_filters"
       :label="format_label(k as VideoFilterType, v)"
       :tag="videos.filters.name(k as keyof typeof modelValue)"
       @click="() => (modelValue[k as VideoFilterType] = undefined)"
