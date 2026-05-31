@@ -5,7 +5,7 @@ const modelValue = defineModel<VideoFilters>({ required: true });
 
 const { hide = [] } = defineProps<{
   hide?: Array<VideoFilterType>;
-  color?: "primary" | "secondary" | "gradient";
+  color?: "primary" | "secondary";
 }>();
 
 const { videos } = useFormatter();
@@ -17,7 +17,7 @@ const { data: subscriptions } = await useAppFetch<Array<SubscriptionResource>>(
   },
 );
 
-const onSelectFilter = (key: keyof (typeof modelValue)["value"], value: string) => {
+const onSelectFilter = (key: VideoFilterType, value: string) => {
   modelValue.value[key] = value as any;
 };
 
@@ -68,11 +68,11 @@ const items = computed(() =>
       children: [
         {
           label: "Oui",
-          value: true,
+          value: true as any,
         },
         {
           label: "Non",
-          value: false,
+          value: false as any,
         },
       ],
     },
@@ -85,6 +85,6 @@ const items = computed(() =>
     label="Ajouter un filtre"
     :items="items"
     :color="color"
-    @select="onSelectFilter"
+    @select="([k, v]) => onSelectFilter(k as VideoFilterType, v!)"
   />
 </template>

@@ -80,9 +80,9 @@ export type UserSubscriptionTable = {
 
   subscription_id: string;
 
-  is_favorite: boolean;
+  is_favorite: ColumnType<boolean, boolean | undefined, boolean | undefined>;
 
-  is_hidden: boolean;
+  is_hidden: ColumnType<boolean, boolean | undefined, boolean | undefined>;
 };
 
 export type HiddenUsersVideosTable = {

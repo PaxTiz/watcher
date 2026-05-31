@@ -8,7 +8,7 @@ const { videos } = useFormatter();
 
 const { hide = [] } = defineProps<{
   hide?: Array<VideoFilterType>;
-  color?: "primary" | "secondary" | "gradient";
+  color?: "primary" | "secondary";
 }>();
 
 const filtered_filters = computed(() => {

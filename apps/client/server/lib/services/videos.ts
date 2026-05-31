@@ -12,14 +12,19 @@ import type { SubscriptionType } from "#shared/types/subscriptions";
 import type { VideosValidators } from "#shared/validators/videos";
 
 export default class VideosService extends AbstractService {
-  async get_by_id(id: string): Promise<VideoResource> {
+  async get_by_id(user: User, id: string): Promise<VideoResource> {
     const database = useDatabase();
 
     const video = await database
       .selectFrom("videos")
       .where("videos.id", "=", id)
       .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
-      .select([
+      .leftJoin("user_subscriptions", (qb) =>
+        qb
+          .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
+          .on("user_subscriptions.user_id", "=", user.id),
+      )
+      .select((qb) => [
         "videos.id as video_id",
         "videos.service as video_service",
         "videos.title as video_title",
@@ -34,6 +39,13 @@ export default class VideosService extends AbstractService {
         "subscriptions.service as subscription_service",
         "subscriptions.url as subscription_url",
         "subscriptions.logo as subscription_logo",
+        "subscriptions.last_synced_at as subscription_last_sync_at",
+        sql<boolean>`COALESCE(${qb.ref("user_subscriptions.is_hidden")}, false)`.as(
+          "subscription_is_hidden",
+        ),
+        sql<boolean>`COALESCE(${qb.ref("user_subscriptions.is_favorite")}, false)`.as(
+          "subscription_is_favorite",
+        ),
       ])
       .executeTakeFirstOrThrow();
 
@@ -50,7 +62,9 @@ export default class VideosService extends AbstractService {
         id: video.subscription_id,
         name: video.subscription_name,
         slug: video.subscription_slug,
-        is_favorite: false,
+        is_favorite: video.subscription_is_favorite,
+        is_hidden: video.subscription_is_hidden,
+        last_synced_at: video.subscription_last_sync_at,
         channel: {
           service: video.subscription_service,
           url: video.subscription_url,
@@ -158,6 +172,7 @@ export default class VideosService extends AbstractService {
         "subscriptions.service as subscription_service",
         "subscriptions.url as subscription_url",
         "subscriptions.logo as subscription_logo",
+        "subscriptions.last_synced_at as subscription_last_synced_at",
         "user_subscriptions.is_favorite as subscription_is_favorite",
       ])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
@@ -190,6 +205,8 @@ export default class VideosService extends AbstractService {
           name: item.subscription_name,
           slug: item.subscription_slug,
           is_favorite: item.subscription_is_favorite,
+          last_synced_at: item.subscription_last_synced_at,
+          is_hidden: false,
           channel: {
             service: item.subscription_service,
             url: item.subscription_url,

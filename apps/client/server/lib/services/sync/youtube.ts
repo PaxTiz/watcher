@@ -138,7 +138,6 @@ export default class SyncYoutube extends AbstractService {
         .values({
           user_id: user.id,
           subscription_id: patched_subscription.id,
-          is_favorite: false,
         })
         .onConflict((oc) => oc.doNothing())
         .execute();
