@@ -1,4 +1,4 @@
-import { formatISO, startOfDay, startOfMonth, startOfWeek, startOfYear } from "date-fns";
+import { formatISO, startOfDay, startOfWeek, sub } from "date-fns";
 import { sql, type SelectQueryBuilder } from "kysely";
 
 import type { User } from "#auth-utils";
@@ -253,9 +253,9 @@ export default class VideosService extends AbstractService {
     const date = {
       today: () => formatISO(startOfDay(new Date())),
       weekly: () => formatISO(startOfWeek(new Date())),
-      monthly: () => formatISO(startOfMonth(new Date())),
-      yearly: () => formatISO(startOfYear(new Date())),
-      older: () => formatISO(startOfYear(new Date())),
+      monthly: () => formatISO(sub(new Date(), { days: 30 })),
+      yearly: () => formatISO(sub(new Date(), { days: 365 })),
+      older: () => formatISO(sub(new Date(), { days: 365 })),
     }[value];
 
     if (value === "older") {

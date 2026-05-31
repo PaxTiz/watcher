@@ -88,9 +88,9 @@ export const useFormatter = () => {
             case "weekly":
               return "Cette semaine";
             case "monthly":
-              return "Ce mois";
+              return "30 derniers jours";
             case "yearly":
-              return "Cette année";
+              return "365 derniers jours";
             case "older":
               return "Plus ancien";
             default:
