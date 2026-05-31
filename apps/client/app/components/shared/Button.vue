@@ -16,6 +16,7 @@ const {
   label?: string;
   to?: RouteLocationRaw;
   icon?: string;
+  iconSize?: "normal" | "lg";
   size?: "sm" | "normal" | "lg";
   disabled?: boolean;
   color?: "primary" | "secondary" | "yellow" | "ghost";
@@ -60,7 +61,7 @@ const hasFormErrors = inject<ComputedRef<boolean>>(
     :external="external"
   >
     <Icon v-if="loading" name="lucide:loader-2" class="animate-spin" />
-    <Icon v-else-if="icon" :name="icon" />
+    <Icon v-else-if="icon" :name="icon" :class="{ 'text-lg': iconSize === 'lg' }" />
 
     <span v-if="tag" class="bg-ui-bg rounded p-1 text-[10px]">
       {{ tag }}

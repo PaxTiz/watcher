@@ -23,7 +23,7 @@ watch(page, () => {
   <div class="mb-8 flex items-center justify-between">
     <h1 class="page-title">Vidéos de vos abonnements</h1>
 
-    <VideosFilters />
+    <VideosFilters v-model="filters" />
   </div>
 
   <VideosList v-model:page="page" :videos="data ?? { total: 0, items: [] }" />

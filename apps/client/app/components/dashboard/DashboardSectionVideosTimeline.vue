@@ -5,9 +5,10 @@ import type { VideoResource } from "#shared/resources/videos";
 
 import type { Label } from "./DashboardSectionVideosTimelineGroup.vue";
 
-const { data: videos } = await useAppFetch<Paginated<VideoResource>>("/api/videos", {
-  query: { page: 1, per_page: 30 },
-});
+const { data: videos } = await useVideos(
+  { page: 1, per_page: 30 },
+  { key: "home_videos_timeline" },
+);
 
 const groupedVideos = computed(() => {
   if (!videos.value) return [];

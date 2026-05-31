@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { CLEAN_ERROR_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "#shared/types/forms";
 
-const modelValue = defineModel<string>({ required: true });
+const modelValue = defineModel<string>();
 const { size = "normal" } = defineProps<{ placeholder?: string; size?: "sm" | "normal" }>();
 
 const __internal_element__ = useTemplateRef("element");

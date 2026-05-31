@@ -108,6 +108,7 @@ export default class VideosService extends AbstractService {
       .$if(!!params.subscription_id, (qb) =>
         qb.where("subscriptions.id", "=", params.subscription_id!),
       )
+      .$if(!!params.query, (qb) => qb.where("videos.title", "ilike", `%${params.query}%`))
       .executeTakeFirst();
 
     const items = await database
@@ -144,6 +145,7 @@ export default class VideosService extends AbstractService {
       .$if(!!params.subscription_id, (qb) =>
         qb.where("subscriptions.id", "=", params.subscription_id!),
       )
+      .$if(!!params.query, (qb) => qb.where("videos.title", "ilike", `%${params.query}%`))
       .execute();
 
     const mapped_items: Array<VideoResource> = [];

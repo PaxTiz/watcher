@@ -16,6 +16,7 @@ const emit = defineEmits<{ select: [key: K, value: T] }>();
 const props = defineProps<{
   label?: string;
   icon?: string;
+  iconSize?: "normal" | "lg";
   color?: "primary" | "secondary" | "yellow" | "ghost";
   size?: "sm" | "normal" | "lg";
   value?: T;
@@ -101,7 +102,14 @@ const DropdownChild = defineComponent<{ item: (typeof props)["items"][number] }>
   <div class="relative">
     <DropdownMenuRoot v-model:open="isOpen">
       <DropdownMenuTrigger :aria-label="label">
-        <Button :label="label" :icon="icon" :color="color" :size="size" />
+        <Button
+          :label="label"
+          :icon="icon"
+          :color="color"
+          :size="size"
+          :icon-size="iconSize"
+          @click.prevent
+        />
       </DropdownMenuTrigger>
 
       <DropdownMenuPortal>

@@ -1,15 +1,18 @@
 <script lang="ts" setup>
 import type { VideoResource } from "#shared/resources/videos";
 
-const { data: favoriteVideos, refresh: refreshFavorites } = await useAppFetch<
-  Paginated<VideoResource>
->("/api/videos", {
-  query: { page: 1, is_favorite: true },
-});
+const { data: videos } = await useVideos(
+  {
+    page: 1,
+    per_page: 9,
+    is_favorite: true,
+  },
+  { key: "home_videos_favorites" },
+);
 </script>
 
 <template>
-  <section v-if="favoriteVideos && favoriteVideos.items.length > 0">
+  <section v-if="videos && videos.items.length > 0">
     <div class="mb-6 flex items-center justify-between">
       <h2 class="text-ui-text flex items-center gap-2 text-xl font-bold">
         <Icon name="lucide:star" class="text-yellow-500" />
@@ -23,7 +26,7 @@ const { data: favoriteVideos, refresh: refreshFavorites } = await useAppFetch<
 
     <div class="infinite-grid-[300px] gap-6">
       <VideoCard
-        v-for="video in favoriteVideos.items.slice(0, 4)"
+        v-for="video in videos.items.slice(0, 4)"
         :key="video.id"
         :id="video.id"
         :video="video"

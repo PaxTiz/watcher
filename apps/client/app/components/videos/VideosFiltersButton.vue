@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { SubscriptionResource } from "#shared/resources/subscriptions";
 
-const { filters } = useVideosFilters();
+const modelValue = defineModel<VideoFilters>({ required: true });
 
 const { hide = [] } = defineProps<{
   hide?: Array<VideoFilterType>;
@@ -15,8 +15,8 @@ const { data: subscriptions } = await useAppFetch<Array<SubscriptionResource>>(
   },
 );
 
-const onSelectFilter = (key: keyof (typeof filters)["value"], value: string) => {
-  filters.value[key] = value as any;
+const onSelectFilter = (key: keyof (typeof modelValue)["value"], value: string) => {
+  modelValue.value[key] = value as any;
 };
 
 const items = computed(() =>

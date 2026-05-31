@@ -15,6 +15,7 @@ export const videosValidatorsSchema = defineValidator({
     query: z.object({
       page: z.coerce.number().check(z.gte(1)),
       per_page: z._default(z.coerce.number(), 21),
+      query: z.optional(z.string()),
       service: z.optional(z.enum(["youtube", "twitch"])),
       is_favorite: z.optional(booleanSchema),
       duration: z.optional(

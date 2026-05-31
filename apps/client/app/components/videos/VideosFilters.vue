@@ -2,8 +2,9 @@
 import type { SubscriptionResource } from "#shared/resources/subscriptions";
 import type { VideosValidators } from "#shared/validators/videos";
 
+const modelValue = defineModel<VideoFilters>({ required: true });
+
 const { videos } = useFormatter();
-const { filters } = useVideosFilters();
 
 const { hide = [] } = defineProps<{
   hide?: Array<VideoFilterType>;
@@ -38,15 +39,15 @@ const format_label = <K extends VideoFilterType, V extends VideosValidators["lis
 <template>
   <div class="text-ui-text flex flex-wrap items-center gap-2">
     <Button
-      v-for="[k, v] in Object.entries(filters).filter(
+      v-for="[k, v] in Object.entries(modelValue).filter(
         ([k, v]) => v !== undefined && !hide.includes(k as VideoFilterType),
       )"
       :label="format_label(k as VideoFilterType, v)"
-      :tag="videos.filters.name(k as keyof typeof filters)"
-      @click="() => (filters[k as VideoFilterType] = undefined)"
+      :tag="videos.filters.name(k as keyof typeof modelValue)"
+      @click="() => (modelValue[k as VideoFilterType] = undefined)"
       allow-remove
     />
 
-    <VideosFiltersButton :hide="hide" :color="color" />
+    <VideosFiltersButton v-model="modelValue" :hide="hide" :color="color" />
   </div>
 </template>

@@ -33,7 +33,7 @@ const { dates, numbers } = useFormatter();
           <div
             class="ring-ui-text flex size-[50px] items-center justify-center rounded-full bg-black/75 ring"
           >
-            <Icon name="lucide:play" class="text-ui-text text-2xl" />
+            <Icon name="lucide:play" class="dark:text-ui-text text-2xl text-white" />
           </div>
         </div>
       </div>
@@ -45,7 +45,7 @@ const { dates, numbers } = useFormatter();
       </div>
     </div>
 
-    <div class="grid grid-cols-[2rem_1fr] gap-4 p-4">
+    <div class="grid grid-cols-[2rem_1fr_2rem] gap-4 p-4">
       <div>
         <NuxtImg
           class="w-full rounded"
@@ -80,6 +80,30 @@ const { dates, numbers } = useFormatter();
 
           <span class="text-ui-text text-sm">{{ dates.ago(video.created_at) }} </span>
         </div>
+      </div>
+
+      <div>
+        <DropdownButton
+          color="ghost"
+          align="center"
+          size="sm"
+          icon-size="lg"
+          icon="lucide:ellipsis-vertical"
+          :items="[
+            {
+              icon: 'lucide:video-off',
+              key: 'hide_video',
+              label: 'Masquer la vidéo',
+              value: 'hide_video',
+            },
+            {
+              icon: 'lucide:circle-off',
+              key: 'hide_subscription',
+              label: 'Masquer la chaîne',
+              value: 'hide_subscription',
+            },
+          ]"
+        />
       </div>
     </div>
   </Card>
