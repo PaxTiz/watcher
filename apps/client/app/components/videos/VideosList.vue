@@ -5,13 +5,27 @@ import type { Paginated } from "#shared/types/shared";
 const VIDEOS_PER_PAGE = 21;
 
 const modelValue = defineModel<number>("page", { required: true });
-const { videos } = defineProps<{ videos: Paginated<VideoResource> }>();
+const {
+  videos,
+  allowHideVideo = true,
+  allowHideChannel = true,
+} = defineProps<{
+  videos: Paginated<VideoResource>;
+  allowHideVideo?: boolean;
+  allowHideChannel?: boolean;
+}>();
 </script>
 
 <template>
   <template v-if="videos.items.length > 0">
     <div class="infinite-grid-[380px] gap-4">
-      <VideoCard v-for="video in videos.items" :id="video.id" :video="video" />
+      <VideoCard
+        v-for="video in videos.items"
+        :id="video.id"
+        :video="video"
+        :allow-hide-video="allowHideVideo"
+        :allow-hide-channel="allowHideChannel"
+      />
     </div>
 
     <div v-if="videos.total > VIDEOS_PER_PAGE" class="mt-8 flex justify-center">

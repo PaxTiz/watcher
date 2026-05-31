@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import type { VideoResource } from "#shared/resources/videos";
-
 const { data: videos } = await useVideos(
   {
     page: 1,

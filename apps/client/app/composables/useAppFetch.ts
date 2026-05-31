@@ -22,7 +22,7 @@ export function useAppFetch<T>(url: string | (() => string), options?: UseFetchO
 export function usePost<T>(
   url: string,
   options?: { key?: string; to?: string } & FetchOptions<"json", T>,
-  asyncDataOptions?: AsyncDataOptions<T>,
+  asyncDataOptions: AsyncDataOptions<T> = { immediate: false },
 ) {
   return useAsyncData(
     options?.key ?? url,

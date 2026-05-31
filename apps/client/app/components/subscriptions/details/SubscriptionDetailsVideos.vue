@@ -41,6 +41,10 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <VideosList v-model:page="page" :videos="videos ?? { total: 0, items: [] }" />
+    <VideosList
+      v-model:page="page"
+      :videos="videos ?? { total: 0, items: [] }"
+      :allow-hide-channel="false"
+    />
   </div>
 </template>

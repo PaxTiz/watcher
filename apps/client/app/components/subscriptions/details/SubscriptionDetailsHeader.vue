@@ -8,6 +8,8 @@ const refresh = inject<VideoCurrentRefreshType>(VIDEO_CURRENT_REFRESH_SYMBOL);
 
 const { subscription } = defineProps<{ subscription: SubscriptionResource }>();
 
+const { forceRefresh } = useSubscriptions();
+
 const { execute: execute_toggle_favorite } = usePost(
   `/api/subscriptions/${subscription.id}/favorite`,
   { method: "POST" },
@@ -23,6 +25,8 @@ const toggleFavorite = async () => {
   } else {
     toast.success(`${subscription.name} a été retiré de vos favoris`);
   }
+
+  await forceRefresh();
 };
 </script>
 

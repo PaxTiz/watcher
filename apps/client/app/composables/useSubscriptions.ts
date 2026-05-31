@@ -24,15 +24,11 @@ export const useSubscriptions = () => {
   const twitch = computed(() => data.value?.filter((e) => e.channel.service === "twitch") ?? []);
 
   const favorites = computed(() => {
-    return (
-      data.value?.filter((e) => e.is_favorite).sort((a, b) => a.name.localeCompare(b.name)) ?? []
-    );
+    return data.value?.filter((e) => e.is_favorite) ?? [];
   });
 
   const others = computed(() => {
-    return (
-      data.value?.filter((e) => !e.is_favorite).sort((a, b) => a.name.localeCompare(b.name)) ?? []
-    );
+    return data.value?.filter((e) => !e.is_favorite) ?? [];
   });
 
   return {

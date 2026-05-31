@@ -1,11 +1,92 @@
 <script lang="ts" setup>
+import { toast } from "vue-sonner";
+
 import { NuxtLink } from "#components";
 import type { VideoResource } from "#shared/resources/videos";
 import { useFormatter } from "#shared/utils/useFormatter";
 
-const { video } = defineProps<{ video: VideoResource }>();
+const on_hide_video_callback = inject<VideoOnHideType | undefined>(VIDE_ON_HIDE_SYMBOL, undefined);
+
+const {
+  video,
+  allowHideChannel = true,
+  allowHideVideo = true,
+} = defineProps<{
+  video: VideoResource;
+  allowHideVideo?: boolean;
+  allowHideChannel?: boolean;
+}>();
 
 const { dates, numbers } = useFormatter();
+const { forceRefresh } = useSubscriptions();
+
+const dropdown_items = computed(() => {
+  const items = [];
+  if (allowHideVideo) {
+    items.push({
+      icon: "lucide:video-off",
+      key: "hide_video",
+      label: "Masquer la vidéo",
+      on_select: on_hide_video,
+    });
+  }
+  if (allowHideChannel) {
+    items.push({
+      icon: "lucide:circle-off",
+      key: "hide_subscription",
+      label: "Masquer la chaîne",
+      on_select: on_hide_subscription,
+    });
+  }
+
+  return items;
+});
+
+const { error: video_error, execute: video_hide } = usePost(`/api/videos/${video.id}/hide`, {
+  method: "POST",
+});
+const { error: subscription_error, execute: subscription_hide } = usePost(
+  `/api/subscriptions/${video.author.id}/hide`,
+  {
+    method: "POST",
+  },
+);
+
+const on_hide_video = async () => {
+  const ok = await useConfirm({
+    title: "Masquer une vidéo",
+    description:
+      "Voulez-vous vraiment masquer cette vidéo ? Elle n'apparaîtra plus dans votre flux.",
+  });
+
+  if (ok) {
+    await video_hide();
+
+    if (!video_error.value) {
+      toast.success("La vidéo a été masquée");
+      await on_hide_video_callback?.();
+    }
+  }
+};
+
+const on_hide_subscription = async () => {
+  const ok = await useConfirm({
+    title: "Masquer une chaîne",
+    description:
+      "Voulez-vous vraiment masquer cette chaîne ? L'historique ainsi que les nouvelles vidéos publiées par cette chaîne ne seront plus visibles dans votre flux.",
+  });
+
+  if (ok) {
+    await subscription_hide();
+
+    if (!subscription_error.value) {
+      await forceRefresh();
+      await on_hide_video_callback?.();
+
+      toast.success("La chaîne a été masquée");
+    }
+  }
+};
 </script>
 
 <template>
@@ -82,27 +163,14 @@ const { dates, numbers } = useFormatter();
         </div>
       </div>
 
-      <div>
+      <div v-if="dropdown_items.length > 0">
         <DropdownButton
           color="ghost"
           align="center"
           size="sm"
           icon-size="lg"
           icon="lucide:ellipsis-vertical"
-          :items="[
-            {
-              icon: 'lucide:video-off',
-              key: 'hide_video',
-              label: 'Masquer la vidéo',
-              value: 'hide_video',
-            },
-            {
-              icon: 'lucide:circle-off',
-              key: 'hide_subscription',
-              label: 'Masquer la chaîne',
-              value: 'hide_subscription',
-            },
-          ]"
+          :items="dropdown_items"
         />
       </div>
     </div>

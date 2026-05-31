@@ -12,6 +12,21 @@ import {
 
 import { AppFormInput, Button, Icon } from "#components";
 
+type DropdownItem = {
+  key: K;
+  label: string;
+  value?: T;
+  icon?: string;
+  allowSearch?: boolean;
+  on_select?: () => Promise<unknown>;
+  children?: Array<{
+    label: string;
+    value: T;
+    disabled?: boolean;
+    icon?: string;
+  }>;
+};
+
 const emit = defineEmits<{ select: [key: K, value: T] }>();
 const props = defineProps<{
   label?: string;
@@ -21,22 +36,16 @@ const props = defineProps<{
   size?: "sm" | "normal" | "lg";
   value?: T;
   align?: "start" | "center" | "end";
-  items: Array<{
-    key: K;
-    label: string;
-    value?: T;
-    icon?: string;
-    allowSearch?: boolean;
-    children?: Array<{
-      label: string;
-      value: T;
-      disabled?: boolean;
-      icon?: string;
-    }>;
-  }>;
+  items: Array<DropdownItem>;
 }>();
 
 const isOpen = ref(false);
+
+const on_select_item = (item: DropdownItem) => {
+  emit("select", item.key, item.value as T);
+
+  item.on_select?.();
+};
 
 const DropdownChild = defineComponent(
   (childProps: {
@@ -152,11 +161,11 @@ const DropdownChild = defineComponent(
                   v-else
                   class="hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 flex w-full cursor-pointer items-center gap-2 rounded p-1.5 text-start text-sm transition-colors outline-none"
                   :class="
-                    value === item.value
+                    value && value === item.value
                       ? 'bg-alt/10 text-alt'
                       : 'text-ui-text-muted hover:text-ui-text'
                   "
-                  @click="emit('select', item.key, item.value as T)"
+                  @click="() => on_select_item(item)"
                 >
                   <Icon v-if="item.icon" :name="item.icon" />
                   <span>{{ item.label }}</span>

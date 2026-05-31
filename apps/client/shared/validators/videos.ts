@@ -47,6 +47,12 @@ export const videosValidatorsSchema = defineValidator({
       quality: z.string(),
     }),
   },
+
+  hide: {
+    params: z.object({
+      id: z.uuidv7(),
+    }),
+  },
 });
 
 export type VideosValidators = InferValidators<typeof videosValidatorsSchema>;

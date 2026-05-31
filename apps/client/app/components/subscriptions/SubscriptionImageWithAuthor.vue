@@ -5,6 +5,7 @@ const { size = "md", withHover = false } = defineProps<{
   slug: string;
   image: string;
   name: string;
+  hidden?: boolean;
   size?: "sm" | "md";
   withHover?: boolean;
 }>();
@@ -16,7 +17,10 @@ const imageSize = computed(() => (size === "md" ? 48 : 38));
 <template>
   <div
     class="flex items-center gap-4"
-    :class="{ 'hover:bg-ui-bg rounded bg-transparent p-1 transition-all duration-300': withHover }"
+    :class="{
+      'hover:bg-ui-bg rounded bg-transparent p-1 transition-all duration-300': withHover,
+      'grayscale-100': hidden,
+    }"
   >
     <nuxt-link :to="`/subscriptions/${slug}`">
       <NuxtImg
@@ -34,7 +38,11 @@ const imageSize = computed(() => (size === "md" ? 48 : 38));
     <div class="shrink-0">
       <nuxt-link
         :to="`/subscriptions/${slug}`"
-        :class="{ 'font-semibold': size === 'md', 'text-sm font-medium': size === 'sm' }"
+        :class="{
+          'font-semibold': size === 'md',
+          'text-sm font-medium': size === 'sm',
+          'text-ui-text-muted': hidden,
+        }"
         class="text-ui-text"
       >
         {{ name }}

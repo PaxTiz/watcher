@@ -22,7 +22,9 @@ export default class SubscriptionsService extends AbstractService {
         "subscriptions.logo",
         "subscriptions.last_synced_at",
         "user_subscriptions.is_favorite",
+        "user_subscriptions.is_hidden",
       ])
+      .orderBy("user_subscriptions.is_hidden", "asc")
       .orderBy("name", "asc")
       .execute();
 
@@ -31,6 +33,7 @@ export default class SubscriptionsService extends AbstractService {
       name: sub.name,
       slug: sub.slug,
       is_favorite: sub.is_favorite,
+      is_hidden: sub.is_hidden,
       last_synced_at: sub.last_synced_at,
       channel: {
         service: sub.service,
@@ -56,6 +59,7 @@ export default class SubscriptionsService extends AbstractService {
         "subscriptions.logo",
         "subscriptions.last_synced_at",
         "user_subscriptions.is_favorite",
+        "user_subscriptions.is_hidden",
       ])
       .where("user_subscriptions.user_id", "=", user.id)
       .$if(is_params_uuid, (qb) => qb.where("id", "=", id_or_slug))
@@ -67,6 +71,7 @@ export default class SubscriptionsService extends AbstractService {
       name: sub.name,
       slug: sub.slug,
       is_favorite: sub.is_favorite,
+      is_hidden: sub.is_hidden,
       last_synced_at: sub.last_synced_at,
       channel: {
         service: sub.service,
@@ -96,6 +101,23 @@ export default class SubscriptionsService extends AbstractService {
       .updateTable("user_subscriptions")
       .from("subscriptions")
       .set({ is_favorite: (c) => c.not(c.ref("is_favorite")) })
+      .whereRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
+      .where("user_id", "=", user.id)
+      .$if(is_params_uuid, (qb) => qb.where("subscriptions.id", "=", id_or_slug))
+      .$if(!is_params_uuid, (qb) =>
+        qb.where("subscriptions.slug", "=", parse_slug_params(id_or_slug)),
+      )
+      .execute();
+  }
+
+  async hide(user: User, id_or_slug: string) {
+    const database = useDatabase();
+
+    const is_params_uuid = is_uuid(id_or_slug);
+    await database
+      .updateTable("user_subscriptions")
+      .from("subscriptions")
+      .set({ is_favorite: false, is_hidden: true })
       .whereRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
       .where("user_id", "=", user.id)
       .$if(is_params_uuid, (qb) => qb.where("subscriptions.id", "=", id_or_slug))

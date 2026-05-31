@@ -8,9 +8,10 @@ const route = useRoute();
 const { filters } = useVideosFilters();
 
 const page = ref(await get_number_query_var(route, "page"));
-const { data } = await useAppFetch<Paginated<VideoResource>>("/api/videos", {
-  query: computed(() => ({ page: page.value, ...filters.value })),
-});
+const { data } = await useVideos(
+  computed(() => ({ page: page.value, per_page: 21, ...filters.value })),
+  { key: "videos_feed" },
+);
 
 watch(page, () => {
   if (import.meta.client) {

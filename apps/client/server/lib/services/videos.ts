@@ -97,6 +97,17 @@ export default class VideosService extends AbstractService {
       .selectFrom("videos")
       .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
       .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
+      .where((eb) =>
+        eb.not(
+          eb.exists(
+            eb
+              .selectFrom("hidden_users_videos")
+              .where("hidden_users_videos.video_id", "=", eb.ref("videos.id"))
+              .where("hidden_users_videos.user_id", "=", eb.ref("user_subscriptions.user_id")),
+          ),
+        ),
+      )
+      .where("user_subscriptions.is_hidden", "=", false)
       .where("user_subscriptions.user_id", "=", user.id)
       .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
@@ -115,6 +126,17 @@ export default class VideosService extends AbstractService {
       .selectFrom("videos")
       .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
       .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
+      .where((eb) =>
+        eb.not(
+          eb.exists(
+            eb
+              .selectFrom("hidden_users_videos")
+              .where("hidden_users_videos.video_id", "=", eb.ref("videos.id"))
+              .where("hidden_users_videos.user_id", "=", eb.ref("user_subscriptions.user_id")),
+          ),
+        ),
+      )
+      .where("user_subscriptions.is_hidden", "=", false)
       .where("user_subscriptions.user_id", "=", user.id)
       .offset((params.page - 1) * params.per_page)
       .limit(params.per_page)
@@ -177,6 +199,19 @@ export default class VideosService extends AbstractService {
       total: Number(total?.total ?? 0),
       items: mapped_items,
     };
+  }
+
+  async hide(user: User, id: string) {
+    const database = useDatabase();
+
+    await database
+      .insertInto("hidden_users_videos")
+      .values({
+        user_id: user.id,
+        video_id: id,
+      })
+      .onConflict((eb) => eb.doNothing())
+      .execute();
   }
 
   private parse_duration_filter(

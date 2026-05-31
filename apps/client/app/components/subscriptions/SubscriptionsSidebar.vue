@@ -86,6 +86,7 @@ const filteredOthers = computed(() => filterList(others.value));
             :slug="sub.slug"
             :name="sub.name"
             :image="sub.channel.logo"
+            :hidden="sub.is_hidden"
             size="sm"
             with-hover
           />

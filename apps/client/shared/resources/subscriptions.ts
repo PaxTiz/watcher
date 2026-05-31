@@ -9,6 +9,8 @@ export type SubscriptionResource = {
 
   is_favorite: boolean;
 
+  is_hidden: boolean;
+
   last_synced_at: string;
 
   channel: {

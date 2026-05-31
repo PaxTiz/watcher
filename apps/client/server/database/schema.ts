@@ -81,6 +81,14 @@ export type UserSubscriptionTable = {
   subscription_id: string;
 
   is_favorite: boolean;
+
+  is_hidden: boolean;
+};
+
+export type HiddenUsersVideosTable = {
+  user_id: string;
+
+  video_id: string;
 };
 
 export type Database = {
@@ -89,6 +97,7 @@ export type Database = {
   user_subscriptions: UserSubscriptionTable;
   credentials: CredentialTable;
   videos: VideoTable;
+  hidden_users_videos: HiddenUsersVideosTable;
 };
 
 export type SubscriptionTableInsert = Insertable<SubscriptionTable>;
