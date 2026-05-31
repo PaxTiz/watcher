@@ -17,10 +17,10 @@ const onShowBlueskyModal = () => {
 
 <template>
   <div class="relative">
-    <section class="mt-32">
+    <section class="mt-12 md:mt-32">
       <Logo />
 
-      <h1 class="text-ui-text mt-4 text-4xl font-bold">Connexion</h1>
+      <h1 class="text-ui-text mt-4 text-2xl font-bold md:text-4xl">Connexion</h1>
       <p class="text-ui-text-muted mt-1">Veuillez vous connecter afin d'accéder à Watcher.</p>
 
       <Card class="mt-4 space-y-2">

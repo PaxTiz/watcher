@@ -45,9 +45,9 @@ const description = computed(() => {
 
 <template>
   <div>
-    <h1 class="text-ui-text text-4xl font-bold">{{ video.title }}</h1>
+    <h1 class="text-ui-text text-2xl font-bold md:text-4xl">{{ video.title }}</h1>
 
-    <div class="mt-4 flex flex-wrap items-center justify-between">
+    <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <SubscriptionImageWithAuthor
         :slug="video.author.slug"
         :image="video.author.channel.logo"
@@ -58,18 +58,20 @@ const description = computed(() => {
         </template>
       </SubscriptionImageWithAuthor>
 
-      <div>
+      <div class="flex justify-start sm:justify-end">
         <Button
           v-if="video.service === 'youtube'"
           label="Ouvrir sur YouTube"
           icon="lucide:youtube"
           :to="video.url"
+          class="w-full sm:w-auto"
         />
         <Button
           v-if="video.service === 'twitch'"
           label="Ouvrir sur Twitch"
           icon="lucide:twitch"
           :to="video.url"
+          class="w-full sm:w-auto"
         />
       </div>
     </div>

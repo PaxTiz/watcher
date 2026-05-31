@@ -71,5 +71,11 @@ const items = computed(() => [
 </script>
 
 <template>
-  <DropdownButton :label="user?.name" icon="lucide:user" :items="items" @select="onSelect" />
+  <DropdownButton
+    class="[&_span]:hidden [&_span]:md:block"
+    icon="lucide:user"
+    :label="user?.name"
+    :items="items"
+    @select="onSelect"
+  />
 </template>

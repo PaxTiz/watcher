@@ -37,7 +37,7 @@ onMounted(() => {
   <section>
     <Logo />
 
-    <h1 class="text-ui-text mt-4 text-4xl font-bold">{{ title }}</h1>
+    <h1 class="text-ui-text mt-4 text-2xl font-bold md:text-4xl">{{ title }}</h1>
     <p class="text-ui-text-muted mt-1">
       {{ description }}
     </p>

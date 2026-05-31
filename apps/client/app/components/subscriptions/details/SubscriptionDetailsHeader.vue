@@ -40,18 +40,18 @@ const toggleFavorite = async () => {
 
     <div class="flex-1 text-center md:text-left">
       <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between">
-        <h1 class="text-ui-text-strong text-4xl font-bold">{{ subscription.name }}</h1>
+        <h1 class="text-ui-text-strong text-2xl font-bold md:text-4xl">{{ subscription.name }}</h1>
 
-        <div class="flex gap-3">
+        <div class="flex flex-wrap justify-center gap-3">
           <Button
-            :label="subscription.is_favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+            :label="subscription.is_favorite ? 'Retirer' : 'Favoris'"
             :icon="subscription.is_favorite ? 'lucide:star-off' : 'lucide:star'"
             :color="subscription.is_favorite ? undefined : 'yellow'"
             @click="toggleFavorite"
           />
 
           <Button
-            label="Ouvrir sur le service"
+            label="Ouvrir"
             icon="lucide:external-link"
             :to="subscription.channel.url"
             target="_blank"

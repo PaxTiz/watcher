@@ -21,11 +21,15 @@ watch(page, () => {
 </script>
 
 <template>
-  <div class="mb-8 flex items-center justify-between">
+  <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
     <h1 class="page-title">Vidéos de vos abonnements</h1>
 
     <div class="flex items-center gap-2">
-      <AppFormInput v-model="filters.query" placeholder="Rechercher une vidéo" class="w-[250px]" />
+      <AppFormInput
+        v-model="filters.query"
+        placeholder="Rechercher une vidéo"
+        class="flex-1 md:w-[250px]"
+      />
       <VideosFilters v-model="filters" />
     </div>
   </div>
