@@ -8,7 +8,7 @@ const route = useRoute();
 const { filters } = useVideosFilters();
 
 const page = ref(await get_number_query_var(route, "page"));
-const { data } = await useVideos(
+const { data, status } = await useVideos(
   computed(() => ({ page: page.value, per_page: 21, ...filters.value })),
   { key: "videos_feed" },
 );
@@ -34,5 +34,9 @@ watch(page, () => {
     </div>
   </div>
 
-  <VideosList v-model:page="page" :videos="data ?? { total: 0, items: [] }" />
+  <VideosList
+    v-model:page="page"
+    :videos="data ?? { total: 0, items: [] }"
+    :loading="status === 'pending'"
+  />
 </template>

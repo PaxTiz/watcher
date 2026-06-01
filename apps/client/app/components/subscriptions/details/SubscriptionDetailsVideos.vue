@@ -6,7 +6,7 @@ const { subscription } = defineProps<{ subscription: SubscriptionResource }>();
 const { filters } = useVideosFilters({ subscription_id: subscription.id });
 
 const page = ref(1);
-const { data: videos } = await useVideos(
+const { data: videos, status } = await useVideos(
   computed(() => ({
     page: page.value,
     per_page: 15,
@@ -44,6 +44,7 @@ onUnmounted(() => {
     <VideosList
       v-model:page="page"
       :videos="videos ?? { total: 0, items: [] }"
+      :loading="status === 'pending'"
       :allow-hide-channel="false"
     />
   </div>
