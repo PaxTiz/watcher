@@ -5,9 +5,18 @@ import type { VideoResource } from "#shared/resources/videos";
 
 import type { Label } from "./DashboardSectionVideosTimelineGroup.vue";
 
-const { data: videos } = await useVideos(
-  { page: 1, per_page: 30 },
-  { key: "home_videos_timeline" },
+const loadMoreTrigger = ref<HTMLElement | null>(null);
+const {
+  items: videos,
+  hasMore,
+  status,
+  loadMore,
+} = await useInfiniteVideos(
+  { per_page: 30 },
+  {
+    key: "home_videos_timeline",
+    loadMoreTrigger,
+  },
 );
 
 const groupedVideos = computed(() => {
@@ -25,7 +34,7 @@ const groupedVideos = computed(() => {
   const weekAgo = subDays(now, 7);
   const monthAgo = subDays(now, 30);
 
-  for (const video of videos.value.items) {
+  for (const video of videos.value) {
     const date = new Date(video.created_at);
     if (isToday(date)) {
       groups.today.push(video);
@@ -56,7 +65,7 @@ const groupedVideos = computed(() => {
     />
 
     <div
-      v-if="groupedVideos.length === 0"
+      v-if="groupedVideos.length === 0 && status !== 'pending'"
       class="flex flex-col items-center justify-center py-20 text-center"
     >
       <Icon name="lucide:video-off" class="text-ui-border mb-4 text-6xl" />
@@ -64,8 +73,11 @@ const groupedVideos = computed(() => {
       <p class="text-ui-text-muted">Lancez une synchronisation pour récupérer du contenu.</p>
     </div>
 
-    <div v-if="groupedVideos.length > 0" class="my-8 flex justify-center">
-      <Button label="Accéder à toute la bibliothèque" to="/videos" size="lg" />
+    <div v-if="hasMore" ref="loadMoreTrigger" class="flex justify-center py-8">
+      <div v-if="status === 'pending'" class="flex items-center gap-2">
+        <Icon name="lucide:loader-2" class="size-6 animate-spin text-blue-500" />
+        <span class="text-ui-text-muted">Chargement de plus de vidéos...</span>
+      </div>
     </div>
   </section>
 </template>
