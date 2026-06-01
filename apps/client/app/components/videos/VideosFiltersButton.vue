@@ -85,6 +85,6 @@ const items = computed(() =>
     label="Ajouter un filtre"
     :items="items"
     :color="color"
-    @select="([k, v]) => onSelectFilter(k as VideoFilterType, v!)"
+    @select="(k, v) => onSelectFilter(k as VideoFilterType, v)"
   />
 </template>
