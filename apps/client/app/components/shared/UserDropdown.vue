@@ -14,9 +14,13 @@ const onSelect = async (key: string, value: string) => {
     if (value === "settings") {
       await navigateTo("/settings");
     } else if (value === "sync") {
-      const { error } = await usePost("/api/subscriptions/sync", {
-        method: "POST",
-      });
+      const { error } = await usePost(
+        "/api/subscriptions/sync",
+        {
+          method: "POST",
+        },
+        { immediate: true },
+      );
 
       if (error.value) {
         toast.error("Une erreur est survenue lors de la synchronisation");
