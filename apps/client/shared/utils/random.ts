@@ -15,3 +15,15 @@ export const parse_slug_params = (value: string) => {
 
   return value;
 };
+
+export const async_pool = async <T>(
+  items: Array<T>,
+  count: number,
+  callback: (item: T) => Promise<unknown>,
+) => {
+  for (let i = 0; i < items.length; i += count) {
+    const sub_items = items.slice(i, i + count);
+    const promises = sub_items.map(callback);
+    await Promise.all(promises);
+  }
+};

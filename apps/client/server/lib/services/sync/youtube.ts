@@ -12,6 +12,7 @@ import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import { useGoogle } from "#server/lib/google";
 import type { Sync } from "#shared/types/sync";
+import { async_pool } from "#shared/utils/random";
 import { to_subscription_slug } from "#shared/utils/subscriptions";
 
 const SHORT_DURATION_THRESOLD = 200; // Videos shorter than 200 seconds (3 minutes + 20 seconds of thresold) are considered as shorts
@@ -27,9 +28,7 @@ export default class SyncYoutube extends AbstractService {
     }
 
     const subscriptions = await this.get_subscriptions(user);
-    for (const subscription of subscriptions) {
-      await this.sync_subscription(user, subscription);
-    }
+    await async_pool(subscriptions, 10, (sub) => this.sync_subscription(user, sub));
   }
 
   private async get_subscriptions(user: User) {

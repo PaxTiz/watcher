@@ -10,6 +10,7 @@ import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import { useTwitch } from "#server/lib/twitch";
 import type { Sync } from "#shared/types/sync";
+import { async_pool } from "#shared/utils/random";
 import { to_subscription_slug } from "#shared/utils/subscriptions";
 
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "twitch");
@@ -24,9 +25,7 @@ export default class SyncTwitch extends AbstractService {
     }
 
     const subscriptions = await this.get_subscriptions(user, token.service_id);
-    for (const subscription of subscriptions) {
-      await this.sync_subscription(user, subscription);
-    }
+    await async_pool(subscriptions, 10, (sub) => this.sync_subscription(user, sub));
   }
 
   private async get_subscriptions(user: User, service_id: string) {
