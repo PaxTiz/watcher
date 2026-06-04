@@ -14,6 +14,8 @@ const onSelect = async (key: string, value: string) => {
     if (value === "settings") {
       await navigateTo("/settings");
     } else if (value === "sync") {
+      const toast_id = toast.loading("Synchronisation en cours..");
+
       const { error } = await usePost(
         "/api/subscriptions/sync",
         {
@@ -23,9 +25,9 @@ const onSelect = async (key: string, value: string) => {
       );
 
       if (error.value) {
-        toast.error("Une erreur est survenue lors de la synchronisation");
+        toast.error("Une erreur est survenue lors de la synchronisation", { id: toast_id });
       } else {
-        toast.success("Synchronisation terminée");
+        toast.success("Synchronisation terminée", { id: toast_id });
       }
     } else if (value === "logout") {
       const { error } = await usePost("/api/auth/logout", {

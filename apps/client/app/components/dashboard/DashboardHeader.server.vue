@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 const { dates } = useFormatter();
-const { data: subscriptions, refresh: refreshSubscriptions } = useSubscriptions();
+const { data: subscriptions } = useSubscriptions();
 
 const lastSyncedAt = computed(() => {
   if (!subscriptions.value || subscriptions.value.length === 0) return null;
@@ -29,7 +29,7 @@ const lastSyncedAt = computed(() => {
       class="text-ui-text-muted flex items-center gap-2 text-xs font-medium md:text-sm"
     >
       <Icon name="lucide:history" class="text-base md:text-lg" />
-      <span>Dernière synchronisation {{ dates.ago(lastSyncedAt) }}</span>
+      <span> Dernière synchronisation {{ dates.ago(lastSyncedAt) }} </span>
     </div>
   </div>
 </template>

@@ -23,13 +23,7 @@ const { data: videos } = await useVideos(
     </div>
 
     <div class="infinite-grid-[300px] gap-6">
-      <VideoCard
-        v-for="video in videos.items.slice(0, 4)"
-        :key="video.id"
-        :id="video.id"
-        :video="video"
-        class="!border-ui-border/50"
-      />
+      <VideoCard v-for="video in videos.items" :key="video.id" :id="video.id" :video="video" />
     </div>
   </section>
 </template>

@@ -10,7 +10,6 @@ const {
   items: videos,
   hasMore,
   status,
-  loadMore,
 } = await useInfiniteVideos(
   { per_page: 30 },
   {

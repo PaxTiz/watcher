@@ -248,14 +248,18 @@ export default class VideosService extends AbstractService {
   async update_progress(user: User, id: string, progression: number) {
     const database = useDatabase();
 
+    const mapped_progression = progression > 0.9 ? 1 : progression;
+
     await database
       .insertInto("users_videos_progression")
       .values({
         user_id: user.id,
         video_id: id,
-        progression,
+        progression: mapped_progression,
       })
-      .onConflict((eb) => eb.columns(["user_id", "video_id"]).doUpdateSet({ progression }))
+      .onConflict((eb) =>
+        eb.columns(["user_id", "video_id"]).doUpdateSet({ progression: mapped_progression }),
+      )
       .execute();
   }
 

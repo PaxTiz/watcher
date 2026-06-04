@@ -29,13 +29,7 @@ const formatted_label = computed(() => {
     </div>
 
     <div class="infinite-grid-[300px] gap-6">
-      <VideoCard
-        v-for="video in videos"
-        :key="video.id"
-        :id="video.id"
-        :video="video"
-        class="!border-ui-border/50"
-      />
+      <VideoCard v-for="video in videos" :key="video.id" :id="video.id" :video="video" />
     </div>
   </div>
 </template>

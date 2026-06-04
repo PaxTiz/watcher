@@ -3,7 +3,6 @@ const route = useRoute();
 
 const navItems = [
   { label: "Accueil", to: "/", icon: "lucide:home" },
-  { label: "Abonnements", to: "/subscriptions", icon: "lucide:layout-grid" },
   { label: "Vidéos", to: "/videos", icon: "lucide:play-square" },
 ];
 
