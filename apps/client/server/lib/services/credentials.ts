@@ -20,9 +20,9 @@ export default class CredentialsService extends AbstractService {
     return {
       service: credentials.service,
       service_id: credentials.service_id,
-      access_token: credentials.access_token,
+      access_token: decrypt("access_token", credentials.access_token),
       access_token_expires_at: credentials.access_token_expires_at,
-      refresh_token: credentials.refresh_token,
+      refresh_token: decrypt("refresh_token", credentials.refresh_token),
       refresh_token_expires_at: credentials.refresh_token_expires_at,
       userId: credentials.user_id,
     } as ServiceCredentials;
@@ -48,9 +48,9 @@ export default class CredentialsService extends AbstractService {
     return {
       service: credentials.service,
       service_id: credentials.service_id,
-      access_token: credentials.access_token,
+      access_token: decrypt("access_token", credentials.access_token),
       access_token_expires_at: credentials.access_token_expires_at,
-      refresh_token: credentials.refresh_token,
+      refresh_token: decrypt("refresh_token", credentials.refresh_token),
       refresh_token_expires_at: credentials.refresh_token_expires_at,
       userId: credentials.user_id,
     } as ServiceCredentials;
@@ -59,24 +59,22 @@ export default class CredentialsService extends AbstractService {
   async replace(user_id: string, data: ServiceCredentials) {
     const database = useDatabase();
 
-    // TODO: Data encryption for tokens
-
     await database
       .insertInto("credentials")
       .values({
         service: data.service,
         service_id: data.service_id,
-        access_token: data.access_token,
+        access_token: encrypt("access_token", data.access_token),
         access_token_expires_at: data.access_token_expires_at,
-        refresh_token: data.refresh_token,
+        refresh_token: encrypt("refresh_token", data.refresh_token),
         refresh_token_expires_at: data.refresh_token_expires_at,
         user_id,
       })
       .onConflict((oc) =>
         oc.columns(["service", "user_id"]).doUpdateSet({
-          access_token: data.access_token,
+          access_token: encrypt("access_token", data.access_token),
           access_token_expires_at: data.access_token_expires_at,
-          refresh_token: data.refresh_token,
+          refresh_token: encrypt("refresh_token", data.refresh_token),
           refresh_token_expires_at: data.refresh_token_expires_at,
         }),
       )

@@ -2,6 +2,8 @@ import { type Client, createClient } from "@watcher/integration-google";
 
 import { useDatabase } from "#server/database";
 
+import { decrypt, encrypt } from "../utils/encryption";
+
 let _client: Client | null = null;
 
 export const useGoogle = () => {
@@ -27,9 +29,9 @@ export const useGoogle = () => {
         }
 
         return {
-          access_token: credentials.access_token,
+          access_token: decrypt("access_token", credentials.access_token),
           access_token_expires_at: credentials.access_token_expires_at,
-          refresh_token: credentials.refresh_token,
+          refresh_token: decrypt("refresh_token", credentials.refresh_token),
           refresh_token_expires_at: credentials.refresh_token_expires_at,
         };
       },
@@ -40,9 +42,9 @@ export const useGoogle = () => {
         await database
           .updateTable("credentials")
           .set({
-            access_token: tokens.access_token,
+            access_token: encrypt("access_token", tokens.access_token),
             access_token_expires_at: tokens.access_token_expires_at,
-            refresh_token: tokens.refresh_token,
+            refresh_token: encrypt("refresh_token", tokens.refresh_token),
             refresh_token_expires_at: tokens.refresh_token_expires_at,
           })
           .where("service", "=", "google")

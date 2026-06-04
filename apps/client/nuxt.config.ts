@@ -105,6 +105,13 @@ export default defineNuxtConfig({
       name: "",
     },
 
+    encryption: {
+      credentials: {
+        access_token: "",
+        refresh_token: "",
+      },
+    },
+
     oauth: {
       google: {
         clientId: "",

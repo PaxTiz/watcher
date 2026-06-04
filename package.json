@@ -3,7 +3,8 @@
   "scripts": {
     "lint": "pnpm oxlint --fix --fix-suggestions -c ./oxlint.config.ts --type-aware",
     "format": "pnpm oxfmt -c ./oxfmt.config.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "generate:secret": "openssl rand -hex 32"
   },
   "dependencies": {
     "date-fns": "catalog:",
