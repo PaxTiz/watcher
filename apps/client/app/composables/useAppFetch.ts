@@ -24,7 +24,7 @@ export function usePost<T>(
   options?: { key?: string; to?: string } & FetchOptions<"json", T>,
   asyncDataOptions: AsyncDataOptions<T> = { immediate: false },
 ) {
-  return useAsyncData(
+  const response = useAsyncData(
     options?.key ?? url,
     () =>
       $fetch(url, {
@@ -36,22 +36,22 @@ export function usePost<T>(
             setError(null);
           }
         },
-
-        onRequestError(response) {
-          if (!response.error) {
-            return;
-          }
-
-          if (response.response?.status === 422 && options?.to) {
-            const { setError } = useFormErrors(options.to);
-            setError(response.error.message);
-
-            return;
-          }
-
-          throw createError({ statusCode: response.response?.status, fatal: true });
-        },
       }),
     asyncDataOptions,
   );
+
+  watchDeep(response.error, (error) => {
+    if (!error) {
+      return;
+    }
+
+    if (error.status === 422 && options?.to) {
+      const { setError } = useFormErrors(options.to);
+      setError(error.message);
+    }
+
+    throw createError({ statusCode: error.status, fatal: true });
+  });
+
+  return response;
 }
