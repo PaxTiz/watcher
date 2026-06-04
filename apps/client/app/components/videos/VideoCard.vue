@@ -20,6 +20,8 @@ const {
 const { dates, numbers } = useFormatter();
 const { forceRefresh } = useSubscriptions();
 
+const viewing_progression = ref(video.viewing_progression);
+
 const dropdown_items = computed(() => {
   const items = [];
   if (allowHideVideo) {
@@ -38,10 +40,25 @@ const dropdown_items = computed(() => {
       on_select: on_hide_subscription,
     });
   }
+  if (viewing_progression.value <= 0.9) {
+    items.push({
+      icon: "lucide:check-check",
+      key: "maek_as_read",
+      label: "Marquer comme vue",
+      on_select: on_mark_as_read,
+    });
+  }
 
   return items;
 });
 
+const { error: video_progress_error, execute: video_progress } = usePost(
+  `/api/videos/${video.id}/progress`,
+  {
+    method: "POST",
+    body: { progression: 1 },
+  },
+);
 const { error: video_error, execute: video_hide } = usePost(`/api/videos/${video.id}/hide`, {
   method: "POST",
 });
@@ -87,6 +104,15 @@ const on_hide_subscription = async () => {
     }
   }
 };
+
+const on_mark_as_read = async () => {
+  await video_progress();
+
+  if (!video_progress_error.value) {
+    viewing_progression.value = 1;
+    toast.success("La vidéo a été marquée comme vue");
+  }
+};
 </script>
 
 <template>
@@ -123,6 +149,14 @@ const on_hide_subscription = async () => {
         class="absolute right-1 bottom-1 z-4 rounded bg-black/75 px-1 py-0.5 text-sm font-medium text-white"
       >
         {{ numbers.displaySeconds(video.duration) }}
+      </div>
+
+      <div
+        v-if="viewing_progression > 0"
+        class="absolute bottom-0 left-0 z-4 h-1 bg-red-500"
+        :style="{ width: `${viewing_progression * 100}%` }"
+      >
+        <!--  -->
       </div>
     </div>
 

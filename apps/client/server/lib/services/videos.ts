@@ -24,6 +24,7 @@ export default class VideosService extends AbstractService {
           .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
           .on("user_subscriptions.user_id", "=", user.id),
       )
+      .leftJoin("users_videos_progression", "users_videos_progression.video_id", "videos.id")
       .select((qb) => [
         "videos.id as video_id",
         "videos.service as video_service",
@@ -46,6 +47,9 @@ export default class VideosService extends AbstractService {
         sql<boolean>`COALESCE(${qb.ref("user_subscriptions.is_favorite")}, false)`.as(
           "subscription_is_favorite",
         ),
+        sql<number>`COALESCE(${qb.ref("users_videos_progression.progression")}, 0)`.as(
+          "viewing_progression",
+        ),
       ])
       .executeTakeFirstOrThrow();
 
@@ -55,6 +59,7 @@ export default class VideosService extends AbstractService {
       title: video.video_title,
       description: video.video_description,
       duration: video.video_duration,
+      viewing_progression: video.viewing_progression,
       url: video.video_url,
       thumbnail: video.video_thumbnail,
       created_at: video.video_created_at,
@@ -142,6 +147,7 @@ export default class VideosService extends AbstractService {
       .selectFrom("videos")
       .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
       .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
+      .leftJoin("users_videos_progression", "users_videos_progression.video_id", "videos.id")
       .where((eb) =>
         eb.not(
           eb.exists(
@@ -157,7 +163,7 @@ export default class VideosService extends AbstractService {
       .offset((params.page - 1) * params.per_page)
       .limit(params.per_page)
       .orderBy("videos.created_at", "desc")
-      .select([
+      .select((qb) => [
         "videos.id as video_id",
         "videos.service as video_service",
         "videos.title as video_title",
@@ -174,6 +180,9 @@ export default class VideosService extends AbstractService {
         "subscriptions.logo as subscription_logo",
         "subscriptions.last_synced_at as subscription_last_synced_at",
         "user_subscriptions.is_favorite as subscription_is_favorite",
+        sql<number>`COALESCE(${qb.ref("users_videos_progression.progression")}, 0)`.as(
+          "video_viewing_progression",
+        ),
       ])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
       .$if(params.is_favorite === true, (qb) =>
@@ -197,6 +206,7 @@ export default class VideosService extends AbstractService {
         title: item.video_title,
         description: item.video_description,
         duration: item.video_duration,
+        viewing_progression: item.video_viewing_progression,
         url: item.video_url,
         thumbnail: item.video_thumbnail,
         created_at: item.video_created_at,
@@ -232,6 +242,20 @@ export default class VideosService extends AbstractService {
         video_id: id,
       })
       .onConflict((eb) => eb.doNothing())
+      .execute();
+  }
+
+  async update_progress(user: User, id: string, progression: number) {
+    const database = useDatabase();
+
+    await database
+      .insertInto("users_videos_progression")
+      .values({
+        user_id: user.id,
+        video_id: id,
+        progression,
+      })
+      .onConflict((eb) => eb.columns(["user_id", "video_id"]).doUpdateSet({ progression }))
       .execute();
   }
 

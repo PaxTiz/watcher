@@ -15,6 +15,8 @@ export type VideoResource = {
 
   duration: number;
 
+  viewing_progression: number; // percentage of view between 0 and 1
+
   url: string;
 
   thumbnail: string;

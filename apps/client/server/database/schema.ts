@@ -91,6 +91,14 @@ export type HiddenUsersVideosTable = {
   video_id: string;
 };
 
+export type UsersVideosProgression = {
+  user_id: string;
+
+  video_id: string;
+
+  progression: number;
+};
+
 export type Database = {
   users: UserTable;
   subscriptions: SubscriptionTable;
@@ -98,6 +106,7 @@ export type Database = {
   credentials: CredentialTable;
   videos: VideoTable;
   hidden_users_videos: HiddenUsersVideosTable;
+  users_videos_progression: UsersVideosProgression;
 };
 
 export type SubscriptionTableInsert = Insertable<SubscriptionTable>;
