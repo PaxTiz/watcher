@@ -16,15 +16,15 @@ const imageSize = computed(() => (size === "md" ? 48 : 38));
 
 <template>
   <div
-    class="flex items-center gap-4"
+    class="flex items-center gap-4 overflow-hidden"
     :class="{
       'hover:bg-ui-bg rounded bg-transparent p-1 transition-all duration-300': withHover,
       'grayscale-100': hidden,
     }"
   >
-    <nuxt-link :to="`/subscriptions/${slug}`">
+    <nuxt-link :to="`/subscriptions/${slug}`" class="shrink-0" :style="{ width: `${imageSize}px` }">
       <NuxtImg
-        class="w-full rounded"
+        class="aspect-square w-full rounded object-cover"
         loading="lazy"
         format="avif,webp"
         :width="imageSize"
@@ -35,7 +35,7 @@ const imageSize = computed(() => (size === "md" ? 48 : 38));
       />
     </nuxt-link>
 
-    <div class="shrink-0">
+    <div class="min-w-0 flex-1">
       <nuxt-link
         :to="`/subscriptions/${slug}`"
         :class="{
@@ -43,7 +43,7 @@ const imageSize = computed(() => (size === "md" ? 48 : 38));
           'text-sm font-medium': size === 'sm',
           'text-ui-text-muted': hidden,
         }"
-        class="text-ui-text"
+        class="text-ui-text block truncate"
       >
         {{ name }}
       </nuxt-link>
