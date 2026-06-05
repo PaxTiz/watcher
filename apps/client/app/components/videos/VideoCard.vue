@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { toast } from "vue-sonner";
-
 import { NuxtLink } from "#components";
 import type { VideoResource } from "#shared/resources/videos";
 import { useFormatter } from "#shared/utils/useFormatter";
@@ -20,7 +18,8 @@ const {
 const { dates, numbers } = useFormatter();
 const { forceRefresh } = useSubscriptions();
 
-const viewing_progression = ref(video.viewing_progression);
+const inner_video = ref(video);
+const viewing_progression = ref(inner_video.value.viewing_progression);
 
 const dropdown_items = computed(() => {
   const items = [];
@@ -29,7 +28,7 @@ const dropdown_items = computed(() => {
       icon: "lucide:video-off",
       key: "hide_video",
       label: "Masquer la vidéo",
-      on_select: on_hide_video,
+      on_select: () => on_hide_video(() => on_hide_video_callback?.()),
     });
   }
   if (allowHideChannel) {
@@ -37,82 +36,38 @@ const dropdown_items = computed(() => {
       icon: "lucide:circle-off",
       key: "hide_subscription",
       label: "Masquer la chaîne",
-      on_select: on_hide_subscription,
+      on_select: () =>
+        on_hide_subscription(async () => {
+          await forceRefresh();
+          await on_hide_video_callback?.();
+        }),
     });
   }
   if (viewing_progression.value <= 0.9) {
     items.push({
       icon: "lucide:check-check",
-      key: "maek_as_read",
+      key: "mark_as_read",
       label: "Marquer comme vue",
-      on_select: on_mark_as_read,
+      on_select: () => on_mark_as_read(() => (viewing_progression.value = 1)),
     });
   }
+
+  items.push({
+    icon: inner_video.value.author.is_favorite ? "lucide:star-off" : "lucide:star",
+    key: "toggle_favorite",
+    label: inner_video.value.author.is_favorite ? "Retirer des favoris" : "Ajouter aux favoris",
+    on_select: () =>
+      on_toggle_subscription_favorite(async () => {
+        inner_video.value.author.is_favorite = !inner_video.value.author.is_favorite;
+        await on_hide_video_callback?.();
+      }),
+  });
 
   return items;
 });
 
-const { error: video_progress_error, execute: video_progress } = usePost(
-  `/api/videos/${video.id}/progress`,
-  {
-    method: "POST",
-    body: { progression: 1 },
-  },
-);
-const { error: video_error, execute: video_hide } = usePost(`/api/videos/${video.id}/hide`, {
-  method: "POST",
-});
-const { error: subscription_error, execute: subscription_hide } = usePost(
-  `/api/subscriptions/${video.author.id}/hide`,
-  {
-    method: "POST",
-  },
-);
-
-const on_hide_video = async () => {
-  const ok = await useConfirm({
-    title: "Masquer une vidéo",
-    description:
-      "Voulez-vous vraiment masquer cette vidéo ? Elle n'apparaîtra plus dans votre flux.",
-  });
-
-  if (ok) {
-    await video_hide();
-
-    if (!video_error.value) {
-      toast.success("La vidéo a été masquée");
-      await on_hide_video_callback?.();
-    }
-  }
-};
-
-const on_hide_subscription = async () => {
-  const ok = await useConfirm({
-    title: "Masquer une chaîne",
-    description:
-      "Voulez-vous vraiment masquer cette chaîne ? L'historique ainsi que les nouvelles vidéos publiées par cette chaîne ne seront plus visibles dans votre flux.",
-  });
-
-  if (ok) {
-    await subscription_hide();
-
-    if (!subscription_error.value) {
-      await forceRefresh();
-      await on_hide_video_callback?.();
-
-      toast.success("La chaîne a été masquée");
-    }
-  }
-};
-
-const on_mark_as_read = async () => {
-  await video_progress();
-
-  if (!video_progress_error.value) {
-    viewing_progression.value = 1;
-    toast.success("La vidéo a été marquée comme vue");
-  }
-};
+const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscription_favorite } =
+  useVideo(video);
 </script>
 
 <template>
