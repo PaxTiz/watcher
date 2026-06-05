@@ -54,9 +54,9 @@ const format_label = <K extends VideoFilterType, V extends VideosValidators["lis
 <template>
   <div class="text-ui-text flex flex-wrap items-center gap-2">
     <Button
-      v-for="[k, v] in filtered_filters"
-      :label="format_label(k as VideoFilterType, v)"
-      :tag="videos.filters.name(k as keyof typeof modelValue)"
+      v-for="[k, v] in filtered_filters.filter((entry) => !['page', 'per_page'].includes(entry[0]))"
+      :label="format_label(k as VideoFilterType, v as any)"
+      :tag="videos.filters.name(k as any)"
       @click="() => (modelValue[k as VideoFilterType] = undefined)"
       allow-remove
     />

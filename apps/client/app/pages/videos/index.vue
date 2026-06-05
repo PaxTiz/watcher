@@ -6,19 +6,10 @@ definePageMeta({ name: pages.videos_index });
 
 const http_key = "videos_feed";
 const route = useRoute();
-const { filters } = useVideosFilters();
-
 const page = ref(await get_number_query_var(route, "page"));
-const { data, status } = await useVideos(
-  computed(() => ({ page: page.value, per_page: 21, ...filters.value })),
-  { key: http_key },
-);
 
-watch(page, () => {
-  if (import.meta.client) {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-});
+const { filters } = useVideosFilters({ page: page.value, per_page: 21 });
+const { data, status } = await useVideos(filters, { key: http_key });
 </script>
 
 <template>
@@ -36,7 +27,7 @@ watch(page, () => {
   </div>
 
   <VideosGrid
-    v-model:page="page"
+    v-model:page="filters.page"
     :videos="data ?? { total: 0, items: [] }"
     :loading="status === 'pending'"
     :http-key="http_key"

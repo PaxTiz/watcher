@@ -5,24 +5,12 @@ import { useVideosFilters } from "~/composables/videos/useVideosFilters";
 
 const { subscription } = defineProps<{ subscription: SubscriptionResource }>();
 
-const { filters } = useVideosFilters({ subscription_id: subscription.id });
+const { filters } = useVideosFilters({ page: 1, per_page: 15, subscription_id: subscription.id }, [
+  "subscription_id",
+]);
 
 const http_key = computed(() => `subscription_${subscription.id}_videos`);
-const page = ref(1);
-const { data: videos, status } = await useVideos(
-  computed(() => ({
-    page: page.value,
-    per_page: 15,
-    ...filters.value,
-  })),
-  { key: http_key },
-);
-
-watch(page, () => {
-  if (import.meta.client) {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-});
+const { data: videos, status } = await useVideos(filters, { key: http_key });
 
 onUnmounted(() => {
   filters.value.subscription_id = undefined;
@@ -45,7 +33,7 @@ onUnmounted(() => {
     </div>
 
     <VideosGrid
-      v-model:page="page"
+      v-model:page="filters.page"
       :videos="videos ?? { total: 0, items: [] }"
       :loading="status === 'pending'"
       :allow-hide-channel="false"
