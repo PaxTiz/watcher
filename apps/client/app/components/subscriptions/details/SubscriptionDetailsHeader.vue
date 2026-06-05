@@ -44,7 +44,7 @@ const toggleFavorite = async () => {
 
         <div class="flex flex-wrap justify-center gap-3">
           <Button
-            :label="subscription.is_favorite ? 'Retirer' : 'Favoris'"
+            :label="subscription.is_favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
             :icon="subscription.is_favorite ? 'lucide:star-off' : 'lucide:star'"
             :color="subscription.is_favorite ? undefined : 'yellow'"
             @click="toggleFavorite"

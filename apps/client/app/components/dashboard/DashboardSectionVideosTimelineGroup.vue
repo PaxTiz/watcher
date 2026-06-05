@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import type { VideoResource } from "#shared/resources/videos";
+import { useVideosFavorites } from "~/composables/videos/useVideosFavorites";
+import { useVideosTimeline } from "~/composables/videos/useVideosTimeline";
 
 export type Label = "today" | "yesterday" | "weekly" | "monthly" | "older";
 
@@ -7,6 +9,9 @@ const props = defineProps<{
   label: Label;
   videos: Array<VideoResource>;
 }>();
+
+const { refresh: refresh_favorites } = await useVideosFavorites();
+const { refresh: refresh_timeline } = useVideosTimeline();
 
 const formatted_label = computed(() => {
   return {
@@ -17,6 +22,14 @@ const formatted_label = computed(() => {
     older: "Plus ancien",
   }[props.label];
 });
+
+const on_hide_subscription = async () => {
+  await Promise.all([refresh_favorites(), refresh_timeline()]);
+};
+
+const on_toggle_favorite = async () => {
+  await Promise.all([refresh_favorites(), refresh_timeline()]);
+};
 </script>
 
 <template>
@@ -29,7 +42,15 @@ const formatted_label = computed(() => {
     </div>
 
     <div class="infinite-grid-[300px] gap-6">
-      <VideoCard v-for="video in videos" :key="video.id" :id="video.id" :video="video" />
+      <VideoCard
+        v-for="video in videos"
+        :key="video.id"
+        :id="video.id"
+        :video="video"
+        @hide-video="refresh_favorites"
+        @hide-subscription="on_hide_subscription"
+        @toggle-favorite="on_toggle_favorite"
+      />
     </div>
   </div>
 </template>

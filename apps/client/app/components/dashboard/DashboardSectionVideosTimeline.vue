@@ -2,21 +2,11 @@
 import { isAfter, isToday, isYesterday, subDays } from "date-fns";
 
 import type { VideoResource } from "#shared/resources/videos";
+import { useVideosTimeline } from "~/composables/videos/useVideosTimeline";
 
 import type { Label } from "./DashboardSectionVideosTimelineGroup.vue";
 
-const loadMoreTrigger = ref<HTMLElement | null>(null);
-const {
-  items: videos,
-  hasMore,
-  status,
-} = await useInfiniteVideos(
-  { per_page: 30 },
-  {
-    key: "home_videos_timeline",
-    loadMoreTrigger,
-  },
-);
+const { videos, hasMore, status, loadMoreTrigger } = useVideosTimeline();
 
 const groupedVideos = computed(() => {
   if (!videos.value) return [];

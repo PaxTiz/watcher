@@ -1,10 +1,13 @@
 <script lang="ts" setup>
 import type { SubscriptionResource } from "#shared/resources/subscriptions";
+import { useVideos } from "~/composables/videos/useVideos";
+import { useVideosFilters } from "~/composables/videos/useVideosFilters";
 
 const { subscription } = defineProps<{ subscription: SubscriptionResource }>();
 
 const { filters } = useVideosFilters({ subscription_id: subscription.id });
 
+const http_key = computed(() => `subscription_${subscription.id}_videos`);
 const page = ref(1);
 const { data: videos, status } = await useVideos(
   computed(() => ({
@@ -12,7 +15,7 @@ const { data: videos, status } = await useVideos(
     per_page: 15,
     ...filters.value,
   })),
-  { key: `subscription_${subscription.id}_videos` },
+  { key: http_key },
 );
 
 watch(page, () => {
@@ -46,6 +49,8 @@ onUnmounted(() => {
       :videos="videos ?? { total: 0, items: [] }"
       :loading="status === 'pending'"
       :allow-hide-channel="false"
+      :allow-toggle-favorite="false"
+      :http-key="http_key"
     />
   </div>
 </template>

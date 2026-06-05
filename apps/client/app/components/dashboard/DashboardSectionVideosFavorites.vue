@@ -1,12 +1,17 @@
 <script lang="ts" setup>
-const { data: videos } = await useVideos(
-  {
-    page: 1,
-    per_page: 9,
-    is_favorite: true,
-  },
-  { key: "home_videos_favorites" },
-);
+import { useVideosFavorites } from "~/composables/videos/useVideosFavorites";
+import { useVideosTimeline } from "~/composables/videos/useVideosTimeline";
+
+const { data: videos, refresh: refresh_favorites } = await useVideosFavorites();
+const { refresh: refresh_timeline } = useVideosTimeline();
+
+const on_hide_subscription = async () => {
+  await Promise.all([refresh_favorites(), refresh_timeline()]);
+};
+
+const on_toggle_favorite = async () => {
+  await Promise.all([refresh_favorites(), refresh_timeline()]);
+};
 </script>
 
 <template>
@@ -23,7 +28,15 @@ const { data: videos } = await useVideos(
     </div>
 
     <div class="infinite-grid-[300px] gap-6">
-      <VideoCard v-for="video in videos.items" :key="video.id" :id="video.id" :video="video" />
+      <VideoCard
+        v-for="video in videos.items"
+        :key="video.id"
+        :id="video.id"
+        :video="video"
+        @hide-video="refresh_favorites"
+        @hide-subscription="on_hide_subscription"
+        @toggle-favorite="on_toggle_favorite"
+      />
     </div>
   </section>
 </template>

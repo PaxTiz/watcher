@@ -1,16 +1,17 @@
 <script lang="ts" setup>
-import type { VideoResource } from "#shared/resources/videos";
-import type { Paginated } from "#shared/types/shared";
+import { useVideos } from "~/composables/videos/useVideos";
+import { useVideosFilters } from "~/composables/videos/useVideosFilters";
 
 definePageMeta({ name: pages.videos_index });
 
+const http_key = "videos_feed";
 const route = useRoute();
 const { filters } = useVideosFilters();
 
 const page = ref(await get_number_query_var(route, "page"));
 const { data, status } = await useVideos(
   computed(() => ({ page: page.value, per_page: 21, ...filters.value })),
-  { key: "videos_feed" },
+  { key: http_key },
 );
 
 watch(page, () => {
@@ -38,5 +39,6 @@ watch(page, () => {
     v-model:page="page"
     :videos="data ?? { total: 0, items: [] }"
     :loading="status === 'pending'"
+    :http-key="http_key"
   />
 </template>

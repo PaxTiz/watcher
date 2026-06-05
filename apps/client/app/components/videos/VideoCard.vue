@@ -2,24 +2,31 @@
 import { NuxtLink } from "#components";
 import type { VideoResource } from "#shared/resources/videos";
 import { useFormatter } from "#shared/utils/useFormatter";
-
-const on_hide_video_callback = inject<VideoOnHideType | undefined>(VIDE_ON_HIDE_SYMBOL, undefined);
+import { useVideo } from "~/composables/videos/useVideo";
 
 const {
   video,
   allowHideChannel = true,
   allowHideVideo = true,
+  allowToggleFavorite = true,
 } = defineProps<{
   video: VideoResource;
   allowHideVideo?: boolean;
   allowHideChannel?: boolean;
+  allowToggleFavorite?: boolean;
+}>();
+
+const emit = defineEmits<{
+  hideVideo: [];
+  hideSubscription: [];
+  markAsView: [];
+  toggleFavorite: [];
 }>();
 
 const { dates, numbers } = useFormatter();
-const { forceRefresh } = useSubscriptions();
+const { forceRefresh: refresh_subscriptions } = useSubscriptions();
 
-const inner_video = ref(video);
-const viewing_progression = ref(inner_video.value.viewing_progression);
+const viewing_progression = ref(video.viewing_progression);
 
 const dropdown_items = computed(() => {
   const items = [];
@@ -28,7 +35,11 @@ const dropdown_items = computed(() => {
       icon: "lucide:video-off",
       key: "hide_video",
       label: "Masquer la vidéo",
-      on_select: () => on_hide_video(() => on_hide_video_callback?.()),
+      on_select: async () => {
+        await on_hide_video(() => {
+          emit("hideVideo");
+        });
+      },
     });
   }
   if (allowHideChannel) {
@@ -36,11 +47,12 @@ const dropdown_items = computed(() => {
       icon: "lucide:circle-off",
       key: "hide_subscription",
       label: "Masquer la chaîne",
-      on_select: () =>
-        on_hide_subscription(async () => {
-          await forceRefresh();
-          await on_hide_video_callback?.();
-        }),
+      on_select: async () => {
+        await on_hide_subscription(async () => {
+          emit("hideSubscription");
+          await refresh_subscriptions();
+        });
+      },
     });
   }
   if (viewing_progression.value <= 0.9) {
@@ -48,20 +60,27 @@ const dropdown_items = computed(() => {
       icon: "lucide:check-check",
       key: "mark_as_read",
       label: "Marquer comme vue",
-      on_select: () => on_mark_as_read(() => (viewing_progression.value = 1)),
+      on_select: async () => {
+        await on_mark_as_read(() => {
+          viewing_progression.value = 1;
+          emit("markAsView");
+        });
+      },
     });
   }
-
-  items.push({
-    icon: inner_video.value.author.is_favorite ? "lucide:star-off" : "lucide:star",
-    key: "toggle_favorite",
-    label: inner_video.value.author.is_favorite ? "Retirer des favoris" : "Ajouter aux favoris",
-    on_select: () =>
-      on_toggle_subscription_favorite(async () => {
-        inner_video.value.author.is_favorite = !inner_video.value.author.is_favorite;
-        await on_hide_video_callback?.();
-      }),
-  });
+  if (allowToggleFavorite) {
+    items.push({
+      icon: video.author.is_favorite ? "lucide:star-off" : "lucide:star",
+      key: "toggle_favorite",
+      label: video.author.is_favorite ? "Retirer des favoris" : "Ajouter aux favoris",
+      on_select: async () => {
+        await on_toggle_subscription_favorite(async () => {
+          emit("toggleFavorite");
+          await refresh_subscriptions();
+        });
+      },
+    });
+  }
 
   return items;
 });

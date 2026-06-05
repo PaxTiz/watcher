@@ -1,6 +1,8 @@
 import type { VideoResource } from "#shared/resources/videos";
 
-export const useInfiniteVideos = async (
+import { useVideos } from "./videos/useVideos";
+
+export const useInfiniteVideos = (
   filters?: { per_page: number },
   options?: {
     key: string;
@@ -21,7 +23,7 @@ export const useInfiniteVideos = async (
     };
   });
 
-  const response = await useVideos(query, {
+  const response = useVideos(query, {
     ...options,
     watch: false,
   });

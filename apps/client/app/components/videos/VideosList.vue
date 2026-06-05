@@ -10,12 +10,34 @@ const {
   loading = false,
   allowHideVideo = true,
   allowHideChannel = true,
+  allowToggleFavorite = true,
+  httpKey,
 } = defineProps<{
   videos: Paginated<VideoResource>;
   loading?: boolean;
   allowHideVideo?: boolean;
   allowHideChannel?: boolean;
+  allowToggleFavorite?: boolean;
+  httpKey?: string;
 }>();
+
+const on_hide_video = async () => {
+  if (httpKey) {
+    await refreshNuxtData(httpKey);
+  }
+};
+
+const on_hide_subscription = async () => {
+  if (httpKey) {
+    await refreshNuxtData(httpKey);
+  }
+};
+
+const on_toggle_favorite = async () => {
+  if (httpKey) {
+    await refreshNuxtData(httpKey);
+  }
+};
 </script>
 
 <template>
@@ -46,6 +68,10 @@ const {
         :video="video"
         :allow-hide-video="allowHideVideo"
         :allow-hide-channel="allowHideChannel"
+        :allow-toggle-favorite="allowToggleFavorite"
+        @hide-video="on_hide_video"
+        @hide-subscription="on_hide_subscription"
+        @toggle-favorite="on_toggle_favorite"
       />
     </div>
 

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { SubscriptionResource } from "#shared/resources/subscriptions";
+import type { VideoFilters, VideoFilterType } from "~/composables/videos/useVideosFilters";
 
 const modelValue = defineModel<VideoFilters>({ required: true });
 
