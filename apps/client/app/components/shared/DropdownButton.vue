@@ -9,6 +9,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "reka-ui";
+import type { ComponentProps } from "vue-component-type-helpers";
 
 import { AppFormInput, Button, Icon } from "#components";
 
@@ -37,6 +38,9 @@ const props = defineProps<{
   value?: T;
   align?: "start" | "center" | "end";
   items: Array<DropdownItem>;
+  ui?: {
+    button?: ComponentProps<typeof Button>["ui"];
+  };
 }>();
 
 const isOpen = ref(false);
@@ -121,6 +125,7 @@ const DropdownChild = defineComponent(
           :color="color"
           :size="size"
           :icon-size="iconSize"
+          :ui="ui?.button"
           @click.prevent
         />
       </DropdownMenuTrigger>

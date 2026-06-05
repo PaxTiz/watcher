@@ -204,6 +204,7 @@ const on_mark_as_read = async () => {
           size="sm"
           icon-size="lg"
           icon="lucide:ellipsis-vertical"
+          :ui="{ button: { root: 'p-1 hover:bg-gray-100' } }"
           :items="dropdown_items"
         />
       </div>
