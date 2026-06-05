@@ -29,9 +29,9 @@ const { forceRefresh: refresh_subscriptions } = useSubscriptions();
 const viewing_progression = ref(video.viewing_progression);
 
 const dropdown_items = computed(() => {
-  const items = [];
+  const video_items = [];
   if (allowHideVideo) {
-    items.push({
+    video_items.push({
       icon: "lucide:video-off",
       key: "hide_video",
       label: "Masquer la vidéo",
@@ -42,21 +42,9 @@ const dropdown_items = computed(() => {
       },
     });
   }
-  if (allowHideChannel) {
-    items.push({
-      icon: "lucide:circle-off",
-      key: "hide_subscription",
-      label: "Masquer la chaîne",
-      on_select: async () => {
-        await on_hide_subscription(async () => {
-          emit("hideSubscription");
-          await refresh_subscriptions();
-        });
-      },
-    });
-  }
+
   if (viewing_progression.value <= 0.9) {
-    items.push({
+    video_items.push({
       icon: "lucide:check-check",
       key: "mark_as_read",
       label: "Marquer comme vue",
@@ -68,8 +56,24 @@ const dropdown_items = computed(() => {
       },
     });
   }
+
+  const subscription_items = [];
+  if (allowHideChannel) {
+    subscription_items.push({
+      icon: "lucide:circle-off",
+      key: "hide_subscription",
+      label: "Masquer la chaîne",
+      on_select: async () => {
+        await on_hide_subscription(async () => {
+          emit("hideSubscription");
+          await refresh_subscriptions();
+        });
+      },
+    });
+  }
+
   if (allowToggleFavorite) {
-    items.push({
+    subscription_items.push({
       icon: video.author.is_favorite ? "lucide:star-off" : "lucide:star",
       key: "toggle_favorite",
       label: video.author.is_favorite ? "Retirer des favoris" : "Ajouter aux favoris",
@@ -80,6 +84,21 @@ const dropdown_items = computed(() => {
         });
       },
     });
+  }
+
+  const items = [];
+  if (video_items.length > 0) {
+    items.push({ label: "Vidéo", type: "label" });
+    items.push(...video_items);
+  }
+
+  if (video_items.length > 0 && subscription_items.length > 0) {
+    items.push({ type: "divider" });
+  }
+
+  if (subscription_items.length > 0) {
+    items.push({ label: "Abonnement", type: "label" });
+    items.push(...subscription_items);
   }
 
   return items;

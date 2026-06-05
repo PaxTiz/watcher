@@ -2,8 +2,10 @@
 import {
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuPortal,
   DropdownMenuRoot,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -16,6 +18,7 @@ import { AppFormInput, Button, Icon } from "#components";
 type DropdownItem = {
   key: K;
   label: string;
+  type?: "item" | "label" | "divider";
   value?: T;
   icon?: string;
   allowSearch?: boolean;
@@ -138,8 +141,20 @@ const DropdownChild = defineComponent(
               :side-offset="5"
               class="bg-ui-bg border-ui-border shadow-ui-border z-1000 flex w-max min-w-[var(--reka-dropdown-menu-trigger-width)] flex-col rounded border p-1 shadow dark:shadow-black"
             >
-              <template v-for="item in items" :key="item.label">
-                <DropdownMenuSub v-if="item.children && item.children.length > 0">
+              <template v-for="(item, index) in items" :key="index">
+                <DropdownMenuSeparator
+                  v-if="item.type === 'divider'"
+                  class="bg-ui-border my-1 h-px"
+                />
+
+                <DropdownMenuLabel
+                  v-else-if="item.type === 'label'"
+                  class="text-ui-text-muted/75 px-2 pt-2 pb-1 text-[10px] font-bold tracking-widest uppercase"
+                >
+                  {{ item.label }}
+                </DropdownMenuLabel>
+
+                <DropdownMenuSub v-else-if="item.children && item.children.length > 0">
                   <DropdownMenuSubTrigger
                     :value="item.label"
                     as="button"
