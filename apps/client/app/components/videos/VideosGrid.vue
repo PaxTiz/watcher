@@ -41,27 +41,10 @@ const on_toggle_favorite = async () => {
 </script>
 
 <template>
-  <div v-if="loading" class="infinite-grid-[380px] gap-4">
-    <Card
-      v-for="i in 9"
-      :key="i"
-      size="flat"
-      class="shadow-ui-border border-2 border-transparent shadow"
-    >
-      <div class="bg-ui-border/50 aspect-video w-full animate-pulse rounded-t" />
-      <div class="grid grid-cols-[2rem_1fr_2rem] gap-4 p-4">
-        <div class="bg-ui-border/50 size-8 animate-pulse rounded" />
-        <div class="space-y-2">
-          <div class="bg-ui-border/50 h-5 w-full animate-pulse rounded" />
-          <div class="bg-ui-border/50 h-4 w-2/3 animate-pulse rounded" />
-        </div>
-        <div class="bg-ui-border/50 size-8 animate-pulse rounded" />
-      </div>
-    </Card>
-  </div>
+  <VideosGridSkeleton v-if="loading" />
 
   <template v-else-if="videos.items.length > 0">
-    <div class="infinite-grid-[380px] gap-4">
+    <div class="infinite-grid-[300px] gap-4">
       <VideoCard
         v-for="video in videos.items"
         :key="video.id"

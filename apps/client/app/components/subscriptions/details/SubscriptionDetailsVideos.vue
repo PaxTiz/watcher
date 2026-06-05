@@ -44,7 +44,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <VideosList
+    <VideosGrid
       v-model:page="page"
       :videos="videos ?? { total: 0, items: [] }"
       :loading="status === 'pending'"

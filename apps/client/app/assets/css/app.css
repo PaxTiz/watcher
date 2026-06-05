@@ -18,6 +18,15 @@
   --color-highlight: oklch(82.8% 0.189 84.429);
 }
 
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
 :root {
   --background: #f8fafc;
   --ui-bg: #ffffff;
@@ -32,6 +41,15 @@
   --card-gradient-bottom: #f8fafc;
   --bg-gradient-radial: radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 100%);
   --btn-secondary-gradient: linear-gradient(135deg, #fe640b 0%, #ff8c42 100%);
+
+  --shimmer-gradient-effect: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.015) 20%,
+    rgba(0, 0, 0, 0.03) 50%,
+    rgba(0, 0, 0, 0.015) 80%,
+    transparent 100%
+  );
 
   --subscription-image-size: 71px;
 }
@@ -50,6 +68,15 @@
   --card-gradient-bottom: #1e1e2e;
   --bg-gradient-radial: radial-gradient(circle at 50% 0%, #1e1e2e 0%, #11111b 100%);
   --btn-secondary-gradient: linear-gradient(135deg, #fe640b 0%, #d45100 100%);
+
+  --shimmer-gradient-effect: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.005) 20%,
+    rgba(255, 255, 255, 0.015) 50%,
+    rgba(255, 255, 255, 0.005) 80%,
+    transparent 100%
+  );
 }
 
 @utility container {
@@ -60,6 +87,21 @@
 @utility infinite-grid-* {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(--value([length]), 1fr));
+}
+
+@utility shimmer {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: var(--shimmer-gradient-effect);
+    animation: shimmer 1.5s infinite;
+    animation-delay: var(--shimmer-delay, 0s);
+  }
 }
 
 body {

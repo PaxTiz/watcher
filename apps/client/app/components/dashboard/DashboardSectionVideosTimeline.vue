@@ -45,7 +45,9 @@ const groupedVideos = computed(() => {
 </script>
 
 <template>
-  <section class="space-y-12">
+  <VideosGridSkeleton v-if="status === 'pending'" />
+
+  <section v-else class="space-y-12">
     <DashboardSectionVideosTimelineGroup
       v-for="[group, items] in groupedVideos"
       :key="group"
@@ -54,7 +56,7 @@ const groupedVideos = computed(() => {
     />
 
     <div
-      v-if="groupedVideos.length === 0 && status !== 'pending'"
+      v-if="groupedVideos.length === 0"
       class="flex flex-col items-center justify-center py-20 text-center"
     >
       <Icon name="lucide:video-off" class="text-ui-border mb-4 text-6xl" />
