@@ -2,6 +2,11 @@
 definePageMeta({ name: pages.home });
 
 useOAuthRedirectionHandler();
+
+useMeta({
+  title: "Accueil",
+  description: "Découvrez les dernières sorties de vos créateurs favoris.",
+});
 </script>
 
 <template>

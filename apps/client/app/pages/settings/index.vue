@@ -1,4 +1,6 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+useMeta({ title: "Paramètres" });
+</script>
 
 <template>
   <div class="mx-auto max-w-4xl pb-16">

@@ -13,6 +13,8 @@ const overlay = useOverlay();
 const onShowBlueskyModal = () => {
   overlay.create(LazyLoginModal).open();
 };
+
+useMeta({ title: "Connexion" });
 </script>
 
 <template>

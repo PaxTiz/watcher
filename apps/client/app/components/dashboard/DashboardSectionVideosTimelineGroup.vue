@@ -15,7 +15,7 @@ const { refresh: refresh_timeline } = useVideosTimeline();
 
 const formatted_label = computed(() => {
   return {
-    today: "Aujourd(hui",
+    today: "Aujourd'hui",
     yesterday: "Hier",
     weekly: "Cette semaine",
     monthly: "30 derniers jours",

@@ -10,6 +10,11 @@ const page = ref(await get_number_query_var(route, "page"));
 
 const { filters } = useVideosFilters({ page: page.value, per_page: 21 });
 const { data, status } = await useVideos(filters, { key: http_key });
+
+useMeta({
+  title: "Vidéos",
+  description: "Explorez l'ensemble des vidéos de vos abonnements YouTube et Twitch.",
+});
 </script>
 
 <template>

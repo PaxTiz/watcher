@@ -22,6 +22,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      titleTemplate: "%s - Watcher",
       link: [
         {
           rel: "icon",
