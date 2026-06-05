@@ -33,6 +33,7 @@ useMeta({
 
   <VideosGrid
     v-model:page="filters.page"
+    :per-page="filters.per_page"
     :videos="data ?? { total: 0, items: [] }"
     :loading="status === 'pending'"
     :http-key="http_key"

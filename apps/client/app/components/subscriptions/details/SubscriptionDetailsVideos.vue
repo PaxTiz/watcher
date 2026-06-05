@@ -34,6 +34,7 @@ onUnmounted(() => {
 
     <VideosGrid
       v-model:page="filters.page"
+      :per-page="filters.per_page"
       :videos="videos ?? { total: 0, items: [] }"
       :loading="status === 'pending'"
       :allow-hide-channel="false"

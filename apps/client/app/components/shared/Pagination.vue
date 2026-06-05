@@ -6,7 +6,7 @@ const { totalItems, perPage } = defineProps<{
 }>();
 
 const router = useRouter();
-const totalPages = computed(() => Math.floor(totalItems / perPage));
+const totalPages = computed(() => Math.ceil(totalItems / perPage));
 
 const changePage = async (page: number) => {
   if (page < 1 || page > totalPages.value || page === currentPage.value) return;

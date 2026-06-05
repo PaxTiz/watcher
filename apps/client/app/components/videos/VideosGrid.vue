@@ -2,8 +2,6 @@
 import type { VideoResource } from "#shared/resources/videos";
 import type { Paginated } from "#shared/types/shared";
 
-const VIDEOS_PER_PAGE = 21;
-
 const modelValue = defineModel<number>("page", { required: true });
 const {
   videos,
@@ -14,6 +12,7 @@ const {
   httpKey,
 } = defineProps<{
   videos: Paginated<VideoResource>;
+  perPage: number;
   loading?: boolean;
   allowHideVideo?: boolean;
   allowHideChannel?: boolean;
@@ -58,12 +57,8 @@ const on_toggle_favorite = async () => {
       />
     </div>
 
-    <div v-if="videos.total > VIDEOS_PER_PAGE" class="mt-8 flex justify-center">
-      <Pagination
-        v-model:page="modelValue"
-        :total-items="videos.total"
-        :per-page="VIDEOS_PER_PAGE"
-      />
+    <div v-if="videos.total > perPage" class="mt-8 flex justify-center">
+      <Pagination v-model:page="modelValue" :total-items="videos.total" :per-page="perPage" />
     </div>
   </template>
 
