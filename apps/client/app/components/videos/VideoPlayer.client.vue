@@ -8,6 +8,8 @@ import type { VideoResource } from "#shared/resources/videos";
 // @ts-ignore
 import "plyr/css";
 
+import { useVideoProgression } from "~/composables/videos/useVideoProgression";
+
 const { video } = defineProps<{ video: VideoResource }>();
 
 const url = computed(() => {
@@ -21,6 +23,8 @@ const url = computed(() => {
 });
 
 const player = useTemplateRef("player");
+const plyr_instance = shallowRef<Plyr>();
+
 const plyrOptions: Record<string, unknown> = {
   settings: ["captions", "quality", "speed", "loop"],
   keyboard: {
@@ -42,7 +46,7 @@ watch(
     }
 
     if (video.service === "youtube") {
-      new Plyr(p, plyrOptions);
+      plyr_instance.value = new Plyr(p, plyrOptions);
     }
 
     const videoElement = p.querySelector("video")!;
@@ -87,17 +91,19 @@ watch(
           }
         });
 
-        new Plyr(videoElement, plyrOptions);
+        plyr_instance.value = new Plyr(videoElement, plyrOptions);
       });
 
       hls.attachMedia(videoElement);
     } else {
       videoElement.src = url.value;
-      new Plyr(videoElement, plyrOptions);
+      plyr_instance.value = new Plyr(videoElement, plyrOptions);
     }
   },
   { deep: true, flush: "post" },
 );
+
+useVideoProgression(video, plyr_instance);
 </script>
 
 <template>

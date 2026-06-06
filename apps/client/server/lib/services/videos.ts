@@ -248,7 +248,7 @@ export default class VideosService extends AbstractService {
   async update_progress(user: User, id: string, progression: number) {
     const database = useDatabase();
 
-    const mapped_progression = progression > 0.9 ? 1 : progression;
+    const mapped_progression = Math.max(0, progression > 0.9 ? 1 : progression);
 
     await database
       .insertInto("users_videos_progression")
