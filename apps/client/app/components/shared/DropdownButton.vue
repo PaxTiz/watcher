@@ -21,6 +21,7 @@ type DropdownItem = {
   type?: "item" | "label" | "divider";
   value?: T;
   icon?: string;
+  disabled?: boolean;
   allowSearch?: boolean;
   on_select?: () => Promise<unknown>;
   children?: Array<{
@@ -101,12 +102,17 @@ const DropdownChild = defineComponent(
               DropdownMenuItem,
               {
                 key: child.value,
+                disabled: child.disabled,
                 class:
-                  "hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 flex w-full min-w-[100px] items-center gap-2 rounded p-1.5 text-start text-sm outline-none cursor-pointer transition-colors " +
-                  (props.value === child.value
-                    ? "bg-alt/10 text-alt"
-                    : "text-ui-text-muted hover:text-ui-text"),
-                onClick: () => childProps.onSelect(childProps.item.key, child.value),
+                  "flex w-full min-w-[100px] items-center gap-2 rounded p-1.5 text-start text-sm outline-none transition-colors " +
+                  (child.disabled
+                    ? "opacity-50 cursor-not-allowed pointer-events-none text-ui-text-muted"
+                    : "hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 cursor-pointer " +
+                      (props.value === child.value
+                        ? "bg-alt/10 text-alt"
+                        : "text-ui-text-muted hover:text-ui-text")),
+                onClick: () =>
+                  !child.disabled && childProps.onSelect(childProps.item.key, child.value),
               },
               () => [child.icon && h(Icon, { name: child.icon }), h("span", child.label)],
             ),
@@ -156,9 +162,15 @@ const DropdownChild = defineComponent(
 
                 <DropdownMenuSub v-else-if="item.children && item.children.length > 0">
                   <DropdownMenuSubTrigger
+                    :disabled="item.disabled"
                     :value="item.label"
                     as="button"
-                    class="text-ui-text-muted hover:hover:text-ui-text hover:bg-ui-border/75 data-[state=open]:bg-ui-border/75 flex w-full cursor-pointer items-center justify-between gap-2 rounded p-1.5 text-start text-sm outline-none"
+                    class="flex w-full items-center justify-between gap-2 rounded p-1.5 text-start text-sm outline-none"
+                    :class="[
+                      item.disabled
+                        ? 'text-ui-text-muted pointer-events-none cursor-not-allowed opacity-50'
+                        : 'text-ui-text-muted hover:hover:text-ui-text hover:bg-ui-border/75 data-[state=open]:bg-ui-border/75 cursor-pointer',
+                    ]"
                   >
                     <div class="flex items-center gap-2">
                       <Icon v-if="item.icon" :name="item.icon" />
@@ -179,13 +191,17 @@ const DropdownChild = defineComponent(
 
                 <DropdownMenuItem
                   v-else
-                  class="hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 flex w-full cursor-pointer items-center gap-2 rounded p-1.5 text-start text-sm transition-colors outline-none"
-                  :class="
-                    value && value === item.value
-                      ? 'bg-alt/10 text-alt'
-                      : 'text-ui-text-muted hover:text-ui-text'
-                  "
-                  @click="() => on_select_item(item)"
+                  :disabled="item.disabled"
+                  class="flex w-full items-center gap-2 rounded p-1.5 text-start text-sm transition-colors outline-none"
+                  :class="[
+                    item.disabled
+                      ? 'text-ui-text-muted pointer-events-none cursor-not-allowed opacity-50'
+                      : 'hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 cursor-pointer ' +
+                        (value && value === item.value
+                          ? 'bg-alt/10 text-alt'
+                          : 'text-ui-text-muted hover:text-ui-text'),
+                  ]"
+                  @click="() => !item.disabled && on_select_item(item)"
                 >
                   <Icon v-if="item.icon" :name="item.icon" />
                   <span>{{ item.label }}</span>

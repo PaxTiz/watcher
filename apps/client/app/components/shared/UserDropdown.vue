@@ -4,6 +4,8 @@ import { toast } from "vue-sonner";
 const { user, clear } = useUserSession();
 const colorMode = useColorMode();
 
+const is_synchronising = ref(false);
+
 const onSelect = async (key: string, value: string) => {
   if (key === "theme") {
     colorMode.preference = value;
@@ -14,6 +16,7 @@ const onSelect = async (key: string, value: string) => {
     if (value === "settings") {
       await navigateTo("/settings");
     } else if (value === "sync") {
+      is_synchronising.value = true;
       const toast_id = toast.loading("Synchronisation en cours..");
 
       const { error } = await usePost(
@@ -29,6 +32,8 @@ const onSelect = async (key: string, value: string) => {
       } else {
         toast.success("Synchronisation terminée", { id: toast_id });
       }
+
+      is_synchronising.value = false;
     } else if (value === "logout") {
       const { error } = await usePost("/api/auth/logout", {
         method: "POST",
@@ -56,6 +61,7 @@ const items = computed(() => [
     label: "Synchroniser",
     value: "sync",
     icon: "lucide:refresh-cw",
+    disabled: is_synchronising.value,
   },
   {
     key: "theme",
