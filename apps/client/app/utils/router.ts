@@ -3,6 +3,7 @@ import type { RouteLocationNormalized } from "vue-router";
 export const pages = {
   home: "home",
   videos_index: "videos_index",
+  videos_single: "videos_single",
 } as const;
 
 export const get_number_query_var = async (

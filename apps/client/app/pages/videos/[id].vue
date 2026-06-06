@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import type { VideoResource } from "#shared/resources/videos";
 
+definePageMeta({ name: pages.videos_single });
+
 const route = useRoute();
 const { dates } = useFormatter();
 
@@ -19,6 +21,8 @@ useMeta({
   <section v-if="data">
     <VideoPlayer :video="data" />
 
-    <VideoMeta :video="data" class="mt-8" />
+    <div class="container mt-8">
+      <VideoMeta :video="data" />
+    </div>
   </section>
 </template>
