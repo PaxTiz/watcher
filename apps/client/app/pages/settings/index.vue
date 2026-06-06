@@ -3,15 +3,13 @@ useMeta({ title: "Paramètres" });
 </script>
 
 <template>
-  <div class="mx-auto max-w-4xl pb-16">
-    <SettingsHeader />
+  <SettingsHeader />
 
-    <div class="mt-12 space-y-8">
-      <SettingsIntegrations />
+  <div class="mt-12 space-y-8">
+    <SettingsIntegrations />
 
-      <SettingsAccount />
+    <SettingsAccount />
 
-      <SettingsActions />
-    </div>
+    <SettingsActions />
   </div>
 </template>
