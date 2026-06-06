@@ -27,7 +27,7 @@ useMeta({ title: "Connexion" });
 
       <Card class="mt-4 space-y-2">
         <Button
-          label="Connexion avec BlueSky"
+          label="Connexion avec Bluesky"
           icon="fa7-brands:bluesky"
           size="lg"
           class="w-full"

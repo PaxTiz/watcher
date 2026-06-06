@@ -33,7 +33,7 @@ export const useIntegrations = () => {
     },
     {
       id: "bluesky",
-      name: "BlueSky",
+      name: "Bluesky",
       icon: "fa7-brands:bluesky",
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
@@ -54,9 +54,9 @@ export const useIntegrations = () => {
       window.open(integration.linkUrl, "_self");
     } else {
       useOverlay().create(LazyLoginModal).open({
-        title: "Lier mon compte BlueSky",
+        title: "Lier mon compte Bluesky",
         description:
-          "Saisissez votre identifiant BlueSky pour vous connecter et lier votre compte.",
+          "Saisissez votre identifiant Bluesky pour vous connecter et lier votre compte.",
         button: "Lier mon compte",
         link: true,
       });

@@ -3,8 +3,8 @@ import type { FormSubmitEvent } from "#shared/types/forms";
 import { type OAuthValidators, oauthValidatorsSchema } from "#shared/validators/oauth";
 
 const {
-  title = "Connexion avec BlueSky",
-  description = "Veuillez vous connecter avec votre compte BlueSky afin d'accéder à Watcher.",
+  title = "Connexion avec Bluesky",
+  description = "Veuillez vous connecter avec votre compte Bluesky afin d'accéder à Watcher.",
   button = "Me connecter",
   link = false,
 } = defineProps<{
@@ -49,7 +49,7 @@ onMounted(() => {
         :schema="oauthValidatorsSchema.loginWithBluesky.body"
         @submit="onSubmit"
       >
-        <AppFormField label="Identifiant BlueSky" name="handle">
+        <AppFormField label="Identifiant Bluesky" name="handle">
           <AppFormInput ref="input" v-model="state.handle" class="w-full" />
         </AppFormField>
 
