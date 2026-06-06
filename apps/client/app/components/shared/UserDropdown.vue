@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { toast } from "vue-sonner";
 
+import type { DropdownItem } from "./DropdownButton.vue";
+
 const { user, clear } = useUserSession();
 const colorMode = useColorMode();
 
@@ -41,7 +43,7 @@ const onSelect = async (key: string, value: string) => {
   }
 };
 
-const items = computed(() => [
+const items = computed<Array<DropdownItem>>(() => [
   {
     key: "actions",
     label: "Paramètres",
@@ -59,6 +61,7 @@ const items = computed(() => [
     key: "theme",
     label: "Thème",
     icon: "lucide:palette",
+    value: colorMode.preference,
     children: [
       { label: "Système", value: "system", icon: "lucide:monitor" },
       { label: "Clair", value: "light", icon: "lucide:sun" },

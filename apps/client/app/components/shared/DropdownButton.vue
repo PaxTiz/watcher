@@ -15,7 +15,7 @@ import type { ComponentProps } from "vue-component-type-helpers";
 
 import { AppFormInput, Button, Icon } from "#components";
 
-type DropdownItem = {
+export type DropdownItem = {
   key: K;
   label: string;
   type?: "item" | "label" | "divider";
@@ -108,13 +108,18 @@ const DropdownChild = defineComponent(
                   (child.disabled
                     ? "opacity-50 cursor-not-allowed pointer-events-none text-ui-text-muted"
                     : "hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 cursor-pointer " +
-                      (props.value === child.value
+                      (childProps.item.value === child.value
                         ? "bg-alt/10 text-alt"
                         : "text-ui-text-muted hover:text-ui-text")),
                 onClick: () =>
                   !child.disabled && childProps.onSelect(childProps.item.key, child.value),
               },
-              () => [child.icon && h(Icon, { name: child.icon }), h("span", child.label)],
+              () => [
+                child.icon && h(Icon, { name: child.icon }),
+                h("span", { class: "flex-1" }, child.label),
+                childProps.item.value === child.value &&
+                  h(Icon, { name: "lucide:check", class: "ml-auto shrink-0 text-alt" }),
+              ],
             ),
           ),
         ],
@@ -204,7 +209,12 @@ const DropdownChild = defineComponent(
                   @click="() => !item.disabled && on_select_item(item)"
                 >
                   <Icon v-if="item.icon" :name="item.icon" />
-                  <span>{{ item.label }}</span>
+                  <span class="flex-1">{{ item.label }}</span>
+                  <Icon
+                    v-if="value && value === item.value"
+                    name="lucide:check"
+                    class="text-alt ml-auto shrink-0"
+                  />
                 </DropdownMenuItem>
               </template>
             </DropdownMenuContent>
