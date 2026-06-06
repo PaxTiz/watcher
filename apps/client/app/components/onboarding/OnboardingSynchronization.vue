@@ -5,6 +5,8 @@ const is_syncing = ref(false);
 
 const { fetch } = useUserSession();
 
+const abort_controller = new AbortController();
+
 const on_sync = async () => {
   const toast_id = toast.loading("Synchronisation en cours", {
     dismissible: false,
@@ -18,6 +20,7 @@ const on_sync = async () => {
       key: "onboard_with_sync",
       method: "POST",
       body: { sync: true },
+      signal: abort_controller.signal,
     },
     { immediate: true },
   );
@@ -37,6 +40,7 @@ const on_onboard = async () => {
       key: "onboard_without_sync",
       method: "POST",
       body: { sync: false },
+      signal: abort_controller.signal,
     },
     { immediate: true },
   );
@@ -45,6 +49,10 @@ const on_onboard = async () => {
 
   return navigateTo("/");
 };
+
+onUnmounted(() => {
+  abort_controller.abort();
+});
 </script>
 
 <template>
@@ -79,6 +87,7 @@ const on_onboard = async () => {
 
       <button
         class="text-ui-text-muted hover:text-ui-text cursor-pointer py-2 text-center text-sm font-medium hover:underline"
+        :disabled="is_syncing"
         @click="on_onboard"
       >
         Passer cette étape pour le moment
