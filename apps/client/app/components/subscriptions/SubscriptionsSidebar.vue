@@ -41,9 +41,9 @@ const filteredOthers = computed(() => filterList(others.value));
 
 <template>
   <aside
-    class="scrollbar-thumb-ui-border sticky top-28 h-[calc(100vh-120px)] w-64 shrink-0 scrollbar-thin overflow-y-auto pt-1 pr-4"
+    class="scrollbar-thumb-ui-border sticky top-28 h-[calc(100vh-120px)] w-64 shrink-0 scrollbar-thin overflow-y-auto pr-4"
   >
-    <div class="mb-6 px-2">
+    <div class="sticky top-0 z-10">
       <div class="relative flex items-center">
         <AppFormInput v-model="search" placeholder="Rechercher" class="w-full border-2" />
         <div class="absolute right-1">
@@ -59,7 +59,7 @@ const filteredOthers = computed(() => filterList(others.value));
       </div>
     </div>
 
-    <div v-if="filteredFavorites.length > 0" class="mb-8">
+    <div v-if="filteredFavorites.length > 0" class="mt-8">
       <h3 class="text-ui-text-muted mb-4 px-2 text-xs font-bold tracking-wider uppercase">
         Favoris
       </h3>
@@ -76,7 +76,7 @@ const filteredOthers = computed(() => filterList(others.value));
       </ul>
     </div>
 
-    <div v-if="filteredOthers.length > 0">
+    <div v-if="filteredOthers.length > 0" class="mt-8">
       <h3 class="text-ui-text-muted mb-4 px-2 text-xs font-bold tracking-wider uppercase">
         Abonnements
       </h3>
@@ -106,7 +106,7 @@ const filteredOthers = computed(() => filterList(others.value));
 
     <div
       v-if="filteredFavorites.length === 0 && filteredOthers.length === 0"
-      class="px-2 py-8 text-center"
+      class="mt-8 px-2 py-8 text-center"
     >
       <p class="text-ui-text-muted text-sm font-medium">Aucun résultat trouvé.</p>
     </div>
