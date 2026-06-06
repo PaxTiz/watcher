@@ -24,6 +24,7 @@ export const set_user_session = async (
           twitch: user.integrations.twitch,
           bluesky: user.integrations.bluesky,
         },
+        is_onboarded: user.is_onboarded,
         created_at: user.created_at,
         last_login_at: user.last_login_at,
         login_with,

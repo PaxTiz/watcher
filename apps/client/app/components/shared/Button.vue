@@ -65,7 +65,7 @@ const classes = computed(() => {
     );
   }
   if (color === "secondary") {
-    inner_classes.push("bg-alt/75", "text-white");
+    inner_classes.push("bg-alt", "hover:bg-alt/75", "text-white");
   }
   if (color === "ghost") {
     inner_classes.push("bg-transparent", "border-none", "text-ui-text-muted", "hover:text-ui-text");

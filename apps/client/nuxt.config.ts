@@ -83,6 +83,7 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         "embla-carousel-vue",
+        "reka-ui",
         "date-fns",
         "date-fns/locale",
         "hls.js",

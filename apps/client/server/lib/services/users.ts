@@ -1,4 +1,6 @@
+import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
+import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import type { UserTable } from "#server/database/schema";
 import type { UserResource } from "#shared/resources/users";
@@ -76,6 +78,7 @@ export default class UsersService extends AbstractService {
         twitch: credentials.find((c) => c.service === "twitch")?.service_id ?? null,
         bluesky: user.bluesky_did,
       },
+      is_onboarded: user.is_onboarded,
       created_at: user.created_at,
       last_login_at: user.last_login_at,
     };
@@ -92,6 +95,7 @@ export default class UsersService extends AbstractService {
         name: data.name,
         bluesky_handle: data.bluesky_handle,
         bluesky_did: data.bluesky_did,
+        is_onboarded: false,
       })
       .onConflict((oc) => oc.doNothing())
       .returningAll()
@@ -115,5 +119,27 @@ export default class UsersService extends AbstractService {
     const database = useDatabase();
 
     await database.deleteFrom("users").where("id", "=", id).execute();
+  }
+
+  async onboard(user: User, sync: boolean) {
+    const database = useDatabase();
+
+    if (user.is_onboarded) {
+      throw createError({ statusCode: 403, message: "user_is_already_onboarded" });
+    }
+
+    if (sync) {
+      await services.subscriptions.sync(user);
+    }
+
+    await database
+      .updateTable("users")
+      .set({ is_onboarded: true })
+      .where("id", "=", user.id)
+      .execute();
+
+    user.is_onboarded = true;
+
+    return { user };
   }
 }

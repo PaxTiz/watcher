@@ -15,6 +15,8 @@ export type UserResource = {
     bluesky: string | null;
   };
 
+  is_onboarded: boolean;
+
   created_at: string;
 
   last_login_at: string;

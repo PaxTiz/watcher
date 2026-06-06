@@ -1,62 +1,12 @@
 <script lang="ts" setup>
-import { toast } from "vue-sonner";
+import type { Integration } from "~/composables/useIntegrations";
 
-import { LazyLoginModal } from "#components";
+const { user } = useUserSession();
+const { is_linked: is_integration_linked, on_link, on_disconnect } = useIntegrations();
 
-const { user, fetch } = useUserSession();
+const { integration } = defineProps<{ integration: Integration }>();
 
-const { integration } = defineProps<{
-  integration: {
-    id: "google" | "twitch" | "bluesky";
-    name: string;
-    icon: string;
-    color: string;
-    linkUrl: string;
-  };
-}>();
-
-const is_linked = computed(() => !!user.value?.integrations?.[integration.id]);
-
-const { error: disconnect_error, execute: on_execute_disconnect } = usePost(
-  `/api/integrations/${integration.id}/disconnect`,
-  {
-    method: "DELETE",
-  },
-  { immediate: false },
-);
-
-const on_disconnect = async () => {
-  const ok = await useConfirm({
-    title: `Déconnexion de votre compte ${integration.name}`,
-    description:
-      "Si vous déconnectez votre compte, vos abonnements ainsi que les vidéos liées à vos abonnements ne seront plus mis à jour.",
-  });
-
-  if (!ok) {
-    return;
-  }
-
-  await on_execute_disconnect();
-  if (disconnect_error.value) {
-    toast.error(`Une erreur est survenue lors de la déconnexion de ${integration.name}`);
-  } else {
-    await fetch();
-    toast.success(`Le compte ${integration.name} a été déconnecté`);
-  }
-};
-
-const on_link = () => {
-  if (integration.id !== "bluesky") {
-    window.open(integration.linkUrl, "_self");
-  } else {
-    useOverlay().create(LazyLoginModal).open({
-      title: "Lier mon compte BlueSky",
-      description: "Saisissez votre identifiant BlueSky pour vous connecter et lier votre compte.",
-      button: "Lier mon compte",
-      link: true,
-    });
-  }
-};
+const is_linked = computed(() => is_integration_linked(integration.id));
 </script>
 
 <template>
@@ -94,7 +44,12 @@ const on_link = () => {
             {{ user?.integrations?.[integration.id] }}
           </span>
         </div>
-        <Button label="Déconnecter" size="sm" class="w-full" @click="on_disconnect" />
+        <Button
+          label="Déconnecter"
+          size="sm"
+          class="w-full"
+          @click="() => on_disconnect(integration)"
+        />
       </template>
     </div>
   </Card>

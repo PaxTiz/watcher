@@ -12,6 +12,8 @@ export type UserTable = {
 
   bluesky_handle: string | null;
 
+  is_onboarded: boolean;
+
   created_at: ColumnType<string, string | undefined, never>;
 
   last_login_at: ColumnType<string, string | undefined, never>;
