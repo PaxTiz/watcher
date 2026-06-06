@@ -27,6 +27,7 @@ const { dates, numbers } = useFormatter();
 const { forceRefresh: refresh_subscriptions } = useSubscriptions();
 
 const viewing_progression = ref(video.viewing_progression);
+const hidden_reason = ref<"video" | "channel" | undefined>();
 
 const dropdown_items = computed(() => {
   const video_items = [];
@@ -37,6 +38,8 @@ const dropdown_items = computed(() => {
       label: "Masquer la vidéo",
       on_select: async () => {
         await on_hide_video(() => {
+          hidden_reason.value = "video";
+
           emit("hideVideo");
         });
       },
@@ -65,6 +68,8 @@ const dropdown_items = computed(() => {
       label: "Masquer la chaîne",
       on_select: async () => {
         await on_hide_subscription(async () => {
+          hidden_reason.value = "channel";
+
           emit("hideSubscription");
           await refresh_subscriptions();
         });
@@ -109,7 +114,22 @@ const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscrip
 </script>
 
 <template>
+  <Card v-if="hidden_reason === 'video'">
+    <div class="flex min-h-[300px] flex-col items-center justify-center p-4">
+      <h2 class="text-ui-text text-center text-lg font-semibold">Cette vidéo a été masquée</h2>
+      <p class="text-ui-text-muted text-center">Elle n'apparaîtra plus dans votre flux</p>
+    </div>
+  </Card>
+
+  <Card v-else-if="hidden_reason === 'channel'">
+    <div class="flex min-h-[300px] flex-col items-center justify-center p-4">
+      <h2 class="text-ui-text text-center text-lg font-semibold">Cet abonnement a été masqué</h2>
+      <p class="text-ui-text-muted text-center">Ses vidéos n'apparaîtront plus dans votre flux</p>
+    </div>
+  </Card>
+
   <Card
+    v-else
     :tag="NuxtLink"
     :to="`/videos/${video.id}`"
     size="flat"

@@ -11,7 +11,6 @@ const props = defineProps<{
 }>();
 
 const { refresh: refresh_favorites } = await useVideosFavorites();
-const { refresh: refresh_timeline } = useVideosTimeline();
 
 const formatted_label = computed(() => {
   return {
@@ -24,11 +23,11 @@ const formatted_label = computed(() => {
 });
 
 const on_hide_subscription = async () => {
-  await Promise.all([refresh_favorites(), refresh_timeline()]);
+  await refresh_favorites();
 };
 
 const on_toggle_favorite = async () => {
-  await Promise.all([refresh_favorites(), refresh_timeline()]);
+  await refresh_favorites();
 };
 </script>
 
