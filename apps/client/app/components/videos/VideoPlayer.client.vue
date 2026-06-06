@@ -26,6 +26,7 @@ const player = useTemplateRef("player");
 const plyr_instance = shallowRef<Plyr>();
 
 const plyrOptions: Record<string, unknown> = {
+  ratio: "unset",
   settings: ["captions", "quality", "speed", "loop"],
   keyboard: {
     focused: true,
@@ -107,18 +108,19 @@ useVideoProgression(video, plyr_instance);
 </script>
 
 <template>
-  <div class="relative">
-    <div ref="player" class="plyr__video-embed" id="player">
-      <iframe
-        v-if="video.service === 'youtube'"
-        :src="url"
-        allowfullscreen
-        allowtransparency
-        allow="autoplay"
-        class="aspect-video"
-      ></iframe>
+  <div class="relative bg-black">
+    <div class="md:container">
+      <div ref="player" class="plyr__video-embed" id="player">
+        <iframe
+          v-if="video.service === 'youtube'"
+          :src="url"
+          allowfullscreen
+          allowtransparency
+          allow="autoplay"
+        ></iframe>
 
-      <video v-else class="aspect-video" playsinline controls></video>
+        <video v-else playsinline controls></video>
+      </div>
     </div>
   </div>
 </template>
