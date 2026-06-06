@@ -6,9 +6,11 @@ definePageMeta({ name: pages.videos_index });
 
 const http_key = "videos_feed";
 const route = useRoute();
-const page = ref(await get_number_query_var(route, "page"));
 
-const { filters } = useVideosFilters({ page: page.value, per_page: 21 });
+const { filters } = useVideosFilters({
+  page: await get_number_query_var(route, "page"),
+  per_page: 21,
+});
 const { data, status } = await useVideos(filters, { key: http_key });
 
 useMeta({

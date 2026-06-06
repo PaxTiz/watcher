@@ -5,9 +5,16 @@ import { useVideosFilters } from "~/composables/videos/useVideosFilters";
 
 const { subscription } = defineProps<{ subscription: SubscriptionResource }>();
 
-const { filters } = useVideosFilters({ page: 1, per_page: 15, subscription_id: subscription.id }, [
-  "subscription_id",
-]);
+const route = useRoute();
+
+const { filters } = useVideosFilters(
+  {
+    page: await get_number_query_var(route, "page"),
+    per_page: 15,
+    subscription_id: subscription.id,
+  },
+  ["subscription_id"],
+);
 
 const http_key = computed(() => `subscription_${subscription.id}_videos`);
 const { data: videos, status } = await useVideos(filters, { key: http_key });
