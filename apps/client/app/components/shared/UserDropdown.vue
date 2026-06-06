@@ -35,16 +35,8 @@ const onSelect = async (key: string, value: string) => {
 
       is_synchronising.value = false;
     } else if (value === "logout") {
-      const { error } = await usePost("/api/auth/logout", {
-        method: "POST",
-      });
-
-      if (error.value) {
-        toast.error("Une erreur est survenue lors de la déconnexion");
-      } else {
-        await clear();
-        await navigateTo("/auth/login");
-      }
+      await clear();
+      await navigateTo("/auth/login");
     }
   }
 };
