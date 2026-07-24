@@ -1,8 +1,8 @@
 <template>
-  <section class="bg-gray-100 pt-16">
+  <section class="bg-background pt-16">
     <div class="container">
       <div class="bg-alt rounded p-16">
-        <h2 class="text-center text-4xl font-black text-gray-200">
+        <h2 class="section-title__white text-center">
           Rejoins la bêta et simplifie ton suivi dès aujourd'hui
         </h2>
         <p class="mt-4 text-center text-gray-200">
@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <div class="mt-16 bg-white py-8">
+    <div class="bg-ui-bg mt-16 py-8">
       <div class="container">
         <div class="flex items-center justify-between gap-4">
           <div>

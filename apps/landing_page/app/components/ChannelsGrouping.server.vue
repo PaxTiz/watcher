@@ -3,14 +3,14 @@
     <div class="container">
       <div class="grid grid-cols-2 gap-8">
         <div>
-          <h2 class="text-4xl font-black text-gray-200">Une seule entité, plusieurs chaînes</h2>
-          <p class="mt-4 text-gray-400">
+          <h2 class="section-title__white">Une seule entité, plusieurs chaînes</h2>
+          <p class="section-description mt-4">
             Beaucoup de créateurs diffusent en direct sur Twitch et publient leurs rediffusions sur
             une chaîne YouTube dédiée. Avec Watcher, tu regroupes ces chaînes en une seule entité :
             plus de doublons, plus de confusion, juste le bon créateur.
           </p>
 
-          <ul class="mt-4 space-y-2 pl-4 text-gray-200">
+          <ul class="mt-4 space-y-2 pl-4 text-gray-300">
             <li class="list-disc">Regroupe autant de chaînes que tu veux par créateur</li>
             <li class="list-disc">Un seul flux, une seule notification, un seul profil</li>
             <li class="list-disc">Idéal pour les streamers Twitch avec chaîne replay YouTube</li>

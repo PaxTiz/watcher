@@ -1,8 +1,8 @@
 <template>
-  <section class="border-t border-gray-200 py-16">
+  <section class="bg-ui-bg border-ui-border border-t py-16">
     <div class="container">
-      <h2 class="text-center text-4xl font-black">Tous tes abonnements au même endroit</h2>
-      <p class="text-landing-text mt-4 text-center text-lg">
+      <h2 class="section-title text-center">Tous tes abonnements au même endroit</h2>
+      <p class="section-description mt-4 text-center">
         Watcher regroupe l'ensemble des vidéos YouTube de Twitch de tous tes créateurs préférés dans
         un seul et même flux unifié.
       </p>
@@ -30,8 +30,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -42,10 +42,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -83,13 +83,13 @@
                   <div data-dc-tpl="68">
                     <p
                       data-dc-tpl="69"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Session ranked
                     </p>
                     <p
                       data-dc-tpl="70"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -101,8 +101,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -113,10 +113,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -154,13 +154,13 @@
                   <div data-dc-tpl="76">
                     <p
                       data-dc-tpl="77"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Best moments #12
                     </p>
                     <p
                       data-dc-tpl="78"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>
@@ -172,8 +172,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -184,10 +184,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -225,13 +225,13 @@
                   <div data-dc-tpl="84">
                     <p
                       data-dc-tpl="85"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Just chatting
                     </p>
                     <p
                       data-dc-tpl="86"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -243,8 +243,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -255,10 +255,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -296,13 +296,13 @@
                   <div data-dc-tpl="92">
                     <p
                       data-dc-tpl="93"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       VOD complet
                     </p>
                     <p
                       data-dc-tpl="94"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>
@@ -314,8 +314,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -326,10 +326,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -367,13 +367,13 @@
                   <div data-dc-tpl="100">
                     <p
                       data-dc-tpl="101"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Speedrun%
                     </p>
                     <p
                       data-dc-tpl="102"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -387,8 +387,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -399,10 +399,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -440,13 +440,13 @@
                   <div data-dc-tpl="109">
                     <p
                       data-dc-tpl="110"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Session ranked
                     </p>
                     <p
                       data-dc-tpl="111"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -458,8 +458,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -470,10 +470,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -511,13 +511,13 @@
                   <div data-dc-tpl="117">
                     <p
                       data-dc-tpl="118"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Best moments #12
                     </p>
                     <p
                       data-dc-tpl="119"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>
@@ -529,8 +529,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -541,10 +541,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -582,13 +582,13 @@
                   <div data-dc-tpl="125">
                     <p
                       data-dc-tpl="126"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Just chatting
                     </p>
                     <p
                       data-dc-tpl="127"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -600,8 +600,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -612,10 +612,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -653,13 +653,13 @@
                   <div data-dc-tpl="133">
                     <p
                       data-dc-tpl="134"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       VOD complet
                     </p>
                     <p
                       data-dc-tpl="135"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>
@@ -671,8 +671,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -683,10 +683,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -724,13 +724,13 @@
                   <div data-dc-tpl="141">
                     <p
                       data-dc-tpl="142"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Speedrun%
                     </p>
                     <p
                       data-dc-tpl="143"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -765,8 +765,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -777,10 +777,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -818,13 +818,13 @@
                   <div data-dc-tpl="153">
                     <p
                       data-dc-tpl="154"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Let's play ep.4
                     </p>
                     <p
                       data-dc-tpl="155"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>
@@ -836,8 +836,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -848,10 +848,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -889,13 +889,13 @@
                   <div data-dc-tpl="161">
                     <p
                       data-dc-tpl="162"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Draft du soir
                     </p>
                     <p
                       data-dc-tpl="163"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -907,8 +907,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -919,10 +919,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -960,13 +960,13 @@
                   <div data-dc-tpl="169">
                     <p
                       data-dc-tpl="170"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Réaction — clip
                     </p>
                     <p
                       data-dc-tpl="171"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>
@@ -978,8 +978,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -990,10 +990,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -1031,13 +1031,13 @@
                   <div data-dc-tpl="177">
                     <p
                       data-dc-tpl="178"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Co-op du dimanche
                     </p>
                     <p
                       data-dc-tpl="179"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -1049,8 +1049,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -1061,10 +1061,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -1102,13 +1102,13 @@
                   <div data-dc-tpl="185">
                     <p
                       data-dc-tpl="186"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Résumé de la semaine
                     </p>
                     <p
                       data-dc-tpl="187"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>
@@ -1122,8 +1122,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -1134,10 +1134,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -1175,13 +1175,13 @@
                   <div data-dc-tpl="194">
                     <p
                       data-dc-tpl="195"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Let's play ep.4
                     </p>
                     <p
                       data-dc-tpl="196"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>
@@ -1193,8 +1193,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -1205,10 +1205,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -1246,13 +1246,13 @@
                   <div data-dc-tpl="202">
                     <p
                       data-dc-tpl="203"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Draft du soir
                     </p>
                     <p
                       data-dc-tpl="204"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -1264,8 +1264,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -1276,10 +1276,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -1317,13 +1317,13 @@
                   <div data-dc-tpl="210">
                     <p
                       data-dc-tpl="211"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Réaction — clip
                     </p>
                     <p
                       data-dc-tpl="212"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>
@@ -1335,8 +1335,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -1347,10 +1347,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -1388,13 +1388,13 @@
                   <div data-dc-tpl="218">
                     <p
                       data-dc-tpl="219"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Co-op du dimanche
                     </p>
                     <p
                       data-dc-tpl="220"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       Twitch
                     </p>
@@ -1406,8 +1406,8 @@
                 style="
                   width: 200px;
                   border-radius: 12px;
-                  border: 1px solid rgb(226, 232, 240);
-                  background: rgb(255, 255, 255);
+                  border: 1px solid var(--ui-border);
+                  background: var(--ui-bg);
                   overflow: hidden;
                   box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
                 "
@@ -1418,10 +1418,10 @@
                     height: 110px;
                     background: repeating-linear-gradient(
                       135deg,
-                      rgb(248, 250, 252) 0px,
-                      rgb(248, 250, 252) 12px,
-                      rgb(255, 255, 255) 12px,
-                      rgb(255, 255, 255) 24px
+                      var(--background) 0px,
+                      var(--background) 12px,
+                      var(--ui-bg) 12px,
+                      var(--ui-bg) 24px
                     );
                     position: relative;
                   "
@@ -1459,13 +1459,13 @@
                   <div data-dc-tpl="226">
                     <p
                       data-dc-tpl="227"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: rgb(15, 23, 42)"
+                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
                     >
                       Résumé de la semaine
                     </p>
                     <p
                       data-dc-tpl="228"
-                      style="margin: 0px; font-size: 11px; color: rgb(100, 116, 139)"
+                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
                     >
                       YouTube
                     </p>

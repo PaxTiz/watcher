@@ -1,3 +1,46 @@
 @theme {
-  --color-landing-text: var(--color-gray-500);
+  --color-landing-text: var(--ui-text-muted);
+
+  --color-landing-section-title: var(--landing-section-title-color);
+}
+
+:root {
+  --landing-section-title-color: #000;
+}
+
+.dark {
+  --landing-section-title-color: #fff;
+}
+
+.page-title {
+  color: var(--color-landing-section-title);
+  font-weight: 900;
+  font-size: var(--text-4xl);
+}
+
+.section-title {
+  color: var(--color-landing-section-title);
+  font-weight: 900;
+  font-size: var(--text-3xl);
+}
+.section-title__white {
+  color: #fff;
+  font-weight: 900;
+  font-size: var(--text-3xl);
+}
+
+.section-description {
+  color: var(--color-ui-text-muted);
+  font-size: var(--text-lg);
+}
+
+.sub-section-title {
+  color: var(--color-landing-section-title);
+  font-weight: var(--font-weight-extrabold);
+  font-size: var(--text-lg);
+}
+.sub-section-title__white {
+  color: #fff;
+  font-weight: var(--font-weight-extrabold);
+  font-size: var(--text-lg);
 }
