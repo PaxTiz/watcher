@@ -1,4 +1,3 @@
-import { useScrollLock } from "@vueuse/core";
 import { useState } from "nuxt/app";
 import { markRaw, watchEffect, type Component } from "vue";
 import type { ComponentEmit, ComponentProps } from "vue-component-type-helpers";

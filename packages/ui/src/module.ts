@@ -14,6 +14,7 @@ export default defineNuxtModule({
 
   moduleDependencies: {
     "reka-ui/nuxt": {},
+    "@vueuse/nuxt": {},
   },
 
   async setup(_options, nuxt) {

@@ -81,7 +81,6 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
     optimizeDeps: {
       include: [
-        "embla-carousel-vue",
         "reka-ui",
         "date-fns",
         "date-fns/locale",

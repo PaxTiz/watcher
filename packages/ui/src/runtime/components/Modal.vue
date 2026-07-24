@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { onClickOutside, onKeyStroke } from "@vueuse/core";
 import { inject, useTemplateRef, type VNode } from "vue";
 
 const props = defineProps<{
