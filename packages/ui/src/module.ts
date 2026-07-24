@@ -34,6 +34,7 @@ export default defineNuxtModule<ModuleOptions>({
   moduleDependencies: {
     "reka-ui/nuxt": {},
     "@vueuse/nuxt": {},
+    // "@nuxt/icon": {},
     "@nuxt/fonts": {
       defaults: {
         provider: "bunny",

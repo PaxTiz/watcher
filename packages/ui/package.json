@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "@nuxt/fonts": "catalog:",
+    "@nuxt/icon": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@vueuse/core": "catalog:",
     "@vueuse/nuxt": "catalog:",
