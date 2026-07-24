@@ -16,6 +16,8 @@
   --color-ui-text: var(--ui-text);
   --color-ui-text-muted: var(--ui-text-muted);
 
+  --color-background-dark: #11111b;
+
   --color-alt: #fe640b;
   --color-highlight: oklch(82.8% 0.189 84.429);
 }

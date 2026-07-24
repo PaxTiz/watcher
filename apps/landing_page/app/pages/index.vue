@@ -8,4 +8,6 @@ useHead({ title: "Accueil" });
   <ChannelsOverview />
 
   <MainFeatures />
+
+  <ChannelsGrouping />
 </template>
