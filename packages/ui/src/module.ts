@@ -15,6 +15,7 @@ export default defineNuxtModule({
   moduleDependencies: {
     "reka-ui/nuxt": {},
     "@vueuse/nuxt": {},
+    "@nuxt/fonts": {},
   },
 
   async setup(_options, nuxt) {

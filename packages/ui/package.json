@@ -5,6 +5,7 @@
     ".": "./src/module.ts"
   },
   "dependencies": {
+    "@nuxt/fonts": "catalog:",
     "@vueuse/core": "catalog:",
     "@vueuse/nuxt": "catalog:",
     "nuxt": "catalog:",

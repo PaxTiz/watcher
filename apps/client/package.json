@@ -16,7 +16,6 @@
   "dependencies": {
     "@atproto/api": "catalog:bluesky",
     "@atproto/oauth-client-node": "catalog:bluesky",
-    "@nuxt/fonts": "catalog:",
     "@nuxt/icon": "catalog:",
     "@nuxt/image": "^2.0.0",
     "@nuxtjs/color-mode": "catalog:",
