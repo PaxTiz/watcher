@@ -1,5 +1,3 @@
 <template>
-  <div>
-    <WatcherButton label="Coucou" />
-  </div>
+  <NuxtPage />
 </template>

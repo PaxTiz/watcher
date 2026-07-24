@@ -18,6 +18,8 @@ export default defineNuxtConfig({
 
   components: [{ path: "~/components", pathPrefix: false }],
 
+  css: ["~/assets/css/app.css"],
+
   app: {
     head: {
       titleTemplate: "%s - Watcher",
@@ -64,15 +66,6 @@ export default defineNuxtConfig({
         dir: join(process.cwd(), ".storage", "uploads"),
         maxAge: 3600 * 12, // 12 hours
       },
-    },
-  },
-
-  fonts: {
-    provider: "bunny",
-
-    defaults: {
-      weights: [400, 500, 600, 700],
-      styles: ["normal"],
     },
   },
 

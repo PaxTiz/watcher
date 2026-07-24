@@ -16,6 +16,8 @@ export default defineNuxtConfig({
 
   components: [{ path: "~/components", pathPrefix: false }],
 
+  css: ["~/assets/css/app.css"],
+
   app: {
     head: {
       titleTemplate: "%s - Watcher",
@@ -40,15 +42,6 @@ export default defineNuxtConfig({
     preference: "system",
     fallback: "dark",
     classSuffix: "",
-  },
-
-  fonts: {
-    provider: "bunny",
-
-    defaults: {
-      weights: [400, 500, 600, 700],
-      styles: ["normal"],
-    },
   },
 
   vite: {

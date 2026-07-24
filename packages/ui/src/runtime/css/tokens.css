@@ -106,17 +106,6 @@
   }
 }
 
-body {
-  background-color: var(--background);
-  background-image: var(--bg-gradient-radial);
-  background-attachment: fixed;
-  color: var(--ui-text);
-  font-weight: 500;
-  transition:
-    background-color 0.3s,
-    color 0.3s;
-}
-
 input {
   background-color: var(--ui-bg);
   border: 1px solid var(--ui-border);
@@ -139,15 +128,5 @@ input {
 
   &:focus {
     outline-color: var(--color-alt);
-  }
-}
-
-.page-title {
-  color: var(--color-ui-text);
-  font-size: var(--text-2xl);
-  font-weight: 900;
-
-  @media screen and (min-width: theme(breakpoint.md)) {
-    font-size: var(--text-3xl);
   }
 }
