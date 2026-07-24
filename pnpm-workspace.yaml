@@ -1,3 +1,5 @@
+shamefullyHoist: true
+
 packages:
   - apps/**
   - packages/**
@@ -13,8 +15,12 @@ catalog:
   iso8601-duration: ^2.1.4
   zod: ^4.4.3
   ofetch: ^1.5.1
+  "@iconify-json/lucide": ^1.2.118
   reka-ui: ^2.10.1
   nuxt: ^4.5
+  "@nuxt/fonts": ^0.14.0
+  "@nuxt/icon": ^2.2.1
+  "@nuxtjs/color-mode": ^4.0.1
   vue: ^3.5.40
   vue-router: ^5.2.0
   vue-tsc: ^3.3.8
@@ -22,6 +28,7 @@ catalog:
   "@vueuse/core": ^14.3.0
   "@vueuse/nuxt": ^14.3.0
   tailwindcss: ^4.3.3
+  "@tailwindcss/vite": ^4.3.3
 
 catalogs:
   bluesky:
