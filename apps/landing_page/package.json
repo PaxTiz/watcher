@@ -20,7 +20,6 @@
   },
   "devDependencies": {
     "@iconify-json/lucide": "catalog:",
-    "@tailwindcss/vite": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vue-tsc": "catalog:"

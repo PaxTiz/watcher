@@ -6,10 +6,12 @@
   },
   "dependencies": {
     "@nuxt/fonts": "catalog:",
+    "@tailwindcss/vite": "catalog:",
     "@vueuse/core": "catalog:",
     "@vueuse/nuxt": "catalog:",
     "nuxt": "catalog:",
     "reka-ui": "catalog:",
+    "tailwindcss": "catalog:",
     "vue": "catalog:",
     "vue-component-type-helpers": "catalog:",
     "vue-router": "catalog:",

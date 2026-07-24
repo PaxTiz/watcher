@@ -46,7 +46,6 @@
     "@iconify-json/fa7-brands": "^1.2.4",
     "@iconify-json/lucide": "catalog:",
     "@oxlint/plugins": "catalog:",
-    "@tailwindcss/vite": "catalog:",
     "@types/pg": "^8.20.0",
     "@vueuse/core": "catalog:",
     "@vueuse/nuxt": "catalog:",

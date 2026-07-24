@@ -1,7 +1,5 @@
 import { join } from "node:path";
 
-import tailwindcss from "@tailwindcss/vite";
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -18,7 +16,9 @@ export default defineNuxtConfig({
 
   components: [{ path: "~/components", pathPrefix: false }],
 
-  css: ["~/assets/css/app.css"],
+  watcherUi: {
+    css: ["~/assets/css/app.css"],
+  },
 
   app: {
     head: {
@@ -70,7 +70,6 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    plugins: [tailwindcss()],
     optimizeDeps: {
       include: [
         "reka-ui",
