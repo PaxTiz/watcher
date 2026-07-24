@@ -4,4 +4,6 @@ useHead({ title: "Accueil" });
 
 <template>
   <Hero />
+
+  <ChannelsOverview />
 </template>

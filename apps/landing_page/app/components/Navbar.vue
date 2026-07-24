@@ -12,15 +12,17 @@
       </div>
 
       <div>
-        <ul class="text-landing-text flex items-center gap-4 font-semibold">
+        <ul
+          class="text-landing-text flex items-center gap-4 text-[15px] font-semibold [&>li:hover>a]:text-gray-800"
+        >
           <li>
-            <nuxt-link to="#">Fonctionnalités</nuxt-link>
+            <nuxt-link to="#features">Fonctionnalités</nuxt-link>
           </li>
           <li>
-            <nuxt-link to="#">Aperçu</nuxt-link>
+            <nuxt-link to="#overview">Aperçu</nuxt-link>
           </li>
           <li>
-            <nuxt-link to="#">FAQ</nuxt-link>
+            <nuxt-link to="#questions">FAQ</nuxt-link>
           </li>
         </ul>
       </div>
