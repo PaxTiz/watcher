@@ -75,6 +75,7 @@ export default defineNuxtModule<ModuleOptions>({
     addTypeTemplate({
       filename: "types/watcher-ui.d.ts",
       getContents: () => `declare module "@watcher/ui" {
+  export type { AccordionItem } from ${JSON.stringify(resolver.resolve("./runtime/types/accordion"))};
   export type { DropdownItem } from ${JSON.stringify(resolver.resolve("./runtime/types/dropdown"))};
   export type { FormSubmitEvent } from ${JSON.stringify(resolver.resolve("./runtime/types/forms"))};
 }
