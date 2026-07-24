@@ -7,8 +7,8 @@
       </p>
 
       <div class="mt-8">
-        <div class="grid grid-cols-[1fr_2fr] gap-4">
-          <div class="border-ui-border bg-ui-bg rounded border p-8">
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_2fr]">
+          <div class="border-ui-border bg-ui-bg rounded border p-6 sm:p-8">
             <div class="bg-alt flex h-12 w-12 items-center justify-center rounded">
               <Icon name="lucide:clapperboard" class="text-2xl text-white" />
             </div>
@@ -21,8 +21,8 @@
           </div>
 
           <div class="flex flex-col gap-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div class="border-ui-border bg-ui-bg rounded border p-8">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div class="border-ui-border bg-ui-bg rounded border p-6 sm:p-8">
                 <div
                   class="dark:bg-ui-border flex h-12 w-12 items-center justify-center rounded bg-black"
                 >
@@ -36,7 +36,7 @@
                 </p>
               </div>
 
-              <div class="border-ui-border bg-ui-bg rounded border p-8">
+              <div class="border-ui-border bg-ui-bg rounded border p-6 sm:p-8">
                 <div
                   class="dark:bg-ui-border flex h-12 w-12 items-center justify-center rounded bg-black"
                 >
@@ -50,7 +50,9 @@
               </div>
             </div>
 
-            <div class="border-ui-border bg-alt flex items-center gap-4 rounded border p-8">
+            <div
+              class="border-ui-border bg-alt flex flex-col items-start gap-4 rounded border p-6 text-left sm:flex-row sm:items-center sm:p-8"
+            >
               <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-white/30">
                 <Icon name="lucide:move-right" class="bg-white text-2xl text-white" />
               </div>

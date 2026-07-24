@@ -1,7 +1,7 @@
 <template>
   <section class="bg-background py-16">
     <div class="container">
-      <h2 class="section-title text-center">Questions fréquentes</h2>
+      <h2 class="section-title text-left md:text-center">Questions fréquentes</h2>
 
       <WatcherAccordion
         :items="[

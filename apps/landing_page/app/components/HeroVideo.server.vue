@@ -1,16 +1,7 @@
 <template>
   <div
-    style="
-      position: relative;
-      width: 100%;
-      max-width: 1160px;
-      margin-inline: auto;
-      height: 70vh;
-      min-height: 420px;
-      border-radius: 24px;
-      overflow: hidden;
-      background: rgb(15, 23, 42);
-    "
+    class="relative mx-auto h-[45vh] min-h-[240px] w-full max-w-[1160px] overflow-hidden rounded-2xl sm:h-[55vh] sm:min-h-[320px] md:h-[70vh] md:min-h-[420px]"
+    style="background: rgb(15, 23, 42)"
   >
     <div
       style="
@@ -36,28 +27,10 @@
       "
     >
       <button
-        style="
-          width: 84px;
-          height: 84px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.12);
-          border: 1.5px solid rgba(255, 255, 255, 0.4);
-          backdrop-filter: blur(6px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-        "
+        class="flex h-14 w-14 cursor-pointer items-center justify-center rounded-full border-[1.5px] border-white/40 bg-white/12 backdrop-blur-sm sm:h-[68px] sm:w-[68px] md:h-[84px] md:w-[84px]"
       >
         <div
-          style="
-            width: 0px;
-            height: 0px;
-            border-top: 13px solid transparent;
-            border-bottom: 13px solid transparent;
-            border-left: 20px solid rgb(255, 255, 255);
-            margin-left: 4px;
-          "
+          class="ml-1 h-0 w-0 border-y-[10px] border-l-[16px] border-y-transparent border-l-white sm:border-y-[11px] sm:border-l-[18px] md:border-y-[13px] md:border-l-[20px]"
         ></div>
       </button>
     </div>

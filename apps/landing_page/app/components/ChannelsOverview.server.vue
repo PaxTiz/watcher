@@ -1,8 +1,8 @@
 <template>
   <section class="bg-ui-bg border-ui-border border-t py-16">
     <div class="container">
-      <h2 class="section-title text-center">Tous tes abonnements au même endroit</h2>
-      <p class="section-description mt-4 text-center">
+      <h2 class="section-title text-left md:text-center">Tous tes abonnements au même endroit</h2>
+      <p class="section-description mt-4 text-left md:text-center">
         Watcher regroupe l'ensemble des vidéos YouTube de Twitch de tous tes créateurs préférés dans
         un seul et même flux unifié.
       </p>

@@ -4,6 +4,12 @@
   --color-landing-section-title: var(--landing-section-title-color);
 }
 
+@utility container {
+  margin-inline: auto;
+  padding-inline: --spacing(4);
+  max-width: 1160px;
+}
+
 :root {
   --landing-section-title-color: #000;
 }
@@ -15,23 +21,38 @@
 .page-title {
   color: var(--color-landing-section-title);
   font-weight: 900;
-  font-size: var(--text-4xl);
+  font-size: var(--text-3xl);
 }
 
 .section-title {
   color: var(--color-landing-section-title);
   font-weight: 900;
-  font-size: var(--text-3xl);
+  font-size: var(--text-2xl);
 }
 .section-title__white {
   color: #fff;
   font-weight: 900;
-  font-size: var(--text-3xl);
+  font-size: var(--text-2xl);
 }
 
 .section-description {
   color: var(--color-ui-text-muted);
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
+}
+
+@media (min-width: 640px) {
+  .page-title {
+    font-size: var(--text-4xl);
+  }
+
+  .section-title,
+  .section-title__white {
+    font-size: var(--text-3xl);
+  }
+
+  .section-description {
+    font-size: var(--text-lg);
+  }
 }
 
 .sub-section-title {

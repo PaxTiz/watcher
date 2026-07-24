@@ -1,7 +1,7 @@
 <template>
   <section class="bg-background-dark py-16">
     <div class="container">
-      <div class="grid grid-cols-2 gap-8">
+      <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
           <h2 class="section-title__white">Une seule entité, plusieurs chaînes</h2>
           <p class="section-description mt-4">
