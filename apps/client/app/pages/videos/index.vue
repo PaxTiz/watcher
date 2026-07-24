@@ -24,7 +24,7 @@ useMeta({
     <h1 class="page-title">Vidéos de vos abonnements</h1>
 
     <div class="flex items-center gap-2">
-      <AppFormInput
+      <WatcherFormInput
         v-model="filters.query"
         placeholder="Rechercher une vidéo"
         class="flex-1 md:w-[250px]"

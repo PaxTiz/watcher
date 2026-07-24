@@ -31,7 +31,7 @@ onUnmounted(() => {
       <h2 class="text-ui-text-strong text-2xl font-bold">Vidéos publiées</h2>
 
       <div class="flex items-center gap-2">
-        <AppFormInput
+        <WatcherFormInput
           v-model="filters.query"
           placeholder="Rechercher une vidéo"
           class="flex-1 md:w-[250px]"

@@ -56,7 +56,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Card class="p-6">
+  <WatcherCard class="p-6">
     <div class="mb-6">
       <h2 class="text-ui-text flex items-center gap-2 text-xl font-bold">
         <span
@@ -75,7 +75,7 @@ onUnmounted(() => {
     </div>
 
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <Button
+      <WatcherButton
         :label="is_syncing ? 'Synchronisation en cours...' : 'Synchroniser mes abonnements'"
         color="secondary"
         size="lg"
@@ -93,5 +93,5 @@ onUnmounted(() => {
         Passer cette étape pour le moment
       </button>
     </div>
-  </Card>
+  </WatcherCard>
 </template>

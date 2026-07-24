@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { HAS_FORM_ERRORS_SYMBOL } from "@watcher/common";
+import { computed, inject, type ComputedRef } from "vue";
 import type { RouteLocationRaw } from "vue-router";
 
-import { NuxtLink } from "#components";
+import { HAS_FORM_ERRORS_SYMBOL } from "../types/forms";
 
 const {
   to,
@@ -28,7 +28,7 @@ const {
   ui?: { root?: string };
 }>();
 
-const component = computed(() => (to ? NuxtLink : "button"));
+const component = computed(() => (to ? "NuxtLink" : "button"));
 
 const classes = computed(() => {
   const inner_classes = [];

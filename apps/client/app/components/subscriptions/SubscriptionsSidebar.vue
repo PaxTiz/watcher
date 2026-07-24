@@ -45,9 +45,9 @@ const filteredOthers = computed(() => filterList(others.value));
   >
     <div class="sticky top-0 z-10">
       <div class="relative flex items-center">
-        <AppFormInput v-model="search" placeholder="Rechercher" class="w-full border-2" />
+        <WatcherFormInput v-model="search" placeholder="Rechercher" class="w-full border-2" />
         <div class="absolute right-1">
-          <DropdownButton
+          <WatcherDropdownButton
             :items="serviceItems"
             :icon="currentServiceIcon"
             :value="serviceFilter ?? 'all'"

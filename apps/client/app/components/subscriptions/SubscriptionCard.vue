@@ -44,7 +44,7 @@ onLongPress(
 </script>
 
 <template>
-  <Card
+  <WatcherCard
     ref="card"
     class="focus:outline-alt block rounded border-2 transition-all duration-300"
     :tag="NuxtLink"
@@ -75,5 +75,5 @@ onLongPress(
 
       <span class="ml-1 truncate">{{ subscription.name }}</span>
     </p>
-  </Card>
+  </WatcherCard>
 </template>

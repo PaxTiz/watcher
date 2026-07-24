@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import { CLEAN_ERROR_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "@watcher/common";
+import { useDebounceFn } from "@vueuse/core";
+import { computed, inject, useTemplateRef, type ComputedRef } from "vue";
+
+import { CLEAN_ERROR_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "../types/forms";
 
 const modelValue = defineModel<string>();
 const { size = "normal" } = defineProps<{ placeholder?: string; size?: "sm" | "normal" }>();

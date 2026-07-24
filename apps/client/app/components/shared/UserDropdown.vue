@@ -1,7 +1,6 @@
 <script lang="ts" setup>
+import type { DropdownItem } from "@watcher/ui";
 import { toast } from "vue-sonner";
-
-import type { DropdownItem } from "./DropdownButton.vue";
 
 const { user, clear } = useUserSession();
 const colorMode = useColorMode();
@@ -78,7 +77,7 @@ const items = computed<Array<DropdownItem>>(() => [
 </script>
 
 <template>
-  <DropdownButton
+  <WatcherDropdownButton
     class="[&_span]:hidden [&_span]:md:block"
     icon="lucide:user"
     :label="user?.name"

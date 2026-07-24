@@ -13,6 +13,7 @@ catalog:
   iso8601-duration: ^2.1.4
   zod: ^4.4.3
   ofetch: ^1.5.1
+  reka-ui: ^2.9.8
 
 catalogs:
   bluesky:

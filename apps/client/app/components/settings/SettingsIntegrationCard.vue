@@ -41,14 +41,14 @@ const is_linked = computed(() => is_integration_linked(integration.id));
         Connecté
       </span>
 
-      <Button
+      <WatcherButton
         v-if="is_linked"
         label="Déconnecter"
         size="sm"
         @click="() => on_disconnect(integration)"
       />
 
-      <Button
+      <WatcherButton
         v-else
         :label="`Associer`"
         size="sm"

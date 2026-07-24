@@ -5,7 +5,7 @@ const { index = 0 } = defineProps<{
 </script>
 
 <template>
-  <Card
+  <WatcherCard
     size="flat"
     class="shimmer shadow-ui-border overflow-hidden border-2 border-transparent shadow"
     :style="{ '--shimmer-delay': `${index * 150}ms` }"
@@ -48,5 +48,5 @@ const { index = 0 } = defineProps<{
       <!-- Actions Placeholder -->
       <div class="bg-ui-border/20 size-8 rounded" />
     </div>
-  </Card>
+  </WatcherCard>
 </template>

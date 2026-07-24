@@ -115,21 +115,21 @@ const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscrip
 </script>
 
 <template>
-  <Card v-if="hidden_reason === 'video'">
+  <WatcherCard v-if="hidden_reason === 'video'">
     <div class="flex min-h-[300px] flex-col items-center justify-center p-4">
       <h2 class="text-ui-text text-center text-lg font-semibold">Cette vidéo a été masquée</h2>
       <p class="text-ui-text-muted text-center">Elle n'apparaîtra plus dans votre flux</p>
     </div>
-  </Card>
+  </WatcherCard>
 
-  <Card v-else-if="hidden_reason === 'channel'">
+  <WatcherCard v-else-if="hidden_reason === 'channel'">
     <div class="flex min-h-[300px] flex-col items-center justify-center p-4">
       <h2 class="text-ui-text text-center text-lg font-semibold">Cet abonnement a été masqué</h2>
       <p class="text-ui-text-muted text-center">Ses vidéos n'apparaîtront plus dans votre flux</p>
     </div>
-  </Card>
+  </WatcherCard>
 
-  <Card
+  <WatcherCard
     v-else
     :tag="NuxtLink"
     :to="`/videos/${video.id}`"
@@ -212,7 +212,7 @@ const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscrip
       </div>
 
       <div v-if="dropdown_items.length > 0">
-        <DropdownButton
+        <WatcherDropdownButton
           color="ghost"
           align="center"
           size="sm"
@@ -223,5 +223,5 @@ const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscrip
         />
       </div>
     </div>
-  </Card>
+  </WatcherCard>
 </template>

@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-const props = defineProps<{ to?: string | false }>();
+const props = defineProps<{ to?: string | false; label?: string; initial?: string }>();
 
 const to = props.to === false ? "#" : (props.to ?? "/");
+const label = props.label ?? "Watcher";
+const initial = props.initial ?? "W";
 </script>
 
 <template>
@@ -9,9 +11,9 @@ const to = props.to === false ? "#" : (props.to ?? "/");
     <div
       class="bg-alt text-ui-bg flex h-[32px] w-[32px] items-center justify-center rounded text-2xl font-bold"
     >
-      W
+      {{ initial }}
     </div>
 
-    <span class="text-ui-text text-lg font-semibold">Watcher</span>
+    <span class="text-ui-text text-lg font-semibold">{{ label }}</span>
   </nuxt-link>
 </template>

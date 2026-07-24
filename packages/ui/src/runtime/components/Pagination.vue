@@ -1,4 +1,9 @@
 <script lang="ts" setup>
+import { computed } from "vue";
+import { useRouter } from "vue-router";
+
+import Button from "./Button.vue";
+
 const currentPage = defineModel<number>("page", { required: true });
 const { totalItems, perPage } = defineProps<{
   totalItems: number;

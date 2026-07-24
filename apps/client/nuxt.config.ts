@@ -18,8 +18,6 @@ export default defineNuxtConfig({
 
   components: [{ path: "~/components", pathPrefix: false }],
 
-  css: ["~/assets/css/app.css"],
-
   app: {
     head: {
       titleTemplate: "%s - Watcher",
@@ -40,6 +38,7 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@vueuse/nuxt",
     "nuxt-auth-utils",
+    "@watcher/ui",
   ],
 
   colorMode: {

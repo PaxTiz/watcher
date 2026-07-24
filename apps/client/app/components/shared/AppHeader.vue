@@ -2,7 +2,7 @@
 import { NuxtLink, LazySubscriptionsSidebarSlideover } from "#components";
 
 const route = useRoute();
-const overlay = useOverlay();
+const overlay = useWatcherOverlay();
 
 const openSidebar = () => {
   overlay.create(LazySubscriptionsSidebarSlideover).open();
@@ -41,7 +41,7 @@ const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
           <Icon name="lucide:menu" class="text-xl" />
         </button>
 
-        <Logo class="mr-12" />
+        <WatcherLogo class="mr-12" />
 
         <nav class="hidden items-center gap-4 md:flex">
           <Link label="Accueil" to="/" :is-active="route.path === '/'" />

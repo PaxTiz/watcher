@@ -25,6 +25,11 @@ const on_logout = async () => {
         Gérez vos intégrations et les paramètres de votre compte.
       </p>
     </div>
-    <Button label="Me déconnecter" color="primary" icon="lucide:log-out" @click="on_logout" />
+    <WatcherButton
+      label="Me déconnecter"
+      color="primary"
+      icon="lucide:log-out"
+      @click="on_logout"
+    />
   </div>
 </template>

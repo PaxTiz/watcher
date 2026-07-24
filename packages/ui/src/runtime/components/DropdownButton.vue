@@ -1,36 +1,10 @@
 <script lang="ts" generic="K extends string, T extends string" setup>
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuRoot,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "reka-ui";
+import { computed, defineComponent, h, ref, resolveComponent } from "vue";
 import type { ComponentProps } from "vue-component-type-helpers";
 
-import { AppFormInput, Button, Icon } from "#components";
-
-export type DropdownItem = {
-  key: K;
-  label: string;
-  type?: "item" | "label" | "divider";
-  value?: T;
-  icon?: string;
-  disabled?: boolean;
-  allowSearch?: boolean;
-  on_select?: () => Promise<unknown>;
-  children?: Array<{
-    label: string;
-    value: T;
-    disabled?: boolean;
-    icon?: string;
-  }>;
-};
+import type { DropdownItem } from "../types/dropdown";
+import Button from "./Button.vue";
+import FormInput from "./FormInput.vue";
 
 const emit = defineEmits<{ select: [key: K, value: T] }>();
 const props = defineProps<{
@@ -41,7 +15,7 @@ const props = defineProps<{
   size?: "sm" | "normal" | "lg";
   value?: T;
   align?: "start" | "center" | "end";
-  items: Array<DropdownItem>;
+  items: Array<DropdownItem<K, T>>;
   ui?: {
     button?: ComponentProps<typeof Button>["ui"];
   };
@@ -49,7 +23,7 @@ const props = defineProps<{
 
 const isOpen = ref(false);
 
-const on_select_item = (item: DropdownItem) => {
+const on_select_item = (item: DropdownItem<K, T>) => {
   emit("select", item.key, item.value as T);
 
   item.on_select?.();
@@ -72,8 +46,12 @@ const DropdownChild = defineComponent(
       return items;
     });
 
-    return () =>
-      h(
+    return () => {
+      const Icon = resolveComponent("Icon");
+      const DropdownMenuSubContent = resolveComponent("DropdownMenuSubContent");
+      const DropdownMenuItem = resolveComponent("DropdownMenuItem");
+
+      return h(
         DropdownMenuSubContent,
         {
           sideOffset: 8,
@@ -88,7 +66,7 @@ const DropdownChild = defineComponent(
               {
                 class: "fixed z-1001 top-0 left-0 p-1 w-full bg-ui-bg rounded-t",
               },
-              h(AppFormInput, {
+              h(FormInput, {
                 placeholder: "Rechercher une chaîne",
                 class: "!bg-ui-border w-full",
                 size: "sm",
@@ -124,6 +102,7 @@ const DropdownChild = defineComponent(
           ),
         ],
       );
+    };
   },
   { props: ["item", "value", "onSelect"] },
 );

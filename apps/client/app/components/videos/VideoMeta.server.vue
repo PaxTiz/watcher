@@ -59,14 +59,14 @@ const description = computed(() => {
       </SubscriptionImageWithAuthor>
 
       <div class="flex justify-start sm:justify-end">
-        <Button
+        <WatcherButton
           v-if="video.service === 'youtube'"
           label="Ouvrir sur YouTube"
           icon="lucide:youtube"
           :to="video.url"
           class="w-full sm:w-auto"
         />
-        <Button
+        <WatcherButton
           v-if="video.service === 'twitch'"
           label="Ouvrir sur Twitch"
           icon="lucide:twitch"

@@ -1,7 +1,7 @@
-import type { Component } from "vue";
+import { useScrollLock } from "@vueuse/core";
+import { useState } from "nuxt/app";
+import { markRaw, watchEffect, type Component } from "vue";
 import type { ComponentEmit, ComponentProps } from "vue-component-type-helpers";
-
-import { randomId } from "#shared/utils/random";
 
 type Props<C extends Component> = Omit<ComponentProps<C>, "overlayIdInternal">;
 type CloseEventArgs<T> = T extends (event: "close", arg_0: infer Arg, ...args: any[]) => void
@@ -17,14 +17,14 @@ export type Overlay<C extends Component, P extends Props<C>> = {
   resolvePromise?: (value: any) => void;
 };
 
-export const useOverlay = () => {
+export const useWatcherOverlay = () => {
   const body = useState<HTMLBodyElement | null>("body", () => null);
   const isScrollLocked = useScrollLock(body);
 
   const overlays = useState<Array<Overlay<any, any>>>("overlays", () => []);
 
   const getOverlay = (id: string) => {
-    const overlay = overlays.value.find((e) => e.id === id);
+    const overlay = overlays.value.find((e: Overlay<any, any>) => e.id === id);
     if (!overlay) {
       throw new Error(`Could not find overlay with id ${id}`);
     }
@@ -37,7 +37,7 @@ export const useOverlay = () => {
   };
 
   const create = <C extends Component, P extends Props<C>>(component: C) => {
-    const id = randomId();
+    const id = crypto.randomUUID();
     overlays.value.push({
       id,
       component: markRaw(component),
@@ -81,7 +81,7 @@ export const useOverlay = () => {
   };
 
   const destroy = (id: string) => {
-    overlays.value = overlays.value.filter((o) => o.id !== id);
+    overlays.value = overlays.value.filter((o: Overlay<any, any>) => o.id !== id);
   };
 
   watchEffect(() => {

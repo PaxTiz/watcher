@@ -1,16 +1,7 @@
 <script lang="ts" generic="T extends string" setup>
-import { CLEAN_ERROR_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "@watcher/common";
-import {
-  SelectContent,
-  SelectItem,
-  SelectItemIndicator,
-  SelectItemText,
-  SelectPortal,
-  SelectRoot,
-  SelectTrigger,
-  SelectValue,
-  SelectViewport,
-} from "reka-ui";
+import { computed, inject, useTemplateRef, type ComputedRef } from "vue";
+
+import { CLEAN_ERROR_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "../types/forms";
 
 const modelValue = defineModel<string>();
 const props = defineProps<{

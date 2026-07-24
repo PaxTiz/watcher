@@ -11,7 +11,7 @@ watch(
 </script>
 
 <template>
-  <Slideover side="left" :ui="{ content: 'max-w-[80%]' }">
+  <WatcherSlideover side="left" :ui="{ content: 'max-w-[80%]' }">
     <div class="flex h-full flex-col">
       <div class="mb-8 flex items-center justify-between">
         <h2 class="text-xl font-bold">Abonnements</h2>
@@ -21,5 +21,5 @@ watch(
         <SubscriptionsSidebar class="!sticky-0 !h-auto !w-full !pr-0" />
       </div>
     </div>
-  </Slideover>
+  </WatcherSlideover>
 </template>

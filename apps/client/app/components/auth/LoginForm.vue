@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { FormSubmitEvent } from "@watcher/common";
+import type { FormSubmitEvent } from "@watcher/ui";
 
 import { type OAuthValidators, oauthValidatorsSchema } from "#shared/validators/oauth";
 
@@ -36,26 +36,26 @@ onMounted(() => {
 
 <template>
   <section>
-    <Logo />
+    <WatcherLogo />
 
     <h1 class="text-ui-text mt-4 text-2xl font-bold md:text-4xl">{{ title }}</h1>
     <p class="text-ui-text-muted mt-1">
       {{ description }}
     </p>
 
-    <Card class="mt-4">
-      <AppForm
+    <WatcherCard class="mt-4">
+      <WatcherForm
         method="POST"
         :state="state"
         :schema="oauthValidatorsSchema.loginWithBluesky.body"
         @submit="onSubmit"
       >
-        <AppFormField label="Identifiant Bluesky" name="handle">
-          <AppFormInput ref="input" v-model="state.handle" class="w-full" />
-        </AppFormField>
+        <WatcherFormField label="Identifiant Bluesky" name="handle">
+          <WatcherFormInput ref="input" v-model="state.handle" class="w-full" />
+        </WatcherFormField>
 
-        <Button :label="button" type="submit" class="mt-4" />
-      </AppForm>
-    </Card>
+        <WatcherButton :label="button" type="submit" class="mt-4" />
+      </WatcherForm>
+    </WatcherCard>
   </section>
 </template>

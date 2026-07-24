@@ -45,14 +45,14 @@ const toggleFavorite = async () => {
         <h1 class="text-ui-text-strong text-2xl font-bold md:text-4xl">{{ subscription.name }}</h1>
 
         <div class="flex flex-wrap justify-center gap-3">
-          <Button
+          <WatcherButton
             :label="subscription.is_favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
             :icon="subscription.is_favorite ? 'lucide:star-off' : 'lucide:star'"
             :color="subscription.is_favorite ? undefined : 'yellow'"
             @click="toggleFavorite"
           />
 
-          <Button
+          <WatcherButton
             label="Ouvrir"
             icon="lucide:external-link"
             :to="subscription.channel.url"

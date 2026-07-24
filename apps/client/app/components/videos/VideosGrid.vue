@@ -57,7 +57,11 @@ const on_toggle_favorite = async () => {
     </div>
 
     <div v-if="videos.total > perPage" class="mt-8 flex justify-center">
-      <Pagination v-model:page="modelValue" :total-items="videos.total" :per-page="perPage" />
+      <WatcherPagination
+        v-model:page="modelValue"
+        :total-items="videos.total"
+        :per-page="perPage"
+      />
     </div>
   </template>
 

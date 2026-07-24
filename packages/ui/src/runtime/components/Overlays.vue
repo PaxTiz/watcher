@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { Transition } from "vue";
+import { defineComponent, h, provide, Transition } from "vue";
 
-import type { Overlay } from "~/composables/useOverlay";
+import { useWatcherOverlay, type Overlay } from "../composables/useWatcherOverlay";
 
-const { overlays, close, destroy } = useOverlay();
+const { overlays, close, destroy } = useWatcherOverlay();
 
 const OverlayChild = defineComponent<{ overlay: Overlay<any, any> }>(
   (props) => {

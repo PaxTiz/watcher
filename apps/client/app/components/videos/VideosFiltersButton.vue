@@ -83,7 +83,7 @@ const items = computed(() =>
 </script>
 
 <template>
-  <DropdownButton
+  <WatcherDropdownButton
     label="Ajouter un filtre"
     :items="items"
     :color="color"

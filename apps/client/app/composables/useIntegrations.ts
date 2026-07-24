@@ -53,7 +53,7 @@ export const useIntegrations = () => {
     if (integration.id !== "bluesky") {
       window.open(integration.linkUrl, "_self");
     } else {
-      useOverlay().create(LazyLoginModal).open({
+      useWatcherOverlay().create(LazyLoginModal).open({
         title: "Lier mon compte Bluesky",
         description:
           "Saisissez votre identifiant Bluesky pour vous connecter et lier votre compte.",
@@ -64,10 +64,12 @@ export const useIntegrations = () => {
   };
 
   const on_disconnect = async (integration: Integration) => {
-    const ok = await useConfirm({
+    const ok = await useWatcherConfirm({
       title: `Déconnexion de votre compte ${integration.name}`,
       description:
         "Si vous déconnectez votre compte, vos abonnements ainsi que les vidéos liées à vos abonnements ne seront plus mis à jour.",
+      confirmLabel: "Confirmer",
+      cancelLabel: "Annuler",
     });
 
     if (!ok) {

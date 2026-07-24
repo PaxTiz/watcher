@@ -27,10 +27,12 @@ export const useVideo = (video: VideoResource) => {
     });
 
   const on_hide_video = async (callback?: () => MaybePromise<unknown>) => {
-    const ok = await useConfirm({
+    const ok = await useWatcherConfirm({
       title: "Masquer une vidéo",
       description:
         "Voulez-vous vraiment masquer cette vidéo ? Elle n'apparaîtra plus dans votre flux.",
+      confirmLabel: "Confirmer",
+      cancelLabel: "Annuler",
     });
 
     if (ok) {
@@ -44,10 +46,12 @@ export const useVideo = (video: VideoResource) => {
   };
 
   const on_hide_subscription = async (callback?: () => MaybePromise<unknown>) => {
-    const ok = await useConfirm({
+    const ok = await useWatcherConfirm({
       title: "Masquer une chaîne",
       description:
         "Voulez-vous vraiment masquer cette chaîne ? L'historique ainsi que les nouvelles vidéos publiées par cette chaîne ne seront plus visibles dans votre flux.",
+      confirmLabel: "Confirmer",
+      cancelLabel: "Annuler",
     });
 
     if (ok) {

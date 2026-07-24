@@ -8,7 +8,7 @@ if (loggedIn.value) {
   await navigateTo("/");
 }
 
-const overlay = useOverlay();
+const overlay = useWatcherOverlay();
 
 const onShowBlueskyModal = () => {
   overlay.create(LazyLoginModal).open();
@@ -20,13 +20,13 @@ useMeta({ title: "Connexion" });
 <template>
   <div class="relative">
     <section class="mt-12 md:mt-32">
-      <Logo />
+      <WatcherLogo />
 
       <h1 class="text-ui-text mt-4 text-2xl font-bold md:text-4xl">Connexion</h1>
       <p class="text-ui-text-muted mt-1">Veuillez vous connecter afin d'accéder à Watcher.</p>
 
-      <Card class="mt-4 space-y-2">
-        <Button
+      <WatcherCard class="mt-4 space-y-2">
+        <WatcherButton
           label="Connexion avec Bluesky"
           icon="fa7-brands:bluesky"
           size="lg"
@@ -34,7 +34,7 @@ useMeta({ title: "Connexion" });
           @click="onShowBlueskyModal"
         />
 
-        <Button
+        <WatcherButton
           to="/api/oauth/google"
           label="Connexion avec Google"
           icon="fa7-brands:youtube"
@@ -43,7 +43,7 @@ useMeta({ title: "Connexion" });
           external
         />
 
-        <Button
+        <WatcherButton
           to="/api/oauth/twitch"
           label="Connexion avec Twitch"
           icon="fa7-brands:twitch"
@@ -51,7 +51,7 @@ useMeta({ title: "Connexion" });
           class="w-full"
           external
         />
-      </Card>
+      </WatcherCard>
     </section>
   </div>
 </template>

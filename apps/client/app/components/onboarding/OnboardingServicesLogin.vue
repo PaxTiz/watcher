@@ -3,7 +3,7 @@ const { integrations, is_linked, on_link } = useIntegrations();
 </script>
 
 <template>
-  <Card class="mb-6 p-6">
+  <WatcherCard class="mb-6 p-6">
     <div class="mb-6">
       <h2 class="text-ui-text flex items-center gap-2 text-xl font-bold">
         <span
@@ -49,7 +49,7 @@ const { integrations, is_linked, on_link } = useIntegrations();
             Connecté
           </span>
 
-          <Button
+          <WatcherButton
             v-else
             label="Associer"
             size="sm"
@@ -60,5 +60,5 @@ const { integrations, is_linked, on_link } = useIntegrations();
         </div>
       </div>
     </div>
-  </Card>
+  </WatcherCard>
 </template>
