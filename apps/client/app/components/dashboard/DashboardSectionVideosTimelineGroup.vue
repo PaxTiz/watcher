@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { VideoResource } from "#shared/resources/videos";
+import type { VideoResource } from "@watcher/common";
+
 import { useVideosFavorites } from "~/composables/videos/useVideosFavorites";
 import { useVideosTimeline } from "~/composables/videos/useVideosTimeline";
 

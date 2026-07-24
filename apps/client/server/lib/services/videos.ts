@@ -1,3 +1,4 @@
+import type { Paginated, SubscriptionType, VideoResource } from "@watcher/common";
 import { formatISO, startOfDay, startOfWeek, sub } from "date-fns";
 import { sql, type SelectQueryBuilder } from "kysely";
 
@@ -6,9 +7,6 @@ import { AbstractService } from "#framework";
 import { useDatabase } from "#server/database";
 import type { Database } from "#server/database/schema";
 import { useTwitch } from "#server/lib/twitch";
-import type { VideoResource } from "#shared/resources/videos";
-import type { Paginated } from "#shared/types/shared";
-import type { SubscriptionType } from "#shared/types/subscriptions";
 import type { VideosValidators } from "#shared/validators/videos";
 
 export default class VideosService extends AbstractService {

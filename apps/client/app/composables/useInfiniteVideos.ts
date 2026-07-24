@@ -1,4 +1,4 @@
-import type { VideoResource } from "#shared/resources/videos";
+import type { Paginated, VideoResource } from "@watcher/common";
 
 import { useVideos } from "./videos/useVideos";
 

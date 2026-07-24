@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type VideoCurrentRefreshType, VIDEO_CURRENT_REFRESH_SYMBOL } from "#shared/types/videos";
+import { type VideoCurrentRefreshType, VIDEO_CURRENT_REFRESH_SYMBOL } from "@watcher/common";
 
 const route = useRoute();
 const slug = route.params.slug as string;

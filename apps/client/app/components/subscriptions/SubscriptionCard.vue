@@ -1,8 +1,8 @@
 <script lang="ts" setup>
+import type { SubscriptionResource } from "@watcher/common";
 import { toast } from "vue-sonner";
 
 import { NuxtLink } from "#components";
-import type { SubscriptionResource } from "#shared/resources/subscriptions";
 
 const { subscription, flat = false } = defineProps<{
   subscription: SubscriptionResource;

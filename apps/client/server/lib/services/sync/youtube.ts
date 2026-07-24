@@ -2,7 +2,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import { writeFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 
-import type { Google } from "@watcher/types";
+import type { Google } from "@watcher/common";
 import { formatISO, differenceInHours } from "date-fns";
 import { parse, toSeconds } from "iso8601-duration";
 

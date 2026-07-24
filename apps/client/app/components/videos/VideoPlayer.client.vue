@@ -1,10 +1,8 @@
 <script lang="ts" setup>
+import type { VideoResource } from "@watcher/common";
 import Hls from "hls.js";
 // @ts-ignore
 import Plyr from "plyr";
-
-import type { VideoResource } from "#shared/resources/videos";
-
 // @ts-ignore
 import "plyr/css";
 

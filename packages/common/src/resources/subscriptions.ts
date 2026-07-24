@@ -1,4 +1,4 @@
-import type { SubscriptionType } from "#shared/types/subscriptions";
+import type { SubscriptionType } from "../types/subscriptions";
 
 export type SubscriptionResource = {
   id: string;

@@ -12,6 +12,6 @@
     "ofetch": "catalog:"
   },
   "devDependencies": {
-    "@watcher/types": "workspace:"
+    "@watcher/common": "workspace:"
   }
 }

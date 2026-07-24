@@ -1,8 +1,10 @@
 <script lang="ts" setup>
+import {
+  type SubscriptionResource,
+  type VideoCurrentRefreshType,
+  VIDEO_CURRENT_REFRESH_SYMBOL,
+} from "@watcher/common";
 import { toast } from "vue-sonner";
-
-import type { SubscriptionResource } from "#shared/resources/subscriptions";
-import { type VideoCurrentRefreshType, VIDEO_CURRENT_REFRESH_SYMBOL } from "#shared/types/videos";
 
 const refresh = inject<VideoCurrentRefreshType>(VIDEO_CURRENT_REFRESH_SYMBOL);
 

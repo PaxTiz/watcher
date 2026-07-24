@@ -1,6 +1,7 @@
 <script lang="ts" setup>
+import type { VideoResource } from "@watcher/common";
+
 import { NuxtLink } from "#components";
-import type { VideoResource } from "#shared/resources/videos";
 import { useFormatter } from "#shared/utils/useFormatter";
 import { useVideo } from "~/composables/videos/useVideo";
 

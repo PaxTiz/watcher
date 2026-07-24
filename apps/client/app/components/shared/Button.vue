@@ -1,8 +1,8 @@
 <script lang="ts" setup>
+import { HAS_FORM_ERRORS_SYMBOL } from "@watcher/common";
 import type { RouteLocationRaw } from "vue-router";
 
 import { NuxtLink } from "#components";
-import { HAS_FORM_ERRORS_SYMBOL } from "#shared/types/forms";
 
 const {
   to,

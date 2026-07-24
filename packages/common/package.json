@@ -1,0 +1,13 @@
+{
+  "name": "@watcher/common",
+  "type": "module",
+  "exports": {
+    ".": [
+      "./src/index.ts"
+    ],
+    "./app.css": "./src/css/app.css"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}

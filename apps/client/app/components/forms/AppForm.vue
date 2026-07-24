@@ -1,13 +1,12 @@
 <script lang="ts" generic="S extends ZodMiniType, I extends input<S>" setup>
-import type { VNode } from "vue";
-import { type ZodMiniType, type input } from "zod/mini";
-
 import {
   type FormSubmitEvent,
   FORM_ERRORS_SYMBOL,
   CLEAN_ERROR_SYMBOL,
   HAS_FORM_ERRORS_SYMBOL,
-} from "#shared/types/forms";
+} from "@watcher/common";
+import type { VNode } from "vue";
+import { type ZodMiniType, type input } from "zod/mini";
 
 defineSlots<{ default: () => VNode }>();
 const props = defineProps<{ method?: "POST" | "GET"; schema: S; state: I }>();

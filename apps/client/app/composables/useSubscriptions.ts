@@ -1,4 +1,4 @@
-import type { SubscriptionResource } from "#shared/resources/subscriptions";
+import type { SubscriptionResource } from "@watcher/common";
 
 export const useSubscriptions = () => {
   const { data, error, refresh, status, clear } = useAppFetch<Array<SubscriptionResource>>(

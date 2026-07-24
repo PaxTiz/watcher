@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { SubscriptionResource } from "#shared/resources/subscriptions";
+import type { SubscriptionResource } from "@watcher/common";
 
 defineProps<{ subscription: SubscriptionResource }>();
 </script>

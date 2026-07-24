@@ -1,6 +1,5 @@
+import type { UserResource } from "@watcher/common";
 import { type H3Event } from "h3";
-
-import type { UserResource } from "#shared/resources/users";
 
 export const set_user_session = async (
   event: H3Event,

@@ -1,6 +1,7 @@
+import type { CredentialsType, ServiceCredentials } from "@watcher/common";
+
 import { AbstractService } from "#framework";
 import { useDatabase } from "#server/database";
-import type { CredentialsType, ServiceCredentials } from "#shared/types/credentials";
 
 export default class CredentialsService extends AbstractService {
   async get(user_id: string, service: CredentialsType): Promise<ServiceCredentials | null> {

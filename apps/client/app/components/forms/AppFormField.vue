@@ -1,7 +1,6 @@
 <script lang="ts" setup>
+import { FORM_ERRORS_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "@watcher/common";
 import type { VNode } from "vue";
-
-import { FORM_ERRORS_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "#shared/types/forms";
 
 defineSlots<{ default: (props: { name?: string }) => VNode }>();
 const { name } = defineProps<{ label?: string; name?: string }>();

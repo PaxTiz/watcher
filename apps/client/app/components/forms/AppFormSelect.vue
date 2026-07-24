@@ -1,4 +1,5 @@
 <script lang="ts" generic="T extends string" setup>
+import { CLEAN_ERROR_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "@watcher/common";
 import {
   SelectContent,
   SelectItem,
@@ -10,8 +11,6 @@ import {
   SelectValue,
   SelectViewport,
 } from "reka-ui";
-
-import { CLEAN_ERROR_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "#shared/types/forms";
 
 const modelValue = defineModel<string>();
 const props = defineProps<{

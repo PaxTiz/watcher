@@ -1,8 +1,9 @@
+import type { SubscriptionResource } from "@watcher/common";
+
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
-import type { SubscriptionResource } from "#shared/resources/subscriptions";
 import { is_uuid, parse_slug_params } from "#shared/utils/random";
 
 export default class SubscriptionsService extends AbstractService {

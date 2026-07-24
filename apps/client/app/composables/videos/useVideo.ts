@@ -1,7 +1,5 @@
-import type { MaybePromise } from "@watcher/types";
+import type { MaybePromise, VideoResource } from "@watcher/common";
 import { toast } from "vue-sonner";
-
-import type { VideoResource } from "#shared/resources/videos";
 
 export const useVideo = (video: VideoResource) => {
   const { error: video_progress_error, execute: video_progress } = usePost(

@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import type { VideoResource } from "#shared/resources/videos";
-import type { Paginated } from "#shared/types/shared";
+import type { Paginated, VideoResource } from "@watcher/common";
 
 const modelValue = defineModel<number>("page", { required: true });
 const {

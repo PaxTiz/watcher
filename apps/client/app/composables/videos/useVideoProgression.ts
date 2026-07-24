@@ -1,8 +1,7 @@
+import type { VideoResource } from "@watcher/common";
 // @ts-ignore
 import Plyr from "plyr";
 import type { ShallowRef } from "vue";
-
-import type { VideoResource } from "#shared/resources/videos";
 
 export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr | undefined>) => {
   if (video.viewing_progression === 1) {

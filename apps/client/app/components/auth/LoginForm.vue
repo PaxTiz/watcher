@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { FormSubmitEvent } from "#shared/types/forms";
+import type { FormSubmitEvent } from "@watcher/common";
+
 import { type OAuthValidators, oauthValidatorsSchema } from "#shared/validators/oauth";
 
 const {

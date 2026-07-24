@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import type { VideoResource } from "@watcher/common";
 import { isAfter, isToday, isYesterday, subDays } from "date-fns";
 
-import type { VideoResource } from "#shared/resources/videos";
 import { useVideosTimeline } from "~/composables/videos/useVideosTimeline";
 
 import type { Label } from "./DashboardSectionVideosTimelineGroup.vue";

@@ -1,10 +1,10 @@
+import type { CredentialsType, UserResource } from "@watcher/common";
+
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import type { UserTable } from "#server/database/schema";
-import type { UserResource } from "#shared/resources/users";
-import type { CredentialsType } from "#shared/types/credentials";
 
 export default class UsersService extends AbstractService {
   async find_by_service_id({

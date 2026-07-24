@@ -1,7 +1,5 @@
+import type { CredentialsType, SubscriptionType } from "@watcher/common";
 import type { ColumnType, Generated, Insertable } from "kysely";
-
-import type { CredentialsType } from "#shared/types/credentials";
-import type { SubscriptionType } from "#shared/types/subscriptions";
 
 export type UserTable = {
   id: Generated<string>;

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { VideoResource } from "#shared/resources/videos";
+import type { VideoResource } from "@watcher/common";
 
 const { video } = defineProps<{ video: VideoResource }>();
 

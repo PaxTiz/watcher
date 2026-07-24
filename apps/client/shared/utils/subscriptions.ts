@@ -1,6 +1,5 @@
+import type { CredentialsType, ServiceType } from "@watcher/common";
 import slugify from "slugify";
-
-import type { CredentialsType, ServiceType } from "#shared/types/credentials";
 
 export const to_subscription_slug = <T extends CredentialsType>(
   service: ServiceType<T>,

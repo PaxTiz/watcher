@@ -1,4 +1,4 @@
-import type { Google } from "@watcher/types";
+import type { Google } from "@watcher/common";
 import { ofetch } from "ofetch";
 
 import type { GoogleClient } from "../internal/client";

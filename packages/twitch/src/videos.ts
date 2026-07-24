@@ -1,4 +1,4 @@
-import type { Twitch } from "@watcher/types";
+import type { Twitch } from "@watcher/common";
 import { isAfter } from "date-fns";
 import { ofetch } from "ofetch";
 

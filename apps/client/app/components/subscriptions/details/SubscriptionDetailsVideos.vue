@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { SubscriptionResource } from "#shared/resources/subscriptions";
+import type { SubscriptionResource } from "@watcher/common";
+
 import { useVideos } from "~/composables/videos/useVideos";
 import { useVideosFilters } from "~/composables/videos/useVideosFilters";
 

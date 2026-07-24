@@ -1,4 +1,4 @@
-import type { UserResource } from "../resources/users";
+import type { UserResource } from "@watcher/common";
 
 declare module "#auth-utils" {
   interface User extends UserResource {

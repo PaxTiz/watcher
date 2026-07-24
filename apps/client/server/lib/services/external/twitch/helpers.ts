@@ -1,4 +1,4 @@
-import type { Twitch } from "@watcher/types";
+import type { Twitch } from "@watcher/common";
 
 import { AbstractService } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
