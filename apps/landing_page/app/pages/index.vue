@@ -10,4 +10,6 @@ useHead({ title: "Accueil" });
   <MainFeatures />
 
   <ChannelsGrouping />
+
+  <PlatformViewer />
 </template>
