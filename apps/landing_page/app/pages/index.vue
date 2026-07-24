@@ -12,4 +12,6 @@ useHead({ title: "Accueil" });
   <ChannelsGrouping />
 
   <PlatformViewer />
+
+  <FrequentQuestions />
 </template>
