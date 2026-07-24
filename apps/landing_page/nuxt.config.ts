@@ -6,6 +6,10 @@ export default defineNuxtConfig({
     compatibilityVersion: 5,
   },
 
+  experimental: {
+    nitroAutoImports: true,
+  },
+
   typescript: {
     strict: true,
   },
@@ -31,12 +35,7 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: [
-    "@nuxt/fonts",
-    // "@nuxt/icon",
-    "@nuxtjs/color-mode",
-    "@watcher/ui",
-  ],
+  modules: ["@nuxt/fonts", "@nuxtjs/color-mode", "@watcher/ui"],
 
   colorMode: {
     preference: "system",

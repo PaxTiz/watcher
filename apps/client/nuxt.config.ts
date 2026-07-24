@@ -33,14 +33,7 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: [
-    "@nuxt/icon",
-    "@nuxt/image",
-    "@nuxtjs/color-mode",
-    "@vueuse/nuxt",
-    "nuxt-auth-utils",
-    "@watcher/ui",
-  ],
+  modules: ["@nuxt/image", "@nuxtjs/color-mode", "@vueuse/nuxt", "nuxt-auth-utils", "@watcher/ui"],
 
   colorMode: {
     preference: "system",

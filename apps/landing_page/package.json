@@ -10,7 +10,6 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxt/icon": "catalog:",
     "@nuxtjs/color-mode": "catalog:",
     "@watcher/common": "workspace:^",
     "@watcher/ui": "workspace:^",
