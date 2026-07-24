@@ -1,11 +1,11 @@
 <template>
-  <div class="container flex flex-col gap-4 pt-32 pb-8">
-    <h1 class="text-center text-4xl font-extrabold">
+  <div class="container flex flex-col gap-4 pt-36 pb-8">
+    <h1 class="text-center text-4xl font-black">
       Retrouve tous tes <span class="text-alt">créateurs préférés</span> réunis dans un seul
       <span class="text-alt">flux unifié</span>
     </h1>
 
-    <p class="text-center text-lg text-gray-600">
+    <p class="text-landing-text text-center text-lg">
       Watcher réunit tes abonnements Twitch et YouTube dans une interface unique. Plus besoin de
       jongler entre les plateformes pour ne rien rater.
     </p>
