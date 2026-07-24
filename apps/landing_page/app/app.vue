@@ -2,4 +2,6 @@
   <Navbar />
 
   <NuxtPage />
+
+  <Footer />
 </template>

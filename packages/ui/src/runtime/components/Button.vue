@@ -20,7 +20,7 @@ const {
   iconSize?: "normal" | "lg";
   size?: "sm" | "normal" | "lg";
   disabled?: boolean;
-  color?: "primary" | "secondary" | "yellow" | "ghost";
+  color?: "primary" | "secondary" | "yellow" | "ghost" | "white" | "glass";
   allowRemove?: boolean;
   type?: "submit" | "button";
   external?: boolean;
@@ -69,6 +69,12 @@ const classes = computed(() => {
   }
   if (color === "ghost") {
     inner_classes.push("bg-transparent", "border-none", "text-ui-text-muted", "hover:text-ui-text");
+  }
+  if (color === "white") {
+    inner_classes.push("bg-white", "text-black");
+  }
+  if (color === "glass") {
+    inner_classes.push("bg-white/20", "text-white", "border-white");
   }
   if (!disabled && !loading) {
     inner_classes.push("cursor-pointer");
