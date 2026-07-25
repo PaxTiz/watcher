@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-background">
+  <section id="features" class="bg-background">
     <div class="container py-16">
       <h2 class="section-title mb-1">Fait pour suivre, pas pour chercher</h2>
       <p class="section-description">

@@ -14,8 +14,17 @@
   --landing-section-title-color: #000;
 }
 
+* {
+  scroll-behavior: smooth;
+}
+
 .dark {
   --landing-section-title-color: #fff;
+}
+
+section {
+  scroll-margin-top: 64px;
+  scroll-snap-align: start;
 }
 
 .page-title {

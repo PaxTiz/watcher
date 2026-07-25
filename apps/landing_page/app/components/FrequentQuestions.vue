@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-background py-16">
+  <section id="questions" class="bg-background py-16">
     <div class="container">
       <h2 class="section-title text-left md:text-center">Questions fréquentes</h2>
 

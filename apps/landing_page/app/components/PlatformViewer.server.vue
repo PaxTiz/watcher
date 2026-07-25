@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-ui-bg py-16">
+  <section id="overview" class="bg-ui-bg py-16">
     <div class="container">
       <h2 class="section-title text-left md:text-center">Ta liste de créateurs, enfin lisible</h2>
       <p class="section-description mt-4 text-left md:text-center">
