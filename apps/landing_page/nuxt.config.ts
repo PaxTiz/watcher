@@ -35,7 +35,32 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["@nuxt/fonts", "@nuxtjs/color-mode", "@nuxtjs/i18n", "@watcher/ui"],
+  modules: ["@nuxt/fonts", "@nuxtjs/color-mode", "@nuxtjs/i18n", "@watcher/ui", "@nuxtjs/seo"],
+
+  site: {
+    url: "https://watcher.app",
+    name: "Watcher",
+    description:
+      "Watcher brings your Twitch and YouTube subscriptions together in one place. No more juggling between platforms to avoid missing anything.",
+    defaultLocale: "en",
+  },
+
+  sitemap: {
+    enabled: false,
+  },
+
+  ogImage: {
+    enabled: false,
+  },
+
+  schemaOrg: {
+    identity: {
+      "@type": "Organization",
+      name: "Watcher",
+      url: "https://watcher.app",
+      logo: "https://watcher.app/images/favicon.svg",
+    },
+  },
 
   colorMode: {
     preference: "system",

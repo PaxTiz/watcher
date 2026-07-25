@@ -1,7 +1,12 @@
 <script lang="ts" setup>
 const { t } = useI18n();
 
-useHead({ title: computed(() => t("page.home")) });
+useSeoMeta({
+  title: computed(() => t("page.home")),
+  description: computed(() => t("hero.subtitle")),
+  ogTitle: computed(() => t("page.home")),
+  ogDescription: computed(() => t("hero.subtitle")),
+});
 </script>
 
 <template>
