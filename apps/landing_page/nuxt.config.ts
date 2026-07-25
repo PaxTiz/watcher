@@ -35,11 +35,28 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["@nuxt/fonts", "@nuxtjs/color-mode", "@watcher/ui"],
+  modules: ["@nuxt/fonts", "@nuxtjs/color-mode", "@nuxtjs/i18n", "@watcher/ui"],
 
   colorMode: {
     preference: "system",
     fallback: "dark",
     classSuffix: "",
+  },
+
+  i18n: {
+    locales: [
+      { code: "en", language: "en-US", name: "English", file: "en.ts" },
+      { code: "fr", language: "fr-FR", name: "Français", file: "fr.ts" },
+      { code: "es", language: "es-ES", name: "Español", file: "es.ts" },
+    ],
+    defaultLocale: "en",
+    langDir: ".",
+    strategy: "no_prefix",
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "watcher_locale",
+      fallbackLocale: "en",
+      redirectOn: "no prefix",
+    },
   },
 });

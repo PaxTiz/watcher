@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { DropdownItem } from "@watcher/ui";
 
+const { t } = useI18n();
 const colorMode = useColorMode();
 
 const icons: Record<string, string> = {
@@ -10,9 +11,9 @@ const icons: Record<string, string> = {
 };
 
 const items = computed<Array<DropdownItem>>(() => [
-  { key: "theme", label: "Système", value: "system", icon: "lucide:monitor" },
-  { key: "theme", label: "Clair", value: "light", icon: "lucide:sun" },
-  { key: "theme", label: "Sombre", value: "dark", icon: "lucide:moon" },
+  { key: "theme", label: t("theme.system"), value: "system", icon: "lucide:monitor" },
+  { key: "theme", label: t("theme.light"), value: "light", icon: "lucide:sun" },
+  { key: "theme", label: t("theme.dark"), value: "dark", icon: "lucide:moon" },
 ]);
 
 const onSelect = (_key: string, value: string) => {

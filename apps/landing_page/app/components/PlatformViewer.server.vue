@@ -1,10 +1,13 @@
+<script lang="ts" setup>
+const { t } = useI18n();
+</script>
+
 <template>
   <section id="overview" class="bg-ui-bg py-16">
     <div class="container">
-      <h2 class="section-title text-left md:text-center">Ta liste de créateurs, enfin lisible</h2>
+      <h2 class="section-title text-left md:text-center">{{ t("platformViewer.title") }}</h2>
       <p class="section-description mt-4 text-left md:text-center">
-        Un panneau latéral avec toutes tes chaînes, un badge pour les lives en cours, et un aperçu
-        vidéo au survol. Tu ne rates plus jamais une sortie.
+        {{ t("platformViewer.description") }}
       </p>
 
       <div
@@ -40,7 +43,7 @@
             border-radius: 8px;
             border: 1px solid var(--ui-border);
           "
-          ><span class="sc-interp">capture d'écran — panneau créateurs</span></span
+          ><span class="sc-interp">{{ t("platformViewer.screenshotAlt") }}</span></span
         >
       </div>
 
@@ -48,20 +51,20 @@
         <div class="inline-flex items-center gap-2">
           <div class="bg-alt h-2 w-2 rounded"></div>
           <span class="text-landing-text text-sm font-bold">
-            Badge « en direct » en temps réel
+            {{ t("platformViewer.liveBadge") }}
           </span>
         </div>
 
         <div class="inline-flex items-center gap-2">
           <div class="bg-alt h-2 w-2 rounded"></div>
           <span class="text-landing-text text-sm font-bold">
-            Filtres par plateforme ou créateur
+            {{ t("platformViewer.filters") }}
           </span>
         </div>
 
         <div class="inline-flex items-center gap-2">
           <div class="bg-alt h-2 w-2 rounded"></div>
-          <span class="text-landing-text text-sm font-bold"> Synchronisation automatique </span>
+          <span class="text-landing-text text-sm font-bold"> {{ t("platformViewer.sync") }} </span>
         </div>
       </div>
     </div>

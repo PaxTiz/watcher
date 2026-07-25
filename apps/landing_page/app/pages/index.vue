@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-useHead({ title: "Accueil" });
+const { t } = useI18n();
+
+useHead({ title: computed(() => t("page.home")) });
 </script>
 
 <template>

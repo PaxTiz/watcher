@@ -1,19 +1,23 @@
+<script lang="ts" setup>
+const { t } = useI18n();
+
+const replaysLabelLower = computed(() => t("channelsGrouping.replaysLabel").toLowerCase());
+</script>
+
 <template>
   <section class="bg-background-dark py-16">
     <div class="container">
       <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
-          <h2 class="section-title__white">Une seule entité, plusieurs chaînes</h2>
+          <h2 class="section-title__white">{{ t("channelsGrouping.title") }}</h2>
           <p class="section-description mt-4">
-            Beaucoup de créateurs diffusent en direct sur Twitch et publient leurs rediffusions sur
-            une chaîne YouTube dédiée. Avec Watcher, tu regroupes ces chaînes en une seule entité :
-            plus de doublons, plus de confusion, juste le bon créateur.
+            {{ t("channelsGrouping.description") }}
           </p>
 
           <ul class="mt-4 space-y-2 pl-4 text-gray-300">
-            <li class="list-disc">Regroupe autant de chaînes que tu veux par créateur</li>
-            <li class="list-disc">Un seul flux, une seule notification, un seul profil</li>
-            <li class="list-disc">Idéal pour les streamers Twitch avec chaîne replay YouTube</li>
+            <li class="list-disc">{{ t("channelsGrouping.bullets.groupAny") }}</li>
+            <li class="list-disc">{{ t("channelsGrouping.bullets.oneFeed") }}</li>
+            <li class="list-disc">{{ t("channelsGrouping.bullets.idealForStreamers") }}</li>
           </ul>
         </div>
 
@@ -60,7 +64,7 @@
                     Squeezie
                   </p>
                   <p style="margin: 0px; font-size: 11px; color: rgb(148, 163, 184)">
-                    Twitch · live
+                    Twitch · {{ t("channelsGrouping.liveStatus") }}
                   </p>
                 </div>
               </div>
@@ -93,10 +97,10 @@
                       color: rgb(205, 214, 244);
                     "
                   >
-                    Squeezie - Rediffusions
+                    Squeezie - {{ t("channelsGrouping.replaysLabel") }}
                   </p>
                   <p style="margin: 0px; font-size: 11px; color: rgb(148, 163, 184)">
-                    YouTube · <span class="sc-interp">rediffusions</span>
+                    YouTube · <span class="sc-interp">{{ replaysLabelLower }}</span>
                   </p>
                 </div>
               </div>
@@ -118,7 +122,7 @@
                   color: rgb(148, 163, 184);
                   letter-spacing: 0.03em;
                 "
-                ><span class="sc-interp">FUSION</span></span
+                ><span class="sc-interp">{{ t("channelsGrouping.mergeLabel") }}</span></span
               >
             </div>
             <div
@@ -168,7 +172,7 @@
                   Squeezie
                 </p>
                 <p style="margin: 0px; font-size: 11px; color: rgb(255, 140, 66); font-weight: 700">
-                  <span class="sc-interp">1 entité · 2 chaînes</span>
+                  <span class="sc-interp">{{ t("channelsGrouping.mergedSummary") }}</span>
                 </p>
               </div>
             </div>

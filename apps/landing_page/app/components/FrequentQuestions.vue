@@ -1,37 +1,36 @@
+<script lang="ts" setup>
+const { t } = useI18n();
+
+const items = computed(() => [
+  {
+    label: t("faq.items.isAppFree.label"),
+    value: "is_app_free",
+    content: t("faq.items.isAppFree.content"),
+  },
+  {
+    label: t("faq.items.howSyncWorks.label"),
+    value: "how_sync_works",
+    content: t("faq.items.howSyncWorks.content"),
+  },
+  {
+    label: t("faq.items.areCredentialsSafe.label"),
+    value: "are_credentials_safe",
+    content: t("faq.items.areCredentialsSafe.content"),
+  },
+  {
+    label: t("faq.items.platformAccess.label"),
+    value: "plateform_access",
+    content: t("faq.items.platformAccess.content"),
+  },
+]);
+</script>
+
 <template>
   <section id="questions" class="bg-background py-16">
     <div class="container">
-      <h2 class="section-title text-left md:text-center">Questions fréquentes</h2>
+      <h2 class="section-title text-left md:text-center">{{ t("faq.title") }}</h2>
 
-      <WatcherAccordion
-        :items="[
-          {
-            label: 'L\'app est-elle gratuite ?',
-            value: 'is_app_free',
-            content:
-              'Oui, Watcher est gratuit pour commencer. Une offre premium sans publicité et avec des filtres avancés arrivera plus tard.',
-          },
-          {
-            label: 'Comment fonctionne la synchronisation ?',
-            value: 'how_sync_works',
-            content:
-              'Tu connectes tes comptes Twitch et YouTube en quelques clics, Watcher récupère automatiquement tes abonnements et les met à jour en continu.',
-          },
-          {
-            label: 'Mes identifiants sont-ils en sécurité ?',
-            value: 'are_credentials_safe',
-            content:
-              'Watcher utilise uniquement les connexions officielles Twitch et YouTube (OAuth) — nous ne stockons jamais ton mot de passe.',
-          },
-          {
-            label: 'Quand aurai-je accès à la bêta ?',
-            value: 'plateform_access',
-            content:
-              'Les invitations sont envoyées par vagues chaque semaine. Plus tôt tu t\'inscris, plus tôt tu reçois ton accès.',
-          },
-        ]"
-        class="mt-8"
-      />
+      <WatcherAccordion :items="items" class="mt-8" />
     </div>
   </section>
 </template>

@@ -1,3 +1,7 @@
+<script lang="ts" setup>
+const { t } = useI18n();
+</script>
+
 <template>
   <section class="bg-background pt-28 pb-8 sm:pt-36">
     <div class="container flex flex-col gap-4">
@@ -7,23 +11,26 @@
         </div>
 
         <div class="video-header">
-          <div class="video-live">En direct</div>
+          <div class="video-live">{{ t("hero.live") }}</div>
         </div>
 
         <div class="video-body py-12 md:py-0">
-          <h1 class="page-title text-left md:text-center">
-            Retrouve tous tes <span class="text-alt">créateurs préférés</span> réunis dans un seul
-            <span class="text-alt">flux unifié</span>
-          </h1>
+          <i18n-t keypath="hero.titleTemplate" tag="h1" class="page-title text-left md:text-center">
+            <template #creators>
+              <span class="text-alt">{{ t("hero.titleCreators") }}</span>
+            </template>
+            <template #feed>
+              <span class="text-alt">{{ t("hero.titleFeed") }}</span>
+            </template>
+          </i18n-t>
 
           <p class="mt-4 text-left text-lg text-gray-300 md:text-center">
-            Watcher réunit tes abonnements Twitch et YouTube dans une interface unique. Plus besoin
-            de jongler entre les plateformes pour ne rien rater.
+            {{ t("hero.subtitle") }}
           </p>
 
           <div class="mt-8 flex flex-wrap items-center justify-start gap-4 md:justify-center">
             <WatcherButton
-              label="Commencer"
+              :label="t('hero.ctaStart')"
               color="secondary"
               size="lg"
               icon="lucide:play"
@@ -31,7 +38,7 @@
               class="font-bold"
             />
 
-            <WatcherButton label="Voir la démo" size="lg" color="glass" class="font-bold" />
+            <WatcherButton :label="t('hero.ctaDemo')" size="lg" color="glass" class="font-bold" />
           </div>
         </div>
 

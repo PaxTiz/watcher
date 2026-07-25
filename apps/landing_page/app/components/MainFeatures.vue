@@ -1,9 +1,13 @@
+<script lang="ts" setup>
+const { t } = useI18n();
+</script>
+
 <template>
   <section id="features" class="bg-background">
     <div class="container py-16">
-      <h2 class="section-title mb-1">Fait pour suivre, pas pour chercher</h2>
+      <h2 class="section-title mb-1">{{ t("mainFeatures.title") }}</h2>
       <p class="section-description">
-        Quatre idées simple pensées pour te faire gagner du temps chaque jour.
+        {{ t("mainFeatures.description") }}
       </p>
 
       <div class="mt-8">
@@ -13,10 +17,9 @@
               <Icon name="lucide:clapperboard" class="text-2xl text-white" />
             </div>
 
-            <h3 class="sub-section-title mt-4 mb-1">Flux unifié</h3>
+            <h3 class="sub-section-title mt-4 mb-1">{{ t("mainFeatures.unifiedFeed.title") }}</h3>
             <p class="text-landing-text">
-              Vidéos, lives et VOD de Twitch et YouTube rassemblés dans une seule timeline, triée
-              par récence.
+              {{ t("mainFeatures.unifiedFeed.description") }}
             </p>
           </div>
 
@@ -29,10 +32,11 @@
                   <Icon name="lucide:leaf" class="text-2xl text-white" />
                 </div>
 
-                <h3 class="sub-section-title mt-4 mb-1">Interface simple</h3>
+                <h3 class="sub-section-title mt-4 mb-1">
+                  {{ t("mainFeatures.simpleInterface.title") }}
+                </h3>
                 <p class="text-landing-text">
-                  Aucune surcharge, aucun réglage compliqué. Tu ouvres l'app, tu vois ce qui est
-                  nouveau.
+                  {{ t("mainFeatures.simpleInterface.description") }}
                 </p>
               </div>
 
@@ -43,9 +47,11 @@
                   <Icon name="lucide:play" class="bg-white text-2xl text-white" />
                 </div>
 
-                <h3 class="sub-section-title mt-4 mb-1">Lecteur intégré</h3>
+                <h3 class="sub-section-title mt-4 mb-1">
+                  {{ t("mainFeatures.integratedPlayer.title") }}
+                </h3>
                 <p class="text-landing-text">
-                  Regarde directement dans Watcher, sans changer d'onglet.
+                  {{ t("mainFeatures.integratedPlayer.description") }}
                 </p>
               </div>
             </div>
@@ -58,9 +64,11 @@
               </div>
 
               <div>
-                <h3 class="sub-section-title__white">Regroupement de chaînes</h3>
+                <h3 class="sub-section-title__white">
+                  {{ t("mainFeatures.channelGrouping.title") }}
+                </h3>
                 <p class="mt-2 text-white">
-                  Fusionne les chaînes Twitch et YouTube d'un même créateur — voir plus bas ↓
+                  {{ t("mainFeatures.channelGrouping.description") }}
                 </p>
               </div>
             </div>

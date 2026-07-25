@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+const { t } = useI18n();
+
 const VideoCard = defineComponent<{
   platform: "youtube" | "twitch";
   title: string;
@@ -24,7 +26,7 @@ const VideoCard = defineComponent<{
                     class:
                       "absolute top-2 left-2 rounded bg-[rgb(145,70,255)] px-1.5 py-0.5 text-[10px] font-extrabold text-white",
                   },
-                  "LIVE",
+                  t("channelsOverview.live"),
                 )
               : h(
                   "span",
@@ -52,21 +54,53 @@ const VideoCard = defineComponent<{
 );
 
 const todayVideos = [
-  { platform: "twitch", title: "Session ranked", badge: { type: "live" } },
-  { platform: "youtube", title: "Best moments #12", badge: { type: "duration", label: "18:42" } },
-  { platform: "twitch", title: "Just chatting", badge: { type: "live" } },
-  { platform: "youtube", title: "VOD complet", badge: { type: "duration", label: "1:02:31" } },
-  { platform: "twitch", title: "Speedrun%", badge: { type: "live" } },
+  { platform: "twitch", title: t("channelsOverview.videos.todaySession"), badge: { type: "live" } },
+  {
+    platform: "youtube",
+    title: t("channelsOverview.videos.todayBestMoments"),
+    badge: { type: "duration", label: "18:42" },
+  },
+  {
+    platform: "twitch",
+    title: t("channelsOverview.videos.todayJustChatting"),
+    badge: { type: "live" },
+  },
+  {
+    platform: "youtube",
+    title: t("channelsOverview.videos.todayFullVod"),
+    badge: { type: "duration", label: "1:02:31" },
+  },
+  {
+    platform: "twitch",
+    title: t("channelsOverview.videos.todaySpeedrun"),
+    badge: { type: "live" },
+  },
 ];
 
 const yesterdayVideos = [
-  { platform: "youtube", title: "Let's play ep.4", badge: { type: "duration", label: "42:10" } },
-  { platform: "twitch", title: "Draft du soir", badge: { type: "live" } },
-  { platform: "youtube", title: "Réaction — clip", badge: { type: "duration", label: "08:55" } },
-  { platform: "twitch", title: "Co-op du dimanche", badge: { type: "live" } },
   {
     platform: "youtube",
-    title: "Résumé de la semaine",
+    title: t("channelsOverview.videos.yesterdayLetsPlay"),
+    badge: { type: "duration", label: "42:10" },
+  },
+  {
+    platform: "twitch",
+    title: t("channelsOverview.videos.yesterdayEveningDraft"),
+    badge: { type: "live" },
+  },
+  {
+    platform: "youtube",
+    title: t("channelsOverview.videos.yesterdayReactionClip"),
+    badge: { type: "duration", label: "08:55" },
+  },
+  {
+    platform: "twitch",
+    title: t("channelsOverview.videos.yesterdaySundayCoop"),
+    badge: { type: "live" },
+  },
+  {
+    platform: "youtube",
+    title: t("channelsOverview.videos.yesterdayWeeklyRecap"),
     badge: { type: "duration", label: "31:20" },
   },
 ];
@@ -75,10 +109,9 @@ const yesterdayVideos = [
 <template>
   <section class="bg-ui-bg border-ui-border border-t py-16">
     <div class="container">
-      <h2 class="section-title text-left md:text-center">Tous tes abonnements au même endroit</h2>
+      <h2 class="section-title text-left md:text-center">{{ t("channelsOverview.title") }}</h2>
       <p class="section-description mt-4 text-left md:text-center">
-        Watcher regroupe l'ensemble des vidéos YouTube de Twitch de tous tes créateurs préférés dans
-        un seul et même flux unifié.
+        {{ t("channelsOverview.description") }}
       </p>
 
       <section class="mt-8">

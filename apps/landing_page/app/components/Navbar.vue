@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+const { t } = useI18n();
+
 const isMobileMenuOpen = ref(false);
 
 function closeMobileMenu() {
@@ -20,28 +22,30 @@ function closeMobileMenu() {
           class="text-landing-text [&>li:hover>a]:text-ui-text flex items-center gap-8 text-[15px] font-semibold"
         >
           <li>
-            <nuxt-link to="#features">Fonctionnalités</nuxt-link>
+            <nuxt-link to="#features">{{ t("nav.features") }}</nuxt-link>
           </li>
           <li>
-            <nuxt-link to="#overview">Aperçu</nuxt-link>
+            <nuxt-link to="#overview">{{ t("nav.overview") }}</nuxt-link>
           </li>
           <li>
-            <nuxt-link to="#questions">FAQ</nuxt-link>
+            <nuxt-link to="#questions">{{ t("nav.faq") }}</nuxt-link>
           </li>
         </ul>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center">
+        <LanguageToggle />
+
         <ThemeToggle />
 
-        <div class="hidden md:block">
-          <WatcherButton label="Connexion" color="secondary" class="font-bold" />
+        <div class="ml-2 hidden md:block">
+          <WatcherButton :label="t('nav.login')" color="secondary" class="font-bold" />
         </div>
 
         <button
           type="button"
           class="text-landing-text flex items-center justify-center md:hidden"
-          aria-label="Ouvrir le menu"
+          :aria-label="t('nav.openMenu')"
           @click="isMobileMenuOpen = !isMobileMenuOpen"
         >
           <Icon :name="isMobileMenuOpen ? 'lucide:x' : 'lucide:menu'" class="text-2xl" />
@@ -55,17 +59,17 @@ function closeMobileMenu() {
     >
       <ul class="text-landing-text flex flex-col gap-3 text-[15px] font-semibold">
         <li>
-          <nuxt-link to="#features" @click="closeMobileMenu">Fonctionnalités</nuxt-link>
+          <nuxt-link to="#features" @click="closeMobileMenu">{{ t("nav.features") }}</nuxt-link>
         </li>
         <li>
-          <nuxt-link to="#overview" @click="closeMobileMenu">Aperçu</nuxt-link>
+          <nuxt-link to="#overview" @click="closeMobileMenu">{{ t("nav.overview") }}</nuxt-link>
         </li>
         <li>
-          <nuxt-link to="#questions" @click="closeMobileMenu">FAQ</nuxt-link>
+          <nuxt-link to="#questions" @click="closeMobileMenu">{{ t("nav.faq") }}</nuxt-link>
         </li>
       </ul>
 
-      <WatcherButton label="Connexion" color="secondary" class="w-full font-bold" />
+      <WatcherButton :label="t('nav.login')" color="secondary" class="w-full font-bold" />
     </div>
   </div>
 </template>
