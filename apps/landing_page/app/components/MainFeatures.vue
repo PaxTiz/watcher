@@ -1,7 +1,7 @@
 <template>
   <section class="bg-background">
     <div class="container py-16">
-      <h2 class="section-title mt-4 mb-1">Fait pour suivre, pas pour chercher</h2>
+      <h2 class="section-title mb-1">Fait pour suivre, pas pour chercher</h2>
       <p class="section-description">
         Quatre idées simple pensées pour te faire gagner du temps chaque jour.
       </p>

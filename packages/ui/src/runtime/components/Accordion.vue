@@ -1,15 +1,21 @@
 <script lang="ts" setup>
+import { computed } from "vue";
 import type { VNode } from "vue";
 
 import type { AccordionItem } from "../types/accordion";
 
 type AccordionSlotProps = { item: AccordionItem; index: number; open: boolean };
 
-const { type = "single", collapsible = true } = defineProps<{
+const {
+  type = "single",
+  collapsible = true,
+  size = "md",
+} = defineProps<{
   items: Array<AccordionItem>;
   type?: "single" | "multiple";
   collapsible?: boolean;
   disabled?: boolean;
+  size?: "sm" | "md" | "lg";
   ui?: {
     root?: string;
     item?: string;
@@ -17,6 +23,26 @@ const { type = "single", collapsible = true } = defineProps<{
     content?: string;
   };
 }>();
+
+const triggerClasses = computed(() => {
+  if (size === "lg") {
+    return "p-5 text-lg gap-3";
+  }
+  if (size === "md") {
+    return "p-4 text-base gap-2";
+  }
+  return "p-3 text-sm gap-2";
+});
+
+const contentClasses = computed(() => {
+  if (size === "lg") {
+    return "px-5 pb-5 text-lg";
+  }
+  if (size === "md") {
+    return "px-4 pb-4 text-base";
+  }
+  return "px-3 pb-3 text-sm";
+});
 defineSlots<
   {
     content?: (props: AccordionSlotProps) => VNode;
@@ -48,8 +74,8 @@ const modelValue = defineModel<string | string[]>();
     >
       <AccordionHeader as="h3" class="flex">
         <AccordionTrigger
-          class="group focus:outline-alt text-ui-text flex w-full flex-1 cursor-pointer items-center justify-between gap-2 p-3 text-start text-sm disabled:cursor-not-allowed disabled:opacity-50"
-          :class="ui?.trigger"
+          class="group focus:outline-alt text-ui-text flex w-full flex-1 cursor-pointer items-center justify-between text-start disabled:cursor-not-allowed disabled:opacity-50"
+          :class="[triggerClasses, ui?.trigger]"
         >
           <span class="flex items-center gap-2">
             <Icon v-if="item.icon" :name="item.icon" />
@@ -63,8 +89,8 @@ const modelValue = defineModel<string | string[]>();
         </AccordionTrigger>
       </AccordionHeader>
 
-      <AccordionContent class="accordion-content text-ui-text-muted overflow-hidden text-sm">
-        <div class="px-3 pb-3" :class="ui?.content">
+      <AccordionContent class="accordion-content text-ui-text-muted overflow-hidden">
+        <div :class="[contentClasses, ui?.content]">
           <slot :name="item.slot ?? 'content'" :item="item" :index="index" :open="open">
             {{ item.content }}
           </slot>
