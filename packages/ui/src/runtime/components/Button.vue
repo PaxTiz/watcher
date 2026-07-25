@@ -6,6 +6,7 @@ import { HAS_FORM_ERRORS_SYMBOL } from "../types/forms";
 
 const {
   to,
+  type,
   disabled,
   size = "normal",
   color = "primary",
@@ -29,6 +30,7 @@ const {
 }>();
 
 const component = computed(() => (to ? "NuxtLink" : "button"));
+const resolvedType = computed(() => (to ? undefined : (type ?? "button")));
 
 const classes = computed(() => {
   const inner_classes = [];
@@ -99,7 +101,7 @@ const hasFormErrors = inject<ComputedRef<boolean>>(
     :to="to"
     :class="[...classes, ui?.root]"
     :disabled="hasFormErrors || disabled || loading"
-    :type="type"
+    :type="resolvedType"
     :external="external"
   >
     <Icon v-if="loading" name="lucide:loader-2" class="animate-spin" />

@@ -9,6 +9,7 @@ import FormInput from "./FormInput.vue";
 const emit = defineEmits<{ select: [key: K, value: T] }>();
 const props = defineProps<{
   label?: string;
+  ariaLabel?: string;
   icon?: string;
   iconSize?: "normal" | "lg";
   color?: "primary" | "secondary" | "yellow" | "ghost";
@@ -111,7 +112,7 @@ const DropdownChild = defineComponent(
 <template>
   <div class="relative">
     <DropdownMenuRoot v-model:open="isOpen">
-      <DropdownMenuTrigger :aria-label="label" as-child>
+      <DropdownMenuTrigger :aria-label="ariaLabel ?? label" as-child>
         <Button
           :label="label"
           :icon="icon"

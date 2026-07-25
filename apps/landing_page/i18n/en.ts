@@ -1,4 +1,8 @@
 export default {
+  a11y: {
+    skipToContent: "Skip to content",
+  },
+
   page: {
     home: "Home",
   },
@@ -12,6 +16,7 @@ export default {
   },
 
   theme: {
+    label: "Theme",
     system: "System",
     light: "Light",
     dark: "Dark",

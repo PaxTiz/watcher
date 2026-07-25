@@ -26,6 +26,7 @@ async function onSelect(_key: string, value: string) {
 <template>
   <WatcherDropdownButton
     icon="lucide:languages"
+    :aria-label="t('language.label')"
     :items="items"
     :value="locale"
     color="ghost"

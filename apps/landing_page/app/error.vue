@@ -21,25 +21,31 @@ function handleBackHome() {
 </script>
 
 <template>
+  <a href="#main-content" class="skip-link">{{ t("a11y.skipToContent") }}</a>
+
   <Navbar />
 
-  <section class="bg-background flex min-h-[70vh] items-center pt-28 sm:pt-36">
-    <div class="container flex flex-col items-center gap-4 text-center">
-      <span class="text-alt text-6xl font-black sm:text-7xl">{{ statusCode }}</span>
+  <main id="main-content">
+    <section class="bg-background flex min-h-[70vh] items-center pt-28 sm:pt-36">
+      <div class="container flex flex-col items-center gap-4 text-center">
+        <span class="text-alt text-6xl font-black sm:text-7xl" aria-hidden="true">{{
+          statusCode
+        }}</span>
 
-      <h1 class="page-title">{{ title }}</h1>
-      <p class="max-w-md text-lg text-gray-300">{{ description }}</p>
+        <h1 class="page-title">{{ title }}</h1>
+        <p class="max-w-md text-lg text-gray-300">{{ description }}</p>
 
-      <WatcherButton
-        :label="t('error.backHome')"
-        color="secondary"
-        size="lg"
-        icon="lucide:arrow-left"
-        class="mt-4 font-bold"
-        @click="handleBackHome"
-      />
-    </div>
-  </section>
+        <WatcherButton
+          :label="t('error.backHome')"
+          color="secondary"
+          size="lg"
+          icon="lucide:arrow-left"
+          class="mt-4 font-bold"
+          @click="handleBackHome"
+        />
+      </div>
+    </section>
+  </main>
 
   <Footer />
 </template>

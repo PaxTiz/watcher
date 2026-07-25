@@ -1,6 +1,10 @@
 import type en from "./en";
 
 export default {
+  a11y: {
+    skipToContent: "Ir al contenido",
+  },
+
   page: {
     home: "Inicio",
   },
@@ -14,6 +18,7 @@ export default {
   },
 
   theme: {
+    label: "Tema",
     system: "Sistema",
     light: "Claro",
     dark: "Oscuro",

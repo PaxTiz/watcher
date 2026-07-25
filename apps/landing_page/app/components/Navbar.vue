@@ -46,16 +46,24 @@ function closeMobileMenu() {
           type="button"
           class="text-landing-text flex items-center justify-center md:hidden"
           :aria-label="t('nav.openMenu')"
+          aria-controls="mobile-menu"
+          :aria-expanded="isMobileMenuOpen"
           @click="isMobileMenuOpen = !isMobileMenuOpen"
         >
-          <Icon :name="isMobileMenuOpen ? 'lucide:x' : 'lucide:menu'" class="text-2xl" />
+          <Icon
+            :name="isMobileMenuOpen ? 'lucide:x' : 'lucide:menu'"
+            class="text-2xl"
+            aria-hidden="true"
+          />
         </button>
       </div>
     </nav>
 
     <div
       v-if="isMobileMenuOpen"
+      id="mobile-menu"
       class="navbar mt-2 flex flex-col gap-4 rounded border border-[var(--navbar-border)] bg-[var(--navbar-bg)] p-4 backdrop-blur-sm md:hidden"
+      @keydown.esc="closeMobileMenu"
     >
       <ul class="text-landing-text flex flex-col gap-3 text-[15px] font-semibold">
         <li>

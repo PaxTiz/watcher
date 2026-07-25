@@ -24,6 +24,7 @@ const onSelect = (_key: string, value: string) => {
 <template>
   <WatcherDropdownButton
     :icon="icons[colorMode.preference] ?? 'lucide:monitor'"
+    :aria-label="t('theme.label')"
     :items="items"
     :value="colorMode.preference"
     color="ghost"
