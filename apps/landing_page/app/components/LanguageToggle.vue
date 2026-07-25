@@ -20,7 +20,6 @@ const items = computed<Array<DropdownItem>>(() =>
 
 async function onSelect(_key: string, value: string) {
   await setLocale(value as "fr" | "en" | "es");
-  reloadNuxtApp({ persistState: false });
 }
 </script>
 
