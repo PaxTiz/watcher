@@ -9,7 +9,7 @@ function closeMobileMenu() {
 <template>
   <div class="fixed top-4 right-4 left-4 z-10">
     <nav
-      class="navbar flex items-center justify-between rounded border border-[var(--navbar-border)] bg-[var(--navbar-bg)] px-4 py-3 backdrop-blur-sm"
+      class="navbar border-ui-border flex items-center justify-between rounded border bg-white/50 px-4 py-3 backdrop-blur-md dark:bg-[var(--navbar-bg)]/50"
     >
       <div>
         <WatcherLogo />
