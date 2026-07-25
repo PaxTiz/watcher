@@ -130,6 +130,18 @@ export default {
     },
   },
 
+  error: {
+    notFound: {
+      title: "Page introuvable",
+      description: "La page que vous recherchez n'existe pas ou a été déplacée.",
+    },
+    generic: {
+      title: "Une erreur est survenue",
+      description: "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    },
+    backHome: "Retour à l'accueil",
+  },
+
   footer: {
     title: "Rejoins la bêta et simplifie ton suivi dès aujourd'hui",
     description: "Connecte un compte, teste Watcher gratuitement, sans engagement.",

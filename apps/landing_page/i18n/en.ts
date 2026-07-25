@@ -127,6 +127,18 @@ export default {
     },
   },
 
+  error: {
+    notFound: {
+      title: "Page not found",
+      description: "The page you're looking for doesn't exist or has been moved.",
+    },
+    generic: {
+      title: "Something went wrong",
+      description: "An unexpected error occurred. Please try again.",
+    },
+    backHome: "Back to home",
+  },
+
   footer: {
     title: "Join the beta and simplify your tracking today",
     description: "Connect an account, try Watcher for free, with no commitment.",

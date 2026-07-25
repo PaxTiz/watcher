@@ -129,6 +129,18 @@ export default {
     },
   },
 
+  error: {
+    notFound: {
+      title: "Página no encontrada",
+      description: "La página que buscas no existe o ha sido movida.",
+    },
+    generic: {
+      title: "Ha ocurrido un error",
+      description: "Se ha producido un error inesperado. Inténtalo de nuevo.",
+    },
+    backHome: "Volver al inicio",
+  },
+
   footer: {
     title: "Únete a la beta y simplifica tu seguimiento hoy mismo",
     description: "Conecta una cuenta, prueba Watcher gratis, sin compromiso.",
