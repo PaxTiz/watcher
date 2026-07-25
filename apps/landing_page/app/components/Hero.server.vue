@@ -31,7 +31,7 @@
               class="font-bold"
             />
 
-            <WatcherButton label="Voir la démo" size="lg" class="font-bold" />
+            <WatcherButton label="Voir la démo" size="lg" color="glass" class="font-bold" />
           </div>
         </div>
 

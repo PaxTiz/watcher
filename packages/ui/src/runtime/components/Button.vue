@@ -74,7 +74,7 @@ const classes = computed(() => {
     inner_classes.push("bg-white", "text-black");
   }
   if (color === "glass") {
-    inner_classes.push("bg-white/20", "text-white", "border-white");
+    inner_classes.push("bg-white/20", "text-white", "border-white/30");
   }
   if (!disabled && !loading) {
     inner_classes.push("cursor-pointer");

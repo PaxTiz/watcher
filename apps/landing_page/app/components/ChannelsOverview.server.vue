@@ -1,3 +1,77 @@
+<script lang="ts" setup>
+const VideoCard = defineComponent<{
+  platform: "youtube" | "twitch";
+  title: string;
+  badge: { type: "live" | "duration"; label: string };
+}>(
+  (props) => {
+    const platformColor = props.platform === "twitch" ? "rgb(145, 70, 255)" : "rgb(255, 0, 0)";
+    const platformLabel = props.platform === "twitch" ? "Twitch" : "YouTube";
+
+    return () =>
+      h(
+        "div",
+        {
+          class:
+            "video-card flex-shrink-0 w-[200px] rounded-xl border border-ui-border bg-ui-bg overflow-hidden shadow-[0_10px_24px_-14px_rgba(0,0,0,0.25)]",
+        },
+        [
+          h("div", { class: "video-card__thumb relative h-[110px] bg-background" }, [
+            props.badge.type === "live"
+              ? h(
+                  "span",
+                  {
+                    class:
+                      "absolute top-2 left-2 rounded bg-[rgb(145,70,255)] px-1.5 py-0.5 text-[10px] font-extrabold text-white",
+                  },
+                  "LIVE",
+                )
+              : h(
+                  "span",
+                  {
+                    class:
+                      "absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-white",
+                  },
+                  props.badge.label,
+                ),
+          ]),
+          h("div", { class: "flex items-center gap-2 p-2.5" }, [
+            h("div", {
+              class: "h-5 w-5 flex-shrink-0 rounded-md",
+              style: { background: platformColor },
+            }),
+            h("div", [
+              h("p", { class: "m-0 text-xs font-extrabold text-ui-text" }, props.title),
+              h("p", { class: "m-0 text-[11px] text-ui-text-muted" }, platformLabel),
+            ]),
+          ]),
+        ],
+      );
+  },
+  { props: ["platform", "title", "badge"] },
+);
+
+const todayVideos = [
+  { platform: "twitch", title: "Session ranked", badge: { type: "live" } },
+  { platform: "youtube", title: "Best moments #12", badge: { type: "duration", label: "18:42" } },
+  { platform: "twitch", title: "Just chatting", badge: { type: "live" } },
+  { platform: "youtube", title: "VOD complet", badge: { type: "duration", label: "1:02:31" } },
+  { platform: "twitch", title: "Speedrun%", badge: { type: "live" } },
+];
+
+const yesterdayVideos = [
+  { platform: "youtube", title: "Let's play ep.4", badge: { type: "duration", label: "42:10" } },
+  { platform: "twitch", title: "Draft du soir", badge: { type: "live" } },
+  { platform: "youtube", title: "Réaction — clip", badge: { type: "duration", label: "08:55" } },
+  { platform: "twitch", title: "Co-op du dimanche", badge: { type: "live" } },
+  {
+    platform: "youtube",
+    title: "Résumé de la semaine",
+    badge: { type: "duration", label: "31:20" },
+  },
+];
+</script>
+
 <template>
   <section class="bg-ui-bg border-ui-border border-t py-16">
     <div class="container">
@@ -8,1470 +82,34 @@
       </p>
 
       <section class="mt-8">
-        <div
-          data-dc-tpl="60"
-          style="
-            overflow: hidden;
-            mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
-          "
-        >
-          <div
-            data-dc-tpl="61"
-            style="
-              display: flex;
-              gap: 16px;
-              width: max-content;
-              animation: 34s linear 0s infinite normal none running fl-marquee-l;
-            "
-          >
-            <div data-dc-tpl="62" style="display: flex; gap: 16px">
-              <div
-                data-dc-tpl="63"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="64"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="65"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="66"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="67"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="68">
-                    <p
-                      data-dc-tpl="69"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Session ranked
-                    </p>
-                    <p
-                      data-dc-tpl="70"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="71"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="72"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="73"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >18:42</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="74"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="75"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="76">
-                    <p
-                      data-dc-tpl="77"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Best moments #12
-                    </p>
-                    <p
-                      data-dc-tpl="78"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="79"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="80"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="81"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="82"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="83"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="84">
-                    <p
-                      data-dc-tpl="85"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Just chatting
-                    </p>
-                    <p
-                      data-dc-tpl="86"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="87"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="88"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="89"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >1:02:31</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="90"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="91"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="92">
-                    <p
-                      data-dc-tpl="93"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      VOD complet
-                    </p>
-                    <p
-                      data-dc-tpl="94"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="95"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="96"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="97"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="98"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="99"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="100">
-                    <p
-                      data-dc-tpl="101"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Speedrun%
-                    </p>
-                    <p
-                      data-dc-tpl="102"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
+        <div class="marquee-viewport">
+          <div class="marquee-track marquee-track--left">
+            <div class="marquee-group">
+              <VideoCard v-for="(video, i) in todayVideos" :key="`today-${i}`" v-bind="video" />
             </div>
-            <div data-dc-tpl="103" aria-hidden="true" style="display: flex; gap: 16px">
-              <div
-                data-dc-tpl="104"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="105"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="106"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="107"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="108"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="109">
-                    <p
-                      data-dc-tpl="110"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Session ranked
-                    </p>
-                    <p
-                      data-dc-tpl="111"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="112"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="113"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="114"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >18:42</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="115"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="116"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="117">
-                    <p
-                      data-dc-tpl="118"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Best moments #12
-                    </p>
-                    <p
-                      data-dc-tpl="119"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="120"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="121"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="122"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="123"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="124"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="125">
-                    <p
-                      data-dc-tpl="126"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Just chatting
-                    </p>
-                    <p
-                      data-dc-tpl="127"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="128"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="129"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="130"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >1:02:31</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="131"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="132"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="133">
-                    <p
-                      data-dc-tpl="134"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      VOD complet
-                    </p>
-                    <p
-                      data-dc-tpl="135"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="136"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="137"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="138"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="139"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="140"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="141">
-                    <p
-                      data-dc-tpl="142"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Speedrun%
-                    </p>
-                    <p
-                      data-dc-tpl="143"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div class="marquee-group" aria-hidden="true">
+              <VideoCard v-for="(video, i) in todayVideos" :key="`today-dup-${i}`" v-bind="video" />
             </div>
           </div>
         </div>
       </section>
 
-      <section>
-        <div
-          data-dc-tpl="145"
-          style="
-            overflow: hidden;
-            mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
-          "
-        >
-          <div
-            data-dc-tpl="146"
-            style="
-              display: flex;
-              gap: 16px;
-              width: max-content;
-              animation: 34s linear 0s infinite normal none running fl-marquee-r;
-            "
-          >
-            <div data-dc-tpl="147" style="display: flex; gap: 16px">
-              <div
-                data-dc-tpl="148"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="149"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="150"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >42:10</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="151"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="152"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="153">
-                    <p
-                      data-dc-tpl="154"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Let's play ep.4
-                    </p>
-                    <p
-                      data-dc-tpl="155"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="156"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="157"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="158"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="159"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="160"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="161">
-                    <p
-                      data-dc-tpl="162"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Draft du soir
-                    </p>
-                    <p
-                      data-dc-tpl="163"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="164"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="165"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="166"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >08:55</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="167"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="168"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="169">
-                    <p
-                      data-dc-tpl="170"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Réaction — clip
-                    </p>
-                    <p
-                      data-dc-tpl="171"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="172"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="173"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="174"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="175"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="176"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="177">
-                    <p
-                      data-dc-tpl="178"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Co-op du dimanche
-                    </p>
-                    <p
-                      data-dc-tpl="179"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="180"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="181"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="182"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >31:20</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="183"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="184"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="185">
-                    <p
-                      data-dc-tpl="186"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Résumé de la semaine
-                    </p>
-                    <p
-                      data-dc-tpl="187"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
+      <section class="mt-8">
+        <div class="marquee-viewport">
+          <div class="marquee-track marquee-track--right">
+            <div class="marquee-group">
+              <VideoCard
+                v-for="(video, i) in yesterdayVideos"
+                :key="`yesterday-${i}`"
+                v-bind="video"
+              />
             </div>
-            <div data-dc-tpl="188" aria-hidden="true" style="display: flex; gap: 16px">
-              <div
-                data-dc-tpl="189"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="190"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="191"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >42:10</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="192"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="193"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="194">
-                    <p
-                      data-dc-tpl="195"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Let's play ep.4
-                    </p>
-                    <p
-                      data-dc-tpl="196"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="197"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="198"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="199"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="200"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="201"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="202">
-                    <p
-                      data-dc-tpl="203"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Draft du soir
-                    </p>
-                    <p
-                      data-dc-tpl="204"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="205"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="206"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="207"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >08:55</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="208"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="209"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="210">
-                    <p
-                      data-dc-tpl="211"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Réaction — clip
-                    </p>
-                    <p
-                      data-dc-tpl="212"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="213"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="214"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="215"
-                    style="
-                      position: absolute;
-                      top: 8px;
-                      left: 8px;
-                      background: rgb(145, 70, 255);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 800;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >LIVE</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="216"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="217"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(145, 70, 255);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="218">
-                    <p
-                      data-dc-tpl="219"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Co-op du dimanche
-                    </p>
-                    <p
-                      data-dc-tpl="220"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      Twitch
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div
-                data-dc-tpl="221"
-                style="
-                  width: 200px;
-                  border-radius: 12px;
-                  border: 1px solid var(--ui-border);
-                  background: var(--ui-bg);
-                  overflow: hidden;
-                  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 24px -14px;
-                "
-              >
-                <div
-                  data-dc-tpl="222"
-                  style="
-                    height: 110px;
-                    background: repeating-linear-gradient(
-                      135deg,
-                      var(--background) 0px,
-                      var(--background) 12px,
-                      var(--ui-bg) 12px,
-                      var(--ui-bg) 24px
-                    );
-                    position: relative;
-                  "
-                >
-                  <span
-                    data-dc-tpl="223"
-                    style="
-                      position: absolute;
-                      bottom: 8px;
-                      right: 8px;
-                      background: rgba(0, 0, 0, 0.7);
-                      color: rgb(255, 255, 255);
-                      font-size: 10px;
-                      font-weight: 700;
-                      padding: 2px 6px;
-                      border-radius: 4px;
-                    "
-                    >31:20</span
-                  >
-                </div>
-                <div
-                  data-dc-tpl="224"
-                  style="padding: 10px; display: flex; align-items: center; gap: 8px"
-                >
-                  <div
-                    data-dc-tpl="225"
-                    style="
-                      width: 20px;
-                      height: 20px;
-                      border-radius: 6px;
-                      background: rgb(255, 0, 0);
-                      flex-shrink: 0;
-                    "
-                  ></div>
-                  <div data-dc-tpl="226">
-                    <p
-                      data-dc-tpl="227"
-                      style="margin: 0px; font-size: 12px; font-weight: 800; color: var(--ui-text)"
-                    >
-                      Résumé de la semaine
-                    </p>
-                    <p
-                      data-dc-tpl="228"
-                      style="margin: 0px; font-size: 11px; color: var(--ui-text-muted)"
-                    >
-                      YouTube
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div class="marquee-group" aria-hidden="true">
+              <VideoCard
+                v-for="(video, i) in yesterdayVideos"
+                :key="`yesterday-dup-${i}`"
+                v-bind="video"
+              />
             </div>
           </div>
         </div>
@@ -1479,3 +117,58 @@
     </div>
   </section>
 </template>
+
+<style scoped>
+.marquee-viewport {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+}
+
+.marquee-track--left {
+  animation: marquee-left 34s linear infinite;
+}
+
+.marquee-track--right {
+  animation: marquee-right 34s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.marquee-group {
+  display: flex;
+  gap: 16px;
+}
+
+@keyframes marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+</style>
