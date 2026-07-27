@@ -76,12 +76,11 @@ export default defineNuxtConfig({
     ],
     defaultLocale: "en",
     langDir: ".",
-    strategy: "no_prefix",
+    strategy: "prefix_and_default",
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: "watcher_locale",
       fallbackLocale: "en",
-      redirectOn: "no prefix",
     },
   },
 });
