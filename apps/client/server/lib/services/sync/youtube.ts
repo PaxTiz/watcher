@@ -12,10 +12,9 @@ import { services } from "#framework/server";
 import { useDatabase } from "#server/database";
 import { useGoogle } from "#server/lib/google";
 import type { Sync } from "#shared/types/sync";
-import { async_pool } from "#shared/utils/random";
+import { async_pool, async_pool_with_delay, with_retry } from "#shared/utils/random";
 import { to_subscription_slug } from "#shared/utils/subscriptions";
 
-const SHORT_DURATION_THRESOLD = 200; // Videos shorter than 200 seconds (3 minutes + 20 seconds of thresold) are considered as shorts
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads", "youtube");
 
 export default class SyncYoutube extends AbstractService {
@@ -188,13 +187,15 @@ export default class SyncYoutube extends AbstractService {
     );
 
     while (true) {
-      for (const video of all_videos.items) {
-        if (this.is_maybe_a_short(video)) {
-          continue;
-        }
+      await async_pool_with_delay(all_videos.items, 5, 300, (video) =>
+        with_retry(async () => {
+          if (await this.is_maybe_a_short(video)) {
+            return;
+          }
 
-        current_videos.push(video);
-      }
+          current_videos.push(video);
+        }),
+      );
 
       if (current_videos.length >= 50) {
         break;
@@ -389,9 +390,31 @@ export default class SyncYoutube extends AbstractService {
     }
   }
 
-  private is_maybe_a_short(video: Google["Youtube"]["Videos"]["Item"]) {
-    const duration = this.parse_duration(video.contentDetails.duration);
-    return duration < SHORT_DURATION_THRESOLD;
+  private async is_maybe_a_short(video: Google["Youtube"]["Videos"]["Item"]): Promise<boolean> {
+    const url = `https://www.youtube.com/shorts/${video.id}`;
+
+    const response = await fetch(url, {
+      method: "HEAD",
+      redirect: "manual",
+      headers: {
+        Cookie: "SOCS=CAI; CONSENT=YES+1",
+      },
+    });
+
+    if (response.status === 200) {
+      return true;
+    }
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location") ?? "";
+      if (location.includes("/watch")) {
+        return false;
+      }
+    }
+
+    throw new Error(
+      `Unexpected status ${response.status} for video ${video.id}, location: ${response.headers.get("location")}`,
+    );
   }
 
   private parse_duration(duration?: string) {
