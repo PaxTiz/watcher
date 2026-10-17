@@ -19,7 +19,7 @@ export default defineTask({
     while (true) {
       const videos = await database
         .selectFrom("videos")
-        .select(["id", "thumbnail"])
+        .select(["id", "thumbnail_large"])
         .where("palette", "is", null)
         .$if(last_id !== null, (qb) => qb.where("id", ">", last_id!))
         .orderBy("id")
@@ -31,7 +31,7 @@ export default defineTask({
       }
 
       await async_pool(videos, 10, async (video) => {
-        const palette = await extract_image_palette(video.thumbnail);
+        const palette = await extract_image_palette(video.thumbnail_large);
         if (!palette) {
           failed++;
           return;

@@ -34,7 +34,6 @@ export default class SubscriptionsService extends AbstractService {
           .as("last_video_at"),
       )
       .orderBy("user_subscriptions.is_hidden", "asc")
-      .orderBy("last_video_at", (ob) => ob.desc().nullsLast())
       .orderBy("name", "asc")
       .execute();
 

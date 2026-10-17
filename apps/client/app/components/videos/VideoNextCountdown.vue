@@ -37,7 +37,7 @@ const cancel = () => {
           class="aspect-video w-full rounded-lg object-cover"
           format="avif,webp"
           width="128"
-          :src="video.thumbnail"
+          :src="video.thumbnails.small"
           alt=""
         />
         <div class="font-content min-w-0">

@@ -68,7 +68,9 @@ export type VideoTable = {
 
   url: string;
 
-  thumbnail: string;
+  thumbnail_small: string;
+
+  thumbnail_large: string;
 
   // jsonb: parsed on read, written as a JSON string
   palette: ColumnType<VideoPalette | null, string | null, string | null>;

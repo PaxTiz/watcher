@@ -95,16 +95,16 @@ const dropdown_items = computed(() => {
 
   const items = [];
   if (video_items.length > 0) {
-    items.push({ label: "Vidéo", type: "label" });
+    items.push({ key: "video", label: "Vidéo", type: "label" as const });
     items.push(...video_items);
   }
 
   if (video_items.length > 0 && subscription_items.length > 0) {
-    items.push({ type: "divider" });
+    items.push({ key: "divider", label: "", type: "divider" as const });
   }
 
   if (subscription_items.length > 0) {
-    items.push({ label: "Abonnement", type: "label" });
+    items.push({ key: "subscription", label: "Abonnement", type: "label" as const });
     items.push(...subscription_items);
   }
 
@@ -160,7 +160,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
           format="avif,webp"
           width="420"
           quality="90"
-          :src="video.thumbnail"
+          :src="video.thumbnails.small"
           alt=""
         />
 

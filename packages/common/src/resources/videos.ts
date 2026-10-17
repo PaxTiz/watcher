@@ -19,7 +19,10 @@ export type VideoResource = {
 
   url: string;
 
-  thumbnail: string;
+  thumbnails: {
+    small: string;
+    large: string;
+  };
 
   palette: VideoPalette | null;
 

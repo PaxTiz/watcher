@@ -65,7 +65,7 @@ const { dates, numbers } = useFormatter();
               loading="lazy"
               format="avif,webp"
               width="168"
-              :src="video.thumbnail"
+              :src="video.thumbnails.small"
               alt=""
             />
             <span

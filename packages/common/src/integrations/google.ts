@@ -106,6 +106,14 @@ export type Google = {
         height: number;
         url: string;
       };
+
+      maxres:
+        | {
+            width: number;
+            height: number;
+            url: string;
+          }
+        | undefined;
     };
   };
 };

@@ -178,7 +178,8 @@ export default class SyncTwitch extends AbstractService {
             created_at: vid.created_at,
             url: vid.url,
             duration: vid.duration,
-            thumbnail: vid.thumbnail,
+            thumbnail_small: vid.thumbnail_small,
+            thumbnail_large: vid.thumbnail_large,
             last_synced_at: vid.last_synced_at,
           },
         })),
@@ -191,6 +192,8 @@ export default class SyncTwitch extends AbstractService {
         const existingVid = videos.find((e) => e.video.service_id === video.id);
 
         if (existingVid) {
+          const isValid = differenceInHours(new Date(), existingVid.video.last_synced_at) < 3;
+
           existingVid.status = "updated";
           existingVid.video = {
             service: "twitch",
@@ -200,10 +203,8 @@ export default class SyncTwitch extends AbstractService {
             description: video.description,
             created_at: video.created_at,
             url: video.url,
-            thumbnail:
-              differenceInHours(new Date(), existingVid.video.last_synced_at) < 3
-                ? existingVid.video.thumbnail
-                : video.thumbnail_url,
+            thumbnail_small: isValid ? existingVid.video.thumbnail_small : video.thumbnail_url,
+            thumbnail_large: isValid ? existingVid.video.thumbnail_large : video.thumbnail_url,
             duration: this.parseDurationToSeconds(video.duration),
             last_synced_at: formatISO(new Date()),
           };
@@ -218,7 +219,8 @@ export default class SyncTwitch extends AbstractService {
               description: video.description,
               created_at: video.created_at,
               url: video.url,
-              thumbnail: video.thumbnail_url,
+              thumbnail_small: video.thumbnail_url,
+              thumbnail_large: video.thumbnail_url,
               duration: this.parseDurationToSeconds(video.duration),
               last_synced_at: formatISO(new Date()),
             },
@@ -246,8 +248,11 @@ export default class SyncTwitch extends AbstractService {
       return await this.delete_video(video);
     }
 
-    video.video.thumbnail = await this.sync_video_thumbnail(video);
-    const palette = await extract_image_palette(video.video.thumbnail);
+    const thumbnails = await this.sync_video_thumbnail(video);
+    video.video.thumbnail_small = thumbnails.small;
+    video.video.thumbnail_large = thumbnails.large;
+
+    const palette = await extract_image_palette(video.video.thumbnail_large);
 
     await database
       .insertInto("videos")
@@ -258,7 +263,8 @@ export default class SyncTwitch extends AbstractService {
           description: (c) => c.ref("excluded.description"),
           url: (c) => c.ref("excluded.url"),
           duration: (c) => c.ref("excluded.duration"),
-          thumbnail: (c) => c.ref("excluded.thumbnail"),
+          thumbnail_small: (c) => c.ref("excluded.thumbnail_small"),
+          thumbnail_large: (c) => c.ref("excluded.thumbnail_large"),
           palette: (c) => c.ref("excluded.palette"),
           last_synced_at: (c) => c.ref("excluded.last_synced_at"),
         }),
@@ -294,40 +300,69 @@ export default class SyncTwitch extends AbstractService {
       .execute();
 
     try {
-      await unlink(
-        join(
-          UPLOADS_DIRECTORY,
-          "channels",
-          video.video.subscription_id,
-          "videos",
-          `${video.video.service_id}.jpg`,
+      await Promise.allSettled([
+        unlink(
+          join(
+            UPLOADS_DIRECTORY,
+            "channels",
+            video.video.subscription_id,
+            "videos",
+            `${video.video.service_id}_small.jpg`,
+          ),
         ),
-      );
+        unlink(
+          join(
+            UPLOADS_DIRECTORY,
+            "channels",
+            video.video.subscription_id,
+            "videos",
+            `${video.video.service_id}_large.jpg`,
+          ),
+        ),
+      ]);
     } catch {
       // Don't throw an error is count not delete video file
     }
   }
 
   private async sync_video_thumbnail(video: Sync["Video"]) {
-    if (video.video.thumbnail.startsWith("/")) {
-      return video.video.thumbnail;
+    const paths = {
+      small: video.video.thumbnail_small,
+      large: video.video.thumbnail_large,
+    };
+
+    if (
+      video.video.thumbnail_small.startsWith("/") &&
+      video.video.thumbnail_large.startsWith("/")
+    ) {
+      return paths;
     }
 
-    const url = video.video.thumbnail.replace("%{width}", "320").replace("%{height}", "180");
-    const image = await fetch(url).then((res) => res.arrayBuffer());
+    const inner = async (key: "small" | "large") => {
+      const url = video.video.thumbnail_small
+        .replace("%{width}", key === "small" ? "320" : "700")
+        .replace("%{height}", key === "small" ? "180" : "394");
 
-    await writeFile(
-      join(
-        UPLOADS_DIRECTORY,
-        "channels",
-        video.video.subscription_id,
-        "videos",
-        `${video.video.service_id}.jpg`,
-      ),
-      Buffer.from(image),
-    );
+      const image = await fetch(url).then((res) => res.arrayBuffer());
 
-    return `/twitch/channels/${video.video.subscription_id}/videos/${video.video.service_id}.jpg`;
+      await writeFile(
+        join(
+          UPLOADS_DIRECTORY,
+          "channels",
+          video.video.subscription_id,
+          "videos",
+          `${video.video.service_id}_${key}.jpg`,
+        ),
+        Buffer.from(image),
+      );
+
+      paths[key] =
+        `/twitch/channels/${video.video.subscription_id}/videos/${video.video.service_id}_${key}.jpg`;
+    };
+
+    await Promise.all([inner("small"), inner("large")]);
+
+    return paths;
   }
 
   private createImageDirectory(...path: Array<string>) {

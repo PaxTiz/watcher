@@ -38,7 +38,7 @@ const remaining_minutes = computed(() => {
           class="size-full object-cover"
           format="avif,webp"
           width="720"
-          :src="featured.thumbnail"
+          :src="featured.thumbnails.large"
           alt=""
         />
         <span

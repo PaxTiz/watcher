@@ -34,7 +34,8 @@ export default class VideosService extends AbstractService {
         "videos.description as video_description",
         "videos.duration as video_duration",
         "videos.url as video_url",
-        "videos.thumbnail as video_thumbnail",
+        "videos.thumbnail_small as video_thumbnail_small",
+        "videos.thumbnail_large as video_thumbnail_large",
         "videos.palette as video_palette",
         "videos.created_at as video_created_at",
         "subscriptions.id as subscription_id",
@@ -64,7 +65,10 @@ export default class VideosService extends AbstractService {
       duration: video.video_duration,
       viewing_progression: video.viewing_progression,
       url: video.video_url,
-      thumbnail: video.video_thumbnail,
+      thumbnails: {
+        small: video.video_thumbnail_small,
+        large: video.video_thumbnail_large,
+      },
       palette: video.video_palette,
       created_at: video.video_created_at,
       author: {
@@ -188,7 +192,8 @@ export default class VideosService extends AbstractService {
         "videos.description as video_description",
         "videos.duration as video_duration",
         "videos.url as video_url",
-        "videos.thumbnail as video_thumbnail",
+        "videos.thumbnail_small as video_thumbnail_small",
+        "videos.thumbnail_large as video_thumbnail_large",
         "videos.palette as video_palette",
         "videos.created_at as video_created_at",
         "subscriptions.id as subscription_id",
@@ -228,7 +233,10 @@ export default class VideosService extends AbstractService {
         duration: item.video_duration,
         viewing_progression: item.video_viewing_progression,
         url: item.video_url,
-        thumbnail: item.video_thumbnail,
+        thumbnails: {
+          small: item.video_thumbnail_small,
+          large: item.video_thumbnail_large,
+        },
         palette: item.video_palette,
         created_at: item.video_created_at,
         author: {

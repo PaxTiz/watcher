@@ -2,7 +2,11 @@
 import { type VideoCurrentRefreshType, VIDEO_CURRENT_REFRESH_SYMBOL } from "@watcher/common";
 
 const route = useRoute();
-const slug = route.params.slug as string;
+if (!route.params.slug) {
+  throw createError({ status: 404 });
+}
+
+const slug = route.params.slug.toString();
 
 const { data, refresh } = await useSubscription(slug);
 
