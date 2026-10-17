@@ -6,6 +6,8 @@ export default defineRoute({
   params: videosValidatorsSchema.url.params,
 
   async handler(event, { params }) {
+    await requireUserSession(event);
+
     const response = await services.videos.get_url(params.id);
     if (!response.url) {
       throw createError({ statusCode: 404 });
@@ -18,7 +20,8 @@ export default defineRoute({
     setHeader(event, "Content-Type", "application/vnd.apple.mpegurl");
     return response.url.replaceAll(
       /((.*)\/(.*)\/((.*)\.m3u8))/g,
-      `/api/videos/${params.id}/segments/$3/$4?base_url=$1`,
+      (base_url: string, _: string, __: string, quality: string, path: string) =>
+        to_proxy_url(params.id, quality, path, base_url),
     );
   },
 });

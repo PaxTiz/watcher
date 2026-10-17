@@ -1,16 +1,13 @@
 import { defineRoute } from "#framework";
 import { videosValidatorsSchema } from "#shared/validators/videos";
 
-const get_last_slash = (str: string, start_position?: number) => {
-  const start = start_position ?? str.length;
-
-  for (let index = start; index > 0; index--) {
-    if (str[index] === "/") {
-      return index;
-    }
+const fetch_upstream = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw createError({ statusCode: 502 });
   }
 
-  return -1;
+  return response;
 };
 
 export default defineRoute({
@@ -18,23 +15,27 @@ export default defineRoute({
   params: videosValidatorsSchema.segment.params,
 
   async handler(event, { query, params }) {
-    const base_url = query.base_url;
+    await requireUserSession(event);
 
-    if (/(\/api\/videos\/(\d+)\/segments\/(.*)\/(\d+)\.ts).*/.test(event.path)) {
-      const last_slash = base_url.lastIndexOf("/");
-      const base_path = base_url.slice(0, last_slash);
-      const real_path = `${base_path}/${params.path}`;
-      return fetch(real_path).then((res) => res.blob());
+    const base_url = query.base_url;
+    if (!verify_proxy_url(params.id, base_url, query.signature)) {
+      throw createError({ statusCode: 403 });
     }
 
-    const last_slash = get_last_slash(base_url);
-    const second_last_slash = get_last_slash(base_url, last_slash - 1);
-    const quality = base_url.slice(second_last_slash + 1, last_slash);
+    const base_path = base_url.slice(0, base_url.lastIndexOf("/"));
 
-    const response = await fetch(base_url).then((res) => res.text());
-    return response.replaceAll(
-      /((\d+)\.ts)/g,
-      `/api/videos/${params.id}/segments/${quality}/$1?base_url=${base_url}`,
+    if (params.path.endsWith(".ts")) {
+      const response = await fetch_upstream(`${base_path}/${params.path}`);
+      return response.blob();
+    }
+
+    const quality = base_path.slice(base_path.lastIndexOf("/") + 1);
+
+    const response = await fetch_upstream(base_url);
+    const playlist = await response.text();
+
+    return playlist.replaceAll(/((\d+)\.ts)/g, (path: string) =>
+      to_proxy_url(params.id, quality, path, base_url),
     );
   },
 });
