@@ -5,6 +5,8 @@ export const useVideo = (video: VideoResource) => {
   const { error: video_progress_error, execute: video_progress } = usePost(
     `/api/videos/${video.id}/progress`,
     {
+      // usePost keys by URL by default: playback progress posts to the same URL with other values
+      key: `videos.${video.id}.mark_as_watched`,
       method: "POST",
       body: { progression: 1 },
     },

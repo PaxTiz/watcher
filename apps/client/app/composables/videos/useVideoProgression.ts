@@ -35,14 +35,13 @@ export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr 
         }
 
         latest_progress = progression;
-        await usePost(
-          `/api/videos/${video.id}/progress`,
-          {
-            method: "POST",
-            body: { progression },
-          },
-          { immediate: true },
-        );
+        // A plain request: each value must be sent, nothing is shared or cached
+        await $fetch(`/api/videos/${video.id}/progress`, {
+          method: "POST",
+          body: { progression },
+        }).catch(() => {
+          latest_progress = 0;
+        });
       });
     },
     { immediate: true },
