@@ -33,15 +33,12 @@ const on_toggle_favorite = async () => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center gap-4">
-      <h3 class="text-ui-text-muted text-lg font-bold tracking-widest uppercase">
-        {{ formatted_label }}
-      </h3>
-      <div class="bg-ui-border h-[1px] flex-1"></div>
-    </div>
+  <section class="space-y-4">
+    <h2 class="text-ui-text text-xl font-bold">
+      {{ formatted_label }}
+    </h2>
 
-    <div class="infinite-grid-[300px] gap-6">
+    <div class="infinite-grid-[300px] gap-x-4 gap-y-8">
       <VideoCard
         v-for="video in videos"
         :key="video.id"
@@ -52,5 +49,5 @@ const on_toggle_favorite = async () => {
         @toggle-favorite="on_toggle_favorite"
       />
     </div>
-  </div>
+  </section>
 </template>

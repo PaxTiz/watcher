@@ -47,7 +47,7 @@ const groupedVideos = computed(() => {
 <template>
   <VideosGridSkeleton v-if="status === 'pending'" />
 
-  <section v-else-if="groupedVideos.length > 0" class="space-y-12">
+  <section v-else-if="groupedVideos.length > 0" class="space-y-10 md:space-y-12">
     <DashboardSectionVideosTimelineGroup
       v-for="[group, items] in groupedVideos"
       :key="group"
@@ -64,7 +64,7 @@ const groupedVideos = computed(() => {
 
   <div v-if="hasMore" ref="loadMoreTrigger" class="flex justify-center py-8">
     <div v-if="status === 'pending'" class="flex items-center gap-2">
-      <Icon name="lucide:loader-2" class="size-6 animate-spin text-blue-500" />
+      <Icon name="lucide:loader-2" class="text-alt size-6 animate-spin" />
       <span class="text-ui-text-muted">Chargement de plus de vidéos...</span>
     </div>
   </div>

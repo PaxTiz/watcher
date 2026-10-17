@@ -18,6 +18,7 @@ export const videosValidatorsSchema = defineValidator({
       query: z.optional(z.string()),
       service: z.optional(z.enum(["youtube", "twitch"])),
       is_favorite: z.optional(booleanSchema),
+      in_progress: z.optional(booleanSchema),
       duration: z.optional(
         z.enum([
           "less_than_10_minutes",

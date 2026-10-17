@@ -97,6 +97,8 @@ export type UsersVideosProgression = {
   video_id: string;
 
   progression: number;
+
+  updated_at: ColumnType<string, string | undefined, string>;
 };
 
 export type Database = {

@@ -22,7 +22,11 @@ export default class VideosService extends AbstractService {
           .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
           .on("user_subscriptions.user_id", "=", user.id),
       )
-      .leftJoin("users_videos_progression", "users_videos_progression.video_id", "videos.id")
+      .leftJoin("users_videos_progression", (qb) =>
+        qb
+          .onRef("users_videos_progression.video_id", "=", "videos.id")
+          .on("users_videos_progression.user_id", "=", user.id),
+      )
       .select((qb) => [
         "videos.id as video_id",
         "videos.service as video_service",
@@ -139,13 +143,18 @@ export default class VideosService extends AbstractService {
       .$if(!!params.query, (qb) =>
         qb.where("videos.title", "@@", sql<string>`(to_tsquery(${params.query!}))`),
       )
+      .$if(params.in_progress === true, (qb) => this.in_progress_filter(qb, user))
       .executeTakeFirst();
 
     const items = await database
       .selectFrom("videos")
       .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
       .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
-      .leftJoin("users_videos_progression", "users_videos_progression.video_id", "videos.id")
+      .leftJoin("users_videos_progression", (qb) =>
+        qb
+          .onRef("users_videos_progression.video_id", "=", "videos.id")
+          .on("users_videos_progression.user_id", "=", user.id),
+      )
       .where((eb) =>
         eb.not(
           eb.exists(
@@ -160,6 +169,9 @@ export default class VideosService extends AbstractService {
       .where("user_subscriptions.user_id", "=", user.id)
       .offset((params.page - 1) * params.per_page)
       .limit(params.per_page)
+      .$if(params.in_progress === true, (qb) =>
+        qb.orderBy("users_videos_progression.updated_at", "desc"),
+      )
       .orderBy("videos.created_at", "desc")
       .select((qb) => [
         "videos.id as video_id",
@@ -194,6 +206,7 @@ export default class VideosService extends AbstractService {
       .$if(!!params.query, (qb) =>
         qb.where("videos.title", "@@", sql<string>`(to_tsquery(${params.query!}))`),
       )
+      .$if(params.in_progress === true, (qb) => this.in_progress_filter(qb, user))
       .execute();
 
     const mapped_items: Array<VideoResource> = [];
@@ -256,9 +269,25 @@ export default class VideosService extends AbstractService {
         progression: mapped_progression,
       })
       .onConflict((eb) =>
-        eb.columns(["user_id", "video_id"]).doUpdateSet({ progression: mapped_progression }),
+        eb
+          .columns(["user_id", "video_id"])
+          .doUpdateSet({ progression: mapped_progression, updated_at: sql`now()` }),
       )
       .execute();
+  }
+
+  // Started but not finished, see `update_progress` for the "finished" threshold
+  private in_progress_filter(qb: SelectQueryBuilder<Database, "videos", any>, user: User) {
+    return qb.where((eb) =>
+      eb.exists(
+        eb
+          .selectFrom("users_videos_progression as progression")
+          .whereRef("progression.video_id", "=", "videos.id")
+          .where("progression.user_id", "=", user.id)
+          .where("progression.progression", ">", 0)
+          .where("progression.progression", "<", 1),
+      ),
+    );
   }
 
   private parse_duration_filter(

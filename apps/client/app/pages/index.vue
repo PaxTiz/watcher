@@ -10,8 +10,10 @@ useMeta({
 </script>
 
 <template>
-  <div class="space-y-8 md:space-y-12">
+  <div class="space-y-10 md:space-y-12">
     <DashboardHeader />
+
+    <DashboardSectionVideosInProgress />
 
     <DashboardSectionVideosFavorites />
 
