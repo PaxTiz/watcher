@@ -167,19 +167,6 @@ const open_search = async () => {
     </ul>
 
     <div class="border-ui-text/10 shrink-0 space-y-0.5 border-t p-3">
-      <NuxtLink
-        to="/settings"
-        :title="collapsed ? 'Paramètres' : undefined"
-        class="text-ui-text-muted hover:text-ui-text hover:bg-ui-text/[0.06] flex items-center gap-3 rounded-lg py-2 text-sm transition-colors"
-        :class="[
-          collapsed ? 'mx-auto size-10 justify-center px-0' : 'px-3',
-          { 'text-ui-text [&_svg]:text-alt bg-ui-text/10 font-medium': route.path === '/settings' },
-        ]"
-      >
-        <Icon name="lucide:settings" class="shrink-0 text-lg" />
-        <span v-if="!collapsed">Paramètres</span>
-      </NuxtLink>
-
       <UserDropdown :compact="collapsed" />
     </div>
   </aside>

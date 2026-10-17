@@ -24,6 +24,13 @@ const onSelect = async (key: string, value: string) => {
 
 const items = computed<Array<DropdownItem>>(() => [
   {
+    key: "settings",
+    label: "Paramètres",
+    value: "settings",
+    icon: "lucide:settings",
+    on_select: () => navigateTo("/settings"),
+  },
+  {
     key: "actions",
     label: "Synchroniser",
     value: "sync",
