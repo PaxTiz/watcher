@@ -8,7 +8,8 @@ import "plyr/css";
 
 import { useVideoProgression } from "~/composables/videos/useVideoProgression";
 
-const { video } = defineProps<{ video: VideoResource }>();
+const { video, autoplay = false } = defineProps<{ video: VideoResource; autoplay?: boolean }>();
+const emit = defineEmits<{ ended: [] }>();
 
 const url = computed(() => {
   if (video.service === "twitch") {
@@ -25,6 +26,7 @@ const plyr_instance = shallowRef<Plyr>();
 
 const plyrOptions: Record<string, unknown> = {
   ratio: "unset",
+  autoplay,
   settings: ["captions", "quality", "speed", "loop"],
   keyboard: {
     focused: true,
@@ -103,11 +105,26 @@ watch(
 );
 
 useVideoProgression(video, plyr_instance);
+
+watch(plyr_instance, (instance) => {
+  instance?.on("ended", () => emit("ended"));
+});
+
+defineExpose({
+  seek: (seconds: number) => {
+    if (!plyr_instance.value) {
+      return;
+    }
+
+    plyr_instance.value.currentTime = seconds;
+    plyr_instance.value.play();
+  },
+});
 </script>
 
 <template>
-  <div class="relative bg-black">
-    <div class="md:container">
+  <div class="relative aspect-video bg-black">
+    <div class="size-full">
       <div ref="player" class="plyr__video-embed" id="player">
         <iframe
           v-if="video.service === 'youtube'"
@@ -122,3 +139,10 @@ useVideoProgression(video, plyr_instance);
     </div>
   </div>
 </template>
+
+<style scoped>
+.size-full :deep(.plyr) {
+  height: 100%;
+  --plyr-color-main: var(--color-alt);
+}
+</style>

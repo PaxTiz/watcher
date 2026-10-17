@@ -3,6 +3,9 @@ import type { VideoResource } from "@watcher/common";
 import Plyr from "plyr";
 import type { ShallowRef } from "vue";
 
+// Below this, there is nothing worth resuming
+const RESUME_THRESHOLD = 0.01;
+
 export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr | undefined>) => {
   if (video.viewing_progression === 1) {
     return;
@@ -13,6 +16,15 @@ export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr 
     (instance) => {
       if (!instance) {
         return;
+      }
+
+      // Duration is only reliable once playback started (especially for YouTube embeds)
+      if (video.viewing_progression > RESUME_THRESHOLD) {
+        instance.once("playing", () => {
+          if (instance.currentTime < 1) {
+            instance.currentTime = video.viewing_progression * instance.duration;
+          }
+        });
       }
 
       let latest_progress = 0;
