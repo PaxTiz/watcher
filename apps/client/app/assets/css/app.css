@@ -1,3 +1,7 @@
+:root {
+  --header-height: 64px;
+}
+
 body {
   background-color: var(--background);
   background-image: var(--bg-gradient-radial);
@@ -12,9 +16,7 @@ body {
 .page-title {
   color: var(--color-ui-text);
   font-size: var(--text-2xl);
-  font-weight: 900;
-
-  @media screen and (min-width: theme(breakpoint.md)) {
-    font-size: var(--text-3xl);
-  }
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }

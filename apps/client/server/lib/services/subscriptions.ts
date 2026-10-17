@@ -25,7 +25,16 @@ export default class SubscriptionsService extends AbstractService {
         "user_subscriptions.is_favorite",
         "user_subscriptions.is_hidden",
       ])
+      .select((eb) =>
+        eb
+          .selectFrom("videos")
+          .whereRef("videos.service", "=", "subscriptions.service")
+          .whereRef("videos.subscription_id", "=", "subscriptions.service_id")
+          .select((eb) => eb.fn.max("videos.created_at").as("created_at"))
+          .as("last_video_at"),
+      )
       .orderBy("user_subscriptions.is_hidden", "asc")
+      .orderBy("last_video_at", (ob) => ob.desc().nullsLast())
       .orderBy("name", "asc")
       .execute();
 
@@ -36,6 +45,7 @@ export default class SubscriptionsService extends AbstractService {
       is_favorite: sub.is_favorite,
       is_hidden: sub.is_hidden,
       last_synced_at: sub.last_synced_at,
+      last_video_at: sub.last_video_at,
       channel: {
         service: sub.service,
         url: sub.url,
@@ -62,6 +72,14 @@ export default class SubscriptionsService extends AbstractService {
         "user_subscriptions.is_favorite",
         "user_subscriptions.is_hidden",
       ])
+      .select((eb) =>
+        eb
+          .selectFrom("videos")
+          .whereRef("videos.service", "=", "subscriptions.service")
+          .whereRef("videos.subscription_id", "=", "subscriptions.service_id")
+          .select((eb) => eb.fn.max("videos.created_at").as("created_at"))
+          .as("last_video_at"),
+      )
       .where("user_subscriptions.user_id", "=", user.id)
       .$if(is_params_uuid, (qb) => qb.where("id", "=", id_or_slug))
       .$if(!is_params_uuid, (qb) => qb.where("slug", "=", parse_slug_params(id_or_slug)))
@@ -74,6 +92,7 @@ export default class SubscriptionsService extends AbstractService {
       is_favorite: sub.is_favorite,
       is_hidden: sub.is_hidden,
       last_synced_at: sub.last_synced_at,
+      last_video_at: sub.last_video_at,
       channel: {
         service: sub.service,
         url: sub.url,

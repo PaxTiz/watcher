@@ -1,56 +1,118 @@
 <script lang="ts" setup>
-import { NuxtLink, LazySubscriptionsSidebarSlideover } from "#components";
+import { LazySubscriptionsSidebarSlideover } from "#components";
+
+const { alwaysShowMenu = false } = defineProps<{ alwaysShowMenu?: boolean }>();
 
 const route = useRoute();
 const overlay = useWatcherOverlay();
 
-const openSidebar = () => {
-  overlay.create(LazySubscriptionsSidebarSlideover).open();
+const is_videos_page = computed(() => (route.name as string) === pages.videos_index);
+
+const search = ref(is_videos_page.value ? ((route.query.query as string) ?? "") : "");
+const show_mobile_search = ref(false);
+
+watch(
+  () => route.query.query,
+  (query) => {
+    if (is_videos_page.value) {
+      search.value = (query as string) ?? "";
+    }
+  },
+);
+
+const go_to_results = async () => {
+  const query = search.value.trim() || undefined;
+
+  // Keep the other active filters when searching from the videos page
+  await navigateTo(
+    {
+      path: "/videos",
+      query: is_videos_page.value ? { ...route.query, page: 1, query } : { query },
+    },
+    { replace: is_videos_page.value },
+  );
 };
 
-const Link = defineComponent<{ label: string; to: string; isActive: boolean }>(
-  (props) => {
-    return () =>
-      h(
-        NuxtLink,
-        {
-          to: props.to,
-          "aria-active": props.isActive,
-          class:
-            "px-4 py-2 rounded-lg transition-all duration-300 text-sm flex items-center gap-2 " +
-            "aria-active:bg-alt/10 aria-active:text-alt " +
-            "not-aria-active:text-ui-text-muted not-aria-active:hover:text-ui-text not-aria-active:hover:bg-ui-border/40 rounded",
-        },
-        () => props.label,
-      );
-  },
-  { props: ["label", "to", "isActive"] },
-);
+// Live search only makes sense when results are already on screen
+const on_input = useDebounceFn(async () => {
+  if (is_videos_page.value) {
+    await go_to_results();
+  }
+}, 300);
+
+const clear_search = async () => {
+  search.value = "";
+  if (is_videos_page.value) {
+    await go_to_results();
+  }
+};
+
+const open_sidebar = () => {
+  overlay.create(LazySubscriptionsSidebarSlideover).open();
+};
 </script>
 
 <template>
   <header
-    class="sticky top-0 z-50 border-b border-[var(--navbar-border)] bg-[var(--navbar-bg)] backdrop-blur-xl transition-all duration-300"
+    class="sticky top-0 z-50 h-[var(--header-height)] border-b border-[var(--navbar-border)] bg-[var(--navbar-bg)] backdrop-blur-xl"
   >
-    <div class="container py-5">
-      <div class="flex items-center">
+    <div class="flex h-full items-center gap-3 px-4 md:px-6">
+      <button
+        class="text-ui-text hover:bg-ui-border/40 -ml-2 flex size-10 items-center justify-center rounded-lg transition-colors"
+        :class="{ 'lg:hidden': !alwaysShowMenu }"
+        aria-label="Ouvrir le menu"
+        @click="open_sidebar"
+      >
+        <Icon name="lucide:menu" class="text-xl" />
+      </button>
+
+      <WatcherLogo class="shrink-0" />
+
+      <form
+        role="search"
+        class="mx-auto hidden w-full max-w-xl sm:block"
+        :class="{
+          'absolute top-1/2 right-16 left-4 !block -translate-y-1/2 sm:static sm:translate-y-0':
+            show_mobile_search,
+        }"
+        @submit.prevent="go_to_results"
+      >
+        <label class="group relative flex items-center">
+          <span class="sr-only">Rechercher une vidéo</span>
+          <Icon
+            name="lucide:search"
+            class="text-ui-text-muted group-focus-within:text-alt pointer-events-none absolute left-3 transition-colors"
+          />
+          <input
+            v-model="search"
+            type="search"
+            placeholder="Rechercher une vidéo"
+            class="h-10 w-full !rounded-full !pr-10 !pl-9 [&::-webkit-search-cancel-button]:hidden"
+            @input="on_input"
+            @keydown.esc="show_mobile_search = false"
+          />
+          <button
+            v-if="search"
+            type="button"
+            class="text-ui-text-muted hover:text-ui-text absolute right-3 flex"
+            aria-label="Effacer la recherche"
+            @click="clear_search"
+          >
+            <Icon name="lucide:x" />
+          </button>
+        </label>
+      </form>
+
+      <div class="ml-auto flex items-center gap-2 sm:ml-0">
         <button
-          class="bg-ui-border/40 text-ui-text mr-4 flex items-center justify-center rounded-lg p-2 lg:hidden"
-          @click="openSidebar"
+          class="text-ui-text hover:bg-ui-border/40 flex size-10 items-center justify-center rounded-lg transition-colors sm:hidden"
+          aria-label="Rechercher"
+          @click="show_mobile_search = !show_mobile_search"
         >
-          <Icon name="lucide:menu" class="text-xl" />
+          <Icon :name="show_mobile_search ? 'lucide:x' : 'lucide:search'" class="text-xl" />
         </button>
 
-        <WatcherLogo class="mr-12" />
-
-        <nav class="hidden items-center gap-4 md:flex">
-          <Link label="Accueil" to="/" :is-active="route.path === '/'" />
-          <Link label="Vidéos" to="/videos" :is-active="route.path.startsWith('/videos')" />
-        </nav>
-
-        <div class="ml-auto flex items-center gap-6">
-          <UserDropdown />
-        </div>
+        <UserDropdown />
       </div>
     </div>
   </header>

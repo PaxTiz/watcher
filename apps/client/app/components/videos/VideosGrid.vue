@@ -42,7 +42,7 @@ const on_toggle_favorite = async () => {
   <VideosGridSkeleton v-if="loading" />
 
   <template v-else-if="videos.items.length > 0">
-    <div class="infinite-grid-[300px] gap-4">
+    <div class="infinite-grid-[300px] gap-x-4 gap-y-8">
       <VideoCard
         v-for="video in videos.items"
         :key="video.id"

@@ -1,34 +1,28 @@
 <script lang="ts" setup>
 const route = useRoute();
 
-const showSidebar = computed(() => {
-  return (
-    route.name &&
-    ([pages.home, pages.videos_index] as Array<string>).includes(route.name.toString())
-  );
-});
+// The video page needs the full width, its sidebar stays reachable from the header menu
+const is_video_page = computed(() => (route.name as string) === pages.videos_single);
 </script>
 
 <template>
-  <AppHeader />
+  <AppHeader :always-show-menu="is_video_page" />
 
-  <main
-    :class="
-      route.name === pages.videos_single
-        ? ['w-full', 'pt-0', 'pb-24', 'md:pb-8']
-        : ['container', 'flex', 'gap-8', 'pt-6', 'pb-24', 'md:pt-8', 'md:pb-8']
-    "
-  >
-    <SubscriptionsSidebar v-if="showSidebar" class="hidden lg:block" />
+  <div class="flex">
+    <AppSidebar
+      v-if="!is_video_page"
+      class="sticky top-[var(--header-height)] hidden h-[calc(100dvh-var(--header-height))] w-64 shrink-0 border-r border-[var(--navbar-border)] lg:flex"
+    />
 
-    <div
-      :class="
-        route.name === pages.videos_single ? ['w-full'] : ['min-w-0', 'flex-1', 'px-2', 'md:px-0']
-      "
+    <main
+      class="min-w-0 flex-1 pb-24 lg:pb-12"
+      :class="is_video_page ? [] : ['px-4', 'pt-6', 'md:px-8', 'md:pt-8']"
     >
-      <NuxtPage />
-    </div>
-  </main>
+      <div :class="is_video_page ? [] : ['mx-auto', 'max-w-[1760px]']">
+        <NuxtPage />
+      </div>
+    </main>
+  </div>
 
   <AppBottomNav />
 </template>

@@ -5,6 +5,7 @@ const props = defineProps<{
   side: "top" | "left" | "right" | "bottom";
   ui?: {
     content?: string;
+    body?: string;
   };
 }>();
 defineSlots<{ default: () => VNode }>();
@@ -38,7 +39,8 @@ onKeyStroke("Escape", () => __CLOSE__?.());
     >
       <div
         ref="overlay"
-        class="bg-background relative flex h-full flex-col justify-between overflow-hidden rounded p-8 shadow shadow-black"
+        class="bg-background relative flex h-full flex-col justify-between overflow-hidden rounded shadow shadow-black"
+        :class="ui?.body ?? 'p-8'"
       >
         <slot />
       </div>
