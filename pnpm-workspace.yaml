@@ -7,29 +7,29 @@ packages:
 catalog:
   husky: ^9.1.7
   oxfmt: ^0.48.0
-  oxlint: ^1.75.0
+  oxlint: ^1.88.0
   oxlint-tsgolint: ^0.22.1
-  "@oxlint/plugins": ^1.75.0
+  "@oxlint/plugins": ^1.88.0
   typescript: ^6.0.3
   date-fns: ^4.4.0
-  iso8601-duration: ^2.1.4
-  zod: ^4.4.3
+  iso8601-duration: ^2.2.0
+  zod: ^4.6.7
   ofetch: ^1.5.1
-  "@iconify-json/lucide": ^1.2.118
-  "@iconify-json/circle-flags": ^1.2.10
-  reka-ui: ^2.10.1
-  nuxt: ^4.5
+  "@iconify-json/lucide": ^1.2.145
+  "@iconify-json/circle-flags": ^1.2.12
+  reka-ui: ^2.11.0
+  nuxt: ^4.6.1
   "@nuxt/fonts": ^0.14.0
   "@nuxt/icon": ^2.3.1
   "@nuxtjs/color-mode": ^4.0.1
-  "@nuxtjs/i18n": ^10.5.0
-  "@nuxtjs/seo": ^5.3.6
-  vue: ^3.5.40
-  vue-router: ^5.2.0
-  vue-tsc: ^3.3.8
-  vue-component-type-helpers: ^3.3.8
-  "@vueuse/core": ^14.3.0
-  "@vueuse/nuxt": ^14.3.0
+  "@nuxtjs/i18n": ^10.6.0
+  "@nuxtjs/seo": ^5.3.16
+  vue: ^3.5.44
+  vue-router: ^5.4.0
+  vue-tsc: ^3.3.13
+  vue-component-type-helpers: ^3.3.13
+  "@vueuse/core": ^14.4.0
+  "@vueuse/nuxt": ^14.4.0
   tailwindcss: ^4.3.3
   "@tailwindcss/vite": ^4.3.3
 
@@ -42,5 +42,6 @@ allowBuilds:
   "@parcel/watcher": true
   core-js: true
   esbuild: true
+  plyr: true
   sharp: true
   vue-demi: true
