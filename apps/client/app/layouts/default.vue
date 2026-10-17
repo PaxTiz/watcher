@@ -53,10 +53,7 @@ watch(isScrolling, (scrolling) => {
 
         <AppTopbar />
 
-        <main
-          class="pb-28 lg:pb-12"
-          :class="is_video_page ? ['md:px-6'] : ['px-4', 'pt-1', 'md:px-8']"
-        >
+        <main class="pb-28 lg:pb-12" :class="is_video_page ? ['md:px-6'] : ['px-4', 'pt-4']">
           <div :class="is_video_page ? [] : ['mx-auto', 'max-w-[1760px]']">
             <NuxtPage />
           </div>

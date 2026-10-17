@@ -41,7 +41,7 @@ const open_menu = () => {
 </script>
 
 <template>
-  <div class="pointer-events-none sticky top-0 z-30 flex items-center gap-2 px-3 py-3 md:px-4">
+  <div class="pointer-events-none sticky top-0 z-30 flex items-center gap-2 p-3 md:p-4">
     <button
       type="button"
       class="liquid-glass text-ui-text pointer-events-auto flex size-10 shrink-0 items-center justify-center rounded-full lg:hidden"

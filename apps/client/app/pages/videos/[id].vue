@@ -59,7 +59,7 @@ useMeta({
 <template>
   <div
     v-if="data"
-    class="video-tinted mx-auto grid max-w-[1800px] gap-6 pb-8 md:px-6 xl:grid-cols-[minmax(0,1fr)_24rem]"
+    class="video-tinted mx-auto grid max-w-[1800px] gap-6 pb-8 xl:grid-cols-[minmax(0,1fr)_24rem]"
     :style="video_tones_style(data.palette)"
   >
     <div class="min-w-0">

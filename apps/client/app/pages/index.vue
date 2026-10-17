@@ -16,9 +16,11 @@ useMeta({
 
 <template>
   <div class="space-y-10 md:space-y-12">
-    <DashboardHeader />
+    <div>
+      <DashboardHeader class="mb-6" />
 
-    <DashboardSectionVideosInProgress />
+      <DashboardSectionVideosInProgress />
+    </div>
 
     <DashboardSectionVideosFavorites />
 
