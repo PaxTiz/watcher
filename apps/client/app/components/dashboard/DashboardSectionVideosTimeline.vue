@@ -45,7 +45,7 @@ const groupedVideos = computed(() => {
 </script>
 
 <template>
-  <VideosGridSkeleton v-if="status === 'pending'" />
+  <VideosGridSkeleton v-if="status === 'pending' && videos.length === 0" />
 
   <section v-else-if="groupedVideos.length > 0" class="space-y-10 md:space-y-12">
     <DashboardSectionVideosTimelineGroup

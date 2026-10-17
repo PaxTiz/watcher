@@ -169,12 +169,18 @@ export default class VideosService extends AbstractService {
       )
       .$if(!params.subscription_id, (qb) => qb.where("user_subscriptions.is_hidden", "=", false))
       .where("user_subscriptions.user_id", "=", user.id)
-      .offset((params.page - 1) * params.per_page)
+      .$if(!!params.before, (qb) =>
+        qb.where(
+          sql<boolean>`(videos.created_at, videos.id) < (SELECT created_at, id FROM videos WHERE id = ${params.before!})`,
+        ),
+      )
+      .offset(params.before ? 0 : (params.page - 1) * params.per_page)
       .limit(params.per_page)
       .$if(params.in_progress === true, (qb) =>
         qb.orderBy("users_videos_progression.updated_at", "desc"),
       )
       .orderBy("videos.created_at", "desc")
+      .orderBy("videos.id", "desc")
       .select((qb) => [
         "videos.id as video_id",
         "videos.service as video_service",

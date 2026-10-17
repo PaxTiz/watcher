@@ -9,7 +9,7 @@ export const useInfiniteVideos = (
     loadMoreTrigger: MaybeRefOrGetter<HTMLElement | null>;
   },
 ) => {
-  const page = ref(1);
+  const before = ref<string | undefined>();
   const items = ref<VideoResource[]>([]);
   const hasMore = ref(true);
   const total = ref(0);
@@ -18,8 +18,9 @@ export const useInfiniteVideos = (
     const f = unref(filters);
     return {
       ...f,
-      page: page.value,
+      page: 1,
       per_page: f?.per_page ?? 30,
+      before: before.value,
     };
   });
 
@@ -32,14 +33,14 @@ export const useInfiniteVideos = (
   const syncItems = (newData: Paginated<VideoResource>) => {
     if (!newData) return;
 
-    if (page.value === 1) {
+    if (!before.value) {
       items.value = newData.items;
     } else {
       items.value.push(...newData.items);
     }
 
     total.value = newData.total;
-    hasMore.value = items.value.length < newData.total;
+    hasMore.value = newData.items.length === query.value.per_page;
   };
 
   const loadMore = async () => {
@@ -47,7 +48,7 @@ export const useInfiniteVideos = (
       return;
     }
 
-    page.value++;
+    before.value = items.value.at(-1)?.id;
     await refresh();
   };
 
@@ -75,7 +76,7 @@ export const useInfiniteVideos = (
     watchDeep(
       () => unref(filters),
       async () => {
-        page.value = 1;
+        before.value = undefined;
         await refresh();
       },
     );
