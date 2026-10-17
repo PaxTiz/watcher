@@ -26,6 +26,8 @@ const up_next = computed(() => {
 // Already watched videos are not worth playing automatically
 const next_video = computed(() => up_next.value.find((v) => v.viewing_progression <= 0.9));
 
+usePageAmbient(() => data.value);
+
 const autoplay = useLocalStorage("watcher:autoplay", true);
 const show_countdown = ref(false);
 
@@ -57,23 +59,37 @@ useMeta({
 <template>
   <div
     v-if="data"
-    class="mx-auto grid max-w-[1800px] gap-6 pb-8 md:px-6 md:pt-6 xl:grid-cols-[minmax(0,1fr)_24rem]"
+    class="video-tinted mx-auto grid max-w-[1800px] gap-6 pb-8 md:px-6 xl:grid-cols-[minmax(0,1fr)_24rem]"
+    :style="video_tones_style(data.color)"
   >
     <div class="min-w-0">
-      <div class="relative overflow-hidden bg-black md:rounded-xl">
-        <VideoPlayer
-          ref="player"
-          :video="data"
-          :autoplay="route.query.autoplay === '1'"
-          @ended="on_ended"
+      <div class="relative">
+        <!-- Ambilight: the video's own colours spill around the player -->
+        <NuxtImg
+          class="pointer-events-none absolute -inset-x-[3%] -inset-y-[5%] hidden h-[110%] w-[106%] max-w-none rounded-[40px] object-cover opacity-45 blur-[70px] saturate-150 md:block"
+          format="webp"
+          width="320"
+          :src="data.thumbnail"
+          alt=""
         />
 
-        <VideoNextCountdown
-          v-if="show_countdown && next_video"
-          :video="next_video"
-          @play="play_next"
-          @cancel="show_countdown = false"
-        />
+        <div
+          class="relative overflow-hidden bg-black shadow-[0_0_0_1px_rgb(255_255_255/0.08)] md:rounded-2xl"
+        >
+          <VideoPlayer
+            ref="player"
+            :video="data"
+            :autoplay="route.query.autoplay === '1'"
+            @ended="on_ended"
+          />
+
+          <VideoNextCountdown
+            v-if="show_countdown && next_video"
+            :video="next_video"
+            @play="play_next"
+            @cancel="show_countdown = false"
+          />
+        </div>
       </div>
 
       <VideoMeta class="mt-4 px-4 md:px-0" :video="data" @seek="player?.seek($event)" />
@@ -83,6 +99,7 @@ useMeta({
       v-model:autoplay="autoplay"
       class="px-4 md:px-0"
       :videos="up_next"
+      :next-id="autoplay ? next_video?.id : undefined"
       :loading="channel_videos_status === 'pending'"
     />
   </div>

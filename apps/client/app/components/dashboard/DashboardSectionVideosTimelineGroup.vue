@@ -34,7 +34,7 @@ const on_toggle_favorite = async () => {
 
 <template>
   <section class="space-y-4">
-    <h2 class="text-ui-text text-xl font-bold">
+    <h2 class="font-display text-ui-text text-lg font-semibold">
       {{ formatted_label }}
     </h2>
 

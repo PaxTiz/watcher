@@ -80,6 +80,8 @@ const items = computed<Array<DropdownItem>>(() => [
   <WatcherDropdownButton
     class="[&_span]:hidden [&_span]:md:block"
     icon="lucide:user"
+    color="ghost"
+    :ui="{ button: { root: 'rounded-full' } }"
     :label="user?.name"
     :items="items"
     @select="onSelect"

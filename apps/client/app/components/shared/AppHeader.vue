@@ -11,6 +11,9 @@ const is_videos_page = computed(() => (route.name as string) === pages.videos_in
 const search = ref(is_videos_page.value ? ((route.query.query as string) ?? "") : "");
 const show_mobile_search = ref(false);
 
+const capsule = useTemplateRef("capsule");
+useLiquidGlass(capsule);
+
 watch(
   () => route.query.query,
   (query) => {
@@ -53,12 +56,13 @@ const open_sidebar = () => {
 </script>
 
 <template>
-  <header
-    class="sticky top-0 z-50 h-[var(--header-height)] border-b border-[var(--navbar-border)] bg-[var(--navbar-bg)] backdrop-blur-xl"
-  >
-    <div class="flex h-full items-center gap-3 px-4 md:px-6">
+  <div class="sticky top-0 z-50 px-3 pt-3 md:px-6">
+    <header
+      ref="capsule"
+      class="liquid-glass relative flex h-14 items-center gap-2 rounded-full px-2"
+    >
       <button
-        class="text-ui-text hover:bg-ui-border/40 -ml-2 flex size-10 items-center justify-center rounded-lg transition-colors"
+        class="text-ui-text hover:bg-ui-text/10 flex size-10 shrink-0 items-center justify-center rounded-full transition-colors"
         :class="{ 'lg:hidden': !alwaysShowMenu }"
         aria-label="Ouvrir le menu"
         @click="open_sidebar"
@@ -66,13 +70,16 @@ const open_sidebar = () => {
         <Icon name="lucide:menu" class="text-xl" />
       </button>
 
-      <WatcherLogo class="shrink-0" />
+      <WatcherLogo
+        class="[&_span]:font-display shrink-0 pr-2 [&_span]:text-base"
+        :class="{ 'lg:hidden': !alwaysShowMenu }"
+      />
 
       <form
         role="search"
         class="mx-auto hidden w-full max-w-xl sm:block"
         :class="{
-          'absolute top-1/2 right-16 left-4 !block -translate-y-1/2 sm:static sm:translate-y-0':
+          'absolute inset-x-2 top-1/2 z-10 !block -translate-y-1/2 sm:static sm:translate-y-0':
             show_mobile_search,
         }"
         @submit.prevent="go_to_results"
@@ -81,39 +88,39 @@ const open_sidebar = () => {
           <span class="sr-only">Rechercher une vidéo</span>
           <Icon
             name="lucide:search"
-            class="text-ui-text-muted group-focus-within:text-alt pointer-events-none absolute left-3 transition-colors"
+            class="text-ui-text-muted group-focus-within:text-alt pointer-events-none absolute left-3.5 transition-colors"
           />
           <input
             v-model="search"
             type="search"
             placeholder="Rechercher une vidéo"
-            class="h-10 w-full !rounded-full !pr-10 !pl-9 [&::-webkit-search-cancel-button]:hidden"
+            class="h-10 w-full !rounded-full !border-transparent !bg-[var(--glass-input)] !pr-10 !pl-10 shadow-[inset_0_1px_2px_rgb(0_0_0/0.2)] [&::-webkit-search-cancel-button]:hidden"
             @input="on_input"
             @keydown.esc="show_mobile_search = false"
           />
           <button
-            v-if="search"
+            v-if="search || show_mobile_search"
             type="button"
             class="text-ui-text-muted hover:text-ui-text absolute right-3 flex"
-            aria-label="Effacer la recherche"
-            @click="clear_search"
+            :aria-label="search ? 'Effacer la recherche' : 'Fermer la recherche'"
+            @click="search ? clear_search() : (show_mobile_search = false)"
           >
             <Icon name="lucide:x" />
           </button>
         </label>
       </form>
 
-      <div class="ml-auto flex items-center gap-2 sm:ml-0">
+      <div class="ml-auto flex items-center gap-1 sm:ml-0">
         <button
-          class="text-ui-text hover:bg-ui-border/40 flex size-10 items-center justify-center rounded-lg transition-colors sm:hidden"
+          class="text-ui-text hover:bg-ui-text/10 flex size-10 items-center justify-center rounded-full transition-colors sm:hidden"
           aria-label="Rechercher"
-          @click="show_mobile_search = !show_mobile_search"
+          @click="show_mobile_search = true"
         >
-          <Icon :name="show_mobile_search ? 'lucide:x' : 'lucide:search'" class="text-xl" />
+          <Icon name="lucide:search" class="text-xl" />
         </button>
 
         <UserDropdown />
       </div>
-    </div>
-  </header>
+    </header>
+  </div>
 </template>

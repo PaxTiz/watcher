@@ -41,16 +41,16 @@ const description = computed(() => {
     const content = p
       .replace(
         /(https?:\/\/[^\s<]+)/g,
-        '<a href="$1" target="_blank" class="text-alt hover:underline" rel="noopener noreferrer">$1</a>',
+        '<a href="$1" target="_blank" class="text-[rgb(var(--c-ink))] hover:underline dark:text-[rgb(var(--c-light))]" rel="noopener noreferrer">$1</a>',
       )
       .replace(
         /(^|[\s(])(\d{1,2}:\d{2}(?::\d{2})?)\b/g,
         (_, before: string, time: string) =>
-          `${before}<button type="button" class="text-alt hover:underline" data-time="${to_seconds(time)}">${time}</button>`,
+          `${before}<button type="button" class="text-[rgb(var(--c-ink))] hover:underline dark:text-[rgb(var(--c-light))]" data-time="${to_seconds(time)}">${time}</button>`,
       )
       .replace(
         /(^|\s)#([\p{L}\p{N}_]+)/gu,
-        '$1<a href="https://www.youtube.com/hashtag/$2" class="text-alt hover:underline" target="_blank" rel="noopener noreferrer">#$2</a>',
+        '$1<a href="https://www.youtube.com/hashtag/$2" class="text-[rgb(var(--c-ink))] hover:underline dark:text-[rgb(var(--c-light))]" target="_blank" rel="noopener noreferrer">#$2</a>',
       )
       .replace(/\n/g, "<br>");
 
@@ -84,7 +84,9 @@ const toggle_favorite = async () => {
 
 <template>
   <div>
-    <h1 class="text-ui-text text-xl leading-tight font-bold md:text-2xl">{{ video.title }}</h1>
+    <h1 class="font-display text-ui-text text-lg leading-snug font-semibold md:text-xl">
+      {{ video.title }}
+    </h1>
 
     <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
       <NuxtLink
@@ -100,7 +102,9 @@ const toggle_favorite = async () => {
           alt=""
         />
         <div class="min-w-0">
-          <p class="text-ui-text group-hover:text-alt truncate font-semibold transition-colors">
+          <p
+            class="text-ui-text truncate font-semibold transition-colors group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
+          >
             {{ video.author.name }}
           </p>
           <p class="text-ui-text-muted flex items-center gap-1 text-sm">
@@ -130,8 +134,11 @@ const toggle_favorite = async () => {
     </div>
 
     <div
-      class="bg-ui-border/30 mt-4 rounded-xl p-4 text-sm"
-      :class="{ 'hover:bg-ui-border/50 cursor-pointer transition-colors': !is_expanded }"
+      class="bg-ui-bg mt-4 rounded-2xl p-4 text-sm shadow-[0_0_0_1px_var(--ui-border)] dark:bg-[rgb(var(--c-dark)/0.3)] dark:shadow-[inset_0_0_0_1px_rgb(var(--c-light)/0.1)]"
+      :class="{
+        'hover:bg-ui-border/40 cursor-pointer transition-colors dark:hover:bg-[rgb(var(--c-dark)/0.5)]':
+          !is_expanded,
+      }"
       @click="on_description_click"
     >
       <p class="text-ui-text font-semibold">

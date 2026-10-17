@@ -27,8 +27,8 @@ const scroll_by_page = (direction: 1 | -1) => {
 <template>
   <section>
     <div class="mb-4 flex items-center gap-3">
-      <h2 class="text-ui-text flex items-center gap-2 text-xl font-bold">
-        <Icon :name="icon" class="text-alt" />
+      <h2 class="font-display text-ui-text flex items-center gap-2.5 text-lg font-semibold">
+        <Icon :name="icon" class="text-ui-text-muted text-base" />
         {{ title }}
       </h2>
 

@@ -113,6 +113,9 @@ const dropdown_items = computed(() => {
 
 const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscription_favorite } =
   useVideo(video);
+
+const tones_style = computed(() => video_tones_style(video.color));
+const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() < 24 * 3600 * 1000);
 </script>
 
 <template>
@@ -136,16 +139,32 @@ const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscrip
     </p>
   </div>
 
-  <article v-else class="group">
+  <article
+    v-else
+    class="group video-tinted transition-transform duration-300 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+    :style="tones_style"
+  >
     <NuxtLink
       :to="`/videos/${video.id}`"
-      class="focus-visible:outline-alt block rounded-xl"
+      class="focus-visible:outline-alt relative block rounded-xl"
       tabindex="-1"
       aria-hidden="true"
     >
-      <div class="bg-ui-border/40 relative aspect-video overflow-hidden rounded-xl">
+      <!-- The video's own light, revealed on hover -->
+      <NuxtImg
+        class="pointer-events-none absolute top-[14%] left-[8%] h-[92%] w-[84%] rounded-xl object-cover opacity-0 blur-[28px] saturate-150 transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-50 motion-reduce:transition-none"
+        loading="lazy"
+        format="webp"
+        width="160"
+        :src="video.thumbnail"
+        alt=""
+      />
+
+      <div
+        class="bg-ui-border/40 relative aspect-video overflow-hidden rounded-xl shadow-[0_0_0_1px_rgb(255_255_255/0.06)]"
+      >
         <NuxtImg
-          class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          class="size-full object-cover"
           :class="{ 'opacity-60': is_watched }"
           loading="lazy"
           format="avif,webp"
@@ -157,21 +176,27 @@ const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscrip
 
         <span
           v-if="is_watched"
-          class="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-semibold text-white"
+          class="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-xs font-semibold text-white backdrop-blur-md"
         >
           <Icon name="lucide:check" /> Vue
         </span>
+        <span
+          v-else-if="is_new"
+          class="bg-alt absolute top-2 left-2 rounded-md px-1.5 py-0.5 text-[11px] font-bold tracking-wide text-black uppercase"
+        >
+          Nouveau
+        </span>
 
         <span
-          class="absolute right-2 bottom-2 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-semibold text-white tabular-nums"
+          class="absolute right-2 bottom-2 rounded-lg bg-[rgb(var(--c-dark)/0.45)] px-1.5 py-0.5 text-xs font-semibold text-white tabular-nums shadow-[inset_1px_1px_0_-0.5px_rgb(255_255_255/0.5),inset_-1px_-1px_0_-0.5px_rgb(255_255_255/0.15)] backdrop-blur-md backdrop-saturate-150"
           :class="{ 'bottom-3': viewing_progression > 0 }"
         >
           {{ numbers.displaySeconds(video.duration) }}
         </span>
 
-        <div v-if="viewing_progression > 0" class="absolute inset-x-0 bottom-0 h-1 bg-white/30">
+        <div v-if="viewing_progression > 0" class="absolute inset-x-0 bottom-0 h-1 bg-white/25">
           <div
-            class="bg-alt h-full"
+            class="h-full bg-[rgb(var(--c-vivid))]"
             :style="{ width: `${Math.min(viewing_progression, 1) * 100}%` }"
           />
         </div>
@@ -194,7 +219,10 @@ const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscrip
         />
 
         <div class="min-w-0">
-          <h2 class="text-ui-text line-clamp-2 leading-snug font-semibold" :title="video.title">
+          <h2
+            class="text-ui-text line-clamp-2 leading-snug font-semibold transition-colors duration-300 group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
+            :title="video.title"
+          >
             {{ video.title }}
           </h2>
 

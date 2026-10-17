@@ -106,8 +106,19 @@ watch(
 
 useVideoProgression(video, plyr_instance);
 
+const controls = shallowRef<HTMLElement | null>(null);
+useLiquidGlass(controls);
+
 watch(plyr_instance, (instance) => {
   instance?.on("ended", () => emit("ended"));
+
+  // Plyr builds its own controls: they become a floating glass capsule
+  const element = (instance as { elements?: { controls?: HTMLElement } } | undefined)?.elements
+    ?.controls;
+  if (element) {
+    element.classList.add("liquid-glass");
+    controls.value = element;
+  }
 });
 
 defineExpose({
@@ -143,6 +154,24 @@ defineExpose({
 <style scoped>
 .size-full :deep(.plyr) {
   height: 100%;
-  --plyr-color-main: var(--color-alt);
+  --plyr-color-main: rgb(var(--c-vivid, 254 100 11));
+  --plyr-video-control-background-hover: rgb(255 255 255 / 0.16);
+  --plyr-range-thumb-background: #fff;
+}
+
+.size-full :deep(.plyr--video .plyr__controls) {
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background-image: none;
+  color: #fff;
+}
+
+.size-full :deep(.plyr__control--overlaid) {
+  background: rgb(var(--c-dark, 16 18 27) / 0.55);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
 }
 </style>

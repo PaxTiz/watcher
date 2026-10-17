@@ -36,7 +36,7 @@ export default defineNuxtConfig({
   modules: ["@nuxt/image", "@nuxtjs/color-mode", "@vueuse/nuxt", "nuxt-auth-utils", "@watcher/ui"],
 
   colorMode: {
-    preference: "system",
+    preference: "dark",
     fallback: "dark",
     classSuffix: "",
   },

@@ -28,6 +28,10 @@ const nav_items = computed<
 
 <template>
   <aside class="flex flex-col">
+    <div class="px-6 pt-6 pb-3">
+      <WatcherLogo class="[&_span]:font-display [&_span]:text-base" />
+    </div>
+
     <nav class="space-y-0.5 p-3" aria-label="Navigation principale">
       <NuxtLink
         v-for="item in nav_items"
@@ -37,7 +41,7 @@ const nav_items = computed<
         class="flex items-center gap-3 rounded-lg px-3 py-2 text-[0.95rem] transition-colors"
         :class="
           item.active
-            ? 'bg-alt/10 text-alt font-semibold'
+            ? 'text-ui-text [&_svg]:text-alt bg-ui-border/70 font-semibold dark:bg-[rgb(var(--tint)/0.16)]'
             : 'text-ui-text-muted hover:bg-ui-border/40 hover:text-ui-text'
         "
       >
