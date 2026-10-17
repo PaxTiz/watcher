@@ -3,9 +3,9 @@ import { join } from "node:path";
 
 import { createResolver, defineNuxtModule } from "nuxt/kit";
 
-import { buildClient } from "./builders/build_client";
-import { buildIndex } from "./builders/build_index";
-import { buildServer } from "./builders/build_server";
+import { buildClient } from "./builders/build_client.ts";
+import { buildIndex } from "./builders/build_index.ts";
+import { buildServer } from "./builders/build_server.ts";
 
 export default defineNuxtModule({
   meta: {
