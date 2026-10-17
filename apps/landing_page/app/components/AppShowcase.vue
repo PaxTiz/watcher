@@ -47,7 +47,7 @@ const latest = PREVIEW_VIDEOS.slice(0, 4);
         :key="channel"
         type="button"
         tabindex="-1"
-        class="font-content flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-1 text-left text-[12.5px] text-[#d6d6da] transition-colors hover:bg-white/[0.06]"
+        class="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-1 text-left text-[12.5px] text-[#d6d6da] transition-colors hover:bg-white/[0.06]"
         :class="{ 'bg-white/10 text-white': selected === index }"
         @click="selected = index"
       >
@@ -83,7 +83,7 @@ const latest = PREVIEW_VIDEOS.slice(0, 4);
           <p class="text-ui-text-muted text-[10.5px] font-semibold tracking-[0.1em] uppercase">
             {{ t("showcase.resume") }}
           </p>
-          <p class="font-content text-ui-text mt-1.5 text-[17px] leading-tight font-medium">
+          <p class="text-ui-text mt-1.5 text-[17px] leading-tight font-medium">
             {{ t(`videos.${resumed.key}`) }}
           </p>
           <p class="text-ui-text-muted mt-2.5 flex items-center gap-2 text-[12.5px]">
@@ -106,9 +106,7 @@ const latest = PREVIEW_VIDEOS.slice(0, 4);
       <div class="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
         <div v-for="video in latest" :key="video.key">
           <PreviewThumb :video="video" />
-          <p
-            class="font-content text-ui-text mt-2 line-clamp-2 text-[12.5px] leading-snug font-medium"
-          >
+          <p class="text-ui-text mt-2 line-clamp-2 text-[12.5px] leading-snug font-medium">
             {{ t(`videos.${video.key}`) }}
           </p>
           <p class="text-ui-text-muted mt-0.5 flex items-center gap-1.5 text-[11.5px]">

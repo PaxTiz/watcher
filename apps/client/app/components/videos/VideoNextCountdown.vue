@@ -40,7 +40,7 @@ const cancel = () => {
           :src="video.thumbnails.small"
           alt=""
         />
-        <div class="font-content min-w-0">
+        <div class="min-w-0">
           <p class="line-clamp-2 leading-snug font-semibold">{{ video.title }}</p>
           <p class="mt-1 truncate text-sm text-white/70">{{ video.author.name }}</p>
         </div>

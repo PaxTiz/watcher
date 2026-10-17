@@ -50,7 +50,7 @@ const upNext = [PREVIEW_VIDEOS[1]!, PREVIEW_VIDEOS[5]!, PREVIEW_VIDEOS[2]!];
             <p v-if="index === 0" class="text-alt mb-0.5 text-[10px] tracking-[0.08em] uppercase">
               {{ t("player.next") }}
             </p>
-            <p class="font-content text-[13px] leading-snug font-medium">
+            <p class="text-[13px] leading-snug font-medium">
               {{ t(`videos.${video.key}`) }}
             </p>
             <p class="mt-0.5 text-[11.5px] text-[#8b8b92]">{{ video.channel }}</p>

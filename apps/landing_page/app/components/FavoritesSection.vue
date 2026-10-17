@@ -27,7 +27,7 @@ const others: Array<{ name: string; state?: "new" | "hidden" }> = [
         <p
           v-for="channel in favorites"
           :key="channel"
-          class="font-content text-ui-text flex items-center gap-3 rounded-[10px] px-2.5 py-2.5 text-[14.5px]"
+          class="text-ui-text flex items-center gap-3 rounded-[10px] px-2.5 py-2.5 text-[14.5px]"
         >
           <span
             class="bg-ui-border text-ui-text-muted grid size-[26px] place-items-center rounded-full font-sans text-[11px] font-semibold"
@@ -46,7 +46,7 @@ const others: Array<{ name: string; state?: "new" | "hidden" }> = [
         <p
           v-for="channel in others"
           :key="channel.name"
-          class="font-content flex items-center gap-3 rounded-[10px] px-2.5 py-2.5 text-[14.5px]"
+          class="flex items-center gap-3 rounded-[10px] px-2.5 py-2.5 text-[14.5px]"
           :class="channel.state === 'hidden' ? 'text-ui-text-muted' : 'text-ui-text'"
         >
           <span

@@ -17,9 +17,8 @@
 }
 
 @theme {
-  --font-sans: "Geist", "Segoe UI", system-ui, sans-serif;
-  --font-content: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
-  --font-display: "Unbounded", "Instrument Sans", system-ui, sans-serif;
+  --font-sans: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Unbounded", "Figtree", system-ui, sans-serif;
 
   --spacing: 0.25rem;
 

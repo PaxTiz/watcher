@@ -28,7 +28,7 @@ const { t } = useI18n();
           }}</time>
           <PreviewThumb :video="video" />
           <div class="min-w-0">
-            <p class="font-content text-ui-text text-[15px] leading-snug font-medium">
+            <p class="text-ui-text text-[15px] leading-snug font-medium">
               {{ t(`videos.${video.key}`) }}
             </p>
             <p class="text-ui-text-muted mt-1 flex items-center gap-1.5 text-[13px]">

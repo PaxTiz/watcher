@@ -102,7 +102,7 @@ const toggle_favorite = async () => {
           :src="video.author.channel.logo"
           alt=""
         />
-        <div class="font-content min-w-0">
+        <div class="min-w-0">
           <p
             class="text-ui-text truncate font-medium transition-colors group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
           >
@@ -149,7 +149,7 @@ const toggle_favorite = async () => {
 
       <div
         v-if="description"
-        class="font-content text-ui-text mt-2 leading-relaxed break-words [&>p+p]:mt-3"
+        class="text-ui-text mt-2 leading-relaxed break-words [&>p+p]:mt-3"
         :class="{
           'max-h-16 overflow-hidden [mask-image:linear-gradient(to_bottom,black_40%,transparent)]':
             !is_expanded,

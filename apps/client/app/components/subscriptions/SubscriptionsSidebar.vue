@@ -111,7 +111,7 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
                 alt=""
               />
 
-              <span class="font-content min-w-0 flex-1 truncate">{{ sub.name }}</span>
+              <span class="min-w-0 flex-1 truncate">{{ sub.name }}</span>
 
               <Icon
                 v-if="sub.is_hidden"

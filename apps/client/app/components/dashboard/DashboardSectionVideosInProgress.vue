@@ -76,7 +76,7 @@ const remaining_minutes = computed(() => {
             :src="featured.author.channel.logo"
             alt=""
           />
-          <span class="font-content">{{ featured.author.name }}</span>
+          <span>{{ featured.author.name }}</span>
         </NuxtLink>
 
         <div class="mt-5 flex flex-wrap items-center gap-4">
