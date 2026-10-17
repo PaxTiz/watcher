@@ -9,7 +9,7 @@ export type Sync = {
 
   Video: {
     status: "created" | "updated" | "deleted";
-    video: Omit<VideoTable, "id">;
+    video: Omit<VideoTable, "id" | "color">;
   };
   VideosList: Array<Sync["Video"]>;
 };

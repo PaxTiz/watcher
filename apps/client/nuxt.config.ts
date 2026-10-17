@@ -76,6 +76,12 @@ export default defineNuxtConfig({
     },
   },
 
+  nitro: {
+    experimental: {
+      tasks: true,
+    },
+  },
+
   runtimeConfig: {
     public: {
       environment: "local", // 'local' | 'production'

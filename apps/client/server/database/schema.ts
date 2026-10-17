@@ -70,6 +70,8 @@ export type VideoTable = {
 
   thumbnail: string;
 
+  color: string | null;
+
   created_at: string;
 
   last_synced_at: string;

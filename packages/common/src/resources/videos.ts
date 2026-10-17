@@ -20,5 +20,8 @@ export type VideoResource = {
 
   thumbnail: string;
 
+  // Dominant colour of the thumbnail, as "#rrggbb", null until computed
+  color: string | null;
+
   created_at: string;
 };

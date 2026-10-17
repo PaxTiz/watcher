@@ -35,6 +35,7 @@ export default class VideosService extends AbstractService {
         "videos.duration as video_duration",
         "videos.url as video_url",
         "videos.thumbnail as video_thumbnail",
+        "videos.color as video_color",
         "videos.created_at as video_created_at",
         "subscriptions.id as subscription_id",
         "subscriptions.name as subscription_name",
@@ -64,6 +65,7 @@ export default class VideosService extends AbstractService {
       viewing_progression: video.viewing_progression,
       url: video.video_url,
       thumbnail: video.video_thumbnail,
+      color: video.video_color,
       created_at: video.video_created_at,
       author: {
         id: video.subscription_id,
@@ -181,6 +183,7 @@ export default class VideosService extends AbstractService {
         "videos.duration as video_duration",
         "videos.url as video_url",
         "videos.thumbnail as video_thumbnail",
+        "videos.color as video_color",
         "videos.created_at as video_created_at",
         "subscriptions.id as subscription_id",
         "subscriptions.name as subscription_name",
@@ -220,6 +223,7 @@ export default class VideosService extends AbstractService {
         viewing_progression: item.video_viewing_progression,
         url: item.video_url,
         thumbnail: item.video_thumbnail,
+        color: item.video_color,
         created_at: item.video_created_at,
         author: {
           id: item.subscription_id,
