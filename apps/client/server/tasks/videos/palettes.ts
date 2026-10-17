@@ -3,11 +3,11 @@ import { async_pool } from "#shared/utils/random";
 
 const BATCH_SIZE = 200;
 
-// Fills the colour of videos synced before colours existed: `pnpm nuxi task run videos:colors`
+// Fills the palette of videos synced before palettes existed: GET /_nitro/tasks/videos:palettes in dev
 export default defineTask({
   meta: {
-    name: "videos:colors",
-    description: "Compute the thumbnail colour of videos that don't have one yet",
+    name: "videos:palettes",
+    description: "Compute the thumbnail palette of videos that don't have one yet",
   },
 
   async run() {
@@ -21,7 +21,7 @@ export default defineTask({
       const videos = await database
         .selectFrom("videos")
         .select(["id", "thumbnail"])
-        .where("color", "is", null)
+        .where("palette", "is", null)
         .$if(last_id !== null, (qb) => qb.where("id", ">", last_id!))
         .orderBy("id")
         .limit(BATCH_SIZE)
@@ -32,13 +32,17 @@ export default defineTask({
       }
 
       await async_pool(videos, 10, async (video) => {
-        const color = await extract_image_color(video.thumbnail);
-        if (!color) {
+        const palette = await extract_image_palette(video.thumbnail);
+        if (!palette) {
           failed++;
           return;
         }
 
-        await database.updateTable("videos").set({ color }).where("id", "=", video.id).execute();
+        await database
+          .updateTable("videos")
+          .set({ palette: JSON.stringify(palette) })
+          .where("id", "=", video.id)
+          .execute();
         updated++;
       });
 

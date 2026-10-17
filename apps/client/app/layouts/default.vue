@@ -1,30 +1,70 @@
 <script lang="ts" setup>
 const route = useRoute();
 
-// The video page needs the full width, its sidebar stays reachable from the header menu
+// The video page needs the width: it shows the rail unless unfolded for the visit
 const is_video_page = computed(() => (route.name as string) === pages.videos_single);
+const collapsed_preference = useCookie<boolean>("watcher-sidebar-collapsed", {
+  default: () => false,
+  maxAge: 3600 * 24 * 365,
+});
+const unfolded_on_video_page = ref(false);
+
+const collapsed = computed(() =>
+  is_video_page.value ? !unfolded_on_video_page.value : collapsed_preference.value,
+);
+
+const toggle_sidebar = () => {
+  if (is_video_page.value) {
+    unfolded_on_video_page.value = !unfolded_on_video_page.value;
+  } else {
+    collapsed_preference.value = !collapsed_preference.value;
+  }
+};
+
+watch(is_video_page, () => {
+  unfolded_on_video_page.value = false;
+});
+
+const scroller = useTemplateRef("scroller");
+const { container } = useAppScroll();
+onMounted(() => {
+  container.value = scroller.value;
+});
+
+// The glass lens is recomputed on every frame while content moves under it: pause it during scroll
+const { isScrolling } = useScroll(scroller, { idle: 150 });
+watch(isScrolling, (scrolling) => {
+  document.documentElement.toggleAttribute("data-scrolling", scrolling);
+});
 </script>
 
 <template>
-  <AppAmbient />
-
-  <div class="flex min-h-dvh">
+  <!-- Frame: the sidebar sits on it, the content lives in an inset panel -->
+  <div class="flex h-dvh bg-[var(--frame)] lg:py-2 lg:pr-2">
     <AppSidebar
-      v-if="!is_video_page"
-      class="sticky top-0 hidden h-dvh w-64 shrink-0 border-r border-[var(--navbar-border)] bg-[var(--background)]/50 lg:flex"
+      class="dark hidden shrink-0 lg:flex"
+      :collapsed="collapsed"
+      @toggle="toggle_sidebar"
     />
 
-    <div class="min-w-0 flex-1">
-      <AppHeader :always-show-menu="is_video_page" />
+    <div
+      class="relative isolate min-w-0 flex-1 overflow-hidden bg-[var(--background)] lg:rounded-2xl lg:shadow-[0_0_0_1px_var(--panel-edge)]"
+    >
+      <div ref="scroller" class="relative isolate h-full overflow-y-auto overscroll-contain">
+        <!-- Inside the scrolled content, so the light scrolls away with the top of the page -->
+        <AppAmbient />
 
-      <main
-        class="pb-24 lg:pb-12"
-        :class="is_video_page ? ['pt-4', 'md:pt-6'] : ['px-4', 'pt-6', 'md:px-8', 'md:pt-8']"
-      >
-        <div :class="is_video_page ? [] : ['mx-auto', 'max-w-[1760px]']">
-          <NuxtPage />
-        </div>
-      </main>
+        <AppTopbar />
+
+        <main
+          class="pb-28 lg:pb-12"
+          :class="is_video_page ? ['md:px-6'] : ['px-4', 'pt-1', 'md:px-8']"
+        >
+          <div :class="is_video_page ? [] : ['mx-auto', 'max-w-[1760px]']">
+            <NuxtPage />
+          </div>
+        </main>
+      </div>
     </div>
   </div>
 

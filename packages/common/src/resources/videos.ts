@@ -1,3 +1,4 @@
+import type { VideoPalette } from "../types/palette";
 import type { SubscriptionType } from "../types/subscriptions";
 import type { SubscriptionResource } from "./subscriptions";
 
@@ -20,8 +21,8 @@ export type VideoResource = {
 
   thumbnail: string;
 
-  // Dominant colour of the thumbnail, as "#rrggbb", null until computed
-  color: string | null;
+  // Colours of the thumbnail, null until computed
+  palette: VideoPalette | null;
 
   created_at: string;
 };

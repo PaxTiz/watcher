@@ -27,7 +27,7 @@ const scroll_by_page = (direction: 1 | -1) => {
 <template>
   <section>
     <div class="mb-4 flex items-center gap-3">
-      <h2 class="font-display text-ui-text flex items-center gap-2.5 text-lg font-semibold">
+      <h2 class="font-display text-ui-text flex items-center gap-2.5 text-base font-medium">
         <Icon :name="icon" class="text-ui-text-muted text-base" />
         {{ title }}
       </h2>
@@ -35,7 +35,7 @@ const scroll_by_page = (direction: 1 | -1) => {
       <NuxtLink
         v-if="to"
         :to="to"
-        class="text-ui-text-muted hover:text-alt ml-1 text-sm font-semibold transition-colors"
+        class="text-ui-text-muted hover:text-alt ml-1 text-sm font-medium transition-colors"
       >
         Tout voir
       </NuxtLink>

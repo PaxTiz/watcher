@@ -96,7 +96,7 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
               class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors"
               :class="[
                 is_active(sub)
-                  ? 'bg-ui-border/60 text-ui-text font-semibold'
+                  ? 'text-ui-text bg-white/10 font-medium'
                   : 'text-ui-text/85 hover:bg-ui-border/40 hover:text-ui-text',
                 { 'opacity-50 grayscale': sub.is_hidden },
               ]"

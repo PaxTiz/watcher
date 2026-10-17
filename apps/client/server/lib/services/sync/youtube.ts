@@ -259,11 +259,11 @@ export default class SyncYoutube extends AbstractService {
     }
 
     video.video.thumbnail = await this.sync_video_thumbnail(video);
-    const color = await extract_image_color(video.video.thumbnail);
+    const palette = await extract_image_palette(video.video.thumbnail);
 
     await database
       .insertInto("videos")
-      .values({ ...video.video, color })
+      .values({ ...video.video, palette: palette ? JSON.stringify(palette) : null })
       .onConflict((row) =>
         row.columns(["service", "service_id"]).doUpdateSet({
           title: (c) => c.ref("excluded.title"),
@@ -271,7 +271,7 @@ export default class SyncYoutube extends AbstractService {
           url: (c) => c.ref("excluded.url"),
           duration: (c) => c.ref("excluded.duration"),
           thumbnail: (c) => c.ref("excluded.thumbnail"),
-          color: (c) => c.ref("excluded.color"),
+          palette: (c) => c.ref("excluded.palette"),
           last_synced_at: (c) => c.ref("excluded.last_synced_at"),
         }),
       )

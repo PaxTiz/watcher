@@ -4,6 +4,9 @@ import { LazySubscriptionsSidebarSlideover } from "#components";
 const route = useRoute();
 const overlay = useWatcherOverlay();
 
+const nav = useTemplateRef("nav");
+useLiquidGlass(nav);
+
 const is_favorites_feed = computed(
   () => route.path === "/videos" && route.query.is_favorite === "true",
 );
@@ -30,8 +33,10 @@ const open_subscriptions = () => {
 </script>
 
 <template>
+  <!-- A floating glass capsule over the content, like the player controls -->
   <nav
-    class="bg-ui-bg/80 border-ui-border pb-safe fixed bottom-0 left-0 z-50 grid w-full grid-cols-4 border-t pt-2 backdrop-blur-xl lg:hidden"
+    ref="nav"
+    class="liquid-glass fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] z-50 grid h-16 grid-cols-4 rounded-full px-1 lg:hidden"
     aria-label="Navigation principale"
   >
     <NuxtLink
@@ -39,7 +44,7 @@ const open_subscriptions = () => {
       :key="item.label"
       :to="item.to"
       :aria-current="item.active ? 'page' : undefined"
-      class="flex flex-col items-center gap-0.5 transition-colors"
+      class="flex flex-col items-center justify-center gap-0.5 transition-colors"
       :class="item.active ? 'text-alt' : 'text-ui-text-muted'"
     >
       <Icon :name="item.icon" class="text-xl" />
@@ -47,8 +52,8 @@ const open_subscriptions = () => {
     </NuxtLink>
 
     <button
-      class="text-ui-text-muted flex flex-col items-center gap-0.5 transition-colors"
-      :class="{ 'text-alt': route.path.startsWith('/subscriptions') }"
+      class="flex flex-col items-center justify-center gap-0.5 transition-colors"
+      :class="route.path.startsWith('/subscriptions') ? 'text-alt' : 'text-ui-text-muted'"
       @click="open_subscriptions"
     >
       <Icon name="lucide:users" class="text-xl" />
@@ -56,9 +61,3 @@ const open_subscriptions = () => {
     </button>
   </nav>
 </template>
-
-<style scoped>
-.pb-safe {
-  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
-}
-</style>

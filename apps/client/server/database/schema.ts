@@ -1,4 +1,4 @@
-import type { CredentialsType, SubscriptionType } from "@watcher/common";
+import type { CredentialsType, SubscriptionType, VideoPalette } from "@watcher/common";
 import type { ColumnType, Generated, Insertable } from "kysely";
 
 export type UserTable = {
@@ -70,7 +70,8 @@ export type VideoTable = {
 
   thumbnail: string;
 
-  color: string | null;
+  // jsonb: parsed on read, written as a JSON string
+  palette: ColumnType<VideoPalette | null, string | null, string | null>;
 
   created_at: string;
 

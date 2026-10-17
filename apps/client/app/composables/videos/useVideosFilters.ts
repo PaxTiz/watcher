@@ -83,7 +83,7 @@ export const useVideosFilters = (
       });
 
       if (changed_property === "page" && import.meta.client) {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        useAppScroll().scroll_to_top();
       }
     },
   );

@@ -12,6 +12,7 @@ const { on_toggle_subscription_favorite } = useVideo(video);
 
 const is_favorite = ref(video.author.is_favorite);
 const is_expanded = ref(false);
+const { scroll_to_top } = useAppScroll();
 
 const escape_html = (value: string) => {
   return value
@@ -71,7 +72,7 @@ const on_description_click = (event: MouseEvent) => {
 
   event.stopPropagation();
   emit("seek", Number(target.dataset.time));
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  scroll_to_top();
 };
 
 const toggle_favorite = async () => {
@@ -84,7 +85,7 @@ const toggle_favorite = async () => {
 
 <template>
   <div>
-    <h1 class="font-display text-ui-text text-lg leading-snug font-semibold md:text-xl">
+    <h1 class="font-display text-ui-text text-lg leading-snug font-medium md:text-xl">
       {{ video.title }}
     </h1>
 
@@ -103,7 +104,7 @@ const toggle_favorite = async () => {
         />
         <div class="min-w-0">
           <p
-            class="text-ui-text truncate font-semibold transition-colors group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
+            class="text-ui-text truncate font-medium transition-colors group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
           >
             {{ video.author.name }}
           </p>

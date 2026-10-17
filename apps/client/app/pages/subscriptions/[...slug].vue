@@ -8,6 +8,8 @@ const { data, refresh } = await useSubscription(slug);
 
 provide<VideoCurrentRefreshType>(VIDEO_CURRENT_REFRESH_SYMBOL, refresh);
 
+usePageBreadcrumb(() => data.value?.name);
+
 useMeta({
   title: () => data.value?.name ?? "",
   description: () => (data.value ? `Découvrez les dernières vidéos de ${data.value.name}.` : ""),

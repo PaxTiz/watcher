@@ -4,6 +4,18 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Inline so utilities read the variables where they are used: a subtree can switch theme
+ * (e.g. a `.dark` sidebar inside a light page) and its `text-ui-text` follows.
+ */
+@theme inline {
+  --color-background: var(--background);
+  --color-ui-bg: var(--ui-bg);
+  --color-ui-border: var(--ui-border);
+  --color-ui-text: var(--ui-text);
+  --color-ui-text-muted: var(--ui-text-muted);
+}
+
 @theme {
   --font-sans: "Alegreya Sans", sans-serif;
 
@@ -11,12 +23,6 @@
 
   --radius-*: initial;
   --radius: 0.5rem;
-
-  --color-background: var(--background);
-  --color-ui-bg: var(--ui-bg);
-  --color-ui-border: var(--ui-border);
-  --color-ui-text: var(--ui-text);
-  --color-ui-text-muted: var(--ui-text-muted);
 
   --color-background-dark: #11111b;
 

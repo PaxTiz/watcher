@@ -23,14 +23,11 @@ const remaining_minutes = computed(() => {
   <div v-if="featured" class="space-y-8">
     <section
       class="video-tinted bg-ui-bg relative isolate grid items-center gap-5 overflow-hidden rounded-3xl p-3 shadow-[0_0_0_1px_var(--ui-border),0_30px_60px_-34px_rgb(var(--c)/0.55)] sm:p-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-8 md:p-5 dark:bg-[rgb(var(--c-dark)/0.3)] dark:shadow-[inset_0_0_0_1px_rgb(var(--c-light)/0.12),0_24px_50px_-30px_rgb(var(--c)/0.45)]"
-      :style="video_tones_style(featured.color)"
+      :style="video_tones_style(featured.palette)"
     >
-      <NuxtImg
-        class="pointer-events-none absolute -inset-[30%] -z-10 hidden size-[160%] max-w-none object-cover opacity-30 blur-[80px] saturate-150 dark:block"
-        format="webp"
-        width="160"
-        :src="featured.thumbnail"
-        alt=""
+      <div
+        class="pointer-events-none absolute inset-0 -z-10 hidden dark:block"
+        :style="{ backgroundImage: palette_light(featured.palette, 0.35) }"
       />
 
       <NuxtLink
@@ -45,7 +42,7 @@ const remaining_minutes = computed(() => {
           alt=""
         />
         <span
-          class="absolute right-3 bottom-4 rounded-lg bg-[rgb(var(--c-dark)/0.45)] px-1.5 py-0.5 text-xs font-semibold text-white tabular-nums backdrop-blur-md"
+          class="absolute right-3 bottom-4 rounded-lg bg-[rgb(var(--c-dark)/0.8)] px-1.5 py-0.5 text-xs font-semibold text-white tabular-nums"
         >
           {{ numbers.displaySeconds(featured.duration) }}
         </span>
@@ -63,7 +60,7 @@ const remaining_minutes = computed(() => {
         >
           Reprendre la lecture
         </p>
-        <h2 class="font-display text-ui-text mt-2 text-lg leading-tight font-semibold md:text-2xl">
+        <h2 class="font-display text-ui-text mt-2 text-lg leading-snug font-medium md:text-xl">
           {{ featured.title }}
         </h2>
 
@@ -85,7 +82,7 @@ const remaining_minutes = computed(() => {
         <div class="mt-5 flex flex-wrap items-center gap-4">
           <NuxtLink
             :to="`/videos/${featured.id}`"
-            class="bg-ui-text text-background inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition-transform hover:scale-[1.03]"
+            class="bg-ui-text text-background inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-transform hover:scale-[1.03]"
           >
             <Icon name="lucide:play" class="fill-current" />
             Reprendre

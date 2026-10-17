@@ -27,6 +27,7 @@ const up_next = computed(() => {
 const next_video = computed(() => up_next.value.find((v) => v.viewing_progression <= 0.9));
 
 usePageAmbient(() => data.value);
+usePageBreadcrumb(() => data.value?.author.name);
 
 const autoplay = useLocalStorage("watcher:autoplay", true);
 const show_countdown = ref(false);
@@ -60,17 +61,14 @@ useMeta({
   <div
     v-if="data"
     class="video-tinted mx-auto grid max-w-[1800px] gap-6 pb-8 md:px-6 xl:grid-cols-[minmax(0,1fr)_24rem]"
-    :style="video_tones_style(data.color)"
+    :style="video_tones_style(data.palette)"
   >
     <div class="min-w-0">
       <div class="relative">
         <!-- Ambilight: the video's own colours spill around the player -->
-        <NuxtImg
-          class="pointer-events-none absolute -inset-x-[3%] -inset-y-[5%] hidden h-[110%] w-[106%] max-w-none rounded-[40px] object-cover opacity-45 blur-[70px] saturate-150 md:block"
-          format="webp"
-          width="320"
-          :src="data.thumbnail"
-          alt=""
+        <div
+          class="pointer-events-none absolute -inset-x-[7%] -inset-y-[14%] hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent),linear-gradient(to_bottom,transparent,black_11%,black_89%,transparent)] [mask-composite:intersect] md:block"
+          :style="{ backgroundImage: palette_glow(data.palette, 0.45) }"
         />
 
         <div

@@ -13,7 +13,11 @@
 }
 
 :root {
-  --background: #f3f4f8;
+  /* The frame behind the sidebar stays dark in both themes, the content panel follows the theme */
+  --frame: #08090c;
+  --panel-edge: rgb(255 255 255 / 0.06);
+
+  --background: #fafafb;
   --ui-bg: #ffffff;
   --ui-border: #e2e5ee;
   --ui-text: #121521;
@@ -37,7 +41,7 @@
 }
 
 .dark {
-  --background: #08090e;
+  --background: #0b0d14;
   --ui-bg: #10121b;
   --ui-border: #1d2130;
   --ui-text: #f0f2f8;
@@ -59,17 +63,17 @@
 body {
   background-color: var(--background);
   color: var(--ui-text);
-  font-weight: 450;
+  font-weight: 400;
   transition:
     background-color 0.3s,
     color 0.3s;
 }
 
 .page-title {
-  color: var(--color-ui-text);
+  color: var(--ui-text);
   font-family: var(--font-display);
   font-size: var(--text-2xl);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.015em;
 }
@@ -90,6 +94,10 @@ body {
   &.liquid-glass-lens {
     backdrop-filter: var(--glass-lens) blur(2px) saturate(1.5) brightness(1.05);
   }
+}
+
+[data-scrolling] .liquid-glass-lens {
+  backdrop-filter: blur(3px) saturate(1.5) brightness(1.05);
 }
 
 /* Per-video tones, set from a video's colour (see video_tones) */

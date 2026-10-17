@@ -1,52 +1,42 @@
 <script lang="ts" setup>
-const { source } = useAmbient();
-const image = useImage();
+const { palette } = useAmbient();
 
-// Two layers so a new source fades in over the previous one
-const layers = ref<[string | null, string | null]>([null, null]);
+// Two layers so a new light fades in over the previous one
+const layers = ref<[string, string]>(["none", "none"]);
 const active_layer = ref<0 | 1>(0);
 
 watch(
-  () => source.value?.thumbnail,
-  (thumbnail) => {
-    const url = thumbnail ? image(thumbnail, { width: 160, format: "webp" }) : null;
-    if (url === layers.value[active_layer.value]) {
+  palette,
+  (value) => {
+    const background = palette_light(value, 0.3);
+    if (background === layers.value[active_layer.value]) {
       return;
     }
 
     const next = active_layer.value === 0 ? 1 : 0;
-    layers.value[next] = url;
+    layers.value[next] = background;
     active_layer.value = next;
   },
   { immediate: true },
 );
 
 watchEffect(() => {
-  if (import.meta.server) {
-    return;
+  if (import.meta.client) {
+    document.documentElement.style.setProperty("--tint", palette.value?.base ?? "254 100 11");
   }
-
-  const tones = color_tones(source.value?.color);
-  document.documentElement.style.setProperty("--tint", tones?.base ?? "254 100 11");
 });
 </script>
 
 <template>
   <div
-    class="pointer-events-none fixed inset-x-0 top-0 -z-10 hidden h-[85vh] overflow-hidden dark:block"
+    class="pointer-events-none absolute inset-x-0 top-0 -z-10 hidden h-[80vh] [mask-image:linear-gradient(to_bottom,black_20%,transparent_95%)] dark:block"
     aria-hidden="true"
   >
-    <img
-      v-for="(layer, index) in layers"
-      v-show="layer"
-      :key="index"
-      :src="layer ?? undefined"
-      alt=""
-      class="absolute -top-1/3 -left-[10%] h-full w-[120%] object-cover blur-[110px] saturate-150 transition-opacity duration-[1200ms] ease-out motion-reduce:transition-none"
-      :style="{ opacity: index === active_layer ? 'var(--ambient-opacity)' : 0 }"
-    />
     <div
-      class="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--background)]/40 to-[var(--background)]"
+      v-for="(layer, index) in layers"
+      :key="index"
+      class="absolute inset-0 transition-opacity duration-1000 ease-out motion-reduce:transition-none"
+      :style="{ backgroundImage: layer, opacity: index === active_layer ? 1 : 0 }"
     />
   </div>
 </template>

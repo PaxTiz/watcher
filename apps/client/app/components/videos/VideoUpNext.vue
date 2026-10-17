@@ -10,7 +10,7 @@ const { dates, numbers } = useFormatter();
 <template>
   <section>
     <div class="mb-3 flex items-center justify-between gap-4">
-      <h2 class="font-display text-ui-text text-base font-semibold">À suivre</h2>
+      <h2 class="font-display text-ui-text text-base font-medium">À suivre</h2>
 
       <label class="text-ui-text-muted flex cursor-pointer items-center gap-2 text-sm select-none">
         Lecture automatique
@@ -46,7 +46,7 @@ const { dates, numbers } = useFormatter();
         v-for="video in videos"
         :key="video.id"
         class="video-tinted"
-        :style="video_tones_style(video.color)"
+        :style="video_tones_style(video.palette)"
       >
         <NuxtLink
           :to="`/videos/${video.id}`"
@@ -69,7 +69,7 @@ const { dates, numbers } = useFormatter();
               alt=""
             />
             <span
-              class="absolute right-1 bottom-1 rounded-md bg-[rgb(var(--c-dark)/0.5)] px-1 text-[11px] font-semibold text-white tabular-nums backdrop-blur-md"
+              class="absolute right-1 bottom-1 rounded-md bg-[rgb(var(--c-dark)/0.8)] px-1 text-[11px] font-semibold text-white tabular-nums"
             >
               {{ numbers.displaySeconds(video.duration) }}
             </span>
@@ -91,7 +91,7 @@ const { dates, numbers } = useFormatter();
             >
               Ensuite
             </p>
-            <h3 class="text-ui-text line-clamp-2 text-sm leading-snug font-semibold">
+            <h3 class="text-ui-text line-clamp-2 text-sm leading-snug font-medium">
               {{ video.title }}
             </h3>
             <p class="text-ui-text-muted mt-1 truncate text-xs">{{ video.author.name }}</p>

@@ -2,6 +2,8 @@
 import type { DropdownItem } from "@watcher/ui";
 import { toast } from "vue-sonner";
 
+const { compact = false } = defineProps<{ compact?: boolean }>();
+
 const { user, clear } = useUserSession();
 const colorMode = useColorMode();
 
@@ -45,12 +47,6 @@ const onSelect = async (key: string, value: string) => {
 const items = computed<Array<DropdownItem>>(() => [
   {
     key: "actions",
-    label: "Paramètres",
-    value: "settings",
-    icon: "lucide:settings",
-  },
-  {
-    key: "actions",
     label: "Synchroniser",
     value: "sync",
     icon: "lucide:refresh-cw",
@@ -78,11 +74,18 @@ const items = computed<Array<DropdownItem>>(() => [
 
 <template>
   <WatcherDropdownButton
-    class="[&_span]:hidden [&_span]:md:block"
-    icon="lucide:user"
+    icon="lucide:circle-user-round"
     color="ghost"
-    :ui="{ button: { root: 'rounded-full' } }"
-    :label="user?.name"
+    align="start"
+    :label="compact ? undefined : user?.name"
+    :aria-label="user?.name ? `Compte de ${user.name}` : 'Compte'"
+    :ui="{
+      button: {
+        root: compact
+          ? 'mx-auto size-10 justify-center !px-0 rounded-lg text-ui-text-muted hover:text-ui-text hover:!bg-white/[0.06]'
+          : 'w-full justify-start gap-3 !px-3 rounded-lg text-sm text-ui-text-muted hover:text-ui-text hover:!bg-white/[0.06]',
+      },
+    }"
     :items="items"
     @select="onSelect"
   />

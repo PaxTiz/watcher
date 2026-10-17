@@ -2,6 +2,7 @@ export * from "./types/credentials";
 export * from "./types/shared";
 export * from "./types/subscriptions";
 export * from "./types/videos";
+export * from "./types/palette";
 
 export * from "./resources/subscriptions";
 export * from "./resources/users";
