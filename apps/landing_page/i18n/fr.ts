@@ -10,11 +10,12 @@ export default {
   },
 
   nav: {
-    features: "Fonctionnalités",
-    overview: "Aperçu",
+    feed: "Le fil",
+    player: "Le lecteur",
+    how: "Comment ça marche",
     faq: "FAQ",
-    login: "Connexion",
-    openMenu: "Ouvrir le menu",
+    login: "Se connecter",
+    start: "Commencer",
   },
 
   theme: {
@@ -32,127 +33,139 @@ export default {
   },
 
   hero: {
-    live: "En direct",
-    titleTemplate: "Retrouve tous tes {creators} réunis dans un seul {feed}",
-    titleCreators: "créateurs préférés",
-    titleFeed: "flux unifié",
-    subtitle:
-      "Watcher réunit tes abonnements Twitch et YouTube dans une interface unique. Plus besoin de jongler entre les plateformes pour ne rien rater.",
-    ctaStart: "Commencer",
-    ctaDemo: "Voir la démo",
+    title: "Toutes tes chaînes",
+    titleSoft: "Un seul endroit",
+    lead: "Watcher réunit tes abonnements YouTube et Twitch dans un seul fil, dans l'ordre où les vidéos sortent. Sans algorithme.",
+    ctaStart: "Commencer gratuitement",
+    ctaHow: "Voir comment ça marche",
+    note: "Gratuit · Lecture seule de tes abonnements",
   },
 
-  channelsOverview: {
-    title: "Tous tes abonnements au même endroit",
-    description:
-      "Watcher regroupe l'ensemble des vidéos YouTube et Twitch de tous tes créateurs préférés dans un seul et même flux unifié.",
-    live: "LIVE",
-    videos: {
-      todaySession: "Session ranked",
-      todayBestMoments: "Best moments #12",
-      todayJustChatting: "Just chatting",
-      todayFullVod: "VOD complet",
-      todaySpeedrun: "Speedrun%",
-      yesterdayLetsPlay: "Let's play ep.4",
-      yesterdayEveningDraft: "Draft du soir",
-      yesterdayReactionClip: "Réaction — clip",
-      yesterdaySundayCoop: "Co-op du dimanche",
-      yesterdayWeeklyRecap: "Résumé de la semaine",
-    },
+  showcase: {
+    label: "Aperçu de l'application Watcher",
+    search: "Rechercher",
+    home: "Accueil",
+    videos: "Vidéos",
+    favorites: "Favoris",
+    subscriptions: "Abonnements",
+    greeting: "Bonjour Alex",
+    resume: "Reprendre la lecture",
+    resumeAction: "Reprendre",
+    remaining: "12 min restantes",
+    latest: "Nouveautés",
+    searchCapsule: "Rechercher dans tes chaînes",
   },
 
-  mainFeatures: {
-    title: "Fait pour suivre, pas pour chercher",
-    description: "Quatre idées simples pensées pour te faire gagner du temps chaque jour.",
-    unifiedFeed: {
-      title: "Flux unifié",
-      description:
-        "Vidéos, lives et VOD de Twitch et YouTube rassemblés dans une seule timeline, triée par récence.",
+  videos: {
+    gps: "Trois jours sans GPS",
+    ranked: "Session ranked, on vise le top 500",
+    gameboy: "On a démonté une Game Boy",
+    final: "VOD : la grande finale du tournoi",
+    bread: "Le pain du dimanche, enfin réussi",
+    trains: "Pourquoi les trains sont en retard",
+    hooks: {
+      gps: "SANS GPS",
+      gameboy: "ON A OSÉ",
+      bread: "ENFIN !",
+      trains: "LE VRAI PRIX",
     },
-    simpleInterface: {
-      title: "Interface simple",
-      description:
-        "Aucune surcharge, aucun réglage compliqué. Tu ouvres l'app, tu vois ce qui est nouveau.",
-    },
-    integratedPlayer: {
-      title: "Lecteur intégré",
-      description: "Regarde directement dans Watcher, sans changer d'onglet.",
-    },
-    channelGrouping: {
-      title: "Regroupement de chaînes",
-      description: "Fusionne les chaînes Twitch et YouTube d'un même créateur — voir plus bas ↓",
+    tags: {
+      new: "Nouveau",
+      live: "En direct",
+      vod: "VOD",
     },
   },
 
-  channelsGrouping: {
-    title: "Une seule entité, plusieurs chaînes",
-    description:
-      "Beaucoup de créateurs diffusent en direct sur Twitch et publient leurs rediffusions sur une chaîne YouTube dédiée. Avec Watcher, tu regroupes ces chaînes en une seule entité : plus de doublons, plus de confusion, juste le bon créateur.",
-    bullets: {
-      groupAny: "Regroupe autant de chaînes que tu veux par créateur",
-      oneFeed: "Un seul flux, une seule notification, un seul profil",
-      idealForStreamers: "Idéal pour les streamers Twitch avec chaîne replay YouTube",
-    },
-    liveStatus: "live",
-    replaysLabel: "Rediffusions",
-    mergeLabel: "FUSION",
-    mergedSummary: "1 entité · 2 chaînes",
+  feed: {
+    title: "Un seul fil",
+    titleSoft: "Dans l'ordre où ça sort",
+    lead: "Les vidéos et les lives de toutes tes chaînes, YouTube et Twitch confondus. Les plus récents en haut, rien d'autre.",
+    today: "Aujourd'hui",
   },
 
-  platformViewer: {
-    title: "Ta liste de créateurs, enfin lisible",
-    description:
-      "Un panneau latéral avec toutes tes chaînes, un badge pour les lives en cours, et un aperçu vidéo au survol. Tu ne rates plus jamais une sortie.",
-    screenshotAlt: "capture d'écran — panneau créateurs",
-    liveBadge: "Badge « en direct » en temps réel",
-    filters: "Filtres par plateforme ou créateur",
-    sync: "Synchronisation automatique",
+  player: {
+    title: "Regarde ici",
+    titleSoft: "Reprends où tu t'étais arrêté",
+    lead: "Le lecteur est intégré. Watcher retient où tu en es sur chaque vidéo et enchaîne sur la suivante quand tu veux.",
+    resumedAt: "Repris à {time}",
+    upNext: "À suivre",
+    autoplay: "Lecture automatique",
+    next: "Ensuite",
+  },
+
+  favorites: {
+    title: "Tes favoris d'abord",
+    titleSoft: "Le reste quand tu veux",
+    lead: "Épingle les chaînes que tu ne veux pas rater. Masque celles qui encombrent ton fil, sans te désabonner.",
+    favorites: "Favoris",
+    subscriptions: "Abonnements",
+    hidden: "Masquée",
+  },
+
+  how: {
+    title: "Prêt en une minute",
+    titleSoft: "Sans mot de passe à créer",
+    connect: {
+      title: "Connecte ton compte",
+      text: "Google pour YouTube, Twitch, ou les deux. Watcher demande un accès en lecture seule.",
+    },
+    import: {
+      title: "Tes abonnements arrivent",
+      text: "Watcher importe tes chaînes et leurs dernières vidéos, puis suit les nouvelles.",
+    },
+    watch: {
+      title: "Tu regardes",
+      text: "Un fil, un lecteur, tes favoris. Tu peux tout déconnecter quand tu veux.",
+    },
   },
 
   faq: {
-    title: "Questions fréquentes",
+    title: "Questions",
+    titleSoft: "fréquentes",
     items: {
-      isAppFree: {
-        label: "L'app est-elle gratuite ?",
-        content:
-          "Oui, Watcher est gratuit pour commencer. Une offre premium sans publicité et avec des filtres avancés arrivera plus tard.",
+      free: {
+        question: "Watcher est-il gratuit ?",
+        answer:
+          "Oui. Une offre premium viendra peut-être plus tard, sans rien retirer à la version gratuite.",
       },
-      howSyncWorks: {
-        label: "Comment fonctionne la synchronisation ?",
-        content:
-          "Tu connectes tes comptes Twitch et YouTube en quelques clics, Watcher récupère automatiquement tes abonnements et les met à jour en continu.",
+      platforms: {
+        question: "Quelles plateformes ?",
+        answer: "YouTube et Twitch. Tu peux connecter l'une, l'autre ou les deux.",
       },
-      areCredentialsSafe: {
-        label: "Mes identifiants sont-ils en sécurité ?",
-        content:
-          "Watcher utilise uniquement les connexions officielles Twitch et YouTube (OAuth) — nous ne stockons jamais ton mot de passe.",
+      access: {
+        question: "Que peut faire Watcher sur mes comptes ?",
+        answer:
+          "Rien d'autre que lire la liste de tes abonnements. Il ne publie rien et ne voit jamais ton mot de passe.",
       },
-      platformAccess: {
-        label: "Quand aurai-je accès à la bêta ?",
-        content:
-          "Les invitations sont envoyées par vagues chaque semaine. Plus tôt tu t'inscris, plus tôt tu reçois ton accès.",
+      mobile: {
+        question: "Ça marche sur mobile ?",
+        answer: "Oui, directement dans le navigateur de ton téléphone.",
       },
     },
+  },
+
+  final: {
+    title: "Tes chaînes t'attendent",
+    titleSoft: "Il ne manque que toi",
+    google: "Continuer avec Google",
+    twitch: "Continuer avec Twitch",
+    note: "Gratuit · Lecture seule · Supprimable à tout moment",
   },
 
   error: {
     notFound: {
       title: "Page introuvable",
-      description: "La page que vous recherchez n'existe pas ou a été déplacée.",
+      description: "La page que tu cherches n'existe pas ou a été déplacée.",
     },
     generic: {
       title: "Une erreur est survenue",
-      description: "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      description: "Une erreur inattendue s'est produite. Réessaie dans un instant.",
     },
     backHome: "Retour à l'accueil",
   },
 
   footer: {
-    title: "Rejoins la bêta et simplifie ton suivi dès aujourd'hui",
-    description: "Connecte un compte, teste Watcher gratuitement, sans engagement.",
-    ctaTwitch: "Continuer avec Twitch",
-    ctaYoutube: "Continuer avec YouTube",
-    copyright: "© 2026 Watcher. Non affilié à Twitch Interactive ou YouTube LLC.",
+    copyright: "© 2026 Watcher. Non affilié à YouTube ni à Twitch.",
     privacy: "Confidentialité",
     terms: "Conditions",
     contact: "Contact",

@@ -26,21 +26,22 @@ function handleBackHome() {
   <Navbar />
 
   <main id="main-content">
-    <section class="bg-background flex min-h-[70vh] items-center pt-28 sm:pt-36">
-      <div class="container flex flex-col items-center gap-4 text-center">
-        <span class="text-alt text-6xl font-black sm:text-7xl" aria-hidden="true">{{
-          statusCode
-        }}</span>
-
-        <h1 class="page-title">{{ title }}</h1>
-        <p class="max-w-md text-lg text-gray-300">{{ description }}</p>
-
+    <section class="flex min-h-[70vh] items-center pt-24">
+      <div class="container">
+        <p class="text-alt font-mono text-sm">{{ statusCode }}</p>
+        <TwoToneTitle
+          as="h1"
+          size="hero"
+          :title="title"
+          :soft="description"
+          class="mt-4 max-w-3xl"
+        />
         <WatcherButton
           :label="t('error.backHome')"
-          color="secondary"
+          color="solid"
           size="lg"
           icon="lucide:arrow-left"
-          class="mt-4 font-bold"
+          class="mt-8"
           @click="handleBackHome"
         />
       </div>

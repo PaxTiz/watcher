@@ -8,11 +8,12 @@ export default {
   },
 
   nav: {
-    features: "Features",
-    overview: "Overview",
+    feed: "The feed",
+    player: "The player",
+    how: "How it works",
     faq: "FAQ",
     login: "Log in",
-    openMenu: "Open menu",
+    start: "Get started",
   },
 
   theme: {
@@ -30,106 +31,123 @@ export default {
   },
 
   hero: {
-    live: "Live",
-    titleTemplate: "Catch every {creators} in one unified {feed}",
-    titleCreators: "favorite creator",
-    titleFeed: "feed",
-    subtitle:
-      "Watcher brings your Twitch and YouTube subscriptions together in one place. No more juggling between platforms to avoid missing anything.",
-    ctaStart: "Get started",
-    ctaDemo: "Watch demo",
+    title: "All your channels",
+    titleSoft: "One place",
+    lead: "Watcher brings your YouTube and Twitch subscriptions together in one feed, in the order videos come out. No algorithm.",
+    ctaStart: "Get started for free",
+    ctaHow: "See how it works",
+    note: "Free · Read-only access to your subscriptions",
   },
 
-  channelsOverview: {
-    title: "All your subscriptions in one place",
-    description:
-      "Watcher gathers every YouTube and Twitch video from all your favorite creators into one unified feed.",
-    live: "LIVE",
-    videos: {
-      todaySession: "Ranked session",
-      todayBestMoments: "Best moments #12",
-      todayJustChatting: "Just chatting",
-      todayFullVod: "Full VOD",
-      todaySpeedrun: "Speedrun%",
-      yesterdayLetsPlay: "Let's play ep.4",
-      yesterdayEveningDraft: "Evening draft",
-      yesterdayReactionClip: "Reaction — clip",
-      yesterdaySundayCoop: "Sunday co-op",
-      yesterdayWeeklyRecap: "Weekly recap",
-    },
+  showcase: {
+    label: "Preview of the Watcher app",
+    search: "Search",
+    home: "Home",
+    videos: "Videos",
+    favorites: "Favorites",
+    subscriptions: "Subscriptions",
+    greeting: "Hi Alex",
+    resume: "Continue watching",
+    resumeAction: "Resume",
+    remaining: "12 min left",
+    latest: "New videos",
+    searchCapsule: "Search your channels",
   },
 
-  mainFeatures: {
-    title: "Made to follow, not to search",
-    description: "Four simple ideas designed to save you time every day.",
-    unifiedFeed: {
-      title: "Unified feed",
-      description:
-        "Videos, live streams and VODs from Twitch and YouTube gathered in a single timeline, sorted by recency.",
+  videos: {
+    gps: "Three days without GPS",
+    ranked: "Ranked session, aiming for the top 500",
+    gameboy: "We took a Game Boy apart",
+    final: "VOD: the tournament grand final",
+    bread: "Sunday bread, finally nailed it",
+    trains: "Why trains are always late",
+    hooks: {
+      gps: "NO GPS",
+      gameboy: "WE DID IT",
+      bread: "FINALLY!",
+      trains: "THE REAL COST",
     },
-    simpleInterface: {
-      title: "Simple interface",
-      description: "No clutter, no complicated settings. Open the app, see what's new.",
-    },
-    integratedPlayer: {
-      title: "Built-in player",
-      description: "Watch directly inside Watcher, without switching tabs.",
-    },
-    channelGrouping: {
-      title: "Channel grouping",
-      description: "Merge the Twitch and YouTube channels of the same creator — see below ↓",
+    tags: {
+      new: "New",
+      live: "Live",
+      vod: "VOD",
     },
   },
 
-  channelsGrouping: {
-    title: "One entity, several channels",
-    description:
-      "Many creators stream live on Twitch and publish their replays on a dedicated YouTube channel. With Watcher, you group these channels into a single entity: no more duplicates, no more confusion, just the right creator.",
-    bullets: {
-      groupAny: "Group as many channels as you want per creator",
-      oneFeed: "One feed, one notification, one profile",
-      idealForStreamers: "Ideal for Twitch streamers with a YouTube replay channel",
-    },
-    liveStatus: "live",
-    replaysLabel: "Replays",
-    mergeLabel: "MERGE",
-    mergedSummary: "1 entity · 2 channels",
+  feed: {
+    title: "One feed",
+    titleSoft: "In the order things come out",
+    lead: "Videos and lives from all your channels, YouTube and Twitch alike. The most recent on top, nothing else.",
+    today: "Today",
   },
 
-  platformViewer: {
-    title: "Your creator list, finally readable",
-    description:
-      "A side panel with all your channels, a badge for ongoing live streams, and a video preview on hover. You'll never miss a new upload again.",
-    screenshotAlt: "screenshot — creators panel",
-    liveBadge: "Real-time “live” badge",
-    filters: "Filter by platform or creator",
-    sync: "Automatic sync",
+  player: {
+    title: "Watch here",
+    titleSoft: "Pick up where you left off",
+    lead: "The player is built in. Watcher remembers where you are in every video and moves on to the next one whenever you want.",
+    resumedAt: "Resumed at {time}",
+    upNext: "Up next",
+    autoplay: "Autoplay",
+    next: "Next",
+  },
+
+  favorites: {
+    title: "Your favorites first",
+    titleSoft: "The rest whenever you want",
+    lead: "Pin the channels you never want to miss. Hide the ones cluttering your feed, without unsubscribing.",
+    favorites: "Favorites",
+    subscriptions: "Subscriptions",
+    hidden: "Hidden",
+  },
+
+  how: {
+    title: "Ready in a minute",
+    titleSoft: "No password to create",
+    connect: {
+      title: "Connect your account",
+      text: "Google for YouTube, Twitch, or both. Watcher only asks for read-only access.",
+    },
+    import: {
+      title: "Your subscriptions come in",
+      text: "Watcher imports your channels and their latest videos, then keeps up with new ones.",
+    },
+    watch: {
+      title: "You watch",
+      text: "One feed, one player, your favorites. You can disconnect everything whenever you want.",
+    },
   },
 
   faq: {
-    title: "Frequently asked questions",
+    title: "Frequently",
+    titleSoft: "asked questions",
     items: {
-      isAppFree: {
-        label: "Is the app free?",
-        content:
-          "Yes, Watcher is free to get started. A premium ad-free offer with advanced filters will arrive later.",
+      free: {
+        question: "Is Watcher free?",
+        answer:
+          "Yes. A premium plan may come later, without taking anything away from the free version.",
       },
-      howSyncWorks: {
-        label: "How does the sync work?",
-        content:
-          "You connect your Twitch and YouTube accounts in a few clicks, and Watcher automatically fetches your subscriptions and keeps them updated continuously.",
+      platforms: {
+        question: "Which platforms?",
+        answer: "YouTube and Twitch. You can connect one, the other, or both.",
       },
-      areCredentialsSafe: {
-        label: "Are my credentials safe?",
-        content:
-          "Watcher only uses the official Twitch and YouTube connections (OAuth) — we never store your password.",
+      access: {
+        question: "What can Watcher do on my accounts?",
+        answer:
+          "Nothing but read your list of subscriptions. It never posts anything and never sees your password.",
       },
-      platformAccess: {
-        label: "When will I get access to the beta?",
-        content:
-          "Invitations are sent out in waves every week. The earlier you sign up, the earlier you get access.",
+      mobile: {
+        question: "Does it work on mobile?",
+        answer: "Yes, right in your phone's browser.",
       },
     },
+  },
+
+  final: {
+    title: "Your channels are waiting",
+    titleSoft: "All that's missing is you",
+    google: "Continue with Google",
+    twitch: "Continue with Twitch",
+    note: "Free · Read-only · Delete your account anytime",
   },
 
   error: {
@@ -145,11 +163,7 @@ export default {
   },
 
   footer: {
-    title: "Join the beta and simplify your tracking today",
-    description: "Connect an account, try Watcher for free, with no commitment.",
-    ctaTwitch: "Continue with Twitch",
-    ctaYoutube: "Continue with YouTube",
-    copyright: "© 2026 Watcher. Not affiliated with Twitch Interactive or YouTube LLC.",
+    copyright: "© 2026 Watcher. Not affiliated with YouTube or Twitch.",
     privacy: "Privacy",
     terms: "Terms",
     contact: "Contact",

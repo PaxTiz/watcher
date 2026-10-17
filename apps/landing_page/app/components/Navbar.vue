@@ -1,89 +1,43 @@
 <script lang="ts" setup>
 const { t } = useI18n();
 
-const isMobileMenuOpen = ref(false);
-
-function closeMobileMenu() {
-  isMobileMenuOpen.value = false;
-}
+const links = computed(() => [
+  { to: "#feed", label: t("nav.feed") },
+  { to: "#player", label: t("nav.player") },
+  { to: "#how", label: t("nav.how") },
+  { to: "#questions", label: t("nav.faq") },
+]);
 </script>
 
 <template>
-  <div class="fixed top-4 right-4 left-4 z-10">
-    <nav
-      class="navbar border-ui-border flex items-center justify-between rounded border bg-white/50 px-4 py-3 backdrop-blur-md dark:bg-[var(--navbar-bg)]/50"
-    >
-      <div>
-        <WatcherLogo />
-      </div>
+  <header class="sticky top-0 z-20 bg-[var(--background)]/80 backdrop-blur-md">
+    <div class="container flex h-16 items-center gap-6">
+      <WatcherLogo
+        class="[&_span]:font-display [&_div]:size-[26px] [&_div]:text-[15px] [&_span]:text-[15px] [&_span]:font-medium"
+      />
 
-      <div class="hidden md:block">
-        <ul
-          class="text-landing-text [&>li:hover>a]:text-ui-text flex items-center gap-8 text-[15px] font-semibold"
+      <nav class="text-ui-text-muted ml-6 hidden gap-5.5 text-sm md:flex" aria-label="Sections">
+        <NuxtLink
+          v-for="link in links"
+          :key="link.to"
+          :to="link.to"
+          class="hover:text-ui-text transition-colors"
         >
-          <li>
-            <nuxt-link to="#features">{{ t("nav.features") }}</nuxt-link>
-          </li>
-          <li>
-            <nuxt-link to="#overview">{{ t("nav.overview") }}</nuxt-link>
-          </li>
-          <li>
-            <nuxt-link to="#questions">{{ t("nav.faq") }}</nuxt-link>
-          </li>
-        </ul>
-      </div>
+          {{ link.label }}
+        </NuxtLink>
+      </nav>
 
-      <div class="flex items-center">
+      <div class="ml-auto flex items-center gap-1">
         <LanguageToggle />
-
         <ThemeToggle />
-
-        <div class="ml-2 hidden md:block">
-          <WatcherButton :label="t('nav.login')" color="secondary" class="font-bold" />
-        </div>
-
-        <button
-          type="button"
-          class="text-landing-text flex items-center justify-center md:hidden"
-          :aria-label="t('nav.openMenu')"
-          aria-controls="mobile-menu"
-          :aria-expanded="isMobileMenuOpen"
-          @click="isMobileMenuOpen = !isMobileMenuOpen"
+        <NuxtLink
+          to="#start"
+          class="text-ui-text hover:text-alt mx-3 hidden text-sm transition-colors sm:inline"
         >
-          <Icon
-            :name="isMobileMenuOpen ? 'lucide:x' : 'lucide:menu'"
-            class="text-2xl"
-            aria-hidden="true"
-          />
-        </button>
+          {{ t("nav.login") }}
+        </NuxtLink>
+        <WatcherButton :label="t('nav.start')" to="#start" color="solid" />
       </div>
-    </nav>
-
-    <div
-      v-if="isMobileMenuOpen"
-      id="mobile-menu"
-      class="navbar mt-2 flex flex-col gap-4 rounded border border-[var(--navbar-border)] bg-[var(--navbar-bg)] p-4 backdrop-blur-sm md:hidden"
-      @keydown.esc="closeMobileMenu"
-    >
-      <ul class="text-landing-text flex flex-col gap-3 text-[15px] font-semibold">
-        <li>
-          <nuxt-link to="#features" @click="closeMobileMenu">{{ t("nav.features") }}</nuxt-link>
-        </li>
-        <li>
-          <nuxt-link to="#overview" @click="closeMobileMenu">{{ t("nav.overview") }}</nuxt-link>
-        </li>
-        <li>
-          <nuxt-link to="#questions" @click="closeMobileMenu">{{ t("nav.faq") }}</nuxt-link>
-        </li>
-      </ul>
-
-      <WatcherButton :label="t('nav.login')" color="secondary" class="w-full font-bold" />
     </div>
-  </div>
+  </header>
 </template>
-
-<style scoped>
-.navbar {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 30px -14px;
-}
-</style>

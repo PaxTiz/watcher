@@ -17,7 +17,9 @@
 }
 
 @theme {
-  --font-sans: "Alegreya Sans", sans-serif;
+  --font-sans: "Geist", "Segoe UI", system-ui, sans-serif;
+  --font-content: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Unbounded", "Instrument Sans", system-ui, sans-serif;
 
   --spacing: 0.25rem;
 
@@ -29,8 +31,6 @@
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
   --radius-3xl: 1.5rem;
-
-  --color-background-dark: #11111b;
 
   --color-alt: #fe640b;
   --color-highlight: oklch(82.8% 0.189 84.429);
@@ -46,19 +46,22 @@
 }
 
 :root {
-  --background: #f8fafc;
+  --background: #fafafb;
   --ui-bg: #ffffff;
-  --ui-border: #e2e8f0;
-  --ui-text: #0f172a;
-  --ui-text-muted: #64748b;
+  --ui-border: #e2e5ee;
+  --ui-text: #121521;
+  --ui-text-muted: #5d6478;
 
-  --navbar-bg: rgba(255, 255, 255, 0.8);
-  --navbar-border: #ccc;
+  --navbar-bg: rgba(255, 255, 255, 0.72);
+  --navbar-border: rgba(18, 21, 33, 0.08);
 
-  --card-gradient-top: #ffffff;
-  --card-gradient-bottom: #f8fafc;
-  --bg-gradient-radial: radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 100%);
-  --btn-secondary-gradient: linear-gradient(135deg, #fe640b 0%, #ff8c42 100%);
+  --glass-fill: rgb(255 255 255 / 0.45);
+  --glass-rim: rgb(255 255 255 / 0.95);
+  --glass-rim-low: rgb(255 255 255 / 0.6);
+  --glass-glow: rgb(255 255 255 / 0.45);
+  --glass-shadow: 0 0 0 1px rgb(18 21 33 / 0.06), 0 12px 32px -16px rgb(18 21 33 / 0.3);
+  --glass-input: rgb(255 255 255 / 0.75);
+  --glass-dense-fill: rgb(255 255 255 / 0.8);
 
   --shimmer-gradient-effect: linear-gradient(
     90deg,
@@ -68,24 +71,25 @@
     rgba(0, 0, 0, 0.015) 80%,
     transparent 100%
   );
-
-  --subscription-image-size: 71px;
 }
 
 .dark {
-  --background: #11111b;
-  --ui-bg: #1e1e2e;
-  --ui-border: #313244;
-  --ui-text: #cdd6f4;
-  --ui-text-muted: #94a3b8;
+  --background: #0b0d14;
+  --ui-bg: #10121b;
+  --ui-border: #1d2130;
+  --ui-text: #f0f2f8;
+  --ui-text-muted: #8d93a8;
 
-  --navbar-bg: rgba(17, 17, 27, 0.8);
-  --navbar-border: rgba(255, 255, 255, 0.1);
+  --navbar-bg: rgba(16, 18, 27, 0.6);
+  --navbar-border: rgba(255, 255, 255, 0.07);
 
-  --card-gradient-top: #232336;
-  --card-gradient-bottom: #1e1e2e;
-  --bg-gradient-radial: radial-gradient(circle at 50% 0%, #1e1e2e 0%, #11111b 100%);
-  --btn-secondary-gradient: linear-gradient(135deg, #fe640b 0%, #d45100 100%);
+  --glass-fill: rgb(255 255 255 / 0.04);
+  --glass-rim: rgb(255 255 255 / 0.42);
+  --glass-rim-low: rgb(255 255 255 / 0.14);
+  --glass-glow: rgb(255 255 255 / 0.05);
+  --glass-shadow: 0 12px 32px -14px rgb(0 0 0 / 0.6);
+  --glass-input: rgb(127 127 127 / 0.14);
+  --glass-dense-fill: rgb(20 22 32 / 0.74);
 
   --shimmer-gradient-effect: linear-gradient(
     90deg,
@@ -95,6 +99,25 @@
     rgba(255, 255, 255, 0.005) 80%,
     transparent 100%
   );
+}
+
+@utility liquid-glass {
+  background-color: var(--glass-fill);
+  backdrop-filter: blur(3px) saturate(1.5) brightness(1.05);
+  box-shadow:
+    inset 1px 1px 0 -0.5px var(--glass-rim),
+    inset -1px -1px 0 -0.5px var(--glass-rim-low),
+    inset 0 0 18px var(--glass-glow),
+    var(--glass-shadow);
+
+  &.liquid-glass-dense {
+    background-color: var(--glass-dense-fill);
+    backdrop-filter: blur(20px) saturate(1.8);
+  }
+
+  &.liquid-glass-lens {
+    backdrop-filter: var(--glass-lens) blur(2px) saturate(1.5) brightness(1.05);
+  }
 }
 
 @utility container {
