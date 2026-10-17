@@ -17,6 +17,7 @@ export default defineRoute({
       date: query.date,
       subscription_id: query.subscription_id,
       is_favorite: query.is_favorite,
+      in_progress: query.in_progress,
     });
   },
 });
