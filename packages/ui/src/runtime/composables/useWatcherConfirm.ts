@@ -6,7 +6,6 @@ export const useWatcherConfirm = (options: {
   description?: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  // Destructive actions get a red confirm button
   danger?: boolean;
 }) => {
   return useWatcherOverlay().create(ConfirmationModal).open(options).result;

@@ -30,7 +30,6 @@ const open_subscriptions = () => {
 </script>
 
 <template>
-  <!-- A floating glass capsule over the content, like the player controls -->
   <nav
     class="liquid-glass liquid-glass-dense fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] z-50 grid h-16 grid-cols-4 rounded-full px-1 lg:hidden"
     aria-label="Navigation principale"

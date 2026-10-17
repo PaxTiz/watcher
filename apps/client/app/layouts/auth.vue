@@ -1,5 +1,4 @@
 <template>
-  <!-- Always dark: the sign-in and onboarding sit on the app's frame -->
   <div
     class="dark text-ui-text grid min-h-dvh bg-[var(--frame)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:p-2"
   >

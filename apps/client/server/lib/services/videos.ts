@@ -130,7 +130,6 @@ export default class VideosService extends AbstractService {
           ),
         ),
       )
-      // Hidden channels leave the feeds, but their own page still lists their videos
       .$if(!params.subscription_id, (qb) => qb.where("user_subscriptions.is_hidden", "=", false))
       .where("user_subscriptions.user_id", "=", user.id)
       .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
@@ -168,7 +167,6 @@ export default class VideosService extends AbstractService {
           ),
         ),
       )
-      // Hidden channels leave the feeds, but their own page still lists their videos
       .$if(!params.subscription_id, (qb) => qb.where("user_subscriptions.is_hidden", "=", false))
       .where("user_subscriptions.user_id", "=", user.id)
       .offset((params.page - 1) * params.per_page)
@@ -282,7 +280,6 @@ export default class VideosService extends AbstractService {
       .execute();
   }
 
-  // Started but not finished, see `update_progress` for the "finished" threshold
   private in_progress_filter(qb: SelectQueryBuilder<Database, "videos", any>, user: User) {
     return qb.where((eb) =>
       eb.exists(

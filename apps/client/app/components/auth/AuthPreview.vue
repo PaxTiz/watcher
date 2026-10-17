@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-// An abstract wall of videos from both platforms, standing for the app before the user has any data
 const HUES = [
   ["#ff3b30", "#7a1020"],
   ["#9146ff", "#2a145c"],
@@ -33,7 +32,6 @@ const tiles = Array.from({ length: 18 }, (_, i) => {
   };
 });
 
-// Two copies of each column so the scroll loops seamlessly
 const columns = [0, 1, 2].map((column) => {
   const items = tiles.filter((_, i) => i % 3 === column);
   return [...items, ...items];
@@ -88,7 +86,6 @@ const columns = [0, 1, 2].map((column) => {
       </div>
     </div>
 
-    <!-- Fades so the wall melts into the frame -->
     <div
       class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,#0b0d14_0%,transparent_22%,transparent_70%,#0b0d14_100%)]"
     />

@@ -26,10 +26,6 @@ const get_filters_host = () => {
   return filters_host;
 };
 
-/**
- * Displacement map of a rounded rectangle: pixels close to the rim sample from further
- * inside, so what passes under the edges bends like through a thick lens.
- */
 const displacement_map = (width: number, height: number, radius: number, bezel: number) => {
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -90,10 +86,6 @@ const displacement_map = (width: number, height: number, radius: number, bezel: 
   return canvas.toDataURL();
 };
 
-/**
- * Adds the lens effect to an element using the `liquid-glass` utility.
- * The filter is rebuilt when the element is resized, since the map depends on its size.
- */
 export const useLiquidGlass = (target: MaybeElementRef<HTMLElement | null | undefined>) => {
   if (import.meta.server) {
     return;
@@ -114,7 +106,6 @@ export const useLiquidGlass = (target: MaybeElementRef<HTMLElement | null | unde
     }
 
     const radius = parseFloat(getComputedStyle(element).borderTopLeftRadius) || height / 2;
-    // A thin bezel and a small scale: the bend should be noticed, not seen
     const bezel = Math.min(height / 2, 16);
     const id = `liquid-glass-${++sequence}`;
 

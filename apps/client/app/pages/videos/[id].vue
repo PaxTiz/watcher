@@ -23,7 +23,6 @@ const up_next = computed(() => {
   return (channel_videos.value?.items ?? []).filter((v) => v.id !== data.value?.id).slice(0, 12);
 });
 
-// Already watched videos are not worth playing automatically
 const next_video = computed(() => up_next.value.find((v) => v.viewing_progression <= 0.9));
 
 usePageAmbient(() => data.value);
@@ -65,7 +64,6 @@ useMeta({
   >
     <div class="min-w-0">
       <div class="relative">
-        <!-- Ambilight: the video's own colours spill around the player -->
         <div
           class="pointer-events-none absolute -inset-x-[7%] -inset-y-[14%] hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent),linear-gradient(to_bottom,transparent,black_11%,black_89%,transparent)] [mask-composite:intersect] md:block"
           :style="{ backgroundImage: palette_glow(data.palette, 0.45) }"

@@ -13,7 +13,6 @@ export type SubscriptionResource = {
 
   last_synced_at: string;
 
-  // Not set when the subscription is embedded in another resource (e.g. a video author)
   last_video_at?: string | null;
 
   channel: {

@@ -34,7 +34,6 @@ const nav_items = computed<
   },
 ]);
 
-// The rail only has room for avatars: favourites first, then the most active channels
 const rail_subscriptions = computed(() =>
   [...favorites.value, ...others.value.filter((s) => !s.is_hidden)].slice(0, 12),
 );
@@ -55,7 +54,6 @@ const open_search = async () => {
     class="text-ui-text flex flex-col transition-[width] duration-300 ease-out motion-reduce:transition-none"
     :class="collapsed ? 'w-[68px]' : 'w-64'"
   >
-    <!-- Brand and collapse -->
     <div
       class="flex h-14 shrink-0 items-center gap-2 px-3.5"
       :class="{ 'justify-center px-0': collapsed }"
@@ -79,7 +77,6 @@ const open_search = async () => {
       </button>
     </div>
 
-    <!-- Search -->
     <div class="shrink-0 px-3 pb-2">
       <button
         v-if="collapsed"
@@ -120,7 +117,6 @@ const open_search = async () => {
       </form>
     </div>
 
-    <!-- Navigation -->
     <nav class="shrink-0 space-y-0.5 px-3" aria-label="Navigation principale">
       <NuxtLink
         v-for="item in nav_items"
@@ -143,7 +139,6 @@ const open_search = async () => {
 
     <div class="border-ui-text/10 mx-5 my-3 shrink-0 border-t" />
 
-    <!-- Subscriptions -->
     <SubscriptionsSidebar v-if="!collapsed" class="min-h-0 flex-1" />
 
     <ul v-else class="min-h-0 flex-1 [scrollbar-width:none] space-y-1.5 overflow-y-auto px-3">
@@ -171,7 +166,6 @@ const open_search = async () => {
       </li>
     </ul>
 
-    <!-- Account -->
     <div class="border-ui-text/10 shrink-0 space-y-0.5 border-t p-3">
       <NuxtLink
         to="/settings"

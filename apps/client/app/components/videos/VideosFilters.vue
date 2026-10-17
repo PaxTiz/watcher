@@ -58,7 +58,6 @@ const reset = () => {
   }
 };
 
-// An active filter shows its value with a light accent, an inactive one stays neutral
 const chip_ui = (active: boolean) => ({
   button: {
     root: active ? "!bg-alt/12 !ring-alt/30 [&_svg]:text-alt" : "",

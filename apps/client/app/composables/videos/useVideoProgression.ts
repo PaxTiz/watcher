@@ -3,7 +3,6 @@ import type { VideoResource } from "@watcher/common";
 import Plyr from "plyr";
 import type { ShallowRef } from "vue";
 
-// Below this, there is nothing worth resuming
 const RESUME_THRESHOLD = 0.01;
 
 export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr | undefined>) => {
@@ -18,7 +17,6 @@ export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr 
         return;
       }
 
-      // Duration is only reliable once playback started (especially for YouTube embeds)
       if (video.viewing_progression > RESUME_THRESHOLD) {
         instance.once("playing", () => {
           if (instance.currentTime < 1) {
@@ -35,7 +33,6 @@ export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr 
         }
 
         latest_progress = progression;
-        // A plain request: each value must be sent, nothing is shared or cached
         await $fetch(`/api/videos/${video.id}/progress`, {
           method: "POST",
           body: { progression },

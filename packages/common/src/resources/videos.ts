@@ -21,7 +21,6 @@ export type VideoResource = {
 
   thumbnail: string;
 
-  // Colours of the thumbnail, null until computed
   palette: VideoPalette | null;
 
   created_at: string;

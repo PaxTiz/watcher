@@ -112,7 +112,6 @@ useLiquidGlass(controls);
 watch(plyr_instance, (instance) => {
   instance?.on("ended", () => emit("ended"));
 
-  // Plyr builds its own controls: they become a floating glass capsule
   const element = (instance as { elements?: { controls?: HTMLElement } } | undefined)?.elements
     ?.controls;
   if (element) {

@@ -20,7 +20,6 @@ const { filters } = useVideosFilters(
 const http_key = computed(() => `subscription_${subscription.id}_videos`);
 const { data: videos, status } = await useVideos(filters, { key: http_key });
 
-// The channel's latest video lights the page
 usePageAmbient(() => videos.value?.items[0]);
 
 onUnmounted(() => {

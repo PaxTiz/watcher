@@ -3,7 +3,6 @@ import { async_pool } from "#shared/utils/random";
 
 const BATCH_SIZE = 200;
 
-// Fills the palette of videos synced before palettes existed: GET /_nitro/tasks/videos:palettes in dev
 export default defineTask({
   meta: {
     name: "videos:palettes",

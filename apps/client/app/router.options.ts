@@ -1,6 +1,5 @@
 import type { RouterConfig } from "@nuxt/schema";
 
-// Scroll positions of the content panel, by page, to restore them on back/forward
 const positions = new Map<string, number>();
 
 export default {
@@ -17,7 +16,6 @@ export default {
       return false;
     }
 
-    // Wait for the new page to be rendered before scrolling its panel
     return new Promise((resolve) => {
       let done = false;
       const scroll = () => {
@@ -35,7 +33,6 @@ export default {
       };
 
       nuxt_app.hooks.hookOnce("page:finish", scroll);
-      // Never leave the navigation hanging if the page doesn't report back
       setTimeout(scroll, 1500);
     });
   },

@@ -1,6 +1,5 @@
 import { toast } from "vue-sonner";
 
-// Manual sync of the subscriptions and their videos, shared by the account menu and the settings
 export const useSynchronization = () => {
   const is_synchronising = useState("synchronization.running", () => false);
   const { forceRefresh: refresh_subscriptions } = useSubscriptions();

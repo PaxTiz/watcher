@@ -1,13 +1,10 @@
-/* Projection: the interface stays quiet and takes its light from the videos. */
 @theme {
-  /* Interface (navigation, controls, settings), content (videos, channels), and display titles */
   --font-sans: "Geist", "Segoe UI", system-ui, sans-serif;
   --font-content: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --font-display: "Unbounded", "Instrument Sans", system-ui, sans-serif;
 }
 
 :root {
-  /* The frame behind the sidebar stays dark in both themes, the content panel follows the theme */
   --frame: #08090c;
   --panel-edge: rgb(255 255 255 / 0.06);
 
@@ -20,12 +17,9 @@
   --navbar-bg: rgba(255, 255, 255, 0.72);
   --navbar-border: rgba(18, 21, 33, 0.08);
 
-  /* Tint of the video in focus (see useAmbient), as "r g b" */
   --tint: 254 100 11;
-  /* Thumbnail colours look muddy over large light surfaces: no ambient light in the light theme */
   --ambient-opacity: 0;
 
-  /* Liquid glass */
   --glass-fill: rgb(255 255 255 / 0.45);
   --glass-rim: rgb(255 255 255 / 0.95);
   --glass-rim-low: rgb(255 255 255 / 0.6);
@@ -74,10 +68,6 @@ body {
   letter-spacing: -0.015em;
 }
 
-/*
- * Liquid glass: nearly clear, sharp highlights on the rim, slightly lensed edges where supported
- * (see useLiquidGlass). Reserved for controls floating over content.
- */
 @utility liquid-glass {
   background-color: var(--glass-fill);
   backdrop-filter: blur(3px) saturate(1.5) brightness(1.05);
@@ -87,7 +77,6 @@ body {
     inset 0 0 18px var(--glass-glow),
     var(--glass-shadow);
 
-  /* For bars holding text and icons over any content: frosted enough to stay readable */
   &.liquid-glass-dense {
     background-color: var(--glass-dense-fill);
     backdrop-filter: blur(20px) saturate(1.8);
@@ -102,7 +91,6 @@ body {
   backdrop-filter: blur(3px) saturate(1.5) brightness(1.05);
 }
 
-/* Per-video tones, set from a video's colour (see video_tones) */
 @utility video-tinted {
   --c: var(--tint);
   --c-vivid: var(--tint);

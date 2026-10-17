@@ -7,7 +7,6 @@ import { useLogger } from "#framework";
 
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads");
 
-// Small enough to be fast, large enough to keep the image's main areas
 const SAMPLE_WIDTH = 48;
 const SAMPLE_HEIGHT = 27;
 
@@ -55,10 +54,6 @@ const hsl = (h: number, s: number, l: number) => {
     .join(" ");
 };
 
-/**
- * Average colour of a set of pixels, weighted towards saturated mid-tones so that
- * the dominant hue wins over blacks, whites and greys.
- */
 const weighted_average = (data: Buffer, columns: readonly [number, number]): Rgb => {
   let r = 0;
   let g = 0;
@@ -82,7 +77,6 @@ const weighted_average = (data: Buffer, columns: readonly [number, number]): Rgb
   return [r / total, g / total, b / total];
 };
 
-// Thumbnails are often dull: saturation is pushed up and lightness fixed per role
 const boosted_saturation = (s: number) => Math.min(1, Math.max(0.45, s * 1.4));
 
 export const extract_image_palette = async (path: string): Promise<VideoPalette | null> => {

@@ -9,7 +9,6 @@ const { label: page_label } = useBreadcrumb();
 const crumb_pill = useTemplateRef("crumb_pill");
 useLiquidGlass(crumb_pill);
 
-// The section the page belongs to, then the item it shows (set by the page)
 const section = computed(() => {
   const name = route.name as string;
 

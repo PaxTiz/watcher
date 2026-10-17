@@ -1,4 +1,3 @@
-// Search shared by the sidebar and the mobile drawer: it always lands on the videos page
 export const useGlobalSearch = () => {
   const route = useRoute();
 
@@ -17,7 +16,6 @@ export const useGlobalSearch = () => {
   const go_to_results = async () => {
     const query = search.value.trim() || undefined;
 
-    // Keep the other active filters when searching from the videos page
     await navigateTo(
       {
         path: "/videos",
@@ -27,7 +25,6 @@ export const useGlobalSearch = () => {
     );
   };
 
-  // Live search only makes sense when results are already on screen
   const on_input = useDebounceFn(async () => {
     if (is_videos_page.value) {
       await go_to_results();

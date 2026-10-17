@@ -122,10 +122,6 @@
   }
 }
 
-/*
- * Controls: one shape language for fields, menus and their items.
- * Colours are mixed from the theme tokens so they work in both themes and in a themed subtree.
- */
 input,
 textarea,
 select {

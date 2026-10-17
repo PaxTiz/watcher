@@ -73,7 +73,6 @@ const SIZES = {
   lg: "h-12 px-5 text-[15px]",
 };
 
-// Icon-only buttons are round
 const ICON_ONLY_SIZES = {
   sm: "w-8 !px-0",
   normal: "w-10 !px-0",

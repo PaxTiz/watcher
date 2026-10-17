@@ -8,7 +8,6 @@ definePageMeta({ name: pages.videos_index });
 const http_key = "videos_feed";
 const route = useRoute();
 
-// Filters can come from the URL (global search, sidebar "Favoris" link, shared link..)
 const parse_route_filters = async () => {
   const parsed = videosValidatorsSchema.list.query.safeParse({
     ...route.query,

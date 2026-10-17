@@ -1,4 +1,3 @@
-// The app scrolls inside its content panel, not the window (see layouts/default.vue)
 const container = shallowRef<HTMLElement | null>(null);
 
 export const useAppScroll = () => {

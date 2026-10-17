@@ -1,6 +1,5 @@
 import type { VideoPalette } from "@watcher/common";
 
-// CSS variables consumed by the `video-tinted` utility and `rgb(var(--c) / x)` colours
 export const video_tones_style = (palette: VideoPalette | null | undefined) => {
   if (!palette) {
     return {};
@@ -15,10 +14,6 @@ export const video_tones_style = (palette: VideoPalette | null | undefined) => {
   };
 };
 
-/**
- * A soft light made of the thumbnail's left, center and right colours. Plain gradients:
- * they look like a blurred thumbnail at a fraction of the rendering cost.
- */
 export const palette_light = (palette: VideoPalette | null | undefined, opacity = 0.5) => {
   if (!palette) {
     return "none";
@@ -33,7 +28,6 @@ export const palette_light = (palette: VideoPalette | null | undefined, opacity 
   ].join(", ");
 };
 
-// The same light, spread around an element instead of falling from the top (the player's ambilight)
 export const palette_glow = (palette: VideoPalette | null | undefined, opacity = 0.5) => {
   if (!palette) {
     return "none";

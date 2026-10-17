@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 const { palette } = useAmbient();
 
-// Two layers so a new light fades in over the previous one
 const layers = ref<[string, string]>(["none", "none"]);
 const active_layer = ref<0 | 1>(0);
 

@@ -4,7 +4,6 @@ type AmbientSource = Pick<VideoResource, "palette">;
 
 let owners = 0;
 
-// The app takes its light from the page's main video, if it has one
 export const useAmbient = () => {
   const palette = useState<VideoResource["palette"]>("ambient.palette", () => null);
   const owner = useState<number>("ambient.owner", () => 0);
@@ -12,10 +11,7 @@ export const useAmbient = () => {
   return { palette, owner };
 };
 
-/**
- * Lights the app with the page's main video while the page is displayed.
- * The next page may mount before this one unmounts, hence the owner check.
- */
+// The next page may mount before this one unmounts, hence the owner check
 export const usePageAmbient = (getter: () => AmbientSource | null | undefined) => {
   const { palette, owner } = useAmbient();
   const id = ++owners;

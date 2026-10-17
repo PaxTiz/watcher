@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 const route = useRoute();
 
-// The video page needs the width: it shows the rail unless unfolded for the visit
 const is_video_page = computed(() => (route.name as string) === pages.videos_single);
 const collapsed_preference = useCookie<boolean>("watcher-sidebar-collapsed", {
   default: () => false,
@@ -31,7 +30,7 @@ onMounted(() => {
   container.value = scroller.value;
 });
 
-// The glass lens is recomputed on every frame while content moves under it: pause it during scroll
+// The glass lens is recomputed on every frame while content moves under it
 const { isScrolling } = useScroll(scroller, { idle: 150 });
 watch(isScrolling, (scrolling) => {
   document.documentElement.toggleAttribute("data-scrolling", scrolling);
@@ -39,7 +38,6 @@ watch(isScrolling, (scrolling) => {
 </script>
 
 <template>
-  <!-- Frame: the sidebar sits on it, the content lives in an inset panel -->
   <div class="flex h-dvh bg-[var(--frame)] lg:py-2 lg:pr-2">
     <AppSidebar
       class="dark hidden shrink-0 lg:flex"
@@ -51,7 +49,6 @@ watch(isScrolling, (scrolling) => {
       class="relative isolate min-w-0 flex-1 overflow-hidden bg-[var(--background)] lg:rounded-2xl lg:shadow-[0_0_0_1px_var(--panel-edge)]"
     >
       <div ref="scroller" class="relative isolate h-full overflow-y-auto overscroll-contain">
-        <!-- Inside the scrolled content, so the light scrolls away with the top of the page -->
         <AppAmbient />
 
         <AppTopbar />

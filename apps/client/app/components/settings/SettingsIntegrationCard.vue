@@ -8,7 +8,6 @@ const { integration } = defineProps<{ integration: Integration }>();
 
 const is_linked = computed(() => is_integration_linked(integration.id));
 
-// Only Bluesky gives a human-readable identifier, the others are numeric ids
 const status = computed(() => {
   if (!is_linked.value) {
     return "Non connecté";
