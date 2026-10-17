@@ -20,7 +20,7 @@ onKeyStroke("Escape", () => __CLOSE__?.());
 <template>
   <div>
     <div
-      class="overlay-backdrop fixed top-0 left-0 z-101 h-full w-full bg-black/80 opacity-100 transition-all duration-200"
+      class="overlay-backdrop fixed top-0 left-0 z-101 h-full w-full bg-black/55 opacity-100 backdrop-blur-[2px] transition-all duration-200"
     >
       <!-- Backdrop  -->
     </div>
@@ -31,7 +31,7 @@ onKeyStroke("Escape", () => __CLOSE__?.());
     >
       <div
         ref="overlay"
-        class="bg-background relative flex w-full flex-col justify-between overflow-hidden rounded p-8 shadow shadow-black"
+        class="bg-ui-bg text-ui-text relative flex w-full flex-col justify-between overflow-hidden rounded-3xl p-6 shadow-[0_0_0_1px_var(--ui-border),0_30px_70px_-20px_rgb(0_0_0/0.55)] md:p-7"
         :class="[ui?.body]"
       >
         <slot />

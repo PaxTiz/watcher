@@ -1,53 +1,39 @@
 <script lang="ts" setup>
 import { toast } from "vue-sonner";
 
-const is_syncing = ref(false);
-
 const { fetch } = useUserSession();
 
+const is_syncing = ref(false);
 const abort_controller = new AbortController();
 
-const on_sync = async () => {
-  const toast_id = toast.loading("Synchronisation en cours", {
-    dismissible: false,
-    description: "Ne quittez pas cette page, vous serez redirigé automatiquement.",
-  });
+const onboard = async (sync: boolean) => {
+  const toast_id = sync
+    ? toast.loading("Synchronisation en cours", {
+        dismissible: false,
+        description: "Restez sur cette page, vous serez redirigé automatiquement.",
+      })
+    : undefined;
 
-  is_syncing.value = true;
-  await usePost(
-    "/api/users/me/onboard",
-    {
-      key: "onboard_with_sync",
+  is_syncing.value = sync;
+
+  try {
+    await $fetch("/api/users/me/onboard", {
       method: "POST",
-      body: { sync: true },
+      body: { sync },
       signal: abort_controller.signal,
-    },
-    { immediate: true },
-  );
-  is_syncing.value = false;
+    });
 
-  toast.success("Synchronisation terminée !", { id: toast_id });
+    if (sync) {
+      toast.success("Synchronisation terminée", { id: toast_id });
+    }
 
-  await fetch();
-
-  return navigateTo("/");
-};
-
-const on_onboard = async () => {
-  await usePost(
-    "/api/users/me/onboard",
-    {
-      key: "onboard_without_sync",
-      method: "POST",
-      body: { sync: false },
-      signal: abort_controller.signal,
-    },
-    { immediate: true },
-  );
-
-  await fetch();
-
-  return navigateTo("/");
+    await fetch();
+    await navigateTo("/");
+  } catch {
+    toast.error("Une erreur est survenue, réessayez dans quelques instants", { id: toast_id });
+  } finally {
+    is_syncing.value = false;
+  }
 };
 
 onUnmounted(() => {
@@ -56,42 +42,28 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <WatcherCard class="p-6">
-    <div class="mb-6">
-      <h2 class="text-ui-text flex items-center gap-2 text-xl font-bold">
-        <span
-          class="bg-alt/10 text-alt flex size-7 items-center justify-center rounded text-sm font-bold"
-        >
-          2
-        </span>
-
-        Synchronisez vos abonnements
-      </h2>
-
-      <p class="text-ui-text-muted mt-2 text-sm">
-        Watcher va récupérer automatiquement vos abonnements sur les services connectés ci-dessus
-        pour importer les dernières vidéos.
-      </p>
-    </div>
-
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <OnboardingStep
+    :step="2"
+    title="Synchronisez vos abonnements"
+    description="Watcher récupère vos abonnements sur les comptes associés et importe leurs dernières vidéos."
+  >
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
       <WatcherButton
-        :label="is_syncing ? 'Synchronisation en cours...' : 'Synchroniser mes abonnements'"
-        color="secondary"
+        :label="is_syncing ? 'Synchronisation en cours…' : 'Synchroniser mes abonnements'"
+        icon="lucide:refresh-cw"
+        color="solid"
         size="lg"
         class="w-full sm:w-auto"
-        icon="lucide:refresh-cw"
         :loading="is_syncing"
-        @click="on_sync"
+        @click="onboard(true)"
       />
-
-      <button
-        class="text-ui-text-muted hover:text-ui-text cursor-pointer py-2 text-center text-sm font-medium hover:underline"
+      <WatcherButton
+        label="Plus tard"
+        color="ghost"
+        size="lg"
         :disabled="is_syncing"
-        @click="on_onboard"
-      >
-        Passer cette étape pour le moment
-      </button>
+        @click="onboard(false)"
+      />
     </div>
-  </WatcherCard>
+  </OnboardingStep>
 </template>

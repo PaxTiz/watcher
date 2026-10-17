@@ -23,6 +23,12 @@
 
   --radius-*: initial;
   --radius: 0.5rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
 
   --color-background-dark: #11111b;
 
@@ -116,27 +122,100 @@
   }
 }
 
-input {
-  background-color: var(--ui-bg);
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius);
-  color: var(--ui-text);
+/*
+ * Controls: one shape language for fields, menus and their items.
+ * Colours are mixed from the theme tokens so they work in both themes and in a themed subtree.
+ */
+input,
+textarea,
+select {
+  color: inherit;
+  background-color: transparent;
 
   &::placeholder {
     color: var(--ui-text-muted);
   }
+}
 
-  &.size__normal {
-    padding: --spacing(1) --spacing(2);
-    min-height: 38px;
-  }
-  &.size__sm {
-    padding: --spacing(1);
-    font-size: 0.9rem;
-    min-height: 32px;
+@utility control-field {
+  height: 2.5rem;
+  padding-inline: 0.875rem;
+  border-radius: 0.75rem;
+  background-color: color-mix(in oklab, var(--ui-text) 5%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ui-text) 10%, transparent);
+  color: var(--ui-text);
+  font-size: 0.875rem;
+  transition:
+    box-shadow 0.15s,
+    background-color 0.15s;
+
+  &:hover {
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ui-text) 18%, transparent);
   }
 
-  &:focus {
-    outline-color: var(--color-alt);
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      inset 0 0 0 1px var(--color-alt),
+      0 0 0 3px color-mix(in oklab, var(--color-alt) 22%, transparent);
   }
+}
+
+@utility menu-surface {
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
+  border-radius: 0.875rem;
+  padding: 0.375rem;
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--ui-text) 9%, transparent),
+    0 18px 40px -14px rgb(0 0 0 / 0.45);
+}
+
+@utility menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  text-align: start;
+  color: var(--ui-text);
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.12s;
+
+  & svg {
+    flex-shrink: 0;
+    color: var(--ui-text-muted);
+  }
+
+  &:hover,
+  &[data-highlighted],
+  &[data-state="open"] {
+    background-color: color-mix(in oklab, var(--ui-text) 7%, transparent);
+  }
+
+  &[data-disabled],
+  &:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
+@utility menu-label {
+  padding: 0.5rem 0.625rem 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-text-muted);
+}
+
+@utility menu-separator {
+  height: 1px;
+  margin: 0.375rem 0.25rem;
+  background-color: color-mix(in oklab, var(--ui-text) 9%, transparent);
 }

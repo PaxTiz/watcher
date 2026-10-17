@@ -84,7 +84,7 @@ const { dates, numbers } = useFormatter();
             </div>
           </div>
 
-          <div class="min-w-0">
+          <div class="font-content min-w-0">
             <p
               v-if="video.id === nextId"
               class="mb-0.5 text-[10.5px] font-bold tracking-wider text-[rgb(var(--c-ink))] uppercase dark:text-[rgb(var(--c-light))]"

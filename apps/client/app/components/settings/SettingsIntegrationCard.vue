@@ -7,55 +7,49 @@ const { is_linked: is_integration_linked, on_link, on_disconnect } = useIntegrat
 const { integration } = defineProps<{ integration: Integration }>();
 
 const is_linked = computed(() => is_integration_linked(integration.id));
+
+// Only Bluesky gives a human-readable identifier, the others are numeric ids
+const status = computed(() => {
+  if (!is_linked.value) {
+    return "Non connecté";
+  }
+
+  if (integration.id === "bluesky" && user.value?.bluesky?.handle) {
+    return `Connecté · @${user.value.bluesky.handle}`;
+  }
+
+  return "Connecté";
+});
 </script>
 
 <template>
-  <div
-    class="border-ui-border flex flex-col justify-between gap-4 rounded border p-4 sm:flex-row sm:items-center"
-  >
-    <div class="flex items-center gap-4">
-      <div
-        :class="[
-          integration.bgColor,
-          integration.color,
-          'flex h-12 w-12 shrink-0 items-center justify-center rounded',
-        ]"
-      >
-        <Icon :name="integration.icon" class="text-2xl" />
-      </div>
-
-      <div>
-        <h3 class="text-ui-text font-semibold">{{ integration.name }}</h3>
-        <p v-if="is_linked" class="text-ui-text-muted mt-1 font-mono text-xs">
-          {{ user?.integrations?.[integration.id] }}
-        </p>
-      </div>
-    </div>
-
-    <div class="flex items-center justify-end gap-3">
+  <SettingsRow :title="integration.name">
+    <template #icon>
       <span
-        v-if="is_linked"
-        class="inline-flex items-center gap-1.5 rounded border border-green-500/20 bg-green-500/10 px-3 py-1 text-xs font-semibold text-green-500"
+        class="flex size-10 shrink-0 items-center justify-center rounded-xl"
+        :class="[integration.bgColor, integration.color]"
       >
-        <span class="size-1.5 rounded bg-green-500" />
-        Connecté
+        <Icon :name="integration.icon" class="text-lg" />
       </span>
+    </template>
 
-      <WatcherButton
-        v-if="is_linked"
-        label="Déconnecter"
-        size="sm"
-        @click="() => on_disconnect(integration)"
-      />
+    <template #description>
+      <span class="inline-flex items-center gap-1.5">
+        <span
+          class="size-1.5 rounded-full"
+          :class="is_linked ? 'bg-green-500' : 'bg-ui-text-muted/50'"
+        />
+        {{ status }}
+      </span>
+    </template>
 
-      <WatcherButton
-        v-else
-        :label="`Associer`"
-        size="sm"
-        color="primary"
-        class="w-full sm:w-auto"
-        @click="on_link"
-      />
-    </div>
-  </div>
+    <WatcherButton
+      v-if="is_linked"
+      label="Déconnecter"
+      size="sm"
+      color="ghost"
+      @click="on_disconnect(integration)"
+    />
+    <WatcherButton v-else label="Associer" size="sm" color="solid" @click="on_link(integration)" />
+  </SettingsRow>
 </template>

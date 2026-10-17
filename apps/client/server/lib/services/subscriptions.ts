@@ -146,4 +146,21 @@ export default class SubscriptionsService extends AbstractService {
       )
       .execute();
   }
+
+  async show(user: User, id_or_slug: string) {
+    const database = useDatabase();
+
+    const is_params_uuid = is_uuid(id_or_slug);
+    await database
+      .updateTable("user_subscriptions")
+      .from("subscriptions")
+      .set({ is_hidden: false })
+      .whereRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
+      .where("user_id", "=", user.id)
+      .$if(is_params_uuid, (qb) => qb.where("subscriptions.id", "=", id_or_slug))
+      .$if(!is_params_uuid, (qb) =>
+        qb.where("subscriptions.slug", "=", parse_slug_params(id_or_slug)),
+      )
+      .execute();
+  }
 }

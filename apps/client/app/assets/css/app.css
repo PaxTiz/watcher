@@ -1,15 +1,9 @@
 /* Projection: the interface stays quiet and takes its light from the videos. */
 @theme {
-  --font-sans: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  /* Interface (navigation, controls, settings), content (videos, channels), and display titles */
+  --font-sans: "Geist", "Segoe UI", system-ui, sans-serif;
+  --font-content: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --font-display: "Unbounded", "Instrument Sans", system-ui, sans-serif;
-
-  /* @watcher/ui resets the radius scale, the app needs it back */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  --radius-3xl: 1.5rem;
 }
 
 :root {
@@ -38,6 +32,7 @@
   --glass-glow: rgb(255 255 255 / 0.45);
   --glass-shadow: 0 0 0 1px rgb(18 21 33 / 0.06), 0 12px 32px -16px rgb(18 21 33 / 0.3);
   --glass-input: rgb(255 255 255 / 0.75);
+  --glass-dense-fill: rgb(255 255 255 / 0.8);
 }
 
 .dark {
@@ -57,6 +52,7 @@
   --glass-rim-low: rgb(255 255 255 / 0.14);
   --glass-glow: rgb(255 255 255 / 0.05);
   --glass-input: rgb(127 127 127 / 0.14);
+  --glass-dense-fill: rgb(20 22 32 / 0.74);
   --glass-shadow: 0 12px 32px -14px rgb(0 0 0 / 0.6);
 }
 
@@ -90,6 +86,12 @@ body {
     inset -1px -1px 0 -0.5px var(--glass-rim-low),
     inset 0 0 18px var(--glass-glow),
     var(--glass-shadow);
+
+  /* For bars holding text and icons over any content: frosted enough to stay readable */
+  &.liquid-glass-dense {
+    background-color: var(--glass-dense-fill);
+    backdrop-filter: blur(20px) saturate(1.8);
+  }
 
   &.liquid-glass-lens {
     backdrop-filter: var(--glass-lens) blur(2px) saturate(1.5) brightness(1.05);

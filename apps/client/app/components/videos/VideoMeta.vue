@@ -102,7 +102,7 @@ const toggle_favorite = async () => {
           :src="video.author.channel.logo"
           alt=""
         />
-        <div class="min-w-0">
+        <div class="font-content min-w-0">
           <p
             class="text-ui-text truncate font-medium transition-colors group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
           >
@@ -130,6 +130,7 @@ const toggle_favorite = async () => {
           icon="lucide:external-link"
           :to="video.url"
           external
+          new-tab
         />
       </div>
     </div>
@@ -142,13 +143,13 @@ const toggle_favorite = async () => {
       }"
       @click="on_description_click"
     >
-      <p class="text-ui-text font-semibold">
+      <p class="text-ui-text font-medium">
         Publiée {{ dates.ago(video.created_at) }} · {{ dates.format(video.created_at) }}
       </p>
 
       <div
         v-if="description"
-        class="text-ui-text mt-2 leading-relaxed break-words [&>p+p]:mt-3"
+        class="font-content text-ui-text mt-2 leading-relaxed break-words [&>p+p]:mt-3"
         :class="{
           'max-h-16 overflow-hidden [mask-image:linear-gradient(to_bottom,black_40%,transparent)]':
             !is_expanded,

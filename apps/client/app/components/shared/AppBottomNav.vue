@@ -4,9 +4,6 @@ import { LazySubscriptionsSidebarSlideover } from "#components";
 const route = useRoute();
 const overlay = useWatcherOverlay();
 
-const nav = useTemplateRef("nav");
-useLiquidGlass(nav);
-
 const is_favorites_feed = computed(
   () => route.path === "/videos" && route.query.is_favorite === "true",
 );
@@ -35,8 +32,7 @@ const open_subscriptions = () => {
 <template>
   <!-- A floating glass capsule over the content, like the player controls -->
   <nav
-    ref="nav"
-    class="liquid-glass fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] z-50 grid h-16 grid-cols-4 rounded-full px-1 lg:hidden"
+    class="liquid-glass liquid-glass-dense fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] z-50 grid h-16 grid-cols-4 rounded-full px-1 lg:hidden"
     aria-label="Navigation principale"
   >
     <NuxtLink

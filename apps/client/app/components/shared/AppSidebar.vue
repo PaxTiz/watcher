@@ -104,7 +104,7 @@ const open_search = async () => {
             v-model="search"
             type="search"
             placeholder="Rechercher"
-            class="h-9 w-full !rounded-lg !border-transparent !bg-white/[0.07] !pr-8 !pl-9 text-sm [&::-webkit-search-cancel-button]:hidden"
+            class="control-field !h-9 w-full !rounded-lg !pr-8 !pl-9 [&::-webkit-search-cancel-button]:hidden"
             @input="on_input"
           />
           <button
@@ -132,8 +132,8 @@ const open_search = async () => {
         :class="[
           collapsed ? 'mx-auto size-10 justify-center px-0' : 'px-3',
           item.active
-            ? 'text-ui-text [&_svg]:text-alt bg-white/10 font-medium'
-            : 'text-ui-text-muted hover:text-ui-text hover:bg-white/[0.06]',
+            ? 'text-ui-text [&_svg]:text-alt bg-ui-text/10 font-medium'
+            : 'text-ui-text-muted hover:text-ui-text hover:bg-ui-text/[0.06]',
         ]"
       >
         <Icon :name="item.icon" class="shrink-0 text-lg" />
@@ -141,7 +141,7 @@ const open_search = async () => {
       </NuxtLink>
     </nav>
 
-    <div class="mx-5 my-3 shrink-0 border-t border-white/10" />
+    <div class="border-ui-text/10 mx-5 my-3 shrink-0 border-t" />
 
     <!-- Subscriptions -->
     <SubscriptionsSidebar v-if="!collapsed" class="min-h-0 flex-1" />
@@ -151,8 +151,8 @@ const open_search = async () => {
         <NuxtLink
           :to="`/subscriptions/${sub.slug}`"
           :title="sub.name"
-          class="relative mx-auto block size-10 rounded-full p-1 transition-colors hover:bg-white/10"
-          :class="{ 'bg-white/10': route.path === `/subscriptions/${sub.slug}` }"
+          class="hover:bg-ui-text/10 relative mx-auto block size-10 rounded-full p-1 transition-colors"
+          :class="{ 'bg-ui-text/10': route.path === `/subscriptions/${sub.slug}` }"
         >
           <NuxtImg
             class="size-8 rounded-full object-cover"
@@ -172,14 +172,14 @@ const open_search = async () => {
     </ul>
 
     <!-- Account -->
-    <div class="shrink-0 space-y-0.5 border-t border-white/10 p-3">
+    <div class="border-ui-text/10 shrink-0 space-y-0.5 border-t p-3">
       <NuxtLink
         to="/settings"
         :title="collapsed ? 'Paramètres' : undefined"
-        class="text-ui-text-muted hover:text-ui-text flex items-center gap-3 rounded-lg py-2 text-sm transition-colors hover:bg-white/[0.06]"
+        class="text-ui-text-muted hover:text-ui-text hover:bg-ui-text/[0.06] flex items-center gap-3 rounded-lg py-2 text-sm transition-colors"
         :class="[
           collapsed ? 'mx-auto size-10 justify-center px-0' : 'px-3',
-          { 'text-ui-text [&_svg]:text-alt bg-white/10 font-medium': route.path === '/settings' },
+          { 'text-ui-text [&_svg]:text-alt bg-ui-text/10 font-medium': route.path === '/settings' },
         ]"
       >
         <Icon name="lucide:settings" class="shrink-0 text-lg" />

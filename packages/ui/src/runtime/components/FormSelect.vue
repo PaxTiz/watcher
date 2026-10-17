@@ -41,7 +41,7 @@ defineExpose({
     <SelectRoot :model-value="modelValue ?? 'none'" @update:model-value="onUpdateValue">
       <SelectTrigger
         ref="element"
-        class="bg-ui-bg border-ui-border text-ui-text group focus:outline-alt flex min-h-[38px] w-full cursor-pointer items-center justify-between gap-2 rounded border px-2 py-1"
+        class="control-field group flex w-full cursor-pointer items-center justify-between gap-2"
         :class="{ 'ring ring-red-400': hasError }"
       >
         <SelectValue :placeholder="placeholder ?? 'Sélectionner...'" />
@@ -54,15 +54,12 @@ defineExpose({
       <SelectPortal>
         <Transition appear>
           <SelectContent
-            class="bg-ui-bg border-ui-border shadow-ui-border absolute z-1000 mt-2 flex w-max min-w-[var(--reka-select-trigger-width)] flex-col rounded border p-1 shadow dark:shadow-black"
+            class="menu-surface absolute z-1000 mt-2 flex w-max min-w-[var(--reka-select-trigger-width)] flex-col"
             position="popper"
             :side-offset="5"
           >
             <SelectViewport>
-              <SelectItem
-                value="none"
-                class="text-ui-text hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 relative flex cursor-pointer items-center rounded p-1.5 pl-8 text-sm outline-none select-none"
-              >
+              <SelectItem value="none" class="menu-item relative pl-8 select-none">
                 <span class="absolute left-2.5 flex h-3.5 w-3.5 items-center justify-center">
                   <SelectItemIndicator>
                     <Icon name="lucide:check" class="size-4" />
@@ -76,7 +73,7 @@ defineExpose({
                 :key="item.value"
                 :value="item.value"
                 :disabled="item.disabled"
-                class="text-ui-text hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 relative flex cursor-pointer items-center rounded p-1.5 pl-8 text-sm outline-none select-none"
+                class="menu-item relative pl-8 select-none"
               >
                 <span class="absolute left-2.5 flex h-3.5 w-3.5 items-center justify-center">
                   <SelectItemIndicator>

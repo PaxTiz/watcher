@@ -2,107 +2,150 @@
 import {
   type SubscriptionResource,
   type VideoCurrentRefreshType,
+  type VideoPalette,
   VIDEO_CURRENT_REFRESH_SYMBOL,
 } from "@watcher/common";
 import { toast } from "vue-sonner";
 
+const { subscription } = defineProps<{
+  subscription: SubscriptionResource;
+  totalVideos?: number;
+  palette?: VideoPalette | null;
+}>();
+
 const refresh = inject<VideoCurrentRefreshType>(VIDEO_CURRENT_REFRESH_SYMBOL);
+const { forceRefresh: refresh_subscriptions } = useSubscriptions();
+const { dates } = useFormatter();
 
-const { subscription } = defineProps<{ subscription: SubscriptionResource }>();
-
-const { forceRefresh } = useSubscriptions();
-
-const { execute: execute_toggle_favorite } = usePost(
-  `/api/subscriptions/${subscription.id}/favorite`,
-  { method: "POST" },
-  { immediate: false },
+const service_name = computed(() =>
+  subscription.channel.service === "youtube" ? "YouTube" : "Twitch",
 );
 
-const toggleFavorite = async () => {
-  await execute_toggle_favorite();
-  await refresh?.();
+const { execute: toggle_favorite_request, status: favorite_status } = usePost(
+  `/api/subscriptions/${subscription.id}/favorite`,
+  { key: `subscriptions.${subscription.id}.favorite`, method: "POST" },
+);
+const { execute: hide_request, status: hide_status } = usePost(
+  `/api/subscriptions/${subscription.id}/hide`,
+  { key: `subscriptions.${subscription.id}.hide`, method: "POST" },
+);
+const { execute: show_request, status: show_status } = usePost(
+  `/api/subscriptions/${subscription.id}/show`,
+  { key: `subscriptions.${subscription.id}.show`, method: "POST" },
+);
 
-  if (subscription.is_favorite) {
-    toast.success(`${subscription.name} a été ajouté à vos favoris`);
+const toggle_favorite = async () => {
+  const was_favorite = subscription.is_favorite;
+  await toggle_favorite_request();
+  await Promise.all([refresh?.(), refresh_subscriptions()]);
+
+  toast.success(
+    was_favorite
+      ? `${subscription.name} a été retiré de vos favoris`
+      : `${subscription.name} a été ajouté à vos favoris`,
+  );
+};
+
+const toggle_hidden = async () => {
+  if (subscription.is_hidden) {
+    await show_request();
   } else {
-    toast.success(`${subscription.name} a été retiré de vos favoris`);
+    const ok = await useWatcherConfirm({
+      title: "Masquer la chaîne",
+      description: `Les vidéos de ${subscription.name} n'apparaîtront plus dans votre flux. Vous pourrez la réafficher depuis cette page.`,
+      confirmLabel: "Masquer",
+      cancelLabel: "Annuler",
+    });
+    if (!ok) {
+      return;
+    }
+
+    await hide_request();
   }
 
-  await forceRefresh();
+  await Promise.all([refresh?.(), refresh_subscriptions()]);
 };
 </script>
 
 <template>
-  <div class="mb-12 flex flex-col items-center gap-8 md:flex-row md:items-start">
+  <header
+    class="video-tinted relative isolate overflow-hidden rounded-3xl p-5 shadow-[0_0_0_1px_var(--ui-border)] md:p-7 dark:shadow-[inset_0_0_0_1px_rgb(var(--c-light)/0.1)]"
+    :style="video_tones_style(palette)"
+  >
     <div
-      class="border-ui-border relative h-40 w-40 shrink-0 overflow-hidden rounded-full border-4 shadow-xl"
+      class="pointer-events-none absolute inset-0 -z-10 opacity-60 dark:opacity-100"
+      :style="{ backgroundImage: palette_light(palette, 0.32) }"
+    />
+
+    <div class="flex flex-col gap-5 md:flex-row md:items-center">
+      <NuxtImg
+        class="size-20 shrink-0 rounded-full object-cover shadow-[0_0_0_3px_var(--background),0_0_0_4.5px_rgb(var(--c)/0.7)] md:size-24"
+        format="avif,webp"
+        width="96"
+        height="96"
+        :src="subscription.channel.logo"
+        :alt="`Logo de ${subscription.name}`"
+      />
+
+      <div class="min-w-0 flex-1">
+        <h1 class="page-title truncate md:text-3xl">{{ subscription.name }}</h1>
+
+        <p class="text-ui-text-muted mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+          <span class="text-ui-text inline-flex items-center gap-1.5">
+            <Icon
+              :name="
+                subscription.channel.service === 'youtube'
+                  ? 'fa7-brands:youtube'
+                  : 'fa7-brands:twitch'
+              "
+              :class="
+                subscription.channel.service === 'youtube' ? 'text-[#ff0033]' : 'text-[#9146ff]'
+              "
+            />
+            {{ service_name }}
+          </span>
+          <template v-if="totalVideos !== undefined">
+            <span aria-hidden="true">·</span>
+            <span>{{ totalVideos }} vidéo{{ totalVideos > 1 ? "s" : "" }}</span>
+          </template>
+          <template v-if="subscription.last_video_at">
+            <span aria-hidden="true">·</span>
+            <span>Dernière vidéo {{ dates.ago(subscription.last_video_at) }}</span>
+          </template>
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <WatcherButton
+          :color="subscription.is_favorite ? 'neutral' : 'solid'"
+          :icon="subscription.is_favorite ? 'lucide:star-off' : 'lucide:star'"
+          :label="subscription.is_favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+          :loading="favorite_status === 'pending'"
+          :disabled="subscription.is_hidden"
+          @click="toggle_favorite"
+        />
+        <WatcherButton
+          :icon="subscription.is_hidden ? 'lucide:eye' : 'lucide:eye-off'"
+          :label="subscription.is_hidden ? 'Réafficher' : 'Masquer'"
+          :loading="hide_status === 'pending' || show_status === 'pending'"
+          @click="toggle_hidden"
+        />
+        <WatcherButton
+          icon="lucide:external-link"
+          :label="`Ouvrir sur ${service_name}`"
+          :to="subscription.channel.url"
+          external
+          new-tab
+        />
+      </div>
+    </div>
+
+    <p
+      v-if="subscription.is_hidden"
+      class="text-ui-text-muted bg-ui-text/[0.05] mt-5 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm"
     >
-      <SubscriptionImage :subscription="subscription" class="h-full w-full object-cover" />
-    </div>
-
-    <div class="flex-1 text-center md:text-left">
-      <div class="flex flex-col items-center gap-4 md:flex-row md:justify-between">
-        <h1 class="text-ui-text-strong text-2xl font-bold md:text-4xl">{{ subscription.name }}</h1>
-
-        <div class="flex flex-wrap justify-center gap-3">
-          <WatcherButton
-            :label="subscription.is_favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-            :icon="subscription.is_favorite ? 'lucide:star-off' : 'lucide:star'"
-            :color="subscription.is_favorite ? undefined : 'yellow'"
-            @click="toggleFavorite"
-          />
-
-          <WatcherButton
-            label="Ouvrir"
-            icon="lucide:external-link"
-            :to="subscription.channel.url"
-            target="_blank"
-            external
-          />
-        </div>
-      </div>
-
-      <div class="text-ui-text-muted mt-4 flex items-center justify-center gap-4 md:justify-start">
-        <div class="flex items-center gap-1.5">
-          <Icon
-            :name="subscription.channel.service === 'youtube' ? 'lucide:youtube' : 'lucide:twitch'"
-            class="h-5 w-5"
-          />
-          <span class="text-sm font-medium capitalize">{{ subscription.channel.service }}</span>
-        </div>
-
-        <span class="bg-ui-border h-1 w-1 rounded-full" />
-        <span class="text-sm">1.2M abonnés</span>
-        <span class="bg-ui-border h-1 w-1 rounded-full" />
-        <span class="text-sm">450 vidéos</span>
-      </div>
-
-      <p class="text-ui-text mt-6 max-w-3xl text-lg leading-relaxed">
-        Bienvenue sur la page de la chaîne {{ subscription.name }}. Vous pouvez retrouver ici toutes
-        les dernières vidéos publiées sur {{ subscription.channel.service }}. Utilisez les filtres
-        ci-dessous pour affiner votre recherche parmi le contenu de ce créateur.
-      </p>
-
-      <div class="mt-8 flex flex-wrap justify-center gap-6 md:justify-start">
-        <div class="flex flex-col">
-          <span class="text-ui-text-muted text-xs font-bold tracking-wider uppercase">
-            Dernière activité
-          </span>
-          <span class="text-ui-text-strong mt-1">Il y a 2 jours</span>
-        </div>
-
-        <div class="flex flex-col">
-          <span class="text-ui-text-muted text-xs font-bold tracking-wider uppercase">
-            Catégorie principale
-          </span>
-          <span class="text-ui-text-strong mt-1">Divertissement</span>
-        </div>
-
-        <div class="flex flex-col">
-          <span class="text-ui-text-muted text-xs font-bold tracking-wider uppercase">Langue</span>
-          <span class="text-ui-text-strong mt-1">Français</span>
-        </div>
-      </div>
-    </div>
-  </div>
+      <Icon name="lucide:eye-off" class="shrink-0" />
+      Cette chaîne est masquée : ses vidéos n'apparaissent pas dans votre flux.
+    </p>
+  </header>
 </template>

@@ -51,10 +51,10 @@ useMeta({
 </script>
 
 <template>
-  <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-    <div>
+  <div class="mb-6 space-y-4">
+    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
       <h1 class="page-title">{{ title }}</h1>
-      <p v-if="data" class="text-ui-text-muted mt-1 text-sm">
+      <p v-if="data" class="text-ui-text-muted text-sm tabular-nums">
         {{ data.total }} vidéo{{ data.total > 1 ? "s" : "" }}
       </p>
     </div>

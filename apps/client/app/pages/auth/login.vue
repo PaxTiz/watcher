@@ -14,44 +14,71 @@ const onShowBlueskyModal = () => {
   overlay.create(LazyLoginModal).open();
 };
 
+const benefits = [
+  { icon: "lucide:layers", text: "Vos abonnements YouTube et Twitch réunis dans un seul fil" },
+  {
+    icon: "lucide:list-ordered",
+    text: "Dans l'ordre de leur sortie, sans algorithme qui trie pour vous",
+  },
+  { icon: "lucide:history", text: "Reprenez chaque vidéo là où vous l'aviez laissée" },
+];
+
 useMeta({ title: "Connexion" });
 </script>
 
 <template>
-  <div class="relative">
-    <section class="mt-12 md:mt-32">
-      <WatcherLogo />
+  <section>
+    <WatcherLogo class="[&_span]:font-display [&_span]:text-[15px] [&_span]:font-medium" />
 
-      <h1 class="text-ui-text mt-4 text-2xl font-bold md:text-4xl">Connexion</h1>
-      <p class="text-ui-text-muted mt-1">Veuillez vous connecter afin d'accéder à Watcher.</p>
+    <h1
+      class="font-display text-ui-text mt-12 text-3xl leading-tight font-medium text-balance md:text-4xl"
+    >
+      Toutes vos chaînes, au même endroit.
+    </h1>
 
-      <WatcherCard class="mt-4 space-y-2">
-        <WatcherButton
-          label="Connexion avec Bluesky"
-          icon="fa7-brands:bluesky"
-          size="lg"
-          class="w-full"
-          @click="onShowBlueskyModal"
-        />
+    <ul class="mt-6 space-y-3">
+      <li
+        v-for="benefit in benefits"
+        :key="benefit.icon"
+        class="text-ui-text-muted flex gap-3 text-[15px]"
+      >
+        <Icon :name="benefit.icon" class="text-alt mt-0.5 shrink-0 text-lg" />
+        {{ benefit.text }}
+      </li>
+    </ul>
 
-        <WatcherButton
-          to="/api/oauth/google"
-          label="Connexion avec Google"
-          icon="fa7-brands:youtube"
-          size="lg"
-          class="w-full"
-          external
-        />
-
+    <div class="mt-10 space-y-2.5">
+      <WatcherButton
+        to="/api/oauth/google"
+        label="Continuer avec Google"
+        icon="fa7-brands:youtube"
+        size="lg"
+        color="solid"
+        class="w-full"
+        external
+      />
+      <div class="grid grid-cols-2 gap-2.5">
         <WatcherButton
           to="/api/oauth/twitch"
-          label="Connexion avec Twitch"
+          label="Twitch"
           icon="fa7-brands:twitch"
           size="lg"
-          class="w-full"
+          class="w-full [&_svg]:text-[#a970ff]"
           external
         />
-      </WatcherCard>
-    </section>
-  </div>
+        <WatcherButton
+          label="Bluesky"
+          icon="fa7-brands:bluesky"
+          size="lg"
+          class="w-full [&_svg]:text-[#1185fe]"
+          @click="onShowBlueskyModal"
+        />
+      </div>
+    </div>
+
+    <p class="text-ui-text-muted mt-6 flex items-center gap-2 text-[13px]">
+      <Icon name="lucide:lock" class="shrink-0" />
+      Accès en lecture seule à vos abonnements YouTube et Twitch.
+    </p>
+  </section>
 </template>

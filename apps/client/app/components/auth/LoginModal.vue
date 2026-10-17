@@ -13,6 +13,6 @@ defineProps<{
   <WatcherSlideover side="right" :ui="{ content: 'w-full max-w-[500px]' }">
     <LoginForm :title="title" :description="description" :button="button" :link="link" />
 
-    <WatcherButton label="Annuler" class="w-full" @click="emit('close')" />
+    <WatcherButton label="Annuler" color="ghost" size="lg" class="w-full" @click="emit('close')" />
   </WatcherSlideover>
 </template>

@@ -208,7 +208,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
           alt=""
         />
 
-        <div class="min-w-0">
+        <div class="font-content min-w-0">
           <h2
             class="text-ui-text line-clamp-2 text-[15px] leading-snug font-medium transition-colors duration-300 group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
             :title="video.title"

@@ -130,7 +130,8 @@ export default class VideosService extends AbstractService {
           ),
         ),
       )
-      .where("user_subscriptions.is_hidden", "=", false)
+      // Hidden channels leave the feeds, but their own page still lists their videos
+      .$if(!params.subscription_id, (qb) => qb.where("user_subscriptions.is_hidden", "=", false))
       .where("user_subscriptions.user_id", "=", user.id)
       .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
       .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
@@ -167,7 +168,8 @@ export default class VideosService extends AbstractService {
           ),
         ),
       )
-      .where("user_subscriptions.is_hidden", "=", false)
+      // Hidden channels leave the feeds, but their own page still lists their videos
+      .$if(!params.subscription_id, (qb) => qb.where("user_subscriptions.is_hidden", "=", false))
       .where("user_subscriptions.user_id", "=", user.id)
       .offset((params.page - 1) * params.per_page)
       .limit(params.per_page)

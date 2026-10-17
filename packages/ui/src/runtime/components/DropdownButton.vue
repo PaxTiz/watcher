@@ -55,41 +55,33 @@ const DropdownChild = defineComponent(
       return h(
         DropdownMenuSubContent,
         {
-          sideOffset: 8,
-          alignOffset: -4,
+          sideOffset: 6,
+          alignOffset: -6,
           class:
-            "bg-ui-bg border-ui-border relative z-1000 flex max-h-[200px] min-w-[var(--reka-dropdown-menu-trigger-width)] w-max flex-col overflow-y-scroll rounded border p-1 shadow shadow-ui-border dark:shadow-black",
+            "menu-surface relative z-1000 flex max-h-[280px] min-w-[max(var(--reka-dropdown-menu-trigger-width),11rem)] w-max flex-col overflow-y-auto",
         },
         () => [
           childProps.item.allowSearch &&
             h(
               "div",
               {
-                class: "fixed z-1001 top-0 left-0 p-1 w-full bg-ui-bg rounded-t",
+                class: "sticky z-1001 -top-1.5 -mx-1.5 -mt-1.5 mb-1 p-1.5 bg-ui-bg",
               },
               h(FormInput, {
                 placeholder: "Rechercher une chaîne",
-                class: "!bg-ui-border w-full",
+                class: "w-full",
                 size: "sm",
                 modelValue: searchQuery.value,
                 "onUpdate:modelValue": (v) => (searchQuery.value = v),
               }),
             ),
-          childProps.item.allowSearch && h("div", { class: "w-full mt-8" }),
           ...availableChildren.value.map((child) =>
             h(
               DropdownMenuItem,
               {
                 key: child.value,
                 disabled: child.disabled,
-                class:
-                  "flex w-full min-w-[100px] items-center gap-2 rounded p-1.5 text-start text-sm outline-none transition-colors " +
-                  (child.disabled
-                    ? "opacity-50 cursor-not-allowed pointer-events-none text-ui-text-muted"
-                    : "hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 cursor-pointer " +
-                      (childProps.item.value === child.value
-                        ? "bg-alt/10 text-alt"
-                        : "text-ui-text-muted hover:text-ui-text")),
+                class: "menu-item" + (childProps.item.value === child.value ? " font-medium" : ""),
                 onClick: () =>
                   !child.disabled && childProps.onSelect(childProps.item.key, child.value),
               },
@@ -97,7 +89,7 @@ const DropdownChild = defineComponent(
                 child.icon && h(Icon, { name: child.icon }),
                 h("span", { class: "flex-1" }, child.label),
                 childProps.item.value === child.value &&
-                  h(Icon, { name: "lucide:check", class: "ml-auto shrink-0 text-alt" }),
+                  h(Icon, { name: "lucide:check", class: "ml-auto shrink-0 !text-alt" }),
               ],
             ),
           ),
@@ -130,18 +122,12 @@ const DropdownChild = defineComponent(
             <DropdownMenuContent
               :align="align ?? 'start'"
               :side-offset="5"
-              class="bg-ui-bg border-ui-border shadow-ui-border z-1000 flex w-max min-w-[var(--reka-dropdown-menu-trigger-width)] flex-col rounded border p-1 shadow dark:shadow-black"
+              class="menu-surface z-1000 flex w-max min-w-[max(var(--reka-dropdown-menu-trigger-width),11rem)] flex-col"
             >
               <template v-for="(item, index) in items" :key="index">
-                <DropdownMenuSeparator
-                  v-if="item.type === 'divider'"
-                  class="bg-ui-border my-1 h-px"
-                />
+                <DropdownMenuSeparator v-if="item.type === 'divider'" class="menu-separator" />
 
-                <DropdownMenuLabel
-                  v-else-if="item.type === 'label'"
-                  class="text-ui-text-muted/75 px-2 pt-2 pb-1 text-[10px] font-bold tracking-widest uppercase"
-                >
+                <DropdownMenuLabel v-else-if="item.type === 'label'" class="menu-label">
                   {{ item.label }}
                 </DropdownMenuLabel>
 
@@ -150,14 +136,9 @@ const DropdownChild = defineComponent(
                     :disabled="item.disabled"
                     :value="item.label"
                     as="button"
-                    class="flex w-full items-center justify-between gap-2 rounded p-1.5 text-start text-sm outline-none"
-                    :class="[
-                      item.disabled
-                        ? 'text-ui-text-muted pointer-events-none cursor-not-allowed opacity-50'
-                        : 'text-ui-text-muted hover:hover:text-ui-text hover:bg-ui-border/75 data-[state=open]:bg-ui-border/75 cursor-pointer',
-                    ]"
+                    class="menu-item"
                   >
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-1 items-center gap-2.5">
                       <Icon v-if="item.icon" :name="item.icon" />
                       <span>{{ item.label }}</span>
                     </div>
@@ -177,15 +158,8 @@ const DropdownChild = defineComponent(
                 <DropdownMenuItem
                   v-else
                   :disabled="item.disabled"
-                  class="flex w-full items-center gap-2 rounded p-1.5 text-start text-sm transition-colors outline-none"
-                  :class="[
-                    item.disabled
-                      ? 'text-ui-text-muted pointer-events-none cursor-not-allowed opacity-50'
-                      : 'hover:bg-ui-border/75 data-[highlighted]:bg-ui-border/75 cursor-pointer ' +
-                        (value && value === item.value
-                          ? 'bg-alt/10 text-alt'
-                          : 'text-ui-text-muted hover:text-ui-text'),
-                  ]"
+                  class="menu-item"
+                  :class="{ 'font-medium': value && value === item.value }"
                   @click="() => !item.disabled && on_select_item(item)"
                 >
                   <Icon v-if="item.icon" :name="item.icon" />
@@ -193,7 +167,7 @@ const DropdownChild = defineComponent(
                   <Icon
                     v-if="value && value === item.value"
                     name="lucide:check"
-                    class="text-alt ml-auto shrink-0"
+                    class="!text-alt ml-auto shrink-0"
                   />
                 </DropdownMenuItem>
               </template>

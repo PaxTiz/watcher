@@ -35,7 +35,11 @@ defineExpose({
     :name="name"
     :id="name"
     :placeholder="placeholder"
-    :class="{ 'ring ring-red-400': hasError, [`size__${size}`]: true }"
+    class="control-field"
+    :class="{
+      '!shadow-[inset_0_0_0_1px_rgb(239_68_68)]': hasError,
+      '!h-8 !rounded-lg !px-2.5 text-[13px]': size === 'sm',
+    }"
     @input="onInput"
   />
 </template>

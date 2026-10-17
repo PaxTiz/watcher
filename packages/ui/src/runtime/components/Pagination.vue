@@ -34,53 +34,52 @@ const pages = computed(() => {
 </script>
 
 <template>
-  <nav class="flex items-center gap-2" aria-label="Pagination">
+  <nav
+    class="bg-ui-text/[0.04] ring-ui-text/10 inline-flex items-center gap-1 rounded-full p-1 ring-1 ring-inset"
+    aria-label="Pagination"
+  >
     <Button
       :disabled="currentPage === 1"
       icon="lucide:chevrons-left"
       aria-label="Première page"
+      color="ghost"
       size="sm"
-      class="min-w-[35px]"
       @click="changePage(1)"
     />
-
     <Button
       :disabled="currentPage === 1"
       icon="lucide:chevron-left"
       aria-label="Page précédente"
+      color="ghost"
       size="sm"
-      class="min-w-[35px]"
       @click="changePage(currentPage - 1)"
     />
 
-    <template v-for="item in pages" :key="item">
-      <Button
-        :color="item === currentPage ? 'secondary' : 'primary'"
-        :aria-current="item === currentPage ? 'page' : undefined"
-        :label="item.toString()"
-        size="sm"
-        class="min-w-[35px]"
-        @click="changePage(item as number)"
-      >
-        {{ item }}
-      </Button>
-    </template>
+    <Button
+      v-for="item in pages"
+      :key="item"
+      :color="item === currentPage ? 'solid' : 'ghost'"
+      :aria-current="item === currentPage ? 'page' : undefined"
+      :label="item.toString()"
+      size="sm"
+      class="min-w-8 tabular-nums"
+      @click="changePage(item as number)"
+    />
 
     <Button
       :disabled="currentPage === totalPages"
       icon="lucide:chevron-right"
       aria-label="Page suivante"
+      color="ghost"
       size="sm"
-      class="min-w-[35px]"
       @click="changePage(currentPage + 1)"
     />
-
     <Button
       :disabled="currentPage === totalPages"
       icon="lucide:chevrons-right"
       aria-label="Dernière page"
+      color="ghost"
       size="sm"
-      class="min-w-[35px]"
       @click="changePage(totalPages)"
     />
   </nav>

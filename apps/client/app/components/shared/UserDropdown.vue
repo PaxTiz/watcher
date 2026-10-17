@@ -1,13 +1,12 @@
 <script lang="ts" setup>
 import type { DropdownItem } from "@watcher/ui";
-import { toast } from "vue-sonner";
 
 const { compact = false } = defineProps<{ compact?: boolean }>();
 
 const { user, clear } = useUserSession();
 const colorMode = useColorMode();
 
-const is_synchronising = ref(false);
+const { is_synchronising, synchronise } = useSynchronization();
 
 const onSelect = async (key: string, value: string) => {
   if (key === "theme") {
@@ -15,32 +14,11 @@ const onSelect = async (key: string, value: string) => {
     return;
   }
 
-  if (key === "actions") {
-    if (value === "settings") {
-      await navigateTo("/settings");
-    } else if (value === "sync") {
-      is_synchronising.value = true;
-      const toast_id = toast.loading("Synchronisation en cours..");
-
-      const { error } = await usePost(
-        "/api/subscriptions/sync",
-        {
-          method: "POST",
-        },
-        { immediate: true },
-      );
-
-      if (error.value) {
-        toast.error("Une erreur est survenue lors de la synchronisation", { id: toast_id });
-      } else {
-        toast.success("Synchronisation terminée", { id: toast_id });
-      }
-
-      is_synchronising.value = false;
-    } else if (value === "logout") {
-      await clear();
-      await navigateTo("/auth/login");
-    }
+  if (value === "sync") {
+    await synchronise();
+  } else if (value === "logout") {
+    await clear();
+    await navigateTo("/auth/login");
   }
 };
 
@@ -82,8 +60,8 @@ const items = computed<Array<DropdownItem>>(() => [
     :ui="{
       button: {
         root: compact
-          ? 'mx-auto size-10 justify-center !px-0 rounded-lg text-ui-text-muted hover:text-ui-text hover:!bg-white/[0.06]'
-          : 'w-full justify-start gap-3 !px-3 rounded-lg text-sm text-ui-text-muted hover:text-ui-text hover:!bg-white/[0.06]',
+          ? 'mx-auto size-10 justify-center !px-0 rounded-lg text-ui-text-muted hover:text-ui-text hover:!bg-ui-text/[0.06]'
+          : 'w-full justify-start gap-3 !px-3 rounded-lg text-sm text-ui-text-muted hover:text-ui-text hover:!bg-ui-text/[0.06]',
       },
     }"
     :items="items"

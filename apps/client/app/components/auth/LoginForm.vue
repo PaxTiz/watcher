@@ -36,26 +36,28 @@ onMounted(() => {
 
 <template>
   <section>
-    <WatcherLogo />
-
-    <h1 class="text-ui-text mt-4 text-2xl font-bold md:text-4xl">{{ title }}</h1>
-    <p class="text-ui-text-muted mt-1">
+    <h1 class="page-title">{{ title }}</h1>
+    <p class="text-ui-text-muted mt-2">
       {{ description }}
     </p>
 
-    <WatcherCard class="mt-4">
-      <WatcherForm
-        method="POST"
-        :state="state"
-        :schema="oauthValidatorsSchema.loginWithBluesky.body"
-        @submit="onSubmit"
-      >
-        <WatcherFormField label="Identifiant Bluesky" name="handle">
-          <WatcherFormInput ref="input" v-model="state.handle" class="w-full" />
-        </WatcherFormField>
+    <WatcherForm
+      class="mt-6"
+      method="POST"
+      :state="state"
+      :schema="oauthValidatorsSchema.loginWithBluesky.body"
+      @submit="onSubmit"
+    >
+      <WatcherFormField label="Identifiant Bluesky" name="handle">
+        <WatcherFormInput
+          ref="input"
+          v-model="state.handle"
+          placeholder="vous.bsky.social"
+          class="w-full"
+        />
+      </WatcherFormField>
 
-        <WatcherButton :label="button" type="submit" class="mt-4" />
-      </WatcherForm>
-    </WatcherCard>
+      <WatcherButton :label="button" type="submit" color="solid" size="lg" class="mt-5 w-full" />
+    </WatcherForm>
   </section>
 </template>

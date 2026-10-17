@@ -11,7 +11,7 @@ watch(
 </script>
 
 <template>
-  <WatcherSlideover side="left" :ui="{ content: 'dark max-w-[85%] w-80', body: 'py-1' }">
+  <WatcherSlideover side="left" :ui="{ content: 'max-w-[85%] w-80', body: 'py-1' }">
     <AppSidebar class="h-full !w-full" @toggle="close?.()" />
   </WatcherSlideover>
 </template>

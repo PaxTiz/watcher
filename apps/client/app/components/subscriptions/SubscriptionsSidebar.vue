@@ -66,7 +66,7 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
           type="text"
           :placeholder="`Filtrer ${data?.length ?? ''} abonnements`"
           aria-label="Filtrer les abonnements"
-          class="hover:!bg-ui-border/40 focus:!bg-ui-bg h-8 w-full !border-transparent !bg-transparent pl-8 text-sm transition-colors"
+          class="hover:bg-ui-text/[0.06] focus:bg-ui-text/[0.06] h-8 w-full rounded-lg pl-8 text-sm transition-colors outline-none"
         />
       </div>
 
@@ -96,7 +96,7 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
               class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors"
               :class="[
                 is_active(sub)
-                  ? 'text-ui-text bg-white/10 font-medium'
+                  ? 'text-ui-text bg-ui-text/10 font-medium'
                   : 'text-ui-text/85 hover:bg-ui-border/40 hover:text-ui-text',
                 { 'opacity-50 grayscale': sub.is_hidden },
               ]"
@@ -111,7 +111,7 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
                 alt=""
               />
 
-              <span class="min-w-0 flex-1 truncate">{{ sub.name }}</span>
+              <span class="font-content min-w-0 flex-1 truncate">{{ sub.name }}</span>
 
               <Icon
                 v-if="sub.is_hidden"

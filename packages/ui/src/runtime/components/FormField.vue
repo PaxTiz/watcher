@@ -17,11 +17,11 @@ provide(HAS_FORM_SINGLE_ERROR_SYMBOL, hasError);
 
 <template>
   <div>
-    <label v-if="label" :for="name" class="text-ui-text-muted">{{ label }}</label>
+    <label v-if="label" :for="name" class="text-ui-text text-sm font-medium">{{ label }}</label>
 
-    <div class="mt-1">
+    <div class="mt-1.5">
       <slot name="default" />
-      <p v-if="hasError" class="mt-1 text-sm text-red-400">{{ error }}</p>
+      <p v-if="hasError" class="mt-1.5 text-[13px] text-red-500">{{ error }}</p>
     </div>
   </div>
 </template>

@@ -65,6 +65,7 @@ export const useIntegrations = () => {
 
   const on_disconnect = async (integration: Integration) => {
     const ok = await useWatcherConfirm({
+      danger: true,
       title: `Déconnexion de votre compte ${integration.name}`,
       description:
         "Si vous déconnectez votre compte, vos abonnements ainsi que les vidéos liées à vos abonnements ne seront plus mis à jour.",
