@@ -17,6 +17,13 @@ export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr 
         return;
       }
 
+      instance.on("ended", () =>
+        $fetch(`/api/videos/${video.id}/progress`, {
+          method: "POST",
+          body: { progression: 1 },
+        }),
+      );
+
       if (video.viewing_progression > RESUME_THRESHOLD) {
         instance.once("playing", () => {
           if (instance.currentTime < 1) {
