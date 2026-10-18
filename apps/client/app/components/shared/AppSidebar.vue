@@ -3,14 +3,15 @@ import type { SubscriptionResource } from "@watcher/common";
 import { differenceInHours } from "date-fns";
 import type { RouteLocationRaw } from "vue-router";
 
+import { ContentSearch } from "#components";
+import { mockSearch } from "~/utils/search";
+
 const { collapsed = false } = defineProps<{ collapsed?: boolean }>();
 const emit = defineEmits<{ toggle: [] }>();
 
 const route = useRoute();
-const { search, go_to_results, on_input, clear_search } = useGlobalSearch();
+const { search, go_to_results, clear_search } = useGlobalSearch();
 const { favorites, others } = useSubscriptions();
-
-const search_input = useTemplateRef("search_input");
 
 const is_favorites_feed = computed(
   () => route.path === "/videos" && route.query.is_favorite === "true",
@@ -42,10 +43,9 @@ const has_new_video = (sub: SubscriptionResource) => {
   return !!sub.last_video_at && differenceInHours(new Date(), sub.last_video_at) < 24;
 };
 
-const open_search = async () => {
-  emit("toggle");
-  await nextTick();
-  search_input.value?.focus();
+const on_search = () => {
+  const overlay = useWatcherOverlay();
+  overlay.create(ContentSearch).open({ searchFn: mockSearch });
 };
 </script>
 
@@ -82,39 +82,24 @@ const open_search = async () => {
         v-if="collapsed"
         type="button"
         class="text-ui-text-muted hover:bg-ui-text/10 hover:text-ui-text mx-auto flex size-10 items-center justify-center rounded-lg transition-colors"
-        aria-label="Rechercher une vidéo"
+        aria-label="Rechercher"
         title="Rechercher"
-        @click="open_search"
+        @click="on_search"
       >
         <Icon name="lucide:search" class="text-lg" />
       </button>
 
-      <form v-else role="search" @submit.prevent="go_to_results">
-        <label class="group relative flex items-center">
-          <span class="sr-only">Rechercher une vidéo</span>
-          <Icon
-            name="lucide:search"
-            class="text-ui-text-muted group-focus-within:text-alt pointer-events-none absolute left-3 transition-colors"
-          />
-          <input
-            ref="search_input"
-            v-model="search"
-            type="search"
-            placeholder="Rechercher"
-            class="control-field !h-9 w-full !rounded-lg !pr-8 !pl-9 [&::-webkit-search-cancel-button]:hidden"
-            @input="on_input"
-          />
-          <button
-            v-if="search"
-            type="button"
-            class="text-ui-text-muted hover:text-ui-text absolute right-2.5 flex"
-            aria-label="Effacer la recherche"
-            @click="clear_search"
-          >
-            <Icon name="lucide:x" />
-          </button>
-        </label>
-      </form>
+      <div v-else class="group relative flex items-center">
+        <span class="sr-only">Rechercher</span>
+        <Icon name="lucide:search" class="text-ui-text-muted pointer-events-none absolute left-3" />
+        <button
+          ref="search_input"
+          class="control-field text-ui-text-muted !h-9 w-full cursor-pointer pl-9 text-left"
+          @click="on_search"
+        >
+          Rechercher
+        </button>
+      </div>
     </div>
 
     <nav class="shrink-0 space-y-0.5 px-3" aria-label="Navigation principale">

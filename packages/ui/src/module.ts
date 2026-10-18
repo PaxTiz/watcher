@@ -78,6 +78,7 @@ export default defineNuxtModule<ModuleOptions>({
   export type { AccordionItem } from ${JSON.stringify(resolver.resolve("./runtime/types/accordion"))};
   export type { DropdownItem } from ${JSON.stringify(resolver.resolve("./runtime/types/dropdown"))};
   export type { FormSubmitEvent } from ${JSON.stringify(resolver.resolve("./runtime/types/forms"))};
+  export type { CommandItem, Video, Channel, DurationFilter, SortFilter, VideoFilters, SearchFilters, SearchResult, SearchResults, SearchType } from ${JSON.stringify(resolver.resolve("./runtime/types/command_palette"))};
 }
 `,
     });
