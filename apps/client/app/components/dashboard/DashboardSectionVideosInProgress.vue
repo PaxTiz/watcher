@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import type { VideoResource } from "@watcher/common";
+
+import { useVideo } from "~/composables/videos/useVideo";
 import { useVideosInProgress } from "~/composables/videos/useVideosInProgress";
 
 const { data: videos, refresh } = await useVideosInProgress();
@@ -7,16 +10,11 @@ const { numbers } = useFormatter();
 const featured = computed(() => videos.value?.items[0]);
 const others = computed(() => videos.value?.items.slice(1) ?? []);
 
-const remaining_minutes = computed(() => {
-  if (!featured.value) {
-    return 0;
-  }
+const on_mark_as_view = async (video: VideoResource) => {
+  const { on_mark_as_read } = useVideo(video);
 
-  return Math.max(
-    1,
-    Math.round((featured.value.duration * (1 - featured.value.viewing_progression)) / 60),
-  );
-});
+  await on_mark_as_read(() => refresh());
+};
 </script>
 
 <template>
@@ -87,7 +85,12 @@ const remaining_minutes = computed(() => {
             <Icon name="lucide:play" class="fill-current" />
             Reprendre
           </NuxtLink>
-          <span class="text-ui-text/75 text-sm">{{ remaining_minutes }} min restantes</span>
+
+          <WatcherButton
+            label="Marquer comme visionnée"
+            color="neutral"
+            @click="() => on_mark_as_view(featured!)"
+          />
         </div>
       </div>
     </section>
