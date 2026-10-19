@@ -52,6 +52,8 @@ const delete_account = async () => {
     toast.error("La suppression de votre compte a échoué, réessayez plus tard");
   }
 };
+
+usePageNavigation()([{ label: "Paramètres", icon: "lucide:settings" }]);
 </script>
 
 <template>

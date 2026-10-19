@@ -6,7 +6,7 @@ import { useVideos } from "~/composables/videos/useVideos";
 definePageMeta({ name: pages.videos_single });
 
 const route = useRoute();
-const { dates } = useFormatter();
+const { dates, videos } = useFormatter();
 
 const { data } = await useAppFetch<VideoResource>(`/api/videos/${route.params.id}`);
 
@@ -26,7 +26,6 @@ const up_next = computed(() => {
 const next_video = computed(() => up_next.value.find((v) => v.viewing_progression <= 0.9));
 
 usePageAmbient(() => data.value);
-usePageBreadcrumb(() => data.value?.author.name);
 
 const autoplay = useLocalStorage("watcher:autoplay", true);
 const show_countdown = ref(false);
@@ -46,6 +45,26 @@ const play_next = async () => {
     await navigateTo({ path: `/videos/${next_video.value.id}`, query: { autoplay: 1 } });
   }
 };
+
+usePageNavigation()(() => [
+  {
+    label: "Vidéos",
+    icon: "lucide:clapperboard",
+    to: "/videos",
+  },
+  {
+    label: videos.filters.service(data.value?.author.channel.service),
+    icon:
+      data.value?.author.channel.service === "youtube" ? "fa7-brands:youtube" : "fa7-brands:twitch",
+  },
+  {
+    label: data.value?.author.name ?? "",
+    to: `/subscriptions/${data.value?.author.id}`,
+  },
+  {
+    label: data.value?.title ?? "",
+  },
+]);
 
 useMeta({
   title: () => data.value?.title ?? "",

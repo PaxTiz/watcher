@@ -4,34 +4,17 @@ import { LazySubscriptionsSidebarSlideover } from "#components";
 const route = useRoute();
 const router = useRouter();
 const overlay = useWatcherOverlay();
-const { label: page_label } = useBreadcrumb();
+
+const { items } = usePageNavigation();
 
 const crumb_pill = useTemplateRef("crumb_pill");
 useLiquidGlass(crumb_pill);
-
-const section = computed(() => {
-  const name = route.name as string;
-
-  if (name === pages.home) return { label: "Accueil", icon: "lucide:house", to: "/" };
-  if (name === pages.videos_index && route.query.is_favorite === "true")
-    return { label: "Favoris", icon: "lucide:star", to: "/videos?is_favorite=true" };
-  if (name === pages.videos_index || name === pages.videos_single)
-    return { label: "Vidéos", icon: "lucide:clapperboard", to: "/videos" };
-  if (route.path.startsWith("/subscriptions"))
-    return { label: "Abonnements", icon: "lucide:users", to: undefined };
-  if (route.path.startsWith("/settings"))
-    return { label: "Paramètres", icon: "lucide:settings", to: undefined };
-
-  return null;
-});
 
 const can_go_back = computed(() => (route.name as string) !== pages.home);
 
 const go_back = async () => {
   if (import.meta.client && window.history.state?.back) {
-    router.back();
-  } else {
-    await navigateTo(section.value?.to ?? "/");
+    return router.back();
   }
 };
 
@@ -62,25 +45,30 @@ const open_menu = () => {
     </button>
 
     <nav
-      v-if="section"
+      v-if="items"
       ref="crumb_pill"
       aria-label="Fil d'Ariane"
-      class="liquid-glass text-ui-text pointer-events-auto flex h-10 min-w-0 items-center gap-2 rounded-full px-4 text-sm"
+      class="liquid-glass text-ui-text pointer-events-auto flex h-10 min-w-0 items-center rounded-full px-4 text-sm"
     >
-      <Icon :name="section.icon" class="text-ui-text-muted shrink-0" />
-      <NuxtLink
-        v-if="section.to && page_label"
-        :to="section.to"
-        class="text-ui-text-muted hover:text-ui-text shrink-0 transition-colors"
-      >
-        {{ section.label }}
-      </NuxtLink>
-      <span v-else class="shrink-0 font-medium">{{ section.label }}</span>
+      <ul class="flex items-center gap-2">
+        <li
+          v-for="(item, index) in [{ label: 'Accueil', icon: 'lucide:house', to: '/' }, ...items]"
+          :key="item.label"
+          class="group inline-flex items-center gap-1"
+        >
+          <Icon v-if="item.icon" :name="item.icon" class="text-ui-text shrink-0" />
+          <NuxtLink v-if="item.to" :to="item.to" class="shrink-0 transition-colors">
+            {{ item.label }}
+          </NuxtLink>
+          <span v-else class="text-ui-text shrink-0 font-medium">{{ item.label }}</span>
 
-      <template v-if="page_label">
-        <Icon name="lucide:chevron-right" class="text-ui-text-muted shrink-0 text-xs" />
-        <span class="truncate font-medium">{{ page_label }}</span>
-      </template>
+          <Icon
+            v-if="index < items.length"
+            name="lucide:chevron-right"
+            class="text-ui-text shrink-0 text-xs"
+          />
+        </li>
+      </ul>
     </nav>
   </div>
 </template>

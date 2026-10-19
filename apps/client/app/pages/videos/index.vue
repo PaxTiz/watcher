@@ -43,6 +43,17 @@ const title = computed(() => {
   return filters.value.is_favorite ? "Vidéos de vos favoris" : "Vidéos";
 });
 
+watch(
+  () => filters.value.is_favorite,
+  (is_favorite) => {
+    usePageNavigation()(() => [
+      { label: "Vidéos", icon: "lucide:clapperboard", to: "/videos" },
+      is_favorite ? { label: "Mes favoris", icon: "lucide:star" } : undefined,
+    ]);
+  },
+  { immediate: true },
+);
+
 useMeta({
   title: "Vidéos",
   description: "Explorez l'ensemble des vidéos de vos abonnements YouTube et Twitch.",

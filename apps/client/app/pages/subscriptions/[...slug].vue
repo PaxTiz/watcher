@@ -12,7 +12,10 @@ const { data, refresh } = await useSubscription(slug);
 
 provide<VideoCurrentRefreshType>(VIDEO_CURRENT_REFRESH_SYMBOL, refresh);
 
-usePageBreadcrumb(() => data.value?.name);
+usePageNavigation()(() => [
+  { label: "Chaînes", icon: "lucide:users" },
+  { label: data.value?.name ?? "" },
+]);
 
 useMeta({
   title: () => data.value?.name ?? "",
