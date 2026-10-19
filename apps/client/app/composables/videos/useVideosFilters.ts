@@ -57,6 +57,16 @@ export const useVideosFilters = (
     per_page: base?.per_page ?? 21,
   });
 
+  const filters_debounced = ref<VideoFilters>(filters.value);
+
+  watchDebounced(
+    () => ({ ...filters.value }),
+    (n) => {
+      filters_debounced.value = n;
+    },
+    { debounce: 300 },
+  );
+
   watchImmediate(
     () => ({ ...filters.value }),
     async (new_value, old_value) => {
@@ -90,5 +100,6 @@ export const useVideosFilters = (
 
   return {
     filters,
+    filters_debounced,
   };
 };

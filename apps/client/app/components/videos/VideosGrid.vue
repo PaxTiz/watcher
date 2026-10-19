@@ -39,7 +39,7 @@ const on_toggle_favorite = async () => {
 </script>
 
 <template>
-  <VideosGridSkeleton v-if="loading" />
+  <VideosGridSkeleton v-if="loading && videos.items.length === 0" />
 
   <template v-else-if="videos.items.length > 0">
     <div class="infinite-grid-[300px] gap-x-4 gap-y-8">
