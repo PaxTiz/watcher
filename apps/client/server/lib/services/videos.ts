@@ -147,7 +147,16 @@ export default class VideosService extends AbstractService {
         qb.where("subscriptions.id", "=", params.subscription_id!),
       )
       .$if(!!params.query, (qb) =>
-        qb.where("videos.title", "@@", sql<string>`(to_tsquery(${params.query!}))`),
+        qb.where((ib) =>
+          ib.or([
+            ib(
+              "videos.title",
+              "@@",
+              sql<string>`(websearch_to_tsquery('french', ${params.query!}))`,
+            ),
+            ib("videos.title", "ilike", `%${params.query!}%`),
+          ]),
+        ),
       )
       .$if(params.in_progress === true, (qb) => this.in_progress_filter(qb, user))
       .executeTakeFirst();
@@ -218,7 +227,16 @@ export default class VideosService extends AbstractService {
         qb.where("subscriptions.id", "=", params.subscription_id!),
       )
       .$if(!!params.query, (qb) =>
-        qb.where("videos.title", "@@", sql<string>`(to_tsquery(${params.query!}))`),
+        qb.where((ib) =>
+          ib.or([
+            ib(
+              "videos.title",
+              "@@",
+              sql<string>`(websearch_to_tsquery('french', ${params.query!}))`,
+            ),
+            ib("videos.title", "ilike", `%${params.query!}%`),
+          ]),
+        ),
       )
       .$if(params.in_progress === true, (qb) => this.in_progress_filter(qb, user))
       .execute();
