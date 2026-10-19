@@ -5,24 +5,14 @@ useMeta({ title: "Paramètres" });
 
 const { user, clear } = useUserSession();
 const { integrations } = useIntegrations();
-const { is_synchronising, synchronise } = useSynchronization();
 const { data: subscriptions } = useSubscriptions();
 const color_mode = useColorMode();
-const { dates } = useFormatter();
 
 const themes = [
   { value: "system", label: "Système", icon: "lucide:monitor" },
   { value: "light", label: "Clair", icon: "lucide:sun" },
   { value: "dark", label: "Sombre", icon: "lucide:moon" },
 ];
-
-const last_synced_at = computed(() => {
-  const times = (subscriptions.value ?? [])
-    .map((s) => new Date(s.last_synced_at).getTime())
-    .filter((t) => !Number.isNaN(t));
-
-  return times.length > 0 ? new Date(Math.max(...times)).toISOString() : null;
-});
 
 const logout = async () => {
   await clear();
@@ -57,8 +47,8 @@ usePageNavigation()([{ label: "Paramètres", icon: "lucide:settings" }]);
 </script>
 
 <template>
-  <div class="mx-auto max-w-4xl pb-8">
-    <h1 class="page-title">Paramètres</h1>
+  <div class="w-full pb-8">
+    <h1 class="page-title">Mon compte</h1>
 
     <div class="mt-8 space-y-10">
       <SettingsSection
@@ -70,24 +60,6 @@ usePageNavigation()([{ label: "Paramètres", icon: "lucide:settings" }]);
           :key="integration.id"
           :integration="integration"
         />
-      </SettingsSection>
-
-      <SettingsSection
-        title="Synchronisation"
-        description="Récupère vos nouveaux abonnements et leurs dernières vidéos."
-      >
-        <SettingsRow
-          title="Dernière synchronisation"
-          :description="last_synced_at ? dates.ago(last_synced_at) : 'Jamais'"
-        >
-          <WatcherButton
-            label="Synchroniser"
-            icon="lucide:refresh-cw"
-            size="sm"
-            :loading="is_synchronising"
-            @click="synchronise"
-          />
-        </SettingsRow>
       </SettingsSection>
 
       <SettingsSection title="Apparence">
