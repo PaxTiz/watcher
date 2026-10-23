@@ -33,14 +33,15 @@ const delete_account = async () => {
     return;
   }
 
-  try {
-    await $fetch("/api/auth/delete", { method: "DELETE" });
-    await clear();
-    await navigateTo("/auth/login");
-    toast.success("Votre compte a été supprimé");
-  } catch {
+  const { error } = await callApi("/api/auth/delete", { method: "DELETE" });
+  if (error) {
     toast.error("La suppression de votre compte a échoué, réessayez plus tard");
+    return;
   }
+
+  await clear();
+  await navigateTo("/auth/login");
+  toast.success("Votre compte a été supprimé");
 };
 
 usePageNavigation()([{ label: "Paramètres", icon: "lucide:settings" }]);

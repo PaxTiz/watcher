@@ -21,22 +21,23 @@ const service_name = computed(() =>
   subscription.channel.service === "youtube" ? "YouTube" : "Twitch",
 );
 
-const { execute: toggle_favorite_request, status: favorite_status } = usePost(
-  `/api/subscriptions/${subscription.id}/favorite`,
-  { key: `subscriptions.${subscription.id}.favorite`, method: "POST" },
-);
-const { execute: hide_request, status: hide_status } = usePost(
-  `/api/subscriptions/${subscription.id}/hide`,
-  { key: `subscriptions.${subscription.id}.hide`, method: "POST" },
-);
-const { execute: show_request, status: show_status } = usePost(
-  `/api/subscriptions/${subscription.id}/show`,
-  { key: `subscriptions.${subscription.id}.show`, method: "POST" },
-);
+const is_favorite_pending = ref(false);
+const is_hidden_pending = ref(false);
 
 const toggle_favorite = async () => {
   const was_favorite = subscription.is_favorite;
-  await toggle_favorite_request();
+
+  is_favorite_pending.value = true;
+  const { error } = await callApi(`/api/subscriptions/${subscription.id}/favorite`, {
+    method: "POST",
+  });
+  is_favorite_pending.value = false;
+
+  if (error) {
+    toast.error("La modification de vos favoris a échoué, réessayez plus tard");
+    return;
+  }
+
   await Promise.all([refresh?.(), refresh_subscriptions()]);
 
   toast.success(
@@ -47,9 +48,7 @@ const toggle_favorite = async () => {
 };
 
 const toggle_hidden = async () => {
-  if (subscription.is_hidden) {
-    await show_request();
-  } else {
+  if (!subscription.is_hidden) {
     const ok = await useWatcherConfirm({
       title: "Masquer la chaîne",
       description: `Les vidéos de ${subscription.name} n'apparaîtront plus dans votre flux. Vous pourrez la réafficher depuis cette page.`,
@@ -59,8 +58,19 @@ const toggle_hidden = async () => {
     if (!ok) {
       return;
     }
+  }
 
-    await hide_request();
+  const action = subscription.is_hidden ? "show" : "hide";
+
+  is_hidden_pending.value = true;
+  const { error } = await callApi(`/api/subscriptions/${subscription.id}/${action}`, {
+    method: "POST",
+  });
+  is_hidden_pending.value = false;
+
+  if (error) {
+    toast.error("La modification de la chaîne a échoué, réessayez plus tard");
+    return;
   }
 
   await Promise.all([refresh?.(), refresh_subscriptions()]);
@@ -120,14 +130,14 @@ const toggle_hidden = async () => {
           :color="subscription.is_favorite ? 'neutral' : 'solid'"
           :icon="subscription.is_favorite ? 'lucide:star-off' : 'lucide:star'"
           :label="subscription.is_favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-          :loading="favorite_status === 'pending'"
+          :loading="is_favorite_pending"
           :disabled="subscription.is_hidden"
           @click="toggle_favorite"
         />
         <WatcherButton
           :icon="subscription.is_hidden ? 'lucide:eye' : 'lucide:eye-off'"
           :label="subscription.is_hidden ? 'Réafficher' : 'Masquer'"
-          :loading="hide_status === 'pending' || show_status === 'pending'"
+          :loading="is_hidden_pending"
           @click="toggle_hidden"
         />
         <WatcherButton

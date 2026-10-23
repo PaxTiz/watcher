@@ -20,7 +20,7 @@ export const usePasskeys = () => {
     registerEndpoint: "/api/passkeys/register",
     authenticateEndpoint: "/api/passkeys/authenticate",
   });
-  const { fetch } = useUserSession();
+  const { fetch: refresh_session } = useUserSession();
 
   const loading = ref(false);
 
@@ -29,7 +29,7 @@ export const usePasskeys = () => {
 
     try {
       await action();
-      await fetch();
+      await refresh_session();
       return true;
     } catch (error) {
       const message = error_message(error, fallback);

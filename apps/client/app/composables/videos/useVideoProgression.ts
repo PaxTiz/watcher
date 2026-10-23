@@ -18,7 +18,7 @@ export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr 
       }
 
       instance.on("ended", () =>
-        $fetch(`/api/videos/${video.id}/progress`, {
+        callApi(`/api/videos/${video.id}/progress`, {
           method: "POST",
           body: { progression: 1 },
         }),
@@ -40,12 +40,13 @@ export const useVideoProgression = (video: VideoResource, plyr: ShallowRef<Plyr 
         }
 
         latest_progress = progression;
-        await $fetch(`/api/videos/${video.id}/progress`, {
+        const { error } = await callApi(`/api/videos/${video.id}/progress`, {
           method: "POST",
           body: { progression },
-        }).catch(() => {
-          latest_progress = 0;
         });
+        if (error) {
+          latest_progress = 0;
+        }
       });
     },
     { immediate: true },

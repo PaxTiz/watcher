@@ -12,15 +12,15 @@ export const useSynchronization = () => {
     is_synchronising.value = true;
     const toast_id = toast.loading("Synchronisation en cours…");
 
-    try {
-      await $fetch("/api/subscriptions/sync", { method: "POST" });
+    const { error } = await callApi("/api/subscriptions/sync", { method: "POST" });
+    if (error) {
+      toast.error("La synchronisation a échoué, réessayez dans quelques minutes", { id: toast_id });
+    } else {
       await refresh_subscriptions();
       toast.success("Synchronisation terminée", { id: toast_id });
-    } catch {
-      toast.error("La synchronisation a échoué, réessayez dans quelques minutes", { id: toast_id });
-    } finally {
-      is_synchronising.value = false;
     }
+
+    is_synchronising.value = false;
   };
 
   return { is_synchronising, synchronise };

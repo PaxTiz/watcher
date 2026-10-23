@@ -2,32 +2,6 @@ import type { MaybePromise, VideoResource } from "@watcher/common";
 import { toast } from "vue-sonner";
 
 export const useVideo = (video: VideoResource) => {
-  const { error: video_progress_error, execute: video_progress } = usePost(
-    `/api/videos/${video.id}/progress`,
-    {
-      // usePost keys by URL by default: playback progress posts to the same URL with other values
-      key: `videos.${video.id}.mark_as_watched`,
-      method: "POST",
-      body: { progression: 1 },
-    },
-  );
-
-  const { error: video_hide_error, execute: video_hide } = usePost(`/api/videos/${video.id}/hide`, {
-    method: "POST",
-  });
-
-  const { error: video_subscription_hide_error, execute: video_subscription_hide } = usePost(
-    `/api/subscriptions/${video.author.id}/hide`,
-    {
-      method: "POST",
-    },
-  );
-
-  const { error: video_subscription_favorite_error, execute: video_subscription_favorite } =
-    usePost(`/api/subscriptions/${video.author.id}/favorite`, {
-      method: "POST",
-    });
-
   const on_hide_video = async (callback?: () => MaybePromise<unknown>) => {
     const ok = await useWatcherConfirm({
       title: "Masquer une vidéo",
@@ -37,14 +11,18 @@ export const useVideo = (video: VideoResource) => {
       cancelLabel: "Annuler",
     });
 
-    if (ok) {
-      await video_hide();
-
-      if (!video_hide_error.value) {
-        toast.success("La vidéo a été masquée");
-        await callback?.();
-      }
+    if (!ok) {
+      return;
     }
+
+    const { error } = await callApi(`/api/videos/${video.id}/hide`, { method: "POST" });
+    if (error) {
+      toast.error("Le masquage de la vidéo a échoué, réessayez plus tard");
+      return;
+    }
+
+    toast.success("La vidéo a été masquée");
+    await callback?.();
   };
 
   const on_hide_subscription = async (callback?: () => MaybePromise<unknown>) => {
@@ -56,38 +34,52 @@ export const useVideo = (video: VideoResource) => {
       cancelLabel: "Annuler",
     });
 
-    if (ok) {
-      await video_subscription_hide();
-
-      if (!video_subscription_hide_error.value) {
-        toast.success("La chaîne a été masquée");
-        await callback?.();
-      }
+    if (!ok) {
+      return;
     }
+
+    const { error } = await callApi(`/api/subscriptions/${video.author.id}/hide`, {
+      method: "POST",
+    });
+    if (error) {
+      toast.error("Le masquage de la chaîne a échoué, réessayez plus tard");
+      return;
+    }
+
+    toast.success("La chaîne a été masquée");
+    await callback?.();
   };
 
   const on_mark_as_read = async (on_success?: () => MaybePromise<unknown>) => {
-    await video_progress();
-
-    if (!video_progress_error.value) {
-      toast.success("La vidéo a été marquée comme vue");
-
-      await on_success?.();
+    const { error } = await callApi(`/api/videos/${video.id}/progress`, {
+      method: "POST",
+      body: { progression: 1 },
+    });
+    if (error) {
+      toast.error("La vidéo n'a pas pu être marquée comme vue, réessayez plus tard");
+      return;
     }
+
+    toast.success("La vidéo a été marquée comme vue");
+    await on_success?.();
   };
 
   const on_toggle_subscription_favorite = async (callback?: () => MaybePromise<unknown>) => {
-    await video_subscription_favorite();
-
-    if (!video_subscription_favorite_error.value) {
-      if (video.author.is_favorite) {
-        toast.success("L'abonnement a été retiré de vos favoris");
-      } else {
-        toast.success("L'abonnement a été ajouté à vos favoris");
-      }
-
-      await callback?.();
+    const { error } = await callApi(`/api/subscriptions/${video.author.id}/favorite`, {
+      method: "POST",
+    });
+    if (error) {
+      toast.error("La modification de vos favoris a échoué, réessayez plus tard");
+      return;
     }
+
+    if (video.author.is_favorite) {
+      toast.success("L'abonnement a été retiré de vos favoris");
+    } else {
+      toast.success("L'abonnement a été ajouté à vos favoris");
+    }
+
+    await callback?.();
   };
 
   return {

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { toast } from "vue-sonner";
 
-const { fetch } = useUserSession();
+const { fetch: refresh_session } = useUserSession();
 
 const is_syncing = ref(false);
 const abort_controller = new AbortController();
@@ -16,24 +16,25 @@ const onboard = async (sync: boolean) => {
 
   is_syncing.value = sync;
 
-  try {
-    await $fetch("/api/users/me/onboard", {
-      method: "POST",
-      body: { sync },
-      signal: abort_controller.signal,
-    });
+  const { error } = await callApi("/api/users/me/onboard", {
+    method: "POST",
+    body: { sync },
+    signal: abort_controller.signal,
+  });
 
-    if (sync) {
-      toast.success("Synchronisation terminée", { id: toast_id });
-    }
+  is_syncing.value = false;
 
-    await fetch();
-    await navigateTo("/");
-  } catch {
+  if (error) {
     toast.error("Une erreur est survenue, réessayez dans quelques instants", { id: toast_id });
-  } finally {
-    is_syncing.value = false;
+    return;
   }
+
+  if (sync) {
+    toast.success("Synchronisation terminée", { id: toast_id });
+  }
+
+  await refresh_session();
+  await navigateTo("/");
 };
 
 onUnmounted(() => {

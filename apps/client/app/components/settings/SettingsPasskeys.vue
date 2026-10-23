@@ -41,16 +41,17 @@ const on_rename = async (passkey: PasskeyResource) => {
     return;
   }
 
-  try {
-    await $fetch(`/api/passkeys/${encodeURIComponent(passkey.id)}`, {
-      method: "PATCH",
-      body: { name },
-    });
-    await refresh();
-    toast.success("La clé d'accès a été renommée");
-  } catch {
+  const { error } = await callApi(`/api/passkeys/${encodeURIComponent(passkey.id)}`, {
+    method: "PATCH",
+    body: { name },
+  });
+  if (error) {
     toast.error("Le renommage de la clé d'accès a échoué, réessayez plus tard");
+    return;
   }
+
+  await refresh();
+  toast.success("La clé d'accès a été renommée");
 };
 
 const on_delete = async (passkey: PasskeyResource) => {
@@ -67,20 +68,20 @@ const on_delete = async (passkey: PasskeyResource) => {
     return;
   }
 
-  try {
-    await $fetch(`/api/passkeys/${encodeURIComponent(passkey.id)}`, { method: "DELETE" });
-    await refresh();
-    toast.success("La clé d'accès a été supprimée");
-  } catch (error) {
-    const is_last =
-      (error as { data?: { message?: string } }).data?.message === "last_login_method";
-
+  const { error } = await callApi(`/api/passkeys/${encodeURIComponent(passkey.id)}`, {
+    method: "DELETE",
+  });
+  if (error) {
     toast.error(
-      is_last
+      error.message === "last_login_method"
         ? "Associez un compte ou une autre clé d'accès avant de supprimer celle-ci"
         : "La suppression de la clé d'accès a échoué, réessayez plus tard",
     );
+    return;
   }
+
+  await refresh();
+  toast.success("La clé d'accès a été supprimée");
 };
 </script>
 

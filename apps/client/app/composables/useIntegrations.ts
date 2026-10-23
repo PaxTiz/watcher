@@ -10,7 +10,7 @@ export type Integration = {
 };
 
 export const useIntegrations = () => {
-  const { user, fetch } = useUserSession();
+  const { user, fetch: refresh_session } = useUserSession();
 
   const integrations: Array<Integration> = [
     {
@@ -57,18 +57,14 @@ export const useIntegrations = () => {
       return;
     }
 
-    const { error } = usePost(
-      `/api/integrations/${integration.id}/disconnect`,
-      {
-        method: "DELETE",
-      },
-      { immediate: true },
-    );
+    const { error } = await callApi(`/api/integrations/${integration.id}/disconnect`, {
+      method: "DELETE",
+    });
 
-    if (error.value) {
+    if (error) {
       toast.error(`Une erreur est survenue lors de la déconnexion de ${integration.name}`);
     } else {
-      await fetch();
+      await refresh_session();
       toast.success(`Le compte ${integration.name} a été déconnecté`);
     }
   };
