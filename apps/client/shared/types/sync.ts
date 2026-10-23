@@ -1,15 +1,15 @@
-import type { SubscriptionTableInsert, VideoTable } from "#server/database/schema";
+import type { DatabaseSchema, DatabaseSchemaInsert } from "@watcher/database";
 
 export type Sync = {
   Subscription: {
     status: "created" | "updated" | "deleted";
-    channel: Omit<SubscriptionTableInsert, "id">;
+    channel: Omit<DatabaseSchemaInsert["subscriptions"], "id">;
   };
   SubscriptionsList: Array<Sync["Subscription"]>;
 
   Video: {
     status: "created" | "updated" | "deleted";
-    video: Omit<VideoTable, "id" | "palette">;
+    video: Omit<DatabaseSchema["videos"], "id" | "palette">;
   };
   VideosList: Array<Sync["Video"]>;
 };

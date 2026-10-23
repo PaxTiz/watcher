@@ -1,8 +1,8 @@
-import type { PasskeyResource } from "@watcher/common";
+import { BadRequestError, type PasskeyResource } from "@watcher/common";
+import { passkeys } from "@watcher/database";
 
 import type { WebAuthnCredential } from "#auth-utils";
 import { AbstractService } from "#framework";
-import { useDatabase } from "#server/database";
 
 const CHALLENGE_TTL = 60 * 5; // 5 minutes, in seconds
 
@@ -10,26 +10,11 @@ export type PasskeyCredential = WebAuthnCredential & { userId: string };
 
 export default class PasskeysService extends AbstractService {
   async list(user_id: string): Promise<Array<PasskeyResource>> {
-    const database = useDatabase();
-
-    const passkeys = await database
-      .selectFrom("passkeys")
-      .select(["id", "name", "backed_up", "created_at", "last_used_at"])
-      .where("user_id", "=", user_id)
-      .orderBy("created_at", "desc")
-      .execute();
-
-    return passkeys;
+    return passkeys.find_all_by_user({ user_id });
   }
 
   async find_by_id(id: string): Promise<PasskeyCredential | null> {
-    const database = useDatabase();
-
-    const passkey = await database
-      .selectFrom("passkeys")
-      .selectAll()
-      .where("id", "=", id)
-      .executeTakeFirst();
+    const passkey = await passkeys.find_by_id({ id });
 
     if (!passkey) {
       return null;
@@ -47,68 +32,34 @@ export default class PasskeysService extends AbstractService {
   }
 
   async count(user_id: string): Promise<number> {
-    const database = useDatabase();
-
-    const { count } = await database
-      .selectFrom("passkeys")
-      .select((eb) => eb.fn.countAll<number>().as("count"))
-      .where("user_id", "=", user_id)
-      .executeTakeFirstOrThrow();
-
-    return Number(count);
+    return passkeys.count_by_user({ user_id });
   }
 
   async create(user_id: string, credential: WebAuthnCredential, name: string) {
-    const database = useDatabase();
-
-    await database
-      .insertInto("passkeys")
-      .values({
+    await passkeys.create({
+      data: {
         id: credential.id,
         user_id,
         name,
         public_key: credential.publicKey,
         counter: credential.counter,
         backed_up: credential.backedUp,
-        transports: JSON.stringify(credential.transports ?? []),
+        transports: credential.transports ?? [],
         aaguid: credential.aaguid ?? null,
-      })
-      .execute();
+      },
+    });
   }
 
   async mark_as_used(id: string, counter: number) {
-    const database = useDatabase();
-
-    await database
-      .updateTable("passkeys")
-      .set({ counter, last_used_at: new Date().toISOString() })
-      .where("id", "=", id)
-      .execute();
+    await passkeys.mark_as_used({ id, counter });
   }
 
   async rename(user_id: string, id: string, name: string) {
-    const database = useDatabase();
-
-    const result = await database
-      .updateTable("passkeys")
-      .set({ name })
-      .where("user_id", "=", user_id)
-      .where("id", "=", id)
-      .executeTakeFirst();
-
-    return result.numUpdatedRows > 0n;
+    return passkeys.rename({ id, user_id, name });
   }
 
   async delete(user_id: string, id: string) {
-    const database = useDatabase();
-
-    const result = await database
-      .deleteFrom("passkeys")
-      .where("user_id", "=", user_id)
-      .where("id", "=", id)
-      .executeTakeFirst();
-
-    return result.numDeletedRows > 0n;
+    return passkeys.remove({ id, user_id });
   }
 
   async store_challenge(attempt_id: string, challenge: string) {
@@ -128,7 +79,7 @@ export default class PasskeysService extends AbstractService {
     await storage.removeItem(key);
 
     if (!item || item.expires_at < Date.now()) {
-      throw createError({ statusCode: 400, message: "challenge_expired" });
+      throw new BadRequestError({ message: "challenge_expired" });
     }
 
     return item.challenge;

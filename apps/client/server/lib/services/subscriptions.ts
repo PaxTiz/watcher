@@ -1,103 +1,31 @@
 import type { SubscriptionResource } from "@watcher/common";
+import { findOrFail, repositoryTypes, subscriptions, userSubscriptions } from "@watcher/database";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
-import { useDatabase } from "#server/database";
 import { is_uuid, parse_slug_params } from "#shared/utils/random";
+
+type SubscriptionRow = repositoryTypes.subscriptions.SubscriptionWithUserState;
+type SubscriptionIdentifier = repositoryTypes.subscriptions.SubscriptionIdentifier;
 
 export default class SubscriptionsService extends AbstractService {
   async find_all(user: User): Promise<Array<SubscriptionResource>> {
-    const database = useDatabase();
+    const rows = await subscriptions.find_all_by_user({ user_id: user.id });
 
-    const subscriptions = await database
-      .selectFrom("subscriptions")
-      .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
-      .where("user_subscriptions.user_id", "=", user.id)
-      .select([
-        "subscriptions.id",
-        "subscriptions.name",
-        "subscriptions.slug",
-        "subscriptions.service",
-        "subscriptions.url",
-        "subscriptions.logo",
-        "subscriptions.last_synced_at",
-        "user_subscriptions.is_favorite",
-        "user_subscriptions.is_hidden",
-      ])
-      .select((eb) =>
-        eb
-          .selectFrom("videos")
-          .whereRef("videos.service", "=", "subscriptions.service")
-          .whereRef("videos.subscription_id", "=", "subscriptions.service_id")
-          .select((eb) => eb.fn.max("videos.created_at").as("created_at"))
-          .as("last_video_at"),
-      )
-      .orderBy("user_subscriptions.is_hidden", "asc")
-      .orderBy("name", "asc")
-      .execute();
-
-    return subscriptions.map((sub) => ({
-      id: sub.id,
-      name: sub.name,
-      slug: sub.slug,
-      is_favorite: sub.is_favorite,
-      is_hidden: sub.is_hidden,
-      last_synced_at: sub.last_synced_at,
-      last_video_at: sub.last_video_at,
-      channel: {
-        service: sub.service,
-        url: sub.url,
-        logo: sub.logo,
-      },
-    }));
+    return rows.map((row) => this.to_resource(row));
   }
 
   async find_one(user: User, id_or_slug: string): Promise<SubscriptionResource> {
-    const database = useDatabase();
+    const row = await findOrFail(
+      subscriptions.find_one_by_user({
+        user_id: user.id,
+        identifier: this.to_identifier(id_or_slug),
+      }),
+      { message: "subscription_not_found" },
+    );
 
-    const is_params_uuid = is_uuid(id_or_slug);
-    const sub = await database
-      .selectFrom("subscriptions")
-      .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
-      .select([
-        "subscriptions.id",
-        "subscriptions.name",
-        "subscriptions.slug",
-        "subscriptions.service",
-        "subscriptions.url",
-        "subscriptions.logo",
-        "subscriptions.last_synced_at",
-        "user_subscriptions.is_favorite",
-        "user_subscriptions.is_hidden",
-      ])
-      .select((eb) =>
-        eb
-          .selectFrom("videos")
-          .whereRef("videos.service", "=", "subscriptions.service")
-          .whereRef("videos.subscription_id", "=", "subscriptions.service_id")
-          .select((eb) => eb.fn.max("videos.created_at").as("created_at"))
-          .as("last_video_at"),
-      )
-      .where("user_subscriptions.user_id", "=", user.id)
-      .$if(is_params_uuid, (qb) => qb.where("id", "=", id_or_slug))
-      .$if(!is_params_uuid, (qb) => qb.where("slug", "=", parse_slug_params(id_or_slug)))
-      .executeTakeFirstOrThrow();
-
-    return {
-      id: sub.id,
-      name: sub.name,
-      slug: sub.slug,
-      is_favorite: sub.is_favorite,
-      is_hidden: sub.is_hidden,
-      last_synced_at: sub.last_synced_at,
-      last_video_at: sub.last_video_at,
-      channel: {
-        service: sub.service,
-        url: sub.url,
-        logo: sub.logo,
-      },
-    };
+    return this.to_resource(row);
   }
 
   async sync(user: User) {
@@ -113,53 +41,38 @@ export default class SubscriptionsService extends AbstractService {
   }
 
   async toggle_favorite(user: User, id_or_slug: string) {
-    const database = useDatabase();
-
-    const is_params_uuid = is_uuid(id_or_slug);
-    await database
-      .updateTable("user_subscriptions")
-      .from("subscriptions")
-      .set({ is_favorite: (c) => c.not(c.ref("is_favorite")) })
-      .whereRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
-      .where("user_id", "=", user.id)
-      .$if(is_params_uuid, (qb) => qb.where("subscriptions.id", "=", id_or_slug))
-      .$if(!is_params_uuid, (qb) =>
-        qb.where("subscriptions.slug", "=", parse_slug_params(id_or_slug)),
-      )
-      .execute();
+    await userSubscriptions.toggle_favorite({
+      user_id: user.id,
+      identifier: this.to_identifier(id_or_slug),
+    });
   }
 
   async hide(user: User, id_or_slug: string) {
-    const database = useDatabase();
-
-    const is_params_uuid = is_uuid(id_or_slug);
-    await database
-      .updateTable("user_subscriptions")
-      .from("subscriptions")
-      .set({ is_favorite: false, is_hidden: true })
-      .whereRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
-      .where("user_id", "=", user.id)
-      .$if(is_params_uuid, (qb) => qb.where("subscriptions.id", "=", id_or_slug))
-      .$if(!is_params_uuid, (qb) =>
-        qb.where("subscriptions.slug", "=", parse_slug_params(id_or_slug)),
-      )
-      .execute();
+    await userSubscriptions.hide({ user_id: user.id, identifier: this.to_identifier(id_or_slug) });
   }
 
   async show(user: User, id_or_slug: string) {
-    const database = useDatabase();
+    await userSubscriptions.show({ user_id: user.id, identifier: this.to_identifier(id_or_slug) });
+  }
 
-    const is_params_uuid = is_uuid(id_or_slug);
-    await database
-      .updateTable("user_subscriptions")
-      .from("subscriptions")
-      .set({ is_hidden: false })
-      .whereRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
-      .where("user_id", "=", user.id)
-      .$if(is_params_uuid, (qb) => qb.where("subscriptions.id", "=", id_or_slug))
-      .$if(!is_params_uuid, (qb) =>
-        qb.where("subscriptions.slug", "=", parse_slug_params(id_or_slug)),
-      )
-      .execute();
+  private to_identifier(id_or_slug: string): SubscriptionIdentifier {
+    return is_uuid(id_or_slug) ? { id: id_or_slug } : { slug: parse_slug_params(id_or_slug) };
+  }
+
+  private to_resource(row: SubscriptionRow): SubscriptionResource {
+    return {
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      is_favorite: row.is_favorite,
+      is_hidden: row.is_hidden,
+      last_synced_at: row.last_synced_at,
+      last_video_at: row.last_video_at,
+      channel: {
+        service: row.service,
+        url: row.url,
+        logo: row.logo,
+      },
+    };
   }
 }

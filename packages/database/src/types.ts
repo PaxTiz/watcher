@@ -1,7 +1,10 @@
-import type { CredentialsType, SubscriptionType, VideoPalette } from "@watcher/common";
-import type { ColumnType, Generated, Insertable } from "kysely";
-
-import type { WebAuthnCredential } from "#auth-utils";
+import type {
+  CredentialsType,
+  PasskeyTransport,
+  SubscriptionType,
+  VideoPalette,
+} from "@watcher/common";
+import type { ColumnType, Generated, Insertable, Selectable, Updateable } from "kysely";
 
 export type UserTable = {
   id: Generated<string>;
@@ -94,7 +97,7 @@ export type HiddenUsersVideosTable = {
   video_id: string;
 };
 
-export type UsersVideosProgression = {
+export type UsersVideosProgressionTable = {
   user_id: string;
 
   video_id: string;
@@ -118,7 +121,7 @@ export type PasskeyTable = {
   backed_up: boolean;
 
   // jsonb: parsed on read, written as a JSON string
-  transports: ColumnType<NonNullable<WebAuthnCredential["transports"]>, string, string>;
+  transports: ColumnType<Array<PasskeyTransport>, string, string>;
 
   aaguid: string | null;
 
@@ -127,7 +130,7 @@ export type PasskeyTable = {
   last_used_at: ColumnType<string | null, string | undefined, string>;
 };
 
-export type Database = {
+export type DatabaseInterface = {
   users: UserTable;
   passkeys: PasskeyTable;
   subscriptions: SubscriptionTable;
@@ -135,7 +138,17 @@ export type Database = {
   credentials: CredentialTable;
   videos: VideoTable;
   hidden_users_videos: HiddenUsersVideosTable;
-  users_videos_progression: UsersVideosProgression;
+  users_videos_progression: UsersVideosProgressionTable;
 };
 
-export type SubscriptionTableInsert = Insertable<SubscriptionTable>;
+export type DatabaseSchema = {
+  [K in keyof DatabaseInterface]: Selectable<DatabaseInterface[K]>;
+};
+
+export type DatabaseSchemaInsert = {
+  [K in keyof DatabaseInterface]: Insertable<DatabaseInterface[K]>;
+};
+
+export type DatabaseSchemaUpdate = {
+  [K in keyof DatabaseInterface]: Updateable<DatabaseInterface[K]>;
+};

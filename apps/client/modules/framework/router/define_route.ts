@@ -7,6 +7,8 @@ import {
 } from "h3";
 import { type ZodMiniType, type infer as zodInfer } from "zod/mini";
 
+import { withHttpErrors } from "./http_errors";
+
 type RouteHandler<
   Body extends ZodMiniType,
   Query extends ZodMiniType,
@@ -54,10 +56,12 @@ export const defineRoute = <
       route.params ? getValidatedRouterParams(event, route.params.parse) : Promise.resolve(null),
     ]);
 
-    return route.handler(event, {
-      body: body as Body extends undefined ? never : zodInfer<Body>,
-      query: query as Query extends undefined ? never : zodInfer<Query>,
-      params: params as Params extends undefined ? never : zodInfer<Params>,
-    });
+    return withHttpErrors(() =>
+      route.handler(event, {
+        body: body as Body extends undefined ? never : zodInfer<Body>,
+        query: query as Query extends undefined ? never : zodInfer<Query>,
+        params: params as Params extends undefined ? never : zodInfer<Params>,
+      }),
+    );
   });
 };

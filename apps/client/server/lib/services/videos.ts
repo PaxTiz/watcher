@@ -1,102 +1,29 @@
 import type { Paginated, SubscriptionType, VideoResource } from "@watcher/common";
+import { findOrFail, repositoryTypes, videos } from "@watcher/database";
 import { formatISO, startOfDay, startOfWeek, sub } from "date-fns";
-import { sql, type SelectQueryBuilder } from "kysely";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
-import { useDatabase } from "#server/database";
-import type { Database } from "#server/database/schema";
 import { useTwitch } from "#server/lib/twitch";
 import type { VideosValidators } from "#shared/validators/videos";
 
+type VideoRow = repositoryTypes.videos.VideoRow;
+type VideosFilters = repositoryTypes.videos.FindAllForUserFilters;
+
 export default class VideosService extends AbstractService {
   async get_by_id(user: User, id: string): Promise<VideoResource> {
-    const database = useDatabase();
+    const video = await findOrFail(videos.find_by_id_for_user({ id, user_id: user.id }), {
+      message: "video_not_found",
+    });
 
-    const video = await database
-      .selectFrom("videos")
-      .where("videos.id", "=", id)
-      .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
-      .leftJoin("user_subscriptions", (qb) =>
-        qb
-          .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
-          .on("user_subscriptions.user_id", "=", user.id),
-      )
-      .leftJoin("users_videos_progression", (qb) =>
-        qb
-          .onRef("users_videos_progression.video_id", "=", "videos.id")
-          .on("users_videos_progression.user_id", "=", user.id),
-      )
-      .select((qb) => [
-        "videos.id as video_id",
-        "videos.service as video_service",
-        "videos.title as video_title",
-        "videos.description as video_description",
-        "videos.duration as video_duration",
-        "videos.url as video_url",
-        "videos.thumbnail_small as video_thumbnail_small",
-        "videos.thumbnail_large as video_thumbnail_large",
-        "videos.palette as video_palette",
-        "videos.created_at as video_created_at",
-        "subscriptions.id as subscription_id",
-        "subscriptions.name as subscription_name",
-        "subscriptions.slug as subscription_slug",
-        "subscriptions.service as subscription_service",
-        "subscriptions.url as subscription_url",
-        "subscriptions.logo as subscription_logo",
-        "subscriptions.last_synced_at as subscription_last_sync_at",
-        sql<boolean>`COALESCE(${qb.ref("user_subscriptions.is_hidden")}, false)`.as(
-          "subscription_is_hidden",
-        ),
-        sql<boolean>`COALESCE(${qb.ref("user_subscriptions.is_favorite")}, false)`.as(
-          "subscription_is_favorite",
-        ),
-        sql<number>`COALESCE(${qb.ref("users_videos_progression.progression")}, 0)`.as(
-          "viewing_progression",
-        ),
-      ])
-      .executeTakeFirstOrThrow();
-
-    return {
-      id: video.video_id,
-      service: video.video_service,
-      title: video.video_title,
-      description: video.video_description,
-      duration: video.video_duration,
-      viewing_progression: video.viewing_progression,
-      url: video.video_url,
-      thumbnails: {
-        small: video.video_thumbnail_small,
-        large: video.video_thumbnail_large,
-      },
-      palette: video.video_palette,
-      created_at: video.video_created_at,
-      author: {
-        id: video.subscription_id,
-        name: video.subscription_name,
-        slug: video.subscription_slug,
-        is_favorite: video.subscription_is_favorite,
-        is_hidden: video.subscription_is_hidden,
-        last_synced_at: video.subscription_last_sync_at,
-        channel: {
-          service: video.subscription_service,
-          url: video.subscription_url,
-          logo: video.subscription_logo,
-        },
-      },
-    };
+    return this.to_resource(video, video.subscription_is_hidden);
   }
 
   async get_url(id: string): Promise<{ service: SubscriptionType; url: string | null }> {
-    const database = useDatabase();
     const twitch = useTwitch();
     const config = useRuntimeConfig();
 
-    const video = await database
-      .selectFrom("videos")
-      .select(["service", "service_id", "url"])
-      .where("id", "=", id)
-      .executeTakeFirstOrThrow();
+    const video = await findOrFail(videos.find_source({ id }), { message: "video_not_found" });
 
     if (video.service === "twitch") {
       return {
@@ -118,243 +45,47 @@ export default class VideosService extends AbstractService {
     user: User,
     params: VideosValidators["list"]["query"],
   ): Promise<Paginated<VideoResource>> {
-    const database = useDatabase();
-
-    const total = await database
-      .selectFrom("videos")
-      .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
-      .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
-      .where((eb) =>
-        eb.not(
-          eb.exists(
-            eb
-              .selectFrom("hidden_users_videos")
-              .where("hidden_users_videos.video_id", "=", eb.ref("videos.id"))
-              .where("hidden_users_videos.user_id", "=", eb.ref("user_subscriptions.user_id")),
-          ),
-        ),
-      )
-      .$if(!params.subscription_id, (qb) => qb.where("user_subscriptions.is_hidden", "=", false))
-      .where("user_subscriptions.user_id", "=", user.id)
-      .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
-      .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
-      .$if(params.is_favorite === true, (qb) =>
-        qb.where("user_subscriptions.is_favorite", "=", params.is_favorite!),
-      )
-      .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
-      .$if(!!params.date, (qb) => this.parse_date_filter(qb, params.date!))
-      .$if(!!params.subscription_id, (qb) =>
-        qb.where("subscriptions.id", "=", params.subscription_id!),
-      )
-      .$if(!!params.query, (qb) =>
-        qb.where((ib) =>
-          ib.or([
-            ib(
-              "videos.title",
-              "@@",
-              sql<string>`(websearch_to_tsquery('french', ${params.query!}))`,
-            ),
-            ib("videos.title", "ilike", `%${params.query!}%`),
-          ]),
-        ),
-      )
-      .$if(params.in_progress === true, (qb) => this.in_progress_filter(qb, user))
-      .executeTakeFirst();
-
-    const items = await database
-      .selectFrom("videos")
-      .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
-      .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
-      .leftJoin("users_videos_progression", (qb) =>
-        qb
-          .onRef("users_videos_progression.video_id", "=", "videos.id")
-          .on("users_videos_progression.user_id", "=", user.id),
-      )
-      .where((eb) =>
-        eb.not(
-          eb.exists(
-            eb
-              .selectFrom("hidden_users_videos")
-              .where("hidden_users_videos.video_id", "=", eb.ref("videos.id"))
-              .where("hidden_users_videos.user_id", "=", eb.ref("user_subscriptions.user_id")),
-          ),
-        ),
-      )
-      .$if(!params.subscription_id, (qb) => qb.where("user_subscriptions.is_hidden", "=", false))
-      .where("user_subscriptions.user_id", "=", user.id)
-      .$if(!!params.before, (qb) =>
-        qb.where(
-          sql<boolean>`(videos.created_at, videos.id) < (SELECT created_at, id FROM videos WHERE id = ${params.before!})`,
-        ),
-      )
-      .offset(params.before ? 0 : (params.page - 1) * params.per_page)
-      .limit(params.per_page)
-      .$if(params.in_progress === true, (qb) =>
-        qb.orderBy("users_videos_progression.updated_at", "desc"),
-      )
-      .orderBy("videos.created_at", "desc")
-      .orderBy("videos.id", "desc")
-      .select((qb) => [
-        "videos.id as video_id",
-        "videos.service as video_service",
-        "videos.title as video_title",
-        "videos.description as video_description",
-        "videos.duration as video_duration",
-        "videos.url as video_url",
-        "videos.thumbnail_small as video_thumbnail_small",
-        "videos.thumbnail_large as video_thumbnail_large",
-        "videos.palette as video_palette",
-        "videos.created_at as video_created_at",
-        "subscriptions.id as subscription_id",
-        "subscriptions.name as subscription_name",
-        "subscriptions.slug as subscription_slug",
-        "subscriptions.service as subscription_service",
-        "subscriptions.url as subscription_url",
-        "subscriptions.logo as subscription_logo",
-        "subscriptions.last_synced_at as subscription_last_synced_at",
-        "user_subscriptions.is_favorite as subscription_is_favorite",
-        sql<number>`COALESCE(${qb.ref("users_videos_progression.progression")}, 0)`.as(
-          "video_viewing_progression",
-        ),
-      ])
-      .$if(!!params.service, (qb) => qb.where("videos.service", "=", params.service!))
-      .$if(params.is_favorite === true, (qb) =>
-        qb.where("user_subscriptions.is_favorite", "=", params.is_favorite!),
-      )
-      .$if(!!params.duration, (qb) => this.parse_duration_filter(qb, params.duration!))
-      .$if(!!params.date, (qb) => this.parse_date_filter(qb, params.date!))
-      .$if(!!params.subscription_id, (qb) =>
-        qb.where("subscriptions.id", "=", params.subscription_id!),
-      )
-      .$if(!!params.query, (qb) =>
-        qb.where((ib) =>
-          ib.or([
-            ib(
-              "videos.title",
-              "@@",
-              sql<string>`(websearch_to_tsquery('french', ${params.query!}))`,
-            ),
-            ib("videos.title", "ilike", `%${params.query!}%`),
-          ]),
-        ),
-      )
-      .$if(params.in_progress === true, (qb) => this.in_progress_filter(qb, user))
-      .execute();
-
-    const mapped_items: Array<VideoResource> = [];
-    for (const item of items) {
-      mapped_items.push({
-        id: item.video_id,
-        service: item.video_service,
-        title: item.video_title,
-        description: item.video_description,
-        duration: item.video_duration,
-        viewing_progression: item.video_viewing_progression,
-        url: item.video_url,
-        thumbnails: {
-          small: item.video_thumbnail_small,
-          large: item.video_thumbnail_large,
-        },
-        palette: item.video_palette,
-        created_at: item.video_created_at,
-        author: {
-          id: item.subscription_id,
-          name: item.subscription_name,
-          slug: item.subscription_slug,
-          is_favorite: item.subscription_is_favorite,
-          last_synced_at: item.subscription_last_synced_at,
-          is_hidden: false,
-          channel: {
-            service: item.subscription_service,
-            url: item.subscription_url,
-            logo: item.subscription_logo,
-          },
-        },
-      });
-    }
+    const { total, items } = await videos.find_all_for_user({
+      user_id: user.id,
+      filters: {
+        query: params.query,
+        service: params.service,
+        subscription_id: params.subscription_id,
+        is_favorite: params.is_favorite,
+        in_progress: params.in_progress,
+        duration: params.duration,
+        ...this.parse_date_filter(params.date),
+      },
+      pagination: {
+        page: params.page,
+        per_page: params.per_page,
+        before: params.before,
+      },
+    });
 
     return {
-      total: Number(total?.total ?? 0),
-      items: mapped_items,
+      total,
+      items: items.map((item) => this.to_resource(item, false)),
     };
   }
 
   async hide(user: User, id: string) {
-    const database = useDatabase();
-
-    await database
-      .insertInto("hidden_users_videos")
-      .values({
-        user_id: user.id,
-        video_id: id,
-      })
-      .onConflict((eb) => eb.doNothing())
-      .execute();
+    await videos.hide_for_user({ user_id: user.id, video_id: id });
   }
 
   async update_progress(user: User, id: string, progression: number) {
-    const database = useDatabase();
-
-    const mapped_progression = Math.max(0, progression > 0.9 ? 1 : progression);
-
-    await database
-      .insertInto("users_videos_progression")
-      .values({
-        user_id: user.id,
-        video_id: id,
-        progression: mapped_progression,
-      })
-      .onConflict((eb) =>
-        eb
-          .columns(["user_id", "video_id"])
-          .doUpdateSet({ progression: mapped_progression, updated_at: sql`now()` }),
-      )
-      .execute();
-  }
-
-  private in_progress_filter(qb: SelectQueryBuilder<Database, "videos", any>, user: User) {
-    return qb.where((eb) =>
-      eb.exists(
-        eb
-          .selectFrom("users_videos_progression as progression")
-          .whereRef("progression.video_id", "=", "videos.id")
-          .where("progression.user_id", "=", user.id)
-          .where("progression.progression", ">", 0)
-          .where("progression.progression", "<", 1),
-      ),
-    );
-  }
-
-  private parse_duration_filter(
-    qb: SelectQueryBuilder<Database, "videos", any>,
-    value: VideosValidators["list"]["query"]["duration"],
-  ) {
-    if (!value) {
-      return qb;
-    }
-
-    switch (value) {
-      case "less_than_10_minutes":
-        return qb.where("videos.duration", "<=", 60 * 10);
-      case "between_10_30_minutes":
-        return qb.where((q) =>
-          q.and([q("videos.duration", ">", 60 * 10), q("videos.duration", "<=", 60 * 30)]),
-        );
-      case "between_30_60_minutes":
-        return qb.where((q) =>
-          q.and([q("videos.duration", ">", 60 * 30), q("videos.duration", "<=", 60 * 60)]),
-        );
-      case "greater_than_1_hour":
-        return qb.where("videos.duration", ">=", 60 * 60);
-    }
+    await videos.upsert_progression({
+      user_id: user.id,
+      video_id: id,
+      progression: Math.max(0, progression > 0.9 ? 1 : progression),
+    });
   }
 
   private parse_date_filter(
-    qb: SelectQueryBuilder<Database, "videos", any>,
     value: VideosValidators["list"]["query"]["date"],
-  ) {
+  ): Pick<VideosFilters, "created_after" | "created_before"> {
     if (!value) {
-      return qb;
+      return {};
     }
 
     const date = {
@@ -366,9 +97,40 @@ export default class VideosService extends AbstractService {
     }[value];
 
     if (value === "older") {
-      return qb.where("videos.created_at", "<=", date());
+      return { created_before: date() };
     }
 
-    return qb.where("videos.created_at", ">=", date());
+    return { created_after: date() };
+  }
+
+  private to_resource(row: VideoRow, is_hidden: boolean): VideoResource {
+    return {
+      id: row.video_id,
+      service: row.video_service,
+      title: row.video_title,
+      description: row.video_description,
+      duration: row.video_duration,
+      viewing_progression: row.video_viewing_progression,
+      url: row.video_url,
+      thumbnails: {
+        small: row.video_thumbnail_small,
+        large: row.video_thumbnail_large,
+      },
+      palette: row.video_palette,
+      created_at: row.video_created_at,
+      author: {
+        id: row.subscription_id,
+        name: row.subscription_name,
+        slug: row.subscription_slug,
+        is_favorite: row.subscription_is_favorite,
+        is_hidden,
+        last_synced_at: row.subscription_last_synced_at,
+        channel: {
+          service: row.subscription_service,
+          url: row.subscription_url,
+          logo: row.subscription_logo,
+        },
+      },
+    };
   }
 }

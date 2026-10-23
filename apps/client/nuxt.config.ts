@@ -81,14 +81,6 @@ export default defineNuxtConfig({
       environment: "local", // 'local' | 'production'
     },
 
-    database: {
-      host: "",
-      port: "",
-      user: "",
-      pass: "",
-      name: "",
-    },
-
     encryption: {
       credentials: {
         access_token: "",

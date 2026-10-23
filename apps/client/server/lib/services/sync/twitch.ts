@@ -2,12 +2,12 @@ import { existsSync, mkdirSync } from "node:fs";
 import { writeFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 
+import { subscriptions, userSubscriptions, videos, withTransaction } from "@watcher/database";
 import { formatISO, differenceInHours } from "date-fns";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
-import { useDatabase } from "#server/database";
 import { useTwitch } from "#server/lib/twitch";
 import type { Sync } from "#shared/types/sync";
 import { async_pool } from "#shared/utils/random";
@@ -31,14 +31,8 @@ export default class SyncTwitch extends AbstractService {
   private async get_subscriptions(user: User, service_id: string) {
     const twitch_id = this.assert_twitch(user);
 
-    const database = useDatabase();
-
-    const user_subscriptions: Sync["SubscriptionsList"] = await database
-      .selectFrom("user_subscriptions")
-      .innerJoin("subscriptions", "subscriptions.id", "user_subscriptions.subscription_id")
-      .select(["service", "service_id", "name", "url", "logo", "last_synced_at", "slug"])
-      .where("service", "=", "twitch")
-      .execute()
+    const user_subscriptions: Sync["SubscriptionsList"] = await subscriptions
+      .find_all_for_sync({ user_id: user.id, service: "twitch" })
       .then((subs) =>
         subs.map((sub) => ({
           status: "deleted",
@@ -114,42 +108,31 @@ export default class SyncTwitch extends AbstractService {
   }
 
   private async sync_subscription(user: User, subscription: Sync["Subscription"]) {
-    const database = useDatabase();
-
     if (subscription.status === "deleted") {
       return;
     }
 
     subscription.channel.logo = await this.sync_subscription_logo(subscription);
 
-    await database.transaction().execute(async (tx) => {
-      const patched_subscription = await tx
-        .insertInto("subscriptions")
-        .values(subscription.channel)
-        .onConflict((row) =>
-          row.columns(["service", "service_id"]).doUpdateSet({
-            logo: (c) => c.ref("excluded.logo"),
-            url: (c) => c.ref("excluded.url"),
-            name: (c) => c.ref("excluded.name"),
-            last_synced_at: (c) => c.ref("excluded.last_synced_at"),
-          }),
-        )
-        .returning("id")
-        .executeTakeFirstOrThrow();
+    await withTransaction(async (tx) => {
+      const patched_subscription = await subscriptions.upsert({
+        data: subscription.channel,
+        options: { tx },
+      });
 
-      await tx
-        .insertInto("user_subscriptions")
-        .values({
-          user_id: user.id,
-          subscription_id: patched_subscription.id,
-        })
-        .onConflict((oc) => oc.doNothing())
-        .execute();
+      await userSubscriptions.attach({
+        user_id: user.id,
+        subscription_id: patched_subscription.id,
+        options: { tx },
+      });
     });
 
-    const videos = await this.get_videos_by_channel_id(user, subscription.channel.service_id);
+    const channel_videos = await this.get_videos_by_channel_id(
+      user,
+      subscription.channel.service_id,
+    );
 
-    for (const video of videos) {
+    for (const video of channel_videos) {
       await this.sync_video(video);
     }
   }
@@ -157,17 +140,12 @@ export default class SyncTwitch extends AbstractService {
   private async get_videos_by_channel_id(user: User, channel_id: string) {
     const twitch_id = this.assert_twitch(user);
 
-    const database = useDatabase();
     const twitch = useTwitch();
 
-    const videos: Sync["VideosList"] = await database
-      .selectFrom("videos")
-      .selectAll()
-      .where("service", "=", "twitch")
-      .where("subscription_id", "=", channel_id)
-      .execute()
-      .then((videos) =>
-        videos.map((vid) => ({
+    const channel_videos: Sync["VideosList"] = await videos
+      .find_all_by_subscription({ service: "twitch", subscription_id: channel_id })
+      .then((rows) =>
+        rows.map((vid) => ({
           status: "deleted",
           video: {
             service: vid.service,
@@ -189,7 +167,7 @@ export default class SyncTwitch extends AbstractService {
 
     while (true) {
       for (const video of response.data) {
-        const existingVid = videos.find((e) => e.video.service_id === video.id);
+        const existingVid = channel_videos.find((e) => e.video.service_id === video.id);
 
         if (existingVid) {
           const isValid = differenceInHours(new Date(), existingVid.video.last_synced_at) < 3;
@@ -209,7 +187,7 @@ export default class SyncTwitch extends AbstractService {
             last_synced_at: formatISO(new Date()),
           };
         } else {
-          videos.push({
+          channel_videos.push({
             status: "created",
             video: {
               service: "twitch",
@@ -238,12 +216,10 @@ export default class SyncTwitch extends AbstractService {
       }
     }
 
-    return videos;
+    return channel_videos;
   }
 
   private async sync_video(video: Sync["Video"]) {
-    const database = useDatabase();
-
     if (video.status === "deleted") {
       return await this.delete_video(video);
     }
@@ -254,22 +230,7 @@ export default class SyncTwitch extends AbstractService {
 
     const palette = await extract_image_palette(video.video.thumbnail_large);
 
-    await database
-      .insertInto("videos")
-      .values({ ...video.video, palette: palette ? JSON.stringify(palette) : null })
-      .onConflict((row) =>
-        row.columns(["service", "service_id"]).doUpdateSet({
-          title: (c) => c.ref("excluded.title"),
-          description: (c) => c.ref("excluded.description"),
-          url: (c) => c.ref("excluded.url"),
-          duration: (c) => c.ref("excluded.duration"),
-          thumbnail_small: (c) => c.ref("excluded.thumbnail_small"),
-          thumbnail_large: (c) => c.ref("excluded.thumbnail_large"),
-          palette: (c) => c.ref("excluded.palette"),
-          last_synced_at: (c) => c.ref("excluded.last_synced_at"),
-        }),
-      )
-      .execute();
+    await videos.upsert({ data: { ...video.video, palette } });
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
@@ -291,13 +252,7 @@ export default class SyncTwitch extends AbstractService {
   }
 
   private async delete_video(video: Sync["Video"]) {
-    const database = useDatabase();
-
-    await database
-      .deleteFrom("videos")
-      .where("service", "=", "twitch")
-      .where("service_id", "=", video.video.service_id)
-      .execute();
+    await videos.remove_by_service_id({ service: "twitch", service_id: video.video.service_id });
 
     try {
       await Promise.allSettled([

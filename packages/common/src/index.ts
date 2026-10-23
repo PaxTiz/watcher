@@ -3,6 +3,7 @@ export * from "./types/shared";
 export * from "./types/subscriptions";
 export * from "./types/videos";
 export * from "./types/palette";
+export * from "./types/passkeys";
 
 export * from "./resources/subscriptions";
 export * from "./resources/users";
@@ -12,3 +13,5 @@ export * from "./integrations/google";
 export * from "./integrations/twitch";
 
 export * from "./shared/promises";
+
+export * from "./errors/http";

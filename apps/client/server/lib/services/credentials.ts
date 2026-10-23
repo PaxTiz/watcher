@@ -1,68 +1,27 @@
 import type { CredentialsType, ServiceCredentials } from "@watcher/common";
+import { credentials, type DatabaseSchema } from "@watcher/database";
 
 import { AbstractService } from "#framework";
-import { useDatabase } from "#server/database";
 
 export default class CredentialsService extends AbstractService {
   async get(user_id: string, service: CredentialsType): Promise<ServiceCredentials | null> {
-    const database = useDatabase();
+    const row = await credentials.find_by_user({ user_id, service });
 
-    const credentials = await database
-      .selectFrom("credentials")
-      .selectAll()
-      .where("service", "=", service)
-      .where("user_id", "=", user_id)
-      .executeTakeFirst();
-
-    if (!credentials) {
-      return null;
-    }
-
-    return {
-      service: credentials.service,
-      service_id: credentials.service_id,
-      access_token: decrypt("access_token", credentials.access_token),
-      access_token_expires_at: credentials.access_token_expires_at,
-      refresh_token: decrypt("refresh_token", credentials.refresh_token),
-      refresh_token_expires_at: credentials.refresh_token_expires_at,
-      userId: credentials.user_id,
-    } as ServiceCredentials;
+    return row ? this.to_service_credentials(row) : null;
   }
 
   async find_by_service(
     service: CredentialsType,
     service_id: string,
   ): Promise<ServiceCredentials | null> {
-    const database = useDatabase();
+    const row = await credentials.find_by_service({ service, service_id });
 
-    const credentials = await database
-      .selectFrom("credentials")
-      .selectAll()
-      .where("service", "=", service)
-      .where("service_id", "=", service_id)
-      .executeTakeFirst();
-
-    if (!credentials) {
-      return null;
-    }
-
-    return {
-      service: credentials.service,
-      service_id: credentials.service_id,
-      access_token: decrypt("access_token", credentials.access_token),
-      access_token_expires_at: credentials.access_token_expires_at,
-      refresh_token: decrypt("refresh_token", credentials.refresh_token),
-      refresh_token_expires_at: credentials.refresh_token_expires_at,
-      userId: credentials.user_id,
-    } as ServiceCredentials;
+    return row ? this.to_service_credentials(row) : null;
   }
 
   async replace(user_id: string, data: ServiceCredentials) {
-    const database = useDatabase();
-
-    await database
-      .insertInto("credentials")
-      .values({
+    await credentials.upsert({
+      data: {
         service: data.service,
         service_id: data.service_id,
         access_token: encrypt("access_token", data.access_token),
@@ -70,27 +29,25 @@ export default class CredentialsService extends AbstractService {
         refresh_token: encrypt("refresh_token", data.refresh_token),
         refresh_token_expires_at: data.refresh_token_expires_at,
         user_id,
-      })
-      .onConflict((oc) =>
-        oc.columns(["service", "user_id"]).doUpdateSet({
-          access_token: encrypt("access_token", data.access_token),
-          access_token_expires_at: data.access_token_expires_at,
-          refresh_token: encrypt("refresh_token", data.refresh_token),
-          refresh_token_expires_at: data.refresh_token_expires_at,
-        }),
-      )
-      .execute();
+      },
+    });
 
     return data;
   }
 
   async delete(user_id: string, service: CredentialsType) {
-    const database = useDatabase();
+    await credentials.remove({ user_id, service });
+  }
 
-    await database
-      .deleteFrom("credentials")
-      .where("user_id", "=", user_id)
-      .where("service", "=", service)
-      .execute();
+  private to_service_credentials(row: DatabaseSchema["credentials"]): ServiceCredentials {
+    return {
+      service: row.service,
+      service_id: row.service_id,
+      access_token: decrypt("access_token", row.access_token),
+      access_token_expires_at: row.access_token_expires_at,
+      refresh_token: decrypt("refresh_token", row.refresh_token),
+      refresh_token_expires_at: row.refresh_token_expires_at,
+      userId: row.user_id,
+    };
   }
 }

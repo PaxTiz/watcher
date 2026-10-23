@@ -1,0 +1,21 @@
+{
+  "name": "@watcher/database",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "db:migrations:run": "node --env-file=../../apps/client/.env ./node_modules/kysely-ctl/dist/bin.mjs migrate up",
+    "db:migrations:rollback": "node --env-file=../../apps/client/.env ./node_modules/kysely-ctl/dist/bin.mjs migrate down",
+    "db:migrations:create": "node --env-file=../../apps/client/.env ./node_modules/kysely-ctl/dist/bin.mjs migrate make"
+  },
+  "dependencies": {
+    "@watcher/common": "workspace:",
+    "kysely": "^0.29.6",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1",
+    "kysely-ctl": "^0.21.0"
+  }
+}

@@ -1,6 +1,6 @@
 import { type Kysely } from "kysely";
 
-import { defaultUUIDV7 } from "../helpers";
+import { defaultUUIDV7 } from "../src/helpers";
 
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema

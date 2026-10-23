@@ -16,10 +16,10 @@ export default defineConfig({
   }),
 
   migrations: {
-    migrationFolder: "./server/database/migrations",
+    migrationFolder: "./migrations",
   },
 
   seeds: {
-    seedFolder: "./server/database/seeds",
+    seedFolder: "./seeds",
   },
 });

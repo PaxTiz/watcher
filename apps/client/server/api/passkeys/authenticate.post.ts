@@ -1,3 +1,4 @@
+import { withHttpErrors } from "#framework";
 import { services } from "#framework/server";
 
 export default defineWebAuthnAuthenticateEventHandler({
@@ -6,7 +7,7 @@ export default defineWebAuthnAuthenticateEventHandler({
   },
 
   async getChallenge(_event, attempt_id) {
-    return services.passkeys.consume_challenge(attempt_id);
+    return withHttpErrors(() => services.passkeys.consume_challenge(attempt_id));
   },
 
   getOptions() {

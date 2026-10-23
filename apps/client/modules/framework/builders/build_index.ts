@@ -12,6 +12,8 @@ export async function buildIndex(root: string) {
     export { AbstractService, AbstractCacheService } from '../modules/framework/services/define_service';
 
     export { defineRoute } from '../modules/framework/router/define_route';
+
+    export { withHttpErrors } from '../modules/framework/router/http_errors';
   `,
   );
 }
