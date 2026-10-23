@@ -2,6 +2,8 @@
 import { computed, inject, type ComputedRef } from "vue";
 import type { RouteLocationRaw } from "vue-router";
 
+import { NuxtLink } from "#components";
+
 import { HAS_FORM_ERRORS_SYMBOL } from "../types/forms";
 
 export type ButtonColor =
@@ -45,7 +47,7 @@ const {
   ui?: { root?: string };
 }>();
 
-const component = computed(() => (to ? "NuxtLink" : "button"));
+const component = computed(() => (to ? NuxtLink : "button"));
 const resolvedType = computed(() => (to ? undefined : (type ?? "button")));
 
 const COLORS: Record<ButtonColor, string> = {
