@@ -11,6 +11,7 @@ export type Integration = {
 
 export const useIntegrations = () => {
   const { user, fetch: refresh_session } = useUserSession();
+  const { t } = useNuxtApp().$i18n;
 
   const integrations: Array<Integration> = [
     {
@@ -46,11 +47,8 @@ export const useIntegrations = () => {
   const on_disconnect = async (integration: Integration) => {
     const ok = await useWatcherConfirm({
       danger: true,
-      title: `Déconnexion de votre compte ${integration.name}`,
-      description:
-        "Si vous déconnectez votre compte, vos abonnements ainsi que les vidéos liées à vos abonnements ne seront plus mis à jour.",
-      confirmLabel: "Confirmer",
-      cancelLabel: "Annuler",
+      title: t("integrations.disconnect.title", { name: integration.name }),
+      description: t("integrations.disconnect.description"),
     });
 
     if (!ok) {
@@ -62,10 +60,10 @@ export const useIntegrations = () => {
     });
 
     if (error) {
-      toast.error(`Une erreur est survenue lors de la déconnexion de ${integration.name}`);
+      toast.error(t("integrations.disconnect.failed", { name: integration.name }));
     } else {
       await refresh_session();
-      toast.success(`Le compte ${integration.name} a été déconnecté`);
+      toast.success(t("integrations.disconnect.success", { name: integration.name }));
     }
   };
 

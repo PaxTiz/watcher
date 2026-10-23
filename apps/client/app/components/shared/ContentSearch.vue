@@ -24,30 +24,26 @@ const emit = defineEmits<{
   close: [result?: SearchResult];
 }>();
 
+const { t } = useI18n();
+
 const query = ref("");
 const results = ref<SearchResults>({ channels: [], videos: [] });
 const loading = ref(false);
 const error = ref<string | null>(null);
 const filters = reactive<SearchFilters>({ type: "all", duration: "any", sort: "relevance" });
 
-const typeOptions: { value: SearchType; label: string }[] = [
-  { value: "all", label: "Tout" },
-  { value: "videos", label: "Vidéos" },
-  { value: "channels", label: "Chaînes" },
-];
+const toOptions = <T extends string>(group: string, values: Array<T>) =>
+  values.map((value) => ({ value, label: t(`search.${group}.${value}`) }));
 
-const durationOptions: { value: DurationFilter; label: string }[] = [
-  { value: "any", label: "Toutes durées" },
-  { value: "short", label: "< 4 min" },
-  { value: "medium", label: "4–20 min" },
-  { value: "long", label: "> 20 min" },
-];
+const typeOptions = computed(() => toOptions<SearchType>("types", ["all", "videos", "channels"]));
 
-const sortOptions: { value: SortFilter; label: string }[] = [
-  { value: "relevance", label: "Pertinence" },
-  { value: "recent", label: "Récentes" },
-  { value: "views", label: "Populaires" },
-];
+const durationOptions = computed(() =>
+  toOptions<DurationFilter>("durations", ["any", "short", "medium", "long"]),
+);
+
+const sortOptions = computed(() =>
+  toOptions<SortFilter>("sorts", ["relevance", "recent", "views"]),
+);
 
 const showVideoFilters = computed(() => filters.type !== "channels");
 
@@ -55,13 +51,13 @@ const items = computed<CommandItem<SearchResult>[]>(() => [
   ...results.value.channels.map((channel) => ({
     id: `channel:${channel.id}`,
     label: channel.name,
-    group: "Chaînes",
+    group: t("search.types.channels"),
     data: { kind: "channel" as const, channel },
   })),
   ...results.value.videos.map((video) => ({
     id: `video:${video.id}`,
     label: video.title,
-    group: "Vidéos",
+    group: t("search.types.videos"),
     data: { kind: "video" as const, video },
   })),
 ]);
@@ -92,7 +88,7 @@ async function run() {
   } catch (e) {
     if (current.signal.aborted || (e as Error).name === "AbortError") return;
     results.value = { channels: [], videos: [] };
-    error.value = "La recherche a échoué. Réessayez dans un instant.";
+    error.value = t("search.failed");
   } finally {
     if (!current.signal.aborted) loading.value = false;
   }
@@ -116,26 +112,36 @@ onBeforeUnmount(() => {
 const emptyMessage = computed(() => {
   const q = query.value.trim();
   if (error.value) return error.value;
-  if (q.length < minChars) return `Tapez au moins ${minChars} caractères pour lancer la recherche.`;
-  return `Aucun résultat pour « ${q} ».`;
+  if (q.length < minChars) return t("search.min_chars", { count: minChars });
+  return t("search.no_results", { query: q });
 });
 
 const { numbers } = useFormatter();
 
-const compact = new Intl.NumberFormat("fr", { notation: "compact", maximumFractionDigits: 1 });
-const formatViews = (views?: number) => (views == null ? "" : `${compact.format(views)} vues`);
+const formatViews = (views?: number) =>
+  views == null ? "" : t("search.views", { count: numbers.compact(views) });
 const formatSubscribers = (n?: number) =>
-  n == null ? "" : `${compact.format(n)} ${n > 1 ? "abonnés" : "abonné"}`;
+  n == null ? "" : t("search.subscribers", { count: numbers.compact(n) }, n);
 
 const filterGroups = computed(() => [
-  { key: "type" as const, label: "Type de résultat", options: typeOptions, visible: true },
+  {
+    key: "type" as const,
+    label: t("search.filters.type"),
+    options: typeOptions.value,
+    visible: true,
+  },
   {
     key: "duration" as const,
-    label: "Durée",
-    options: durationOptions,
+    label: t("search.filters.duration"),
+    options: durationOptions.value,
     visible: showVideoFilters.value,
   },
-  { key: "sort" as const, label: "Tri", options: sortOptions, visible: showVideoFilters.value },
+  {
+    key: "sort" as const,
+    label: t("search.filters.sort"),
+    options: sortOptions.value,
+    visible: showVideoFilters.value,
+  },
 ]);
 
 const setFilter = (key: keyof SearchFilters, value: string) => {
@@ -149,8 +155,8 @@ const setFilter = (key: keyof SearchFilters, value: string) => {
     :items="items"
     :loading="loading"
     manual-filter
-    placeholder="Rechercher une vidéo ou une chaîne…"
-    title="Recherche"
+    :placeholder="t('search.placeholder')"
+    :title="t('search.title')"
     @select="(item) => emit('select', item.data)"
     @close="(item) => emit('close', item?.data)"
   >

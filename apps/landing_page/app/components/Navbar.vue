@@ -28,8 +28,8 @@ const links = computed(() => [
       </nav>
 
       <div class="ml-auto flex items-center gap-1">
-        <LanguageToggle />
-        <ThemeToggle />
+        <WatcherLanguageToggle />
+        <WatcherThemeToggle />
         <NuxtLink
           to="#start"
           class="text-ui-text hover:text-alt mx-3 hidden text-sm transition-colors sm:inline"

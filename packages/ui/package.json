@@ -7,9 +7,12 @@
   "dependencies": {
     "@nuxt/fonts": "catalog:",
     "@nuxt/icon": "catalog:",
+    "@nuxtjs/color-mode": "catalog:",
+    "@nuxtjs/i18n": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@vueuse/core": "catalog:",
     "@vueuse/nuxt": "catalog:",
+    "@watcher/i18n": "workspace:^",
     "nuxt": "catalog:",
     "reka-ui": "catalog:",
     "tailwindcss": "catalog:",

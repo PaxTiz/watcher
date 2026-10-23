@@ -3,6 +3,8 @@ import { useVideosInProgress } from "~/composables/videos/useVideosInProgress";
 
 definePageMeta({ name: pages.home });
 
+const { t } = useI18n();
+
 useOAuthRedirectionHandler();
 
 const { data: in_progress } = await useVideosInProgress();
@@ -11,8 +13,8 @@ usePageAmbient(() => in_progress.value?.items[0]);
 usePageNavigation()([]);
 
 useMeta({
-  title: "Accueil",
-  description: "Découvrez les dernières sorties de vos créateurs favoris.",
+  title: () => t("nav.home"),
+  description: () => t("dashboard.description"),
 });
 </script>
 

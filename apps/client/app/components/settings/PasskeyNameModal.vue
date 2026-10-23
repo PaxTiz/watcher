@@ -11,6 +11,8 @@ const { name = "" } = defineProps<{
 
 const emit = defineEmits<{ close: [string | undefined] }>();
 
+const { t } = useI18n();
+
 const input = useTemplateRef("input");
 const state = ref<PasskeysValidators["name"]["body"]>({ name });
 
@@ -26,10 +28,7 @@ onMounted(() => {
 <template>
   <WatcherModal :ui="{ body: 'w-full max-w-[420px]' }">
     <h2 class="text-ui-text text-lg font-semibold">{{ title }}</h2>
-    <p class="text-ui-text-muted mt-2 text-sm leading-relaxed">
-      Donnez-lui un nom pour la reconnaître facilement, par exemple l'appareil ou le gestionnaire de
-      mots de passe qui la conserve.
-    </p>
+    <p class="text-ui-text-muted mt-2 text-sm leading-relaxed">{{ t("passkeys.name_hint") }}</p>
 
     <WatcherForm
       class="mt-5"
@@ -38,17 +37,21 @@ onMounted(() => {
       :schema="passkeysValidatorsSchema.name.body"
       @submit="onSubmit"
     >
-      <WatcherFormField label="Nom de la clé d'accès" name="name">
+      <WatcherFormField :label="t('passkeys.name')" name="name">
         <WatcherFormInput
           ref="input"
           v-model="state.name"
-          placeholder="MacBook, iPhone, Bitwarden…"
+          :placeholder="t('passkeys.name_placeholder')"
           class="w-full"
         />
       </WatcherFormField>
 
       <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <WatcherButton label="Annuler" color="ghost" @click="emit('close', undefined)" />
+        <WatcherButton
+          :label="t('common.cancel')"
+          color="ghost"
+          @click="emit('close', undefined)"
+        />
         <WatcherButton :label="confirmLabel" type="submit" color="solid" />
       </div>
     </WatcherForm>

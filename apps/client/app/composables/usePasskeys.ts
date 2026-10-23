@@ -1,11 +1,12 @@
 import { toast } from "vue-sonner";
 
+// Translation keys, an empty one means the error is silently ignored
 const ERRORS: Record<string, string> = {
   // Thrown by the browser when the user dismisses the passkey prompt
   NotAllowedError: "",
-  InvalidStateError: "Cette clé d'accès est déjà associée à votre compte",
-  unknown_passkey: "Cette clé d'accès n'est associée à aucun compte Watcher",
-  challenge_expired: "La demande a expiré, veuillez réessayer",
+  InvalidStateError: "passkeys.errors.already_registered",
+  unknown_passkey: "passkeys.errors.unknown",
+  challenge_expired: "passkeys.errors.expired",
 };
 
 const error_message = (error: unknown, fallback: string) => {
@@ -21,6 +22,7 @@ export const usePasskeys = () => {
     authenticateEndpoint: "/api/passkeys/authenticate",
   });
   const { fetch: refresh_session } = useUserSession();
+  const { t } = useNuxtApp().$i18n;
 
   const loading = ref(false);
 
@@ -34,7 +36,7 @@ export const usePasskeys = () => {
     } catch (error) {
       const message = error_message(error, fallback);
       if (message) {
-        toast.error(message);
+        toast.error(t(message));
       }
 
       return false;
@@ -43,23 +45,19 @@ export const usePasskeys = () => {
     }
   };
 
-  const login = () =>
-    run(
-      () => authenticate(),
-      "Une erreur est survenue lors de la connexion avec votre clé d'accès",
-    );
+  const login = () => run(() => authenticate(), "passkeys.errors.login");
 
   const signup = (name: string, passkey_name: string) =>
     run(
       () => register({ userName: name, displayName: name, passkeyName: passkey_name }),
-      "Une erreur est survenue lors de la création de votre compte",
+      "passkeys.errors.signup",
     );
 
   // The server uses the authenticated user's name, the userName is only required by the endpoint
   const add = (user_name: string, passkey_name: string) =>
     run(
       () => register({ userName: user_name, displayName: user_name, passkeyName: passkey_name }),
-      "Une erreur est survenue lors de l'ajout de votre clé d'accès",
+      "passkeys.errors.add",
     );
 
   return {

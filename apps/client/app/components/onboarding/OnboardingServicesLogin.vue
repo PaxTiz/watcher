@@ -1,12 +1,13 @@
 <script lang="ts" setup>
+const { t } = useI18n();
 const { integrations } = useIntegrations();
 </script>
 
 <template>
   <OnboardingStep
     :step="1"
-    title="Associez vos comptes"
-    description="Liez les plateformes de votre choix pour regrouper tous vos abonnements."
+    :title="t('onboarding.link.title')"
+    :description="t('onboarding.link.description')"
   >
     <div
       class="bg-ui-bg divide-ui-border divide-y overflow-hidden rounded-2xl shadow-[0_0_0_1px_var(--ui-border)]"

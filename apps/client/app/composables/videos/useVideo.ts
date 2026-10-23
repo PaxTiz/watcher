@@ -2,13 +2,12 @@ import type { MaybePromise, VideoResource } from "@watcher/common";
 import { toast } from "vue-sonner";
 
 export const useVideo = (video: VideoResource) => {
+  const { t } = useNuxtApp().$i18n;
+
   const on_hide_video = async (callback?: () => MaybePromise<unknown>) => {
     const ok = await useWatcherConfirm({
-      title: "Masquer une vidéo",
-      description:
-        "Voulez-vous vraiment masquer cette vidéo ? Elle n'apparaîtra plus dans votre flux.",
-      confirmLabel: "Confirmer",
-      cancelLabel: "Annuler",
+      title: t("videos.hide.title"),
+      description: t("videos.hide.description"),
     });
 
     if (!ok) {
@@ -17,21 +16,18 @@ export const useVideo = (video: VideoResource) => {
 
     const { error } = await callApi(`/api/videos/${video.id}/hide`, { method: "POST" });
     if (error) {
-      toast.error("Le masquage de la vidéo a échoué, réessayez plus tard");
+      toast.error(t("videos.hide.failed"));
       return;
     }
 
-    toast.success("La vidéo a été masquée");
+    toast.success(t("videos.hide.success"));
     await callback?.();
   };
 
   const on_hide_subscription = async (callback?: () => MaybePromise<unknown>) => {
     const ok = await useWatcherConfirm({
-      title: "Masquer une chaîne",
-      description:
-        "Voulez-vous vraiment masquer cette chaîne ? L'historique ainsi que les nouvelles vidéos publiées par cette chaîne ne seront plus visibles dans votre flux.",
-      confirmLabel: "Confirmer",
-      cancelLabel: "Annuler",
+      title: t("videos.hide_channel.title"),
+      description: t("videos.hide_channel.description"),
     });
 
     if (!ok) {
@@ -42,11 +38,11 @@ export const useVideo = (video: VideoResource) => {
       method: "POST",
     });
     if (error) {
-      toast.error("Le masquage de la chaîne a échoué, réessayez plus tard");
+      toast.error(t("videos.hide_channel.failed"));
       return;
     }
 
-    toast.success("La chaîne a été masquée");
+    toast.success(t("videos.hide_channel.success"));
     await callback?.();
   };
 
@@ -56,11 +52,11 @@ export const useVideo = (video: VideoResource) => {
       body: { progression: 1 },
     });
     if (error) {
-      toast.error("La vidéo n'a pas pu être marquée comme vue, réessayez plus tard");
+      toast.error(t("videos.mark_as_watched.failed"));
       return;
     }
 
-    toast.success("La vidéo a été marquée comme vue");
+    toast.success(t("videos.mark_as_watched.success"));
     await on_success?.();
   };
 
@@ -69,14 +65,14 @@ export const useVideo = (video: VideoResource) => {
       method: "POST",
     });
     if (error) {
-      toast.error("La modification de vos favoris a échoué, réessayez plus tard");
+      toast.error(t("subscriptions.favorite.failed"));
       return;
     }
 
     if (video.author.is_favorite) {
-      toast.success("L'abonnement a été retiré de vos favoris");
+      toast.success(t("videos.favorite.removed"));
     } else {
-      toast.success("L'abonnement a été ajouté à vos favoris");
+      toast.success(t("videos.favorite.added"));
     }
 
     await callback?.();

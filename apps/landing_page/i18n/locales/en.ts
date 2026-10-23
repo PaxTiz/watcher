@@ -1,6 +1,6 @@
 export default {
   a11y: {
-    skipToContent: "Skip to content",
+    skip_to_content: "Skip to content",
   },
 
   page: {
@@ -16,26 +16,12 @@ export default {
     start: "Get started",
   },
 
-  theme: {
-    label: "Theme",
-    system: "System",
-    light: "Light",
-    dark: "Dark",
-  },
-
-  language: {
-    label: "Language",
-    fr: "Français",
-    en: "English",
-    es: "Español",
-  },
-
   hero: {
     title: "All your channels",
-    titleSoft: "One place",
+    title_soft: "One place",
     lead: "Watcher brings your YouTube and Twitch subscriptions together in one feed, in the order videos come out. No algorithm.",
-    ctaStart: "Get started for free",
-    ctaHow: "See how it works",
+    cta_start: "Get started for free",
+    cta_how: "See how it works",
     note: "Free · Read-only access to your subscriptions",
   },
 
@@ -48,10 +34,10 @@ export default {
     subscriptions: "Subscriptions",
     greeting: "Hi Alex",
     resume: "Continue watching",
-    resumeAction: "Resume",
+    resume_action: "Resume",
     remaining: "12 min left",
     latest: "New videos",
-    searchCapsule: "Search your channels",
+    search_capsule: "Search your channels",
   },
 
   videos: {
@@ -76,24 +62,24 @@ export default {
 
   feed: {
     title: "One feed",
-    titleSoft: "In the order things come out",
+    title_soft: "In the order things come out",
     lead: "Videos and lives from all your channels, YouTube and Twitch alike. The most recent on top, nothing else.",
     today: "Today",
   },
 
   player: {
     title: "Watch here",
-    titleSoft: "Pick up where you left off",
+    title_soft: "Pick up where you left off",
     lead: "The player is built in. Watcher remembers where you are in every video and moves on to the next one whenever you want.",
-    resumedAt: "Resumed at {time}",
-    upNext: "Up next",
+    resumed_at: "Resumed at {time}",
+    up_next: "Up next",
     autoplay: "Autoplay",
     next: "Next",
   },
 
   favorites: {
     title: "Your favorites first",
-    titleSoft: "The rest whenever you want",
+    title_soft: "The rest whenever you want",
     lead: "Pin the channels you never want to miss. Hide the ones cluttering your feed, without unsubscribing.",
     favorites: "Favorites",
     subscriptions: "Subscriptions",
@@ -102,7 +88,7 @@ export default {
 
   how: {
     title: "Ready in a minute",
-    titleSoft: "No password to create",
+    title_soft: "No password to create",
     connect: {
       title: "Connect your account",
       text: "Google for YouTube, Twitch, or both. Watcher only asks for read-only access.",
@@ -119,7 +105,7 @@ export default {
 
   faq: {
     title: "Frequently",
-    titleSoft: "asked questions",
+    title_soft: "asked questions",
     items: {
       free: {
         question: "Is Watcher free?",
@@ -144,14 +130,14 @@ export default {
 
   final: {
     title: "Your channels are waiting",
-    titleSoft: "All that's missing is you",
+    title_soft: "All that's missing is you",
     google: "Continue with Google",
     twitch: "Continue with Twitch",
     note: "Free · Read-only · Delete your account anytime",
   },
 
   error: {
-    notFound: {
+    not_found: {
       title: "Page not found",
       description: "The page you're looking for doesn't exist or has been moved.",
     },
@@ -159,7 +145,7 @@ export default {
       title: "Something went wrong",
       description: "An unexpected error occurred. Please try again.",
     },
-    backHome: "Back to home",
+    back_home: "Back to home",
   },
 
   footer: {

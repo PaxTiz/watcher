@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+const { t } = useI18n();
+
 const HUES = [
   ["#ff3b30", "#7a1020"],
   ["#9146ff", "#2a145c"],
@@ -106,8 +108,8 @@ const columns = [0, 1, 2].map((column) => {
         </span>
       </span>
       <span>
-        <span class="font-medium">Un seul fil</span>
-        <span class="text-white/60"> · toutes vos chaînes, dans l'ordre de leur sortie</span>
+        <span class="font-medium">{{ t("auth.preview.title") }}</span>
+        <span class="text-white/60"> · {{ t("auth.preview.text") }}</span>
       </span>
     </div>
   </div>

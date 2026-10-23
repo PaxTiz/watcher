@@ -9,14 +9,16 @@ import {
 } from "reka-ui";
 import { computed, onBeforeUnmount, onMounted } from "vue";
 
+import { useI18n } from "#imports";
+
 import type { CommandItem } from "../types/command_palette";
 
 const {
-  placeholder = "Rechercher",
-  title = "Palette de commandes",
+  placeholder,
+  title,
   manualFilter = false,
   loading = false,
-  emptyText = "Aucun résultat",
+  emptyText,
   closeOnSelect = true,
   lockScroll = true,
   items,
@@ -32,6 +34,8 @@ const {
   lockScroll?: boolean;
   ui?: { content?: string; body?: string };
 }>();
+
+const { t } = useI18n();
 
 const search = defineModel<string>("search", { default: "" });
 
@@ -107,7 +111,12 @@ function onSelect(item: CommandItem<T>) {
 
 <template>
   <WatcherModal :ui="modalUi">
-    <div role="dialog" aria-modal="true" :aria-label="title" class="flex min-h-0 flex-1 flex-col">
+    <div
+      role="dialog"
+      aria-modal="true"
+      :aria-label="title ?? t('ui.command_palette.title')"
+      class="flex min-h-0 flex-1 flex-col"
+    >
       <ListboxRoot highlight-on-hover class="flex min-h-0 flex-1 flex-col">
         <div class="border-ui-text/10 flex h-14 shrink-0 items-center gap-3 border-b px-4">
           <slot name="icon">
@@ -124,11 +133,11 @@ function onSelect(item: CommandItem<T>) {
             auto-focus
             autocomplete="off"
             spellcheck="false"
-            :placeholder="placeholder"
+            :placeholder="placeholder ?? t('ui.command_palette.placeholder')"
             class="text-ui-text h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none"
           />
 
-          <kbd :class="kbd">Échap</kbd>
+          <kbd :class="kbd">{{ t("ui.command_palette.escape") }}</kbd>
         </div>
 
         <slot name="filters" />
@@ -139,7 +148,9 @@ function onSelect(item: CommandItem<T>) {
             class="text-ui-text-muted flex flex-col items-center gap-2 px-6 py-10 text-center text-sm"
           >
             <Icon name="lucide:search-x" class="text-2xl" aria-hidden="true" />
-            <slot name="empty" :search="search">{{ emptyText }}</slot>
+            <slot name="empty" :search="search">{{
+              emptyText ?? t("ui.command_palette.empty")
+            }}</slot>
           </div>
 
           <ListboxGroup v-for="group in groups" :key="group.label" class="not-first:mt-2">
@@ -169,11 +180,11 @@ function onSelect(item: CommandItem<T>) {
             <span class="flex items-center gap-1.5">
               <kbd :class="kbd"><Icon name="lucide:arrow-up" /></kbd>
               <kbd :class="kbd"><Icon name="lucide:arrow-down" /></kbd>
-              Naviguer
+              {{ t("ui.command_palette.navigate") }}
             </span>
             <span class="flex items-center gap-1.5">
               <kbd :class="kbd"><Icon name="lucide:corner-down-left" /></kbd>
-              Sélectionner
+              {{ t("ui.command_palette.select") }}
             </span>
           </slot>
         </div>

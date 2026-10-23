@@ -4,7 +4,7 @@ const { t } = useI18n();
 useSeoMeta({
   title: computed(() => t("page.home")),
   description: computed(() => t("hero.lead")),
-  ogTitle: computed(() => `${t("hero.title")}. ${t("hero.titleSoft")}.`),
+  ogTitle: computed(() => `${t("hero.title")}. ${t("hero.title_soft")}.`),
   ogDescription: computed(() => t("hero.lead")),
 });
 </script>

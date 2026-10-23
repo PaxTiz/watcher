@@ -13,6 +13,7 @@ const { subscription } = defineProps<{
   palette?: VideoPalette | null;
 }>();
 
+const { t } = useI18n();
 const refresh = inject<VideoCurrentRefreshType>(VIDEO_CURRENT_REFRESH_SYMBOL);
 const { forceRefresh: refresh_subscriptions } = useSubscriptions();
 const { dates } = useFormatter();
@@ -34,26 +35,25 @@ const toggle_favorite = async () => {
   is_favorite_pending.value = false;
 
   if (error) {
-    toast.error("La modification de vos favoris a échoué, réessayez plus tard");
+    toast.error(t("subscriptions.favorite.failed"));
     return;
   }
 
   await Promise.all([refresh?.(), refresh_subscriptions()]);
 
   toast.success(
-    was_favorite
-      ? `${subscription.name} a été retiré de vos favoris`
-      : `${subscription.name} a été ajouté à vos favoris`,
+    t(was_favorite ? "subscriptions.favorite.removed" : "subscriptions.favorite.added", {
+      name: subscription.name,
+    }),
   );
 };
 
 const toggle_hidden = async () => {
   if (!subscription.is_hidden) {
     const ok = await useWatcherConfirm({
-      title: "Masquer la chaîne",
-      description: `Les vidéos de ${subscription.name} n'apparaîtront plus dans votre flux. Vous pourrez la réafficher depuis cette page.`,
-      confirmLabel: "Masquer",
-      cancelLabel: "Annuler",
+      title: t("subscriptions.hide.title"),
+      description: t("subscriptions.hide.description", { name: subscription.name }),
+      confirmLabel: t("subscriptions.hide.action"),
     });
     if (!ok) {
       return;
@@ -69,7 +69,7 @@ const toggle_hidden = async () => {
   is_hidden_pending.value = false;
 
   if (error) {
-    toast.error("La modification de la chaîne a échoué, réessayez plus tard");
+    toast.error(t("subscriptions.hide.failed"));
     return;
   }
 
@@ -94,7 +94,7 @@ const toggle_hidden = async () => {
         width="96"
         height="96"
         :src="subscription.channel.logo"
-        :alt="`Logo de ${subscription.name}`"
+        :alt="t('subscriptions.logo', { name: subscription.name })"
       />
 
       <div class="min-w-0 flex-1">
@@ -116,11 +116,13 @@ const toggle_hidden = async () => {
           </span>
           <template v-if="totalVideos !== undefined">
             <span aria-hidden="true">·</span>
-            <span>{{ totalVideos }} vidéo{{ totalVideos > 1 ? "s" : "" }}</span>
+            <span>{{ t("videos.count", totalVideos) }}</span>
           </template>
           <template v-if="subscription.last_video_at">
             <span aria-hidden="true">·</span>
-            <span>Dernière vidéo {{ dates.ago(subscription.last_video_at) }}</span>
+            <span>
+              {{ t("subscriptions.last_video", { ago: dates.ago(subscription.last_video_at) }) }}
+            </span>
           </template>
         </p>
       </div>
@@ -129,20 +131,28 @@ const toggle_hidden = async () => {
         <WatcherButton
           :color="subscription.is_favorite ? 'neutral' : 'solid'"
           :icon="subscription.is_favorite ? 'lucide:star-off' : 'lucide:star'"
-          :label="subscription.is_favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+          :label="
+            t(
+              subscription.is_favorite
+                ? 'subscriptions.favorite.remove'
+                : 'subscriptions.favorite.add',
+            )
+          "
           :loading="is_favorite_pending"
           :disabled="subscription.is_hidden"
           @click="toggle_favorite"
         />
         <WatcherButton
           :icon="subscription.is_hidden ? 'lucide:eye' : 'lucide:eye-off'"
-          :label="subscription.is_hidden ? 'Réafficher' : 'Masquer'"
+          :label="
+            t(subscription.is_hidden ? 'subscriptions.hide.show' : 'subscriptions.hide.action')
+          "
           :loading="is_hidden_pending"
           @click="toggle_hidden"
         />
         <WatcherButton
           icon="lucide:external-link"
-          :label="`Ouvrir sur ${service_name}`"
+          :label="t('subscriptions.open_on', { service: service_name })"
           :to="subscription.channel.url"
           external
           new-tab
@@ -155,7 +165,7 @@ const toggle_hidden = async () => {
       class="text-ui-text-muted bg-ui-text/[0.05] mt-5 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm"
     >
       <Icon name="lucide:eye-off" class="shrink-0" />
-      Cette chaîne est masquée : ses vidéos n'apparaissent pas dans votre flux.
+      {{ t("subscriptions.hide.notice") }}
     </p>
   </header>
 </template>

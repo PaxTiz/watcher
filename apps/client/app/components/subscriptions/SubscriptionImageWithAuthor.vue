@@ -11,6 +11,8 @@ const { size = "md", withHover = false } = defineProps<{
 }>();
 defineSlots<{ bottom?: () => VNode }>();
 
+const { t } = useI18n();
+
 const imageSize = computed(() => (size === "md" ? 48 : 38));
 </script>
 
@@ -31,7 +33,7 @@ const imageSize = computed(() => (size === "md" ? 48 : 38));
         :height="imageSize"
         densities="x1"
         :src="image"
-        :alt="`Logo de ${name}`"
+        :alt="t('subscriptions.logo', { name })"
       />
     </nuxt-link>
 

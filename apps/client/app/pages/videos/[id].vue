@@ -5,6 +5,7 @@ import { useVideos } from "~/composables/videos/useVideos";
 
 definePageMeta({ name: pages.videos_single });
 
+const { t } = useI18n();
 const route = useRoute();
 const { dates, videos } = useFormatter();
 
@@ -48,7 +49,7 @@ const play_next = async () => {
 
 usePageNavigation()(() => [
   {
-    label: "Vidéos",
+    label: t("nav.videos"),
     icon: "lucide:clapperboard",
     to: "/videos",
   },
@@ -70,7 +71,11 @@ useMeta({
   title: () => data.value?.title ?? "",
   description: () =>
     data.value
-      ? `Regarder la vidéo ${data.value.title} de ${data.value.author.name}, publiée le ${dates.format(data.value.created_at)}.`
+      ? t("videos.watch_description", {
+          title: data.value.title,
+          author: data.value.author.name,
+          date: dates.format(data.value.created_at),
+        })
       : "",
 });
 </script>

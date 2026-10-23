@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { VideoResource } from "@watcher/common";
 
-import { useFormatter } from "#shared/utils/useFormatter";
 import { useVideo } from "~/composables/videos/useVideo";
 
 const {
@@ -23,6 +22,7 @@ const emit = defineEmits<{
   toggleFavorite: [];
 }>();
 
+const { t } = useI18n();
 const { dates, numbers } = useFormatter();
 const { forceRefresh: refresh_subscriptions } = useSubscriptions();
 
@@ -37,7 +37,7 @@ const dropdown_items = computed(() => {
     video_items.push({
       icon: "lucide:video-off",
       key: "hide_video",
-      label: "Masquer la vidéo",
+      label: t("videos.hide.action"),
       on_select: async () => {
         await on_hide_video(() => {
           hidden_reason.value = "video";
@@ -52,7 +52,7 @@ const dropdown_items = computed(() => {
     video_items.push({
       icon: "lucide:check-check",
       key: "mark_as_read",
-      label: "Marquer comme vue",
+      label: t("videos.mark_as_watched.action"),
       on_select: async () => {
         await on_mark_as_read(() => {
           viewing_progression.value = 1;
@@ -67,7 +67,7 @@ const dropdown_items = computed(() => {
     subscription_items.push({
       icon: "lucide:circle-off",
       key: "hide_subscription",
-      label: "Masquer la chaîne",
+      label: t("videos.hide_channel.action"),
       on_select: async () => {
         await on_hide_subscription(async () => {
           hidden_reason.value = "channel";
@@ -83,7 +83,9 @@ const dropdown_items = computed(() => {
     subscription_items.push({
       icon: video.author.is_favorite ? "lucide:star-off" : "lucide:star",
       key: "toggle_favorite",
-      label: video.author.is_favorite ? "Retirer des favoris" : "Ajouter aux favoris",
+      label: t(
+        video.author.is_favorite ? "subscriptions.favorite.remove" : "subscriptions.favorite.add",
+      ),
       on_select: async () => {
         await on_toggle_subscription_favorite(async () => {
           emit("toggleFavorite");
@@ -95,7 +97,7 @@ const dropdown_items = computed(() => {
 
   const items = [];
   if (video_items.length > 0) {
-    items.push({ key: "video", label: "Vidéo", type: "label" as const });
+    items.push({ key: "video", label: t("videos.video"), type: "label" as const });
     items.push(...video_items);
   }
 
@@ -104,7 +106,7 @@ const dropdown_items = computed(() => {
   }
 
   if (subscription_items.length > 0) {
-    items.push({ key: "subscription", label: "Abonnement", type: "label" as const });
+    items.push({ key: "subscription", label: t("videos.subscription"), type: "label" as const });
     items.push(...subscription_items);
   }
 
@@ -128,13 +130,15 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
       class="mb-1 text-2xl"
     />
     <p class="text-ui-text font-semibold">
-      {{ hidden_reason === "video" ? "Vidéo masquée" : "Chaîne masquée" }}
+      {{ t(hidden_reason === "video" ? "videos.hide.hidden" : "videos.hide_channel.hidden") }}
     </p>
     <p class="text-sm">
       {{
-        hidden_reason === "video"
-          ? "Elle n'apparaîtra plus dans votre flux."
-          : "Ses vidéos n'apparaîtront plus dans votre flux."
+        t(
+          hidden_reason === "video"
+            ? "videos.hide.hidden_description"
+            : "videos.hide_channel.hidden_description",
+        )
       }}
     </p>
   </div>
@@ -168,13 +172,13 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
           v-if="is_watched"
           class="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-semibold text-white"
         >
-          <Icon name="lucide:check" /> Vue
+          <Icon name="lucide:check" /> {{ t("videos.watched") }}
         </span>
         <span
           v-else-if="is_new"
           class="bg-alt absolute top-2 left-2 rounded-md px-1.5 py-0.5 text-[11px] font-bold tracking-wide text-black uppercase"
         >
-          Nouveau
+          {{ t("videos.new") }}
         </span>
 
         <span
@@ -242,7 +246,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
           size="sm"
           icon-size="lg"
           icon="lucide:ellipsis-vertical"
-          aria-label="Actions sur la vidéo"
+          :aria-label="t('videos.actions')"
           :items="dropdown_items"
         />
       </div>

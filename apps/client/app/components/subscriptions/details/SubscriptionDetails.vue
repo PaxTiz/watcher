@@ -6,6 +6,7 @@ import { useVideosFilters } from "~/composables/videos/useVideosFilters";
 
 const { subscription } = defineProps<{ subscription: SubscriptionResource }>();
 
+const { t } = useI18n();
 const route = useRoute();
 
 const { filters, filters_debounced } = useVideosFilters(
@@ -37,11 +38,13 @@ onUnmounted(() => {
 
     <section>
       <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h2 class="font-display text-ui-text text-base font-medium">Vidéos</h2>
+        <h2 class="font-display text-ui-text text-base font-medium">{{ t("nav.videos") }}</h2>
 
         <div class="flex flex-1 items-center justify-end gap-2">
           <label class="group relative flex w-full max-w-xs items-center">
-            <span class="sr-only">Rechercher dans les vidéos de {{ subscription.name }}</span>
+            <span class="sr-only">
+              {{ t("subscriptions.search_in_label", { name: subscription.name }) }}
+            </span>
             <Icon
               name="lucide:search"
               class="text-ui-text-muted group-focus-within:text-alt pointer-events-none absolute left-3.5 text-sm"
@@ -49,7 +52,7 @@ onUnmounted(() => {
             <input
               v-model="filters.query"
               type="search"
-              :placeholder="`Rechercher dans ${subscription.name}`"
+              :placeholder="t('subscriptions.search_in', { name: subscription.name })"
               class="control-field w-full !rounded-full !pl-9"
             />
           </label>

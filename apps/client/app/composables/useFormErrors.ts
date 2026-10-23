@@ -12,8 +12,9 @@ export const setFormError = (key: string, apiError: ApiError | undefined) => {
     return;
   }
 
+  const { t } = useNuxtApp().$i18n;
   const e = ERROR_MESSAGES[apiError.message ?? ""];
-  error.value = e ?? "Une erreur interne s'est produite";
+  error.value = e ?? t("errors.internal");
 };
 
 export const useFormErrors = (key: string) => {

@@ -9,7 +9,7 @@ const { t } = useI18n();
     class="pt-[clamp(100px,16vh,160px)] pb-[clamp(80px,12vh,120px)] text-center"
   >
     <div class="container">
-      <TwoToneTitle id="start-title" :title="t('final.title')" :soft="t('final.titleSoft')" />
+      <TwoToneTitle id="start-title" :title="t('final.title')" :soft="t('final.title_soft')" />
 
       <div class="mt-7.5 flex flex-wrap justify-center gap-2.5">
         <WatcherButton

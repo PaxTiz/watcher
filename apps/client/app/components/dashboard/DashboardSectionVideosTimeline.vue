@@ -6,6 +6,7 @@ import { useVideosTimeline } from "~/composables/videos/useVideosTimeline";
 
 import type { Label } from "./DashboardSectionVideosTimelineGroup.vue";
 
+const { t } = useI18n();
 const { videos, hasMore, status, loadMoreTrigger } = useVideosTimeline();
 
 const groupedVideos = computed(() => {
@@ -58,14 +59,14 @@ const groupedVideos = computed(() => {
 
   <div v-else class="flex flex-col items-center justify-center py-20 text-center">
     <Icon name="lucide:video-off" class="text-ui-border mb-4 text-6xl" />
-    <p class="text-ui-text-muted text-xl font-bold">Aucune vidéo à afficher.</p>
-    <p class="text-ui-text-muted">Lancez une synchronisation pour récupérer du contenu.</p>
+    <p class="text-ui-text-muted text-xl font-bold">{{ t("dashboard.empty.title") }}</p>
+    <p class="text-ui-text-muted">{{ t("dashboard.empty.description") }}</p>
   </div>
 
   <div v-if="hasMore" ref="loadMoreTrigger" class="flex justify-center py-8">
     <div v-if="status === 'pending'" class="flex items-center gap-2">
       <Icon name="lucide:loader-2" class="text-alt size-6 animate-spin" />
-      <span class="text-ui-text-muted">Chargement de plus de vidéos...</span>
+      <span class="text-ui-text-muted">{{ t("dashboard.loading_more") }}</span>
     </div>
   </div>
 </template>

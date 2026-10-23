@@ -1,18 +1,30 @@
 <script lang="ts" setup>
 import { toast } from "vue-sonner";
 
-useMeta({ title: "Paramètres" });
+const { t } = useI18n();
+
+useMeta({ title: () => t("nav.settings") });
 
 const { user, clear } = useUserSession();
 const { integrations } = useIntegrations();
 const { data: subscriptions } = useSubscriptions();
-const color_mode = useColorMode();
+const themes = useWatcherThemes();
+const locales = useWatcherLocales();
 
-const themes = [
-  { value: "system", label: "Système", icon: "lucide:monitor" },
-  { value: "light", label: "Clair", icon: "lucide:sun" },
-  { value: "dark", label: "Sombre", icon: "lucide:moon" },
-];
+const preferences = computed(() => [
+  {
+    label: t("theme.label"),
+    value: themes.colorMode.preference,
+    options: themes.options.value,
+    select: themes.changeTheme,
+  },
+  {
+    label: t("language.label"),
+    value: locales.locale.value,
+    options: locales.options,
+    select: locales.changeLocale,
+  },
+]);
 
 const logout = async () => {
   await clear();
@@ -22,11 +34,9 @@ const logout = async () => {
 const delete_account = async () => {
   const ok = await useWatcherConfirm({
     danger: true,
-    title: "Supprimer mon compte",
-    description:
-      "Votre compte, vos abonnements et votre historique seront supprimés définitivement. Cette action est irréversible.",
-    confirmLabel: "Supprimer",
-    cancelLabel: "Annuler",
+    title: t("settings.delete_account.title"),
+    description: t("settings.delete_account.confirm"),
+    confirmLabel: t("common.delete"),
   });
 
   if (!ok) {
@@ -35,26 +45,26 @@ const delete_account = async () => {
 
   const { error } = await callApi("/api/auth/delete", { method: "DELETE" });
   if (error) {
-    toast.error("La suppression de votre compte a échoué, réessayez plus tard");
+    toast.error(t("settings.delete_account.failed"));
     return;
   }
 
   await clear();
   await navigateTo("/auth/login");
-  toast.success("Votre compte a été supprimé");
+  toast.success(t("settings.delete_account.success"));
 };
 
-usePageNavigation()([{ label: "Paramètres", icon: "lucide:settings" }]);
+usePageNavigation()([{ label: t("nav.settings"), icon: "lucide:settings" }]);
 </script>
 
 <template>
   <div class="w-full pb-8">
-    <h1 class="page-title">Mon compte</h1>
+    <h1 class="page-title">{{ t("settings.heading") }}</h1>
 
     <div class="mt-8 space-y-10">
       <SettingsSection
-        title="Comptes liés"
-        description="Vos abonnements YouTube et Twitch sont récupérés depuis ces comptes."
+        :title="t('settings.linked_accounts.title')"
+        :description="t('settings.linked_accounts.description')"
       >
         <SettingsIntegrationCard
           v-for="integration in integrations"
@@ -65,46 +75,60 @@ usePageNavigation()([{ label: "Paramètres", icon: "lucide:settings" }]);
 
       <SettingsPasskeys />
 
-      <SettingsSection title="Apparence">
-        <SettingsRow title="Thème">
+      <SettingsSection :title="t('settings.interface')">
+        <SettingsRow
+          v-for="preference in preferences"
+          :key="preference.label"
+          :title="preference.label"
+        >
           <div
             class="bg-ui-text/[0.06] ring-ui-text/10 inline-flex rounded-full p-1 ring-1 ring-inset"
             role="radiogroup"
-            aria-label="Thème"
+            :aria-label="preference.label"
           >
             <button
-              v-for="theme in themes"
-              :key="theme.value"
+              v-for="option in preference.options"
+              :key="option.value"
               type="button"
               role="radio"
-              :aria-checked="color_mode.preference === theme.value"
+              :aria-checked="preference.value === option.value"
               class="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium transition-colors"
               :class="
-                color_mode.preference === theme.value
+                preference.value === option.value
                   ? 'bg-ui-bg text-ui-text shadow-sm'
                   : 'text-ui-text-muted hover:text-ui-text'
               "
-              @click="color_mode.preference = theme.value"
+              @click="preference.select(option.value)"
             >
-              <Icon :name="theme.icon" />
-              {{ theme.label }}
+              <Icon :name="option.icon" />
+              {{ option.label }}
             </button>
           </div>
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection title="Compte">
-        <SettingsRow :title="user?.name ?? 'Mon compte'">
-          <WatcherButton label="Me déconnecter" icon="lucide:log-out" size="sm" @click="logout" />
+      <SettingsSection :title="t('settings.account')">
+        <SettingsRow :title="user?.name ?? t('settings.heading')">
+          <WatcherButton
+            :label="t('account.logout')"
+            icon="lucide:log-out"
+            size="sm"
+            @click="logout"
+          />
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection title="Zone de danger" danger>
+      <SettingsSection :title="t('settings.danger')" danger>
         <SettingsRow
-          title="Supprimer mon compte"
-          description="Supprime définitivement votre compte, vos abonnements et votre historique."
+          :title="t('settings.delete_account.title')"
+          :description="t('settings.delete_account.description')"
         >
-          <WatcherButton label="Supprimer" size="sm" color="danger" @click="delete_account" />
+          <WatcherButton
+            :label="t('common.delete')"
+            size="sm"
+            color="danger"
+            @click="delete_account"
+          />
         </SettingsRow>
       </SettingsSection>
     </div>

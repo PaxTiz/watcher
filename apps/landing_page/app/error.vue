@@ -7,9 +7,9 @@ const { t } = useI18n();
 
 const statusCode = computed(() => props.error?.statusCode ?? 404);
 const isNotFound = computed(() => statusCode.value === 404);
-const title = computed(() => t(isNotFound.value ? "error.notFound.title" : "error.generic.title"));
+const title = computed(() => t(isNotFound.value ? "error.not_found.title" : "error.generic.title"));
 const description = computed(() =>
-  t(isNotFound.value ? "error.notFound.description" : "error.generic.description"),
+  t(isNotFound.value ? "error.not_found.description" : "error.generic.description"),
 );
 
 useSeoMeta({ title, description });
@@ -21,7 +21,7 @@ function handleBackHome() {
 </script>
 
 <template>
-  <a href="#main-content" class="skip-link">{{ t("a11y.skipToContent") }}</a>
+  <a href="#main-content" class="skip-link">{{ t("a11y.skip_to_content") }}</a>
 
   <Navbar />
 
@@ -37,7 +37,7 @@ function handleBackHome() {
           class="mt-4 max-w-3xl"
         />
         <WatcherButton
-          :label="t('error.backHome')"
+          :label="t('error.back_home')"
           color="solid"
           size="lg"
           icon="lucide:arrow-left"

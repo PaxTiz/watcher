@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { computed, inject, provide, type Ref, type VNode } from "vue";
 
+import { useI18n } from "#imports";
+
 import { FORM_ERRORS_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "../types/forms";
 
 defineSlots<{ default: (props: { name?: string }) => VNode }>();
@@ -8,8 +10,14 @@ const { name } = defineProps<{ label?: string; name?: string }>();
 
 provide("name", name);
 
+const { t, te } = useI18n();
+
 const errors = inject<Ref<Record<string, string>>>(FORM_ERRORS_SYMBOL);
-const error = computed(() => (name ? errors?.value[name] : undefined));
+// Validators may return translation keys (e.g. `validation.required`) instead of messages
+const error = computed(() => {
+  const message = name ? errors?.value[name] : undefined;
+  return message && te(message) ? t(message) : message;
+});
 const hasError = computed(() => !!error.value);
 
 provide(HAS_FORM_SINGLE_ERROR_SYMBOL, hasError);

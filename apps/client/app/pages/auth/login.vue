@@ -3,6 +3,7 @@ import { LazyPasskeySignupModal } from "#components";
 
 definePageMeta({ layout: "auth" });
 
+const { t } = useI18n();
 const { loggedIn } = useUserSession();
 if (loggedIn.value) {
   await navigateTo("/");
@@ -21,16 +22,13 @@ const onShowPasskeySignupModal = () => {
   overlay.create(LazyPasskeySignupModal).open();
 };
 
-const benefits = [
-  { icon: "lucide:layers", text: "Vos abonnements YouTube et Twitch réunis dans un seul fil" },
-  {
-    icon: "lucide:list-ordered",
-    text: "Dans l'ordre de leur sortie, sans algorithme qui trie pour vous",
-  },
-  { icon: "lucide:history", text: "Reprenez chaque vidéo là où vous l'aviez laissée" },
-];
+const benefits = computed(() => [
+  { icon: "lucide:layers", text: t("auth.benefits.feed") },
+  { icon: "lucide:list-ordered", text: t("auth.benefits.order") },
+  { icon: "lucide:history", text: t("auth.benefits.resume") },
+]);
 
-useMeta({ title: "Connexion" });
+useMeta({ title: () => t("auth.title") });
 </script>
 
 <template>
@@ -40,7 +38,7 @@ useMeta({ title: "Connexion" });
     <h1
       class="font-display text-ui-text mt-12 text-3xl leading-tight font-medium text-balance md:text-4xl"
     >
-      Toutes vos chaînes, au même endroit.
+      {{ t("auth.headline") }}
     </h1>
 
     <ul class="mt-6 space-y-3">
@@ -57,7 +55,7 @@ useMeta({ title: "Connexion" });
     <div class="mt-10 space-y-2.5">
       <WatcherButton
         to="/api/oauth/google"
-        label="Continuer avec Google"
+        :label="t('auth.google')"
         icon="fa7-brands:youtube"
         size="lg"
         color="solid"
@@ -74,7 +72,7 @@ useMeta({ title: "Connexion" });
           external
         />
         <WatcherButton
-          label="Clé d'accès"
+          :label="t('auth.passkey')"
           icon="lucide:key-round"
           size="lg"
           class="w-full"
@@ -85,19 +83,19 @@ useMeta({ title: "Connexion" });
     </div>
 
     <p class="text-ui-text-muted mt-4 text-center text-[13px]">
-      Pas encore de compte ?
+      {{ t("auth.no_account") }}
       <button
         type="button"
         class="text-ui-text font-medium underline-offset-4 hover:underline"
         @click="onShowPasskeySignupModal"
       >
-        Créer un compte avec une clé d'accès
+        {{ t("auth.signup_with_passkey") }}
       </button>
     </p>
 
     <p class="text-ui-text-muted mt-6 flex items-center gap-2 text-[13px]">
       <Icon name="lucide:lock" class="shrink-0" />
-      Accès en lecture seule à vos abonnements YouTube et Twitch.
+      {{ t("auth.read_only") }}
     </p>
   </section>
 </template>

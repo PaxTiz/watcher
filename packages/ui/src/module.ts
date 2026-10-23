@@ -35,6 +35,8 @@ export default defineNuxtModule<ModuleOptions>({
     "reka-ui/nuxt": {},
     "@vueuse/nuxt": {},
     "@nuxt/icon": {},
+    "@nuxtjs/color-mode": {},
+    "@watcher/i18n": {},
     "@nuxt/fonts": {
       defaults: {
         provider: "bunny",

@@ -2,6 +2,8 @@
 import type { SubscriptionResource } from "@watcher/common";
 
 defineProps<{ subscription: SubscriptionResource }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -13,6 +15,6 @@ defineProps<{ subscription: SubscriptionResource }>();
     height="71"
     densities="x1"
     :src="subscription.channel.logo"
-    :alt="`Logo de ${subscription.name}`"
+    :alt="t('subscriptions.logo', { name: subscription.name })"
   />
 </template>

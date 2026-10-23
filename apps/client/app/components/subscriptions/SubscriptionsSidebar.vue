@@ -2,17 +2,18 @@
 import type { SubscriptionResource } from "@watcher/common";
 import { differenceInHours } from "date-fns";
 
+const { t } = useI18n();
 const { data, favorites, others } = useSubscriptions();
 const route = useRoute();
 
 const search = ref("");
 const serviceFilter = ref<"youtube" | "twitch" | null>(null);
 
-const serviceItems = [
-  { key: "service", label: "Tous les services", value: "all", icon: "lucide:layers" },
+const serviceItems = computed(() => [
+  { key: "service", label: t("subscriptions.all_services"), value: "all", icon: "lucide:layers" },
   { key: "service", label: "YouTube", value: "youtube", icon: "fa7-brands:youtube" },
   { key: "service", label: "Twitch", value: "twitch", icon: "fa7-brands:twitch" },
-];
+]);
 
 const currentServiceIcon = computed(() => {
   if (serviceFilter.value === "youtube") return "fa7-brands:youtube";
@@ -41,8 +42,8 @@ const filteredOthers = computed(() => filterList(others.value));
 
 const groups = computed(() =>
   [
-    { label: "Favoris", items: filteredFavorites.value },
-    { label: "Abonnements", items: filteredOthers.value },
+    { label: t("nav.favorites"), items: filteredFavorites.value },
+    { label: t("nav.subscriptions"), items: filteredOthers.value },
   ].filter((group) => group.items.length > 0),
 );
 
@@ -64,8 +65,8 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
         <input
           v-model="search"
           type="text"
-          :placeholder="`Filtrer ${data?.length ?? ''} abonnements`"
-          aria-label="Filtrer les abonnements"
+          :placeholder="t('subscriptions.filter', { count: data?.length ?? '' })"
+          :aria-label="t('subscriptions.filter_label')"
           class="hover:bg-ui-text/[0.06] focus:bg-ui-text/[0.06] h-8 w-full rounded-lg pl-8 text-sm transition-colors outline-none"
         />
       </div>
@@ -74,7 +75,7 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
         :items="serviceItems"
         :icon="currentServiceIcon"
         :value="serviceFilter ?? 'all'"
-        aria-label="Filtrer par service"
+        :aria-label="t('subscriptions.filter_by_service')"
         color="ghost"
         size="sm"
         align="end"
@@ -117,12 +118,12 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
                 v-if="sub.is_hidden"
                 name="lucide:eye-off"
                 class="text-ui-text-muted shrink-0 text-xs"
-                aria-label="Masqué"
+                :aria-label="t('subscriptions.hidden')"
               />
               <span
                 v-else-if="has_new_video(sub)"
                 class="bg-alt size-1.5 shrink-0 rounded-full"
-                title="Nouvelle vidéo ces dernières 24 heures"
+                :title="t('subscriptions.new_video')"
               />
             </NuxtLink>
           </li>
@@ -130,7 +131,7 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
       </section>
 
       <p v-if="groups.length === 0" class="text-ui-text-muted px-3 py-8 text-center text-sm">
-        Aucun abonnement trouvé.
+        {{ t("subscriptions.empty") }}
       </p>
     </div>
   </div>

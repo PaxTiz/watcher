@@ -1,6 +1,8 @@
 <script lang="ts" generic="T extends string" setup>
 import { computed, inject, useTemplateRef, type ComputedRef } from "vue";
 
+import { useI18n } from "#imports";
+
 import { CLEAN_ERROR_SYMBOL, HAS_FORM_SINGLE_ERROR_SYMBOL } from "../types/forms";
 
 const modelValue = defineModel<string>();
@@ -12,6 +14,8 @@ const props = defineProps<{
     disabled?: boolean;
   }>;
 }>();
+
+const { t } = useI18n();
 
 const __internal_element__ = useTemplateRef<any>("element");
 
@@ -44,7 +48,7 @@ defineExpose({
         class="control-field group flex w-full cursor-pointer items-center justify-between gap-2"
         :class="{ 'ring ring-red-400': hasError }"
       >
-        <SelectValue :placeholder="placeholder ?? 'Sélectionner...'" />
+        <SelectValue :placeholder="placeholder ?? t('ui.select.placeholder')" />
         <Icon
           name="lucide:chevron-down"
           class="transition-all duration-300 group-data-[state=open]:rotate-180"

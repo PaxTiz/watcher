@@ -3,6 +3,7 @@ import { toast } from "vue-sonner";
 export const useSynchronization = () => {
   const is_synchronising = useState("synchronization.running", () => false);
   const { forceRefresh: refresh_subscriptions } = useSubscriptions();
+  const { t } = useNuxtApp().$i18n;
 
   const synchronise = async () => {
     if (is_synchronising.value) {
@@ -10,14 +11,14 @@ export const useSynchronization = () => {
     }
 
     is_synchronising.value = true;
-    const toast_id = toast.loading("Synchronisation en cours…");
+    const toast_id = toast.loading(t("sync.running"));
 
     const { error } = await callApi("/api/subscriptions/sync", { method: "POST" });
     if (error) {
-      toast.error("La synchronisation a échoué, réessayez dans quelques minutes", { id: toast_id });
+      toast.error(t("sync.failed"), { id: toast_id });
     } else {
       await refresh_subscriptions();
-      toast.success("Synchronisation terminée", { id: toast_id });
+      toast.success(t("sync.done"), { id: toast_id });
     }
 
     is_synchronising.value = false;

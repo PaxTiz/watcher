@@ -19,6 +19,8 @@ const {
   httpKey?: string;
 }>();
 
+const { t } = useI18n();
+
 const on_hide_video = async () => {
   if (httpKey) {
     await refreshNuxtData(httpKey);
@@ -66,6 +68,6 @@ const on_toggle_favorite = async () => {
   </template>
 
   <div v-else class="my-16 flex justify-center">
-    <p class="text-ui-text">Désolé, aucun résultat n'a été trouvé pour votre recherche..</p>
+    <p class="text-ui-text">{{ t("videos.no_results") }}</p>
   </div>
 </template>

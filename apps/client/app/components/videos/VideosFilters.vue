@@ -9,15 +9,19 @@ type Query = VideosValidators["list"]["query"];
 const filters = defineModel<VideoFilters>({ required: true });
 const { hide = [] } = defineProps<{ hide?: Array<VideoFilterType> }>();
 
+const { t } = useI18n();
 const { videos } = useFormatter();
 
 const shown = (key: VideoFilterType) => !hide.includes(key);
 
-const platforms = [
-  { value: undefined, label: "Tout", icon: undefined },
-  { value: "youtube", label: "YouTube", icon: "fa7-brands:youtube" },
-  { value: "twitch", label: "Twitch", icon: "fa7-brands:twitch" },
-] as const;
+const platforms = computed(
+  () =>
+    [
+      { value: undefined, label: t("common.all"), icon: undefined },
+      { value: "youtube", label: "YouTube", icon: "fa7-brands:youtube" },
+      { value: "twitch", label: "Twitch", icon: "fa7-brands:twitch" },
+    ] as const,
+);
 
 const DATES: Array<NonNullable<Query["date"]>> = ["today", "weekly", "monthly", "yearly", "older"];
 const DURATIONS: Array<NonNullable<Query["duration"]>> = [
@@ -28,13 +32,13 @@ const DURATIONS: Array<NonNullable<Query["duration"]>> = [
 ];
 
 const date_items = computed<Array<DropdownItem>>(() => [
-  { key: "date", label: "Toutes les dates", value: "all" },
+  { key: "date", label: t("videos.filters.all_dates"), value: "all" },
   { key: "divider", label: "", type: "divider" },
   ...DATES.map((value) => ({ key: "date", label: videos.filters.date(value), value })),
 ]);
 
 const duration_items = computed<Array<DropdownItem>>(() => [
-  { key: "duration", label: "Toutes les durées", value: "all" },
+  { key: "duration", label: t("videos.filters.all_durations"), value: "all" },
   { key: "divider", label: "", type: "divider" },
   ...DURATIONS.map((value) => ({ key: "duration", label: videos.filters.duration(value), value })),
 ]);
@@ -69,17 +73,17 @@ const chip_ui = (active: boolean) => ({
   <div
     class="-mx-4 flex [scrollbar-width:none] items-center gap-2 overflow-x-auto px-4 md:mx-0 md:px-0"
     role="group"
-    aria-label="Filtres"
+    :aria-label="t('videos.filters.label')"
   >
     <div
       v-if="shown('service')"
       class="bg-ui-text/[0.06] ring-ui-text/10 inline-flex shrink-0 rounded-full p-0.5 ring-1 ring-inset"
       role="radiogroup"
-      aria-label="Plateforme"
+      :aria-label="t('videos.filters.platform')"
     >
       <button
         v-for="platform in platforms"
-        :key="platform.label"
+        :key="platform.value ?? 'all'"
         type="button"
         role="radio"
         :aria-checked="filters.service === platform.value"
@@ -104,7 +108,7 @@ const chip_ui = (active: boolean) => ({
       v-if="shown('date')"
       icon="lucide:calendar"
       size="sm"
-      :label="filters.date ? videos.filters.date(filters.date) : 'Date'"
+      :label="filters.date ? videos.filters.date(filters.date) : t('videos.filters.date')"
       :value="filters.date ?? 'all'"
       :items="date_items"
       :ui="chip_ui(!!filters.date)"
@@ -115,7 +119,9 @@ const chip_ui = (active: boolean) => ({
       v-if="shown('duration')"
       icon="lucide:timer"
       size="sm"
-      :label="filters.duration ? videos.filters.duration(filters.duration) : 'Durée'"
+      :label="
+        filters.duration ? videos.filters.duration(filters.duration) : t('videos.filters.duration')
+      "
       :value="filters.duration ?? 'all'"
       :items="duration_items"
       :ui="chip_ui(!!filters.duration)"
@@ -125,7 +131,7 @@ const chip_ui = (active: boolean) => ({
     <WatcherButton
       v-if="shown('is_favorite')"
       icon="lucide:star"
-      label="Favoris"
+      :label="t('nav.favorites')"
       size="sm"
       :aria-pressed="!!filters.is_favorite"
       :ui="chip_ui(!!filters.is_favorite).button"
@@ -134,7 +140,7 @@ const chip_ui = (active: boolean) => ({
 
     <WatcherButton
       v-if="has_active_filters"
-      label="Effacer"
+      :label="t('common.clear')"
       icon="lucide:x"
       size="sm"
       color="ghost"

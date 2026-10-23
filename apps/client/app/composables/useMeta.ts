@@ -2,8 +2,8 @@ export const useMeta = (values: {
   title: string | (() => string);
   description?: string | (() => string);
 }) => {
-  const description =
-    values.description ?? "Watcher - Suivez tous vos créateurs favoris au même endroit";
+  const { t } = useNuxtApp().$i18n;
+  const description = values.description ?? (() => t("meta.description"));
 
   useSeoMeta({
     title: values.title,

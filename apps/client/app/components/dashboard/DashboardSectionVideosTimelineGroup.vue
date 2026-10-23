@@ -13,15 +13,9 @@ const props = defineProps<{
 
 const { refresh: refresh_favorites } = await useVideosFavorites();
 
-const formatted_label = computed(() => {
-  return {
-    today: "Aujourd'hui",
-    yesterday: "Hier",
-    weekly: "Cette semaine",
-    monthly: "30 derniers jours",
-    older: "Plus ancien",
-  }[props.label];
-});
+const { t } = useI18n();
+
+const formatted_label = computed(() => t(`dashboard.groups.${props.label}`));
 
 const on_hide_subscription = async () => {
   await refresh_favorites();

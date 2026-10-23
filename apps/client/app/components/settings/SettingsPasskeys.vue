@@ -4,6 +4,7 @@ import { toast } from "vue-sonner";
 
 import { LazyPasskeyNameModal } from "#components";
 
+const { t } = useI18n();
 const { user } = useUserSession();
 const { add, loading, is_supported } = usePasskeys();
 const { dates } = useFormatter();
@@ -16,8 +17,8 @@ const passkeys = computed(() => data.value ?? []);
 
 const on_add = async () => {
   const name = await overlay.create(LazyPasskeyNameModal).open({
-    title: "Ajouter une clé d'accès",
-    confirmLabel: "Continuer",
+    title: t("passkeys.add.title"),
+    confirmLabel: t("common.continue"),
   }).result;
 
   if (!name) {
@@ -26,14 +27,14 @@ const on_add = async () => {
 
   if (await add(user.value?.name ?? "Watcher", name)) {
     await refresh();
-    toast.success("Votre clé d'accès a été ajoutée");
+    toast.success(t("passkeys.add.success"));
   }
 };
 
 const on_rename = async (passkey: PasskeyResource) => {
   const name = await overlay.create(LazyPasskeyNameModal).open({
-    title: "Renommer la clé d'accès",
-    confirmLabel: "Enregistrer",
+    title: t("passkeys.rename.title"),
+    confirmLabel: t("common.save"),
     name: passkey.name,
   }).result;
 
@@ -46,22 +47,20 @@ const on_rename = async (passkey: PasskeyResource) => {
     body: { name },
   });
   if (error) {
-    toast.error("Le renommage de la clé d'accès a échoué, réessayez plus tard");
+    toast.error(t("passkeys.rename.failed"));
     return;
   }
 
   await refresh();
-  toast.success("La clé d'accès a été renommée");
+  toast.success(t("passkeys.rename.success"));
 };
 
 const on_delete = async (passkey: PasskeyResource) => {
   const ok = await useWatcherConfirm({
     danger: true,
-    title: "Supprimer cette clé d'accès",
-    description:
-      "Vous ne pourrez plus vous connecter à Watcher avec cette clé d'accès. Pensez également à la supprimer de votre appareil ou de votre gestionnaire de mots de passe.",
-    confirmLabel: "Supprimer",
-    cancelLabel: "Annuler",
+    title: t("passkeys.delete.title"),
+    description: t("passkeys.delete.description"),
+    confirmLabel: t("common.delete"),
   });
 
   if (!ok) {
@@ -73,23 +72,22 @@ const on_delete = async (passkey: PasskeyResource) => {
   });
   if (error) {
     toast.error(
-      error.message === "last_login_method"
-        ? "Associez un compte ou une autre clé d'accès avant de supprimer celle-ci"
-        : "La suppression de la clé d'accès a échoué, réessayez plus tard",
+      t(
+        error.message === "last_login_method"
+          ? "passkeys.delete.last_login_method"
+          : "passkeys.delete.failed",
+      ),
     );
     return;
   }
 
   await refresh();
-  toast.success("La clé d'accès a été supprimée");
+  toast.success(t("passkeys.delete.success"));
 };
 </script>
 
 <template>
-  <SettingsSection
-    title="Clés d'accès"
-    description="Connectez-vous avec l'empreinte, le visage ou le code de votre appareil."
-  >
+  <SettingsSection :title="t('passkeys.title')" :description="t('passkeys.description')">
     <SettingsRow v-for="passkey in passkeys" :key="passkey.id" :title="passkey.name">
       <template #icon>
         <span
@@ -100,26 +98,32 @@ const on_delete = async (passkey: PasskeyResource) => {
       </template>
 
       <template #description>
-        Ajoutée le {{ dates.format(passkey.created_at) }}
+        {{ t("passkeys.added_on", { date: dates.format(passkey.created_at) }) }}
         <template v-if="passkey.last_used_at">
-          · Utilisée {{ dates.ago(passkey.last_used_at) }}
+          · {{ t("passkeys.used_ago", { ago: dates.ago(passkey.last_used_at) }) }}
         </template>
       </template>
 
-      <WatcherButton label="Renommer" size="sm" color="ghost" @click="on_rename(passkey)" />
-      <WatcherButton label="Supprimer" size="sm" color="ghost" @click="on_delete(passkey)" />
+      <WatcherButton
+        :label="t('common.rename')"
+        size="sm"
+        color="ghost"
+        @click="on_rename(passkey)"
+      />
+      <WatcherButton
+        :label="t('common.delete')"
+        size="sm"
+        color="ghost"
+        @click="on_delete(passkey)"
+      />
     </SettingsRow>
 
     <SettingsRow
-      title="Ajouter une clé d'accès"
-      :description="
-        is_supported
-          ? 'Enregistrez une clé d\'accès sur cet appareil.'
-          : 'Votre navigateur ne prend pas en charge les clés d\'accès.'
-      "
+      :title="t('passkeys.add.title')"
+      :description="t(is_supported ? 'passkeys.add.supported' : 'passkeys.add.unsupported')"
     >
       <WatcherButton
-        label="Ajouter"
+        :label="t('common.add')"
         icon="lucide:plus"
         size="sm"
         color="solid"

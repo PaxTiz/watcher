@@ -7,7 +7,7 @@ const questions = ["free", "platforms", "access", "mobile"] as const;
 <template>
   <section id="questions" aria-labelledby="questions-title" class="pt-[clamp(90px,15vh,150px)]">
     <div class="container grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
-      <TwoToneTitle id="questions-title" :title="t('faq.title')" :soft="t('faq.titleSoft')" />
+      <TwoToneTitle id="questions-title" :title="t('faq.title')" :soft="t('faq.title_soft')" />
 
       <dl class="border-ui-border m-0 border-t">
         <template v-for="question in questions" :key="question">

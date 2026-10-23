@@ -1,0 +1,13 @@
+{
+  "name": "@watcher/i18n",
+  "type": "module",
+  "exports": {
+    ".": "./src/module.ts"
+  },
+  "dependencies": {
+    "@nuxtjs/i18n": "catalog:",
+    "date-fns": "catalog:",
+    "nuxt": "catalog:",
+    "vue": "catalog:"
+  }
+}

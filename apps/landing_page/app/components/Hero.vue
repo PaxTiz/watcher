@@ -7,15 +7,15 @@ const { t } = useI18n();
     <div class="container">
       <div class="flex flex-wrap items-end justify-between gap-7">
         <div>
-          <TwoToneTitle as="h1" size="hero" :title="t('hero.title')" :soft="t('hero.titleSoft')" />
+          <TwoToneTitle as="h1" size="hero" :title="t('hero.title')" :soft="t('hero.title_soft')" />
           <p class="lead mt-5.5">{{ t("hero.lead") }}</p>
         </div>
 
         <div>
           <div class="flex flex-wrap gap-2.5">
-            <WatcherButton :label="t('hero.ctaStart')" to="#start" color="solid" size="lg" />
+            <WatcherButton :label="t('hero.cta_start')" to="#start" color="solid" size="lg" />
             <WatcherButton
-              :label="t('hero.ctaHow')"
+              :label="t('hero.cta_how')"
               to="#feed"
               size="lg"
               :ui="{ root: '!bg-ui-bg !ring-ui-border' }"

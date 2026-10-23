@@ -95,7 +95,7 @@ const latest = PREVIEW_VIDEOS.slice(0, 4);
               class="bg-ui-text text-background inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[12.5px] font-medium"
             >
               <Icon name="lucide:play" class="fill-current" />
-              {{ t("showcase.resumeAction") }}
+              {{ t("showcase.resume_action") }}
             </span>
             {{ t("showcase.remaining") }}
           </p>
@@ -122,7 +122,7 @@ const latest = PREVIEW_VIDEOS.slice(0, 4);
         class="bg-ui-bg/80 text-ui-text-muted absolute bottom-4 left-1/2 flex h-[42px] w-[min(420px,80%)] -translate-x-1/2 items-center gap-2.5 rounded-full pr-2 pl-3.5 text-[13px] shadow-[0_0_0_1px_var(--ui-border),0_10px_30px_-10px_rgb(0_0_0/0.2)] backdrop-blur-md"
       >
         <Icon name="lucide:search" />
-        {{ t("showcase.searchCapsule") }}
+        {{ t("showcase.search_capsule") }}
         <kbd
           class="bg-background text-ui-text-muted ml-auto rounded-md px-1.5 py-0.5 font-mono text-[11px]"
           >⌘ K</kbd

@@ -5,6 +5,7 @@ import { useVideo } from "~/composables/videos/useVideo";
 import { useVideosInProgress } from "~/composables/videos/useVideosInProgress";
 
 const { data: videos, refresh } = await useVideosInProgress();
+const { t } = useI18n();
 const { numbers } = useFormatter();
 
 const featured = computed(() => videos.value?.items[0]);
@@ -56,7 +57,7 @@ const on_mark_as_view = async (video: VideoResource) => {
         <p
           class="text-xs font-bold tracking-widest text-[rgb(var(--c-ink))] uppercase dark:text-[rgb(var(--c-light))]"
         >
-          Reprendre la lecture
+          {{ t("dashboard.resume") }}
         </p>
         <h2 class="font-display text-ui-text mt-2 text-lg leading-snug font-medium md:text-xl">
           {{ featured.title }}
@@ -83,11 +84,11 @@ const on_mark_as_view = async (video: VideoResource) => {
             class="bg-ui-text text-background inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-transform hover:scale-[1.03]"
           >
             <Icon name="lucide:play" class="fill-current" />
-            Reprendre
+            {{ t("dashboard.resume_action") }}
           </NuxtLink>
 
           <WatcherButton
-            label="Marquer comme visionnée"
+            :label="t('dashboard.mark_as_watched')"
             color="neutral"
             @click="() => on_mark_as_view(featured!)"
           />
@@ -97,7 +98,7 @@ const on_mark_as_view = async (video: VideoResource) => {
 
     <VideosRow
       v-if="others.length > 0"
-      title="Aussi en cours"
+      :title="t('dashboard.also_in_progress')"
       icon="lucide:history"
       :videos="others"
       @change="refresh"

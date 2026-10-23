@@ -5,7 +5,7 @@ const steps = ["connect", "import", "watch"] as const;
 </script>
 
 <template>
-  <SectionIntro id="how" :title="t('how.title')" :soft="t('how.titleSoft')">
+  <SectionIntro id="how" :title="t('how.title')" :soft="t('how.title_soft')">
     <ol class="border-ui-border mt-10 grid border-t md:grid-cols-3">
       <li
         v-for="(step, index) in steps"

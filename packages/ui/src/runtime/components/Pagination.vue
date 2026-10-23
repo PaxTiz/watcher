@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
+import { useI18n } from "#imports";
+
 import Button from "./Button.vue";
 
 const currentPage = defineModel<number>("page", { required: true });
@@ -10,6 +12,7 @@ const { totalItems, perPage } = defineProps<{
   perPage: number;
 }>();
 
+const { t } = useI18n();
 const router = useRouter();
 const totalPages = computed(() => Math.ceil(totalItems / perPage));
 
@@ -36,12 +39,12 @@ const pages = computed(() => {
 <template>
   <nav
     class="bg-ui-text/[0.04] ring-ui-text/10 inline-flex items-center gap-1 rounded-full p-1 ring-1 ring-inset"
-    aria-label="Pagination"
+    :aria-label="t('ui.pagination.label')"
   >
     <Button
       :disabled="currentPage === 1"
       icon="lucide:chevrons-left"
-      aria-label="Première page"
+      :aria-label="t('ui.pagination.first')"
       color="ghost"
       size="sm"
       @click="changePage(1)"
@@ -49,7 +52,7 @@ const pages = computed(() => {
     <Button
       :disabled="currentPage === 1"
       icon="lucide:chevron-left"
-      aria-label="Page précédente"
+      :aria-label="t('ui.pagination.previous')"
       color="ghost"
       size="sm"
       @click="changePage(currentPage - 1)"
@@ -69,7 +72,7 @@ const pages = computed(() => {
     <Button
       :disabled="currentPage === totalPages"
       icon="lucide:chevron-right"
-      aria-label="Page suivante"
+      :aria-label="t('ui.pagination.next')"
       color="ghost"
       size="sm"
       @click="changePage(currentPage + 1)"
@@ -77,7 +80,7 @@ const pages = computed(() => {
     <Button
       :disabled="currentPage === totalPages"
       icon="lucide:chevrons-right"
-      aria-label="Dernière page"
+      :aria-label="t('ui.pagination.last')"
       color="ghost"
       size="sm"
       @click="changePage(totalPages)"

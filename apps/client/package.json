@@ -17,6 +17,7 @@
     "@simplewebauthn/server": "^11.0.0",
     "@watcher/common": "workspace:^",
     "@watcher/database": "workspace:^",
+    "@watcher/i18n": "workspace:^",
     "@watcher/integration-google": "workspace:^",
     "@watcher/integration-twitch": "workspace:^",
     "@watcher/ui": "workspace:^",
@@ -39,6 +40,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@iconify-json/circle-flags": "catalog:",
     "@iconify-json/fa7-brands": "^1.2.4",
     "@iconify-json/lucide": "catalog:",
     "@oxlint/plugins": "catalog:",

@@ -6,6 +6,7 @@ import { useVideo } from "~/composables/videos/useVideo";
 const { video } = defineProps<{ video: VideoResource }>();
 const emit = defineEmits<{ seek: [seconds: number] }>();
 
+const { t } = useI18n();
 const { dates } = useFormatter();
 const { forceRefresh: refresh_subscriptions } = useSubscriptions();
 const { on_toggle_subscription_favorite } = useVideo(video);
@@ -120,13 +121,17 @@ const toggle_favorite = async () => {
 
       <div class="flex flex-wrap gap-2 sm:ml-auto">
         <WatcherButton
-          :label="is_favorite ? 'En favoris' : 'Ajouter aux favoris'"
+          :label="t(is_favorite ? 'subscriptions.favorite.active' : 'subscriptions.favorite.add')"
           :icon="is_favorite ? 'lucide:star-off' : 'lucide:star'"
           color="ghost"
           @click="toggle_favorite"
         />
         <WatcherButton
-          :label="video.service === 'youtube' ? 'Ouvrir sur YouTube' : 'Ouvrir sur Twitch'"
+          :label="
+            t('subscriptions.open_on', {
+              service: video.service === 'youtube' ? 'YouTube' : 'Twitch',
+            })
+          "
           icon="lucide:external-link"
           :to="video.url"
           external
@@ -144,7 +149,12 @@ const toggle_favorite = async () => {
       @click="on_description_click"
     >
       <p class="text-ui-text font-medium">
-        Publiée {{ dates.ago(video.created_at) }} · {{ dates.format(video.created_at) }}
+        {{
+          t("videos.published", {
+            ago: dates.ago(video.created_at),
+            date: dates.format(video.created_at),
+          })
+        }}
       </p>
 
       <div
@@ -163,7 +173,7 @@ const toggle_favorite = async () => {
         class="text-ui-text mt-2 font-semibold hover:underline"
         @click.stop="is_expanded = !is_expanded"
       >
-        {{ is_expanded ? "Moins" : "Plus" }}
+        {{ t(is_expanded ? "common.less" : "common.more") }}
       </button>
     </div>
   </div>

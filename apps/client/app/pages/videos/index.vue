@@ -5,6 +5,8 @@ import { useVideosFilters } from "~/composables/videos/useVideosFilters";
 
 definePageMeta({ name: pages.videos_index });
 
+const { t } = useI18n();
+
 const http_key = "videos_feed";
 const route = useRoute();
 
@@ -37,26 +39,26 @@ watch(
 
 const title = computed(() => {
   if (filters.value.query) {
-    return `Résultats pour « ${filters.value.query} »`;
+    return t("videos.results_for", { query: filters.value.query });
   }
 
-  return filters.value.is_favorite ? "Vidéos de vos favoris" : "Vidéos";
+  return filters.value.is_favorite ? t("videos.favorites_title") : t("nav.videos");
 });
 
 watch(
   () => filters.value.is_favorite,
   (is_favorite) => {
     usePageNavigation()(() => [
-      { label: "Vidéos", icon: "lucide:clapperboard", to: "/videos" },
-      is_favorite ? { label: "Mes favoris", icon: "lucide:star" } : undefined,
+      { label: t("nav.videos"), icon: "lucide:clapperboard", to: "/videos" },
+      is_favorite ? { label: t("nav.my_favorites"), icon: "lucide:star" } : undefined,
     ]);
   },
   { immediate: true },
 );
 
 useMeta({
-  title: "Vidéos",
-  description: "Explorez l'ensemble des vidéos de vos abonnements YouTube et Twitch.",
+  title: () => t("nav.videos"),
+  description: () => t("videos.description"),
 });
 </script>
 
@@ -65,7 +67,7 @@ useMeta({
     <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
       <h1 class="page-title">{{ title }}</h1>
       <p v-if="data" class="text-ui-text-muted text-sm tabular-nums">
-        {{ data.total }} vidéo{{ data.total > 1 ? "s" : "" }}
+        {{ t("videos.count", data.total) }}
       </p>
     </div>
 

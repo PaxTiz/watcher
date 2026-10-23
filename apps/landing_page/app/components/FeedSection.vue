@@ -6,7 +6,7 @@ const { t } = useI18n();
   <SectionIntro
     id="feed"
     :title="t('feed.title')"
-    :soft="t('feed.titleSoft')"
+    :soft="t('feed.title_soft')"
     :lead="t('feed.lead')"
   >
     <div

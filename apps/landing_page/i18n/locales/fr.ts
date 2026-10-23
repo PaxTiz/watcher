@@ -2,7 +2,7 @@ import type en from "./en";
 
 export default {
   a11y: {
-    skipToContent: "Aller au contenu",
+    skip_to_content: "Aller au contenu",
   },
 
   page: {
@@ -18,26 +18,12 @@ export default {
     start: "Commencer",
   },
 
-  theme: {
-    label: "Thème",
-    system: "Système",
-    light: "Clair",
-    dark: "Sombre",
-  },
-
-  language: {
-    label: "Langue",
-    fr: "Français",
-    en: "English",
-    es: "Español",
-  },
-
   hero: {
     title: "Toutes tes chaînes",
-    titleSoft: "Un seul endroit",
+    title_soft: "Un seul endroit",
     lead: "Watcher réunit tes abonnements YouTube et Twitch dans un seul fil, dans l'ordre où les vidéos sortent. Sans algorithme.",
-    ctaStart: "Commencer gratuitement",
-    ctaHow: "Voir comment ça marche",
+    cta_start: "Commencer gratuitement",
+    cta_how: "Voir comment ça marche",
     note: "Gratuit · Lecture seule de tes abonnements",
   },
 
@@ -50,10 +36,10 @@ export default {
     subscriptions: "Abonnements",
     greeting: "Bonjour Alex",
     resume: "Reprendre la lecture",
-    resumeAction: "Reprendre",
+    resume_action: "Reprendre",
     remaining: "12 min restantes",
     latest: "Nouveautés",
-    searchCapsule: "Rechercher dans tes chaînes",
+    search_capsule: "Rechercher dans tes chaînes",
   },
 
   videos: {
@@ -78,24 +64,24 @@ export default {
 
   feed: {
     title: "Un seul fil",
-    titleSoft: "Dans l'ordre où ça sort",
+    title_soft: "Dans l'ordre où ça sort",
     lead: "Les vidéos et les lives de toutes tes chaînes, YouTube et Twitch confondus. Les plus récents en haut, rien d'autre.",
     today: "Aujourd'hui",
   },
 
   player: {
     title: "Regarde ici",
-    titleSoft: "Reprends où tu t'étais arrêté",
+    title_soft: "Reprends où tu t'étais arrêté",
     lead: "Le lecteur est intégré. Watcher retient où tu en es sur chaque vidéo et enchaîne sur la suivante quand tu veux.",
-    resumedAt: "Repris à {time}",
-    upNext: "À suivre",
+    resumed_at: "Repris à {time}",
+    up_next: "À suivre",
     autoplay: "Lecture automatique",
     next: "Ensuite",
   },
 
   favorites: {
     title: "Tes favoris d'abord",
-    titleSoft: "Le reste quand tu veux",
+    title_soft: "Le reste quand tu veux",
     lead: "Épingle les chaînes que tu ne veux pas rater. Masque celles qui encombrent ton fil, sans te désabonner.",
     favorites: "Favoris",
     subscriptions: "Abonnements",
@@ -104,7 +90,7 @@ export default {
 
   how: {
     title: "Prêt en une minute",
-    titleSoft: "Sans mot de passe à créer",
+    title_soft: "Sans mot de passe à créer",
     connect: {
       title: "Connecte ton compte",
       text: "Google pour YouTube, Twitch, ou les deux. Watcher demande un accès en lecture seule.",
@@ -121,7 +107,7 @@ export default {
 
   faq: {
     title: "Questions",
-    titleSoft: "fréquentes",
+    title_soft: "fréquentes",
     items: {
       free: {
         question: "Watcher est-il gratuit ?",
@@ -146,14 +132,14 @@ export default {
 
   final: {
     title: "Tes chaînes t'attendent",
-    titleSoft: "Il ne manque que toi",
+    title_soft: "Il ne manque que toi",
     google: "Continuer avec Google",
     twitch: "Continuer avec Twitch",
     note: "Gratuit · Lecture seule · Supprimable à tout moment",
   },
 
   error: {
-    notFound: {
+    not_found: {
       title: "Page introuvable",
       description: "La page que tu cherches n'existe pas ou a été déplacée.",
     },
@@ -161,7 +147,7 @@ export default {
       title: "Une erreur est survenue",
       description: "Une erreur inattendue s'est produite. Réessaie dans un instant.",
     },
-    backHome: "Retour à l'accueil",
+    back_home: "Retour à l'accueil",
   },
 
   footer: {

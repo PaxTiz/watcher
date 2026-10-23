@@ -2,6 +2,8 @@
 import { computed, defineComponent, h, ref, resolveComponent } from "vue";
 import type { ComponentProps } from "vue-component-type-helpers";
 
+import { useI18n } from "#imports";
+
 import type { DropdownItem } from "../types/dropdown";
 import Button from "./Button.vue";
 import FormInput from "./FormInput.vue";
@@ -21,6 +23,8 @@ const props = defineProps<{
     button?: ComponentProps<typeof Button>["ui"];
   };
 }>();
+
+const { t } = useI18n();
 
 const isOpen = ref(false);
 
@@ -68,7 +72,7 @@ const DropdownChild = defineComponent(
                 class: "sticky z-1001 -top-1.5 -mx-1.5 -mt-1.5 mb-1 p-1.5 bg-ui-bg",
               },
               h(FormInput, {
-                placeholder: "Rechercher une chaîne",
+                placeholder: t("common.search"),
                 class: "w-full",
                 size: "sm",
                 modelValue: searchQuery.value,

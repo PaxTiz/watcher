@@ -12,6 +12,8 @@ defineProps<{
 
 const emit = defineEmits<{ change: [] }>();
 
+const { t } = useI18n();
+
 const scroller = useTemplateRef("scroller");
 const { arrivedState } = useScroll(scroller);
 
@@ -37,13 +39,13 @@ const scroll_by_page = (direction: 1 | -1) => {
         :to="to"
         class="text-ui-text-muted hover:text-alt ml-1 text-sm font-medium transition-colors"
       >
-        Tout voir
+        {{ t("common.see_all") }}
       </NuxtLink>
 
       <div class="ml-auto hidden gap-1 md:flex">
         <button
           class="text-ui-text hover:bg-ui-border/50 flex size-8 items-center justify-center rounded-full border border-[var(--navbar-border)] transition disabled:opacity-30"
-          aria-label="Précédent"
+          :aria-label="t('common.previous')"
           :disabled="arrivedState.left"
           @click="scroll_by_page(-1)"
         >
@@ -51,7 +53,7 @@ const scroll_by_page = (direction: 1 | -1) => {
         </button>
         <button
           class="text-ui-text hover:bg-ui-border/50 flex size-8 items-center justify-center rounded-full border border-[var(--navbar-border)] transition disabled:opacity-30"
-          aria-label="Suivant"
+          :aria-label="t('common.next')"
           :disabled="arrivedState.right"
           @click="scroll_by_page(1)"
         >

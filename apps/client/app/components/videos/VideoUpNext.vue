@@ -4,16 +4,19 @@ import type { VideoResource } from "@watcher/common";
 defineProps<{ videos: Array<VideoResource>; loading?: boolean; nextId?: string }>();
 const autoplay = defineModel<boolean>("autoplay", { required: true });
 
+const { t } = useI18n();
 const { dates, numbers } = useFormatter();
 </script>
 
 <template>
   <section>
     <div class="mb-3 flex items-center justify-between gap-4">
-      <h2 class="font-display text-ui-text text-base font-medium">À suivre</h2>
+      <h2 class="font-display text-ui-text text-base font-medium">
+        {{ t("videos.up_next.title") }}
+      </h2>
 
       <label class="text-ui-text-muted flex cursor-pointer items-center gap-2 text-sm select-none">
-        Lecture automatique
+        {{ t("videos.up_next.autoplay") }}
         <button
           type="button"
           role="switch"
@@ -89,7 +92,7 @@ const { dates, numbers } = useFormatter();
               v-if="video.id === nextId"
               class="mb-0.5 text-[10.5px] font-bold tracking-wider text-[rgb(var(--c-ink))] uppercase dark:text-[rgb(var(--c-light))]"
             >
-              Ensuite
+              {{ t("videos.up_next.next") }}
             </p>
             <h3 class="text-ui-text line-clamp-2 text-sm leading-snug font-medium">
               {{ video.title }}
@@ -102,7 +105,7 @@ const { dates, numbers } = useFormatter();
     </ul>
 
     <p v-else class="text-ui-text-muted py-6 text-center text-sm">
-      Aucune autre vidéo de cette chaîne pour le moment.
+      {{ t("videos.up_next.empty") }}
     </p>
   </section>
 </template>

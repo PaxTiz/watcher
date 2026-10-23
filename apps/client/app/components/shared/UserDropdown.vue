@@ -3,14 +3,21 @@ import type { DropdownItem } from "@watcher/ui";
 
 const { compact = false } = defineProps<{ compact?: boolean }>();
 
+const { t } = useI18n();
 const { user, clear } = useUserSession();
-const colorMode = useColorMode();
+const { colorMode, options: theme_options, changeTheme } = useWatcherThemes();
+const { locale, options: locale_options, changeLocale } = useWatcherLocales();
 
 const { is_synchronising, synchronise } = useSynchronization();
 
 const onSelect = async (key: string, value: string) => {
   if (key === "theme") {
-    colorMode.preference = value;
+    changeTheme(value);
+    return;
+  }
+
+  if (key === "language") {
+    await changeLocale(value);
     return;
   }
 
@@ -25,32 +32,35 @@ const onSelect = async (key: string, value: string) => {
 const items = computed<Array<DropdownItem>>(() => [
   {
     key: "settings",
-    label: "Paramètres",
+    label: t("nav.settings"),
     value: "settings",
     icon: "lucide:settings",
     on_select: () => navigateTo("/settings"),
   },
   {
     key: "actions",
-    label: "Synchroniser",
+    label: t("sync.action"),
     value: "sync",
     icon: "lucide:refresh-cw",
     disabled: is_synchronising.value,
   },
   {
     key: "theme",
-    label: "Thème",
+    label: t("theme.label"),
     icon: "lucide:palette",
     value: colorMode.preference,
-    children: [
-      { label: "Système", value: "system", icon: "lucide:monitor" },
-      { label: "Clair", value: "light", icon: "lucide:sun" },
-      { label: "Sombre", value: "dark", icon: "lucide:moon" },
-    ],
+    children: theme_options.value,
+  },
+  {
+    key: "language",
+    label: t("language.label"),
+    icon: "lucide:languages",
+    value: locale.value,
+    children: locale_options,
   },
   {
     key: "actions",
-    label: "Me déconnecter",
+    label: t("account.logout"),
     value: "logout",
     icon: "lucide:log-out",
   },
@@ -63,7 +73,7 @@ const items = computed<Array<DropdownItem>>(() => [
     color="ghost"
     align="start"
     :label="compact ? undefined : user?.name"
-    :aria-label="user?.name ? `Compte de ${user.name}` : 'Compte'"
+    :aria-label="user?.name ? t('account.label_of', { name: user.name }) : t('account.label')"
     :ui="{
       button: {
         root: compact

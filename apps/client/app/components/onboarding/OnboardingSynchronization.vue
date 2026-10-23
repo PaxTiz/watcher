@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { toast } from "vue-sonner";
 
+const { t } = useI18n();
 const { fetch: refresh_session } = useUserSession();
 
 const is_syncing = ref(false);
@@ -8,9 +9,9 @@ const abort_controller = new AbortController();
 
 const onboard = async (sync: boolean) => {
   const toast_id = sync
-    ? toast.loading("Synchronisation en cours", {
+    ? toast.loading(t("sync.running"), {
         dismissible: false,
-        description: "Restez sur cette page, vous serez redirigé automatiquement.",
+        description: t("onboarding.sync.stay"),
       })
     : undefined;
 
@@ -25,12 +26,12 @@ const onboard = async (sync: boolean) => {
   is_syncing.value = false;
 
   if (error) {
-    toast.error("Une erreur est survenue, réessayez dans quelques instants", { id: toast_id });
+    toast.error(t("errors.generic"), { id: toast_id });
     return;
   }
 
   if (sync) {
-    toast.success("Synchronisation terminée", { id: toast_id });
+    toast.success(t("sync.done"), { id: toast_id });
   }
 
   await refresh_session();
@@ -45,12 +46,12 @@ onUnmounted(() => {
 <template>
   <OnboardingStep
     :step="2"
-    title="Synchronisez vos abonnements"
-    description="Watcher récupère vos abonnements sur les comptes associés et importe leurs dernières vidéos."
+    :title="t('onboarding.sync.title')"
+    :description="t('onboarding.sync.description')"
   >
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
       <WatcherButton
-        :label="is_syncing ? 'Synchronisation en cours…' : 'Synchroniser mes abonnements'"
+        :label="is_syncing ? t('sync.running') : t('onboarding.sync.action')"
         icon="lucide:refresh-cw"
         color="solid"
         size="lg"
@@ -59,7 +60,7 @@ onUnmounted(() => {
         @click="onboard(true)"
       />
       <WatcherButton
-        label="Plus tard"
+        :label="t('onboarding.sync.later')"
         color="ghost"
         size="lg"
         :disabled="is_syncing"

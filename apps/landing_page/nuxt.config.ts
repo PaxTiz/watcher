@@ -35,7 +35,7 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ["@nuxt/fonts", "@nuxtjs/color-mode", "@nuxtjs/i18n", "@watcher/ui", "@nuxtjs/seo"],
+  modules: ["@nuxt/fonts", "@nuxtjs/color-mode", "@watcher/i18n", "@watcher/ui", "@nuxtjs/seo"],
 
   site: {
     url: "https://watcher.app",
@@ -69,18 +69,6 @@ export default defineNuxtConfig({
   },
 
   i18n: {
-    locales: [
-      { code: "en", language: "en-US", name: "English", file: "en.ts" },
-      { code: "fr", language: "fr-FR", name: "Français", file: "fr.ts" },
-      { code: "es", language: "es-ES", name: "Español", file: "es.ts" },
-    ],
-    defaultLocale: "en",
-    langDir: ".",
     strategy: "prefix_and_default",
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: "watcher_locale",
-      fallbackLocale: "en",
-    },
   },
 });

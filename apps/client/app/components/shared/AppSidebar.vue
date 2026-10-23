@@ -9,6 +9,7 @@ import { mockSearch } from "~/utils/search";
 const { collapsed = false } = defineProps<{ collapsed?: boolean }>();
 const emit = defineEmits<{ toggle: [] }>();
 
+const { t } = useI18n();
 const route = useRoute();
 const { search, go_to_results, clear_search } = useGlobalSearch();
 const { favorites, others } = useSubscriptions();
@@ -20,15 +21,15 @@ const is_favorites_feed = computed(
 const nav_items = computed<
   Array<{ label: string; to: RouteLocationRaw; icon: string; active: boolean }>
 >(() => [
-  { label: "Accueil", to: "/", icon: "lucide:house", active: route.path === "/" },
+  { label: t("nav.home"), to: "/", icon: "lucide:house", active: route.path === "/" },
   {
-    label: "Vidéos",
+    label: t("nav.videos"),
     to: "/videos",
     icon: "lucide:clapperboard",
     active: route.path === "/videos" && !is_favorites_feed.value,
   },
   {
-    label: "Favoris",
+    label: t("nav.favorites"),
     to: { path: "/videos", query: { is_favorite: "true" } },
     icon: "lucide:star",
     active: is_favorites_feed.value,
@@ -66,8 +67,8 @@ const on_search = () => {
         type="button"
         class="text-ui-text-muted hover:bg-ui-text/10 hover:text-ui-text flex size-9 items-center justify-center rounded-lg transition-colors"
         :class="{ 'ml-auto': !collapsed }"
-        :aria-label="collapsed ? 'Déplier la barre latérale' : 'Replier la barre latérale'"
-        :title="collapsed ? 'Déplier' : 'Replier'"
+        :aria-label="t(collapsed ? 'nav.expand_sidebar' : 'nav.collapse_sidebar')"
+        :title="t(collapsed ? 'nav.expand' : 'nav.collapse')"
         @click="emit('toggle')"
       >
         <Icon
@@ -82,30 +83,30 @@ const on_search = () => {
         v-if="collapsed"
         type="button"
         class="text-ui-text-muted hover:bg-ui-text/10 hover:text-ui-text mx-auto flex size-10 items-center justify-center rounded-lg transition-colors"
-        aria-label="Rechercher"
-        title="Rechercher"
+        :aria-label="t('common.search')"
+        :title="t('common.search')"
         @click="on_search"
       >
         <Icon name="lucide:search" class="text-lg" />
       </button>
 
       <div v-else class="group relative flex items-center">
-        <span class="sr-only">Rechercher</span>
+        <span class="sr-only">{{ t("common.search") }}</span>
         <Icon name="lucide:search" class="text-ui-text-muted pointer-events-none absolute left-3" />
         <button
           ref="search_input"
           class="control-field text-ui-text-muted !h-9 w-full cursor-pointer pl-9 text-left"
           @click="on_search"
         >
-          Rechercher
+          {{ t("common.search") }}
         </button>
       </div>
     </div>
 
-    <nav class="shrink-0 space-y-0.5 px-3" aria-label="Navigation principale">
+    <nav class="shrink-0 space-y-0.5 px-3" :aria-label="t('nav.label')">
       <NuxtLink
         v-for="item in nav_items"
-        :key="item.label"
+        :key="item.icon"
         :to="item.to"
         :aria-current="item.active ? 'page' : undefined"
         :title="collapsed ? item.label : undefined"

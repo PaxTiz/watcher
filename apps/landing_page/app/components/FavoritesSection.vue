@@ -14,7 +14,7 @@ const others: Array<{ name: string; state?: "new" | "hidden" }> = [
   <SectionIntro
     id="favorites"
     :title="t('favorites.title')"
-    :soft="t('favorites.titleSoft')"
+    :soft="t('favorites.title_soft')"
     :lead="t('favorites.lead')"
   >
     <div class="mt-10 grid gap-4 md:grid-cols-2" aria-hidden="true">

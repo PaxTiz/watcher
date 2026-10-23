@@ -3,6 +3,7 @@ import { toast } from "vue-sonner";
 export const useOAuthRedirectionHandler = () => {
   const route = useRoute();
   const router = useRouter();
+  const { t } = useNuxtApp().$i18n;
 
   const providers: Record<string, string> = {
     google: "Google",
@@ -22,15 +23,15 @@ export const useOAuthRedirectionHandler = () => {
   const error = route.query.error as string;
 
   const messages: Record<string, string> = {
-    already_linked: `Ce compte ${provider} est déjà lié à un autre compte Watcher.`,
-    default_error: `Une erreur est survenue lors de la connexion à votre compte ${provider}`,
+    already_linked: t("integrations.oauth.already_linked", { provider }),
+    default_error: t("integrations.oauth.failed", { provider }),
   };
 
   const data = {
     color: state,
     message:
       state === "success"
-        ? `Votre compte ${provider} est désormais connecté`
+        ? t("integrations.oauth.success", { provider })
         : (messages[error] ?? messages.default_error),
   };
 

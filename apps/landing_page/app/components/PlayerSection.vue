@@ -9,7 +9,7 @@ const upNext = [PREVIEW_VIDEOS[1]!, PREVIEW_VIDEOS[5]!, PREVIEW_VIDEOS[2]!];
   <SectionIntro
     id="player"
     :title="t('player.title')"
-    :soft="t('player.titleSoft')"
+    :soft="t('player.title_soft')"
     :lead="t('player.lead')"
   >
     <div
@@ -21,7 +21,7 @@ const upNext = [PREVIEW_VIDEOS[1]!, PREVIEW_VIDEOS[5]!, PREVIEW_VIDEOS[2]!];
         <span
           class="absolute top-3 left-3 rounded-full bg-[rgb(12_12_14/0.6)] px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md"
         >
-          {{ t("player.resumedAt", { time: "1:47:12" }) }}
+          {{ t("player.resumed_at", { time: "1:47:12" }) }}
         </span>
         <div
           class="absolute inset-x-3 bottom-3 flex items-center gap-3 rounded-full bg-white/[0.12] px-3.5 py-2 text-xs font-medium text-white tabular-nums shadow-[inset_0_0_0_1px_rgb(255_255_255/0.15)] backdrop-blur-md"
@@ -36,7 +36,7 @@ const upNext = [PREVIEW_VIDEOS[1]!, PREVIEW_VIDEOS[5]!, PREVIEW_VIDEOS[2]!];
 
       <div>
         <p class="mb-3 flex justify-between text-sm font-medium text-white">
-          {{ t("player.upNext") }}
+          {{ t("player.up_next") }}
           <span class="text-xs font-normal text-[#8b8b92]">{{ t("player.autoplay") }}</span>
         </p>
         <div

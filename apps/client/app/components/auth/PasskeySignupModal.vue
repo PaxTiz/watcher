@@ -5,6 +5,7 @@ import { type PasskeysValidators, passkeysValidatorsSchema } from "#shared/valid
 
 const emit = defineEmits<{ close: [] }>();
 
+const { t } = useI18n();
 const { signup, loading } = usePasskeys();
 
 const input = useTemplateRef("input");
@@ -28,11 +29,8 @@ onMounted(() => {
 <template>
   <WatcherSlideover side="right" :ui="{ content: 'w-full max-w-[500px]' }">
     <section>
-      <h1 class="page-title">Créer un compte avec une clé d'accès</h1>
-      <p class="text-ui-text-muted mt-2">
-        Votre clé d'accès est enregistrée sur votre appareil ou dans votre gestionnaire de mots de
-        passe. Aucun mot de passe à retenir.
-      </p>
+      <h1 class="page-title">{{ t("auth.signup.title") }}</h1>
+      <p class="text-ui-text-muted mt-2">{{ t("auth.signup.description") }}</p>
 
       <WatcherForm
         class="mt-6"
@@ -41,20 +39,25 @@ onMounted(() => {
         :schema="passkeysValidatorsSchema.signup.body"
         @submit="onSubmit"
       >
-        <WatcherFormField label="Votre nom" name="name">
-          <WatcherFormInput ref="input" v-model="state.name" placeholder="Jean" class="w-full" />
+        <WatcherFormField :label="t('auth.signup.name')" name="name">
+          <WatcherFormInput
+            ref="input"
+            v-model="state.name"
+            :placeholder="t('auth.signup.name_placeholder')"
+            class="w-full"
+          />
         </WatcherFormField>
 
-        <WatcherFormField label="Nom de la clé d'accès" name="passkey_name" class="mt-4">
+        <WatcherFormField :label="t('passkeys.name')" name="passkey_name" class="mt-4">
           <WatcherFormInput
             v-model="state.passkey_name"
-            placeholder="MacBook, iPhone, Bitwarden…"
+            :placeholder="t('passkeys.name_placeholder')"
             class="w-full"
           />
         </WatcherFormField>
 
         <WatcherButton
-          label="Créer mon compte"
+          :label="t('auth.signup.submit')"
           icon="lucide:key-round"
           type="submit"
           color="solid"
@@ -65,6 +68,12 @@ onMounted(() => {
       </WatcherForm>
     </section>
 
-    <WatcherButton label="Annuler" color="ghost" size="lg" class="w-full" @click="emit('close')" />
+    <WatcherButton
+      :label="t('common.cancel')"
+      color="ghost"
+      size="lg"
+      class="w-full"
+      @click="emit('close')"
+    />
   </WatcherSlideover>
 </template>

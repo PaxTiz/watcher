@@ -1,13 +1,14 @@
 <script lang="ts" setup>
 import type { Integration } from "~/composables/useIntegrations";
 
+const { t } = useI18n();
 const { is_linked: is_integration_linked, on_link, on_disconnect } = useIntegrations();
 
 const { integration } = defineProps<{ integration: Integration }>();
 
 const is_linked = computed(() => is_integration_linked(integration.id));
 
-const status = computed(() => (is_linked.value ? "Connecté" : "Non connecté"));
+const status = computed(() => t(is_linked.value ? "integrations.linked" : "integrations.unlinked"));
 </script>
 
 <template>
@@ -33,11 +34,17 @@ const status = computed(() => (is_linked.value ? "Connecté" : "Non connecté"))
 
     <WatcherButton
       v-if="is_linked"
-      label="Déconnecter"
+      :label="t('integrations.disconnect.action')"
       size="sm"
       color="ghost"
       @click="on_disconnect(integration)"
     />
-    <WatcherButton v-else label="Associer" size="sm" color="solid" @click="on_link(integration)" />
+    <WatcherButton
+      v-else
+      :label="t('integrations.link')"
+      size="sm"
+      color="solid"
+      @click="on_link(integration)"
+    />
   </SettingsRow>
 </template>

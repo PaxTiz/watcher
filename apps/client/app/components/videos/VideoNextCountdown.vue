@@ -6,6 +6,8 @@ const COUNTDOWN_SECONDS = 8;
 const { video } = defineProps<{ video: VideoResource }>();
 const emit = defineEmits<{ play: []; cancel: [] }>();
 
+const { t } = useI18n();
+
 const remaining = ref(COUNTDOWN_SECONDS);
 
 const { pause } = useIntervalFn(() => {
@@ -27,10 +29,12 @@ const cancel = () => {
   <div
     class="absolute inset-0 z-10 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
     role="dialog"
-    aria-label="Vidéo suivante"
+    :aria-label="t('videos.countdown.label')"
   >
     <div class="w-full max-w-sm text-white">
-      <p class="text-sm text-white/70">Vidéo suivante dans {{ remaining }} s</p>
+      <p class="text-sm text-white/70">
+        {{ t("videos.countdown.remaining", { seconds: remaining }) }}
+      </p>
 
       <div class="mt-3 grid grid-cols-[8rem_1fr] gap-3">
         <NuxtImg
@@ -59,14 +63,14 @@ const cancel = () => {
           class="flex-1 rounded-lg bg-white/15 px-4 py-2 text-sm font-semibold transition-colors hover:bg-white/25"
           @click="cancel"
         >
-          Annuler
+          {{ t("common.cancel") }}
         </button>
         <button
           type="button"
           class="bg-alt flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           @click="emit('play')"
         >
-          Lire maintenant
+          {{ t("videos.countdown.play_now") }}
         </button>
       </div>
     </div>

@@ -9,6 +9,7 @@ const { subscription, flat = false } = defineProps<{
   flat?: boolean;
 }>();
 
+const { t } = useI18n();
 const card = useTemplateRef("card");
 const { forceRefresh } = useSubscriptions();
 
@@ -20,15 +21,20 @@ onLongPress(
       method: "POST",
     });
     if (error) {
-      toast.error("La modification de vos favoris a échoué, réessayez plus tard");
+      toast.error(t("subscriptions.favorite.failed"));
       return;
     }
 
-    if (subscription.is_favorite) {
-      toast.success(`${subscription.name} a été retiré de vos favoris`);
-    } else {
-      toast.success(`${subscription.name} a été ajouté à vos favoris`);
-    }
+    toast.success(
+      t(
+        subscription.is_favorite
+          ? "subscriptions.favorite.removed"
+          : "subscriptions.favorite.added",
+        {
+          name: subscription.name,
+        },
+      ),
+    );
 
     await forceRefresh();
   },

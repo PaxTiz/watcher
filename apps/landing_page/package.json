@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@nuxtjs/color-mode": "catalog:",
-    "@nuxtjs/i18n": "catalog:",
     "@nuxtjs/seo": "catalog:",
     "@takumi-rs/core": "^2.16.2",
     "@watcher/common": "workspace:^",
+    "@watcher/i18n": "workspace:^",
     "@watcher/ui": "workspace:^",
     "nuxt": "catalog:",
     "vue": "catalog:",
