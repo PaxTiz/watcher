@@ -7,9 +7,7 @@ const { t } = useI18n();
     <div
       class="text-ui-text-muted container flex flex-wrap items-center justify-between gap-4 py-7 text-[13px]"
     >
-      <WatcherLogo
-        class="[&_span]:font-display [&_div]:size-[26px] [&_div]:text-[15px] [&_span]:text-[15px] [&_span]:font-medium"
-      />
+      <WatcherLogo class="h-[26px]" />
       <span>{{ t("footer.copyright") }}</span>
       <nav class="flex gap-5" aria-label="Footer">
         <span>{{ t("footer.privacy") }}</span>

@@ -12,9 +12,7 @@ const links = computed(() => [
 <template>
   <header class="sticky top-0 z-20 bg-[var(--background)]/80 backdrop-blur-md">
     <div class="container flex h-16 items-center gap-6">
-      <WatcherLogo
-        class="[&_span]:font-display [&_div]:size-[26px] [&_div]:text-[15px] [&_span]:text-[15px] [&_span]:font-medium"
-      />
+      <WatcherLogo class="h-[26px]" />
 
       <nav class="text-ui-text-muted ml-6 hidden gap-5.5 text-sm md:flex" aria-label="Sections">
         <NuxtLink

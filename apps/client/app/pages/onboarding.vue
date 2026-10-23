@@ -11,7 +11,7 @@ useMeta({
 
 <template>
   <section>
-    <WatcherLogo class="[&_span]:font-display [&_span]:text-[15px] [&_span]:font-medium" />
+    <WatcherLogo class="h-7" />
 
     <h1 class="page-title mt-10 md:text-3xl">{{ t("onboarding.heading") }}</h1>
     <p class="text-ui-text-muted mt-3">{{ t("onboarding.lead") }}</p>

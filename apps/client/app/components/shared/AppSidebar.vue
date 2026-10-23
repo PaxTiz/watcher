@@ -59,10 +59,7 @@ const on_search = () => {
       class="flex h-14 shrink-0 items-center gap-2 px-3.5"
       :class="{ 'justify-center px-0': collapsed }"
     >
-      <WatcherLogo
-        v-if="!collapsed"
-        class="[&_span]:font-display ml-1 [&_span]:text-[15px] [&_span]:font-medium"
-      />
+      <WatcherLogo v-if="!collapsed" class="ml-1 h-7" />
       <button
         type="button"
         class="text-ui-text-muted hover:bg-ui-text/10 hover:text-ui-text flex size-9 items-center justify-center rounded-lg transition-colors"

@@ -33,7 +33,7 @@ useMeta({ title: () => t("auth.title") });
 
 <template>
   <section>
-    <WatcherLogo class="[&_span]:font-display [&_span]:text-[15px] [&_span]:font-medium" />
+    <WatcherLogo class="h-7" />
 
     <h1
       class="font-display text-ui-text mt-12 text-3xl leading-tight font-medium text-balance md:text-4xl"
