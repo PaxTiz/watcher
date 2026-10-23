@@ -69,11 +69,21 @@ export default defineNuxtConfig({
         "reka-ui",
         "date-fns",
         "date-fns/locale",
-        "hls.js",
-        "plyr",
+        "@videojs/html/i18n",
+        "@videojs/html/video/player",
+        "@videojs/html/video/skin",
+        "@videojs/html/media/hlsjs-video",
+        "@videojs/html/media/youtube-video",
         "vue-sonner",
         "zod/mini",
       ],
+    },
+  },
+
+  vue: {
+    compilerOptions: {
+      isCustomElement: (tag) =>
+        ["media-i18n", "video-player", "video-skin", "hlsjs-video", "youtube-video"].includes(tag),
     },
   },
 
