@@ -8,14 +8,7 @@ export default defineRoute({
   async handler(event, { params }) {
     const { user: sessionUser } = await requireUserSession(event);
 
-    if (params.provider === "bluesky") {
-      await services.users.update(sessionUser.id, {
-        bluesky_did: null,
-        bluesky_handle: null,
-      });
-    } else {
-      await services.credentials.delete(sessionUser.id, params.provider);
-    }
+    await services.credentials.delete(sessionUser.id, params.provider);
 
     const database_user = await services.users.find_by_id(sessionUser.id);
     if (!database_user) {

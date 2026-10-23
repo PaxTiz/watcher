@@ -14,10 +14,10 @@
     "db:migrations:create": "./node_modules/kysely-ctl/dist/bin.mjs migrate make"
   },
   "dependencies": {
-    "@atproto/api": "catalog:bluesky",
-    "@atproto/oauth-client-node": "catalog:bluesky",
     "@nuxt/image": "^2.1.0",
     "@nuxtjs/color-mode": "catalog:",
+    "@simplewebauthn/browser": "^11.0.0",
+    "@simplewebauthn/server": "^11.0.0",
     "@watcher/common": "workspace:^",
     "@watcher/integration-google": "workspace:^",
     "@watcher/integration-twitch": "workspace:^",

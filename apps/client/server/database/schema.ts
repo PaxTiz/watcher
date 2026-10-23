@@ -1,14 +1,12 @@
 import type { CredentialsType, SubscriptionType, VideoPalette } from "@watcher/common";
 import type { ColumnType, Generated, Insertable } from "kysely";
 
+import type { WebAuthnCredential } from "#auth-utils";
+
 export type UserTable = {
   id: Generated<string>;
 
   name: string;
-
-  bluesky_did: string | null;
-
-  bluesky_handle: string | null;
 
   is_onboarded: boolean;
 
@@ -106,8 +104,32 @@ export type UsersVideosProgression = {
   updated_at: ColumnType<string, string | undefined, string>;
 };
 
+export type PasskeyTable = {
+  id: string;
+
+  user_id: string;
+
+  name: string;
+
+  public_key: string;
+
+  counter: number;
+
+  backed_up: boolean;
+
+  // jsonb: parsed on read, written as a JSON string
+  transports: ColumnType<NonNullable<WebAuthnCredential["transports"]>, string, string>;
+
+  aaguid: string | null;
+
+  created_at: ColumnType<string, string | undefined, never>;
+
+  last_used_at: ColumnType<string | null, string | undefined, string>;
+};
+
 export type Database = {
   users: UserTable;
+  passkeys: PasskeyTable;
   subscriptions: SubscriptionTable;
   user_subscriptions: UserSubscriptionTable;
   credentials: CredentialTable;

@@ -27,11 +27,7 @@ export default defineOAuthTwitchEventHandler({
       }
 
       if (!database_user) {
-        database_user = await services.users.create({
-          name: user.display_name,
-          bluesky_did: null,
-          bluesky_handle: null,
-        });
+        database_user = await services.users.create({ name: user.display_name });
       }
 
       await services.credentials.replace(database_user.id, {

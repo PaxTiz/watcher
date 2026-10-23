@@ -31,22 +31,6 @@ export default class UsersService extends AbstractService {
     return this.find_by_id(user.id);
   }
 
-  async find_by_bluesky_did(did: string): Promise<UserResource | null> {
-    const database = useDatabase();
-
-    const user = await database
-      .selectFrom("users")
-      .selectAll()
-      .where("bluesky_did", "=", did)
-      .executeTakeFirst();
-
-    if (!user) {
-      return null;
-    }
-
-    return this.find_by_id(user.id);
-  }
-
   async find_by_id(id: string): Promise<UserResource | null> {
     const database = useDatabase();
 
@@ -69,14 +53,9 @@ export default class UsersService extends AbstractService {
     return {
       id: user.id,
       name: user.name,
-      bluesky: {
-        handle: user.bluesky_handle,
-        did: user.bluesky_did,
-      },
       integrations: {
         google: credentials.find((c) => c.service === "google")?.service_id ?? null,
         twitch: credentials.find((c) => c.service === "twitch")?.service_id ?? null,
-        bluesky: user.bluesky_did,
       },
       is_onboarded: user.is_onboarded,
       created_at: user.created_at,
@@ -84,17 +63,13 @@ export default class UsersService extends AbstractService {
     };
   }
 
-  async create(
-    data: Pick<UserTable, "name" | "bluesky_handle" | "bluesky_did">,
-  ): Promise<UserResource> {
+  async create(data: Pick<UserTable, "name">): Promise<UserResource> {
     const database = useDatabase();
 
     const user = await database
       .insertInto("users")
       .values({
         name: data.name,
-        bluesky_handle: data.bluesky_handle,
-        bluesky_did: data.bluesky_did,
         is_onboarded: false,
       })
       .onConflict((oc) => oc.doNothing())
@@ -104,10 +79,7 @@ export default class UsersService extends AbstractService {
     return (await this.find_by_id(user.id))!;
   }
 
-  async update(
-    id: string,
-    data: Partial<Pick<UserTable, "name" | "bluesky_handle" | "bluesky_did">>,
-  ) {
+  async update(id: string, data: Partial<Pick<UserTable, "name">>) {
     const database = useDatabase();
 
     await database.updateTable("users").set(data).where("id", "=", id).execute();

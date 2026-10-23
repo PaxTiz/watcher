@@ -3,16 +3,9 @@ export type UserResource = {
 
   name: string;
 
-  bluesky: {
-    did: string | null;
-
-    handle: string | null;
-  };
-
   integrations: {
     google: string | null;
     twitch: string | null;
-    bluesky: string | null;
   };
 
   is_onboarded: boolean;
@@ -20,4 +13,16 @@ export type UserResource = {
   created_at: string;
 
   last_login_at: string;
+};
+
+export type PasskeyResource = {
+  id: string;
+
+  name: string;
+
+  backed_up: boolean;
+
+  created_at: string;
+
+  last_used_at: string | null;
 };

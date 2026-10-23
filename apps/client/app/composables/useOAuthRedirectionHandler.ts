@@ -5,7 +5,6 @@ export const useOAuthRedirectionHandler = () => {
   const router = useRouter();
 
   const providers: Record<string, string> = {
-    bluesky: "Bluesky",
     google: "Google",
     twitch: "Twitch",
   };

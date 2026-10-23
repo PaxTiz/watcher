@@ -62,6 +62,8 @@ usePageNavigation()([{ label: "Paramètres", icon: "lucide:settings" }]);
         />
       </SettingsSection>
 
+      <SettingsPasskeys />
+
       <SettingsSection title="Apparence">
         <SettingsRow title="Thème">
           <div
@@ -91,10 +93,7 @@ usePageNavigation()([{ label: "Paramètres", icon: "lucide:settings" }]);
       </SettingsSection>
 
       <SettingsSection title="Compte">
-        <SettingsRow
-          :title="user?.name ?? 'Mon compte'"
-          :description="user?.bluesky?.handle ? `@${user.bluesky.handle}` : undefined"
-        >
+        <SettingsRow :title="user?.name ?? 'Mon compte'">
           <WatcherButton label="Me déconnecter" icon="lucide:log-out" size="sm" @click="logout" />
         </SettingsRow>
       </SettingsSection>

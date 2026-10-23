@@ -3,7 +3,7 @@ import type { UserResource } from "@watcher/common";
 declare module "#auth-utils" {
   interface User extends UserResource {
     login_with: {
-      integration: "google" | "twitch" | "bluesky";
+      integration: "google" | "twitch" | "passkey";
       id: string;
     };
   }

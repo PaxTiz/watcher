@@ -1,24 +1,13 @@
 <script lang="ts" setup>
 import type { Integration } from "~/composables/useIntegrations";
 
-const { user } = useUserSession();
 const { is_linked: is_integration_linked, on_link, on_disconnect } = useIntegrations();
 
 const { integration } = defineProps<{ integration: Integration }>();
 
 const is_linked = computed(() => is_integration_linked(integration.id));
 
-const status = computed(() => {
-  if (!is_linked.value) {
-    return "Non connecté";
-  }
-
-  if (integration.id === "bluesky" && user.value?.bluesky?.handle) {
-    return `Connecté · @${user.value.bluesky.handle}`;
-  }
-
-  return "Connecté";
-});
+const status = computed(() => (is_linked.value ? "Connecté" : "Non connecté"));
 </script>
 
 <template>

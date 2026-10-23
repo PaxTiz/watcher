@@ -33,11 +33,6 @@ catalog:
   tailwindcss: ^4.3.3
   "@tailwindcss/vite": ^4.3.3
 
-catalogs:
-  bluesky:
-    "@atproto/api": ^0.19.19
-    "@atproto/oauth-client-node": ^0.3.17
-
 allowBuilds:
   "@parcel/watcher": true
   core-js: true

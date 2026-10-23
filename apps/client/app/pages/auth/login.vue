@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { LazyLoginModal } from "#components";
+import { LazyPasskeySignupModal } from "#components";
 
 definePageMeta({ layout: "auth" });
 
@@ -9,9 +9,16 @@ if (loggedIn.value) {
 }
 
 const overlay = useWatcherOverlay();
+const { login: loginWithPasskey, loading: passkeyLoading } = usePasskeys();
 
-const onShowBlueskyModal = () => {
-  overlay.create(LazyLoginModal).open();
+const onLoginWithPasskey = async () => {
+  if (await loginWithPasskey()) {
+    await navigateTo("/");
+  }
+};
+
+const onShowPasskeySignupModal = () => {
+  overlay.create(LazyPasskeySignupModal).open();
 };
 
 const benefits = [
@@ -67,14 +74,26 @@ useMeta({ title: "Connexion" });
           external
         />
         <WatcherButton
-          label="Bluesky"
-          icon="fa7-brands:bluesky"
+          label="Clé d'accès"
+          icon="lucide:key-round"
           size="lg"
-          class="w-full [&_svg]:text-[#1185fe]"
-          @click="onShowBlueskyModal"
+          class="w-full"
+          :loading="passkeyLoading"
+          @click="onLoginWithPasskey"
         />
       </div>
     </div>
+
+    <p class="text-ui-text-muted mt-4 text-center text-[13px]">
+      Pas encore de compte ?
+      <button
+        type="button"
+        class="text-ui-text font-medium underline-offset-4 hover:underline"
+        @click="onShowPasskeySignupModal"
+      >
+        Créer un compte avec une clé d'accès
+      </button>
+    </p>
 
     <p class="text-ui-text-muted mt-6 flex items-center gap-2 text-[13px]">
       <Icon name="lucide:lock" class="shrink-0" />

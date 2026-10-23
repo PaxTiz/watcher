@@ -41,14 +41,8 @@ export default defineNuxtConfig({
     classSuffix: "",
   },
 
-  devServer: {
-    // Used with atproto oauth
-    // https://atproto.com/specs/oauth#localhost-client-development
-    host: "127.0.0.1",
-  },
-
   auth: {
-    atproto: true,
+    webAuthn: true,
   },
 
   image: {
@@ -112,11 +106,6 @@ export default defineNuxtConfig({
         playerClientId: "",
         clientId: "",
         clientSecret: "",
-      },
-
-      bluesky: {
-        scope: ["atproto", "transition:generic", "transition:email"],
-        clientId: "",
       },
     },
   },
