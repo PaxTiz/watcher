@@ -107,7 +107,7 @@ usePageNavigation()([{ label: t("nav.settings"), icon: "lucide:settings" }]);
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection :title="t('settings.account')">
+      <SettingsSection :title="t('settings.danger')" danger>
         <SettingsRow :title="user?.name ?? t('settings.heading')">
           <WatcherButton
             :label="t('account.logout')"
@@ -116,9 +116,7 @@ usePageNavigation()([{ label: t("nav.settings"), icon: "lucide:settings" }]);
             @click="logout"
           />
         </SettingsRow>
-      </SettingsSection>
 
-      <SettingsSection :title="t('settings.danger')" danger>
         <SettingsRow
           :title="t('settings.delete_account.title')"
           :description="t('settings.delete_account.description')"
