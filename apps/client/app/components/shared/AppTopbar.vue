@@ -60,7 +60,7 @@ const open_menu = () => {
           :key="item.label"
           class="group inline-flex items-center gap-1"
         >
-          <Icon v-if="item.icon" :name="item.icon" class="text-ui-text shrink-0" />
+          <!-- <Icon v-if="item.icon" :name="item.icon" class="text-ui-text shrink-0" /> -->
           <NuxtLink v-if="item.to" :to="item.to" class="shrink-0 transition-colors">
             {{ item.label }}
           </NuxtLink>
