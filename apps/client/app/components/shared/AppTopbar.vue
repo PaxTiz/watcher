@@ -51,20 +51,27 @@ const open_menu = () => {
       :aria-label="t('nav.breadcrumb')"
       class="liquid-glass text-ui-text pointer-events-auto flex h-10 min-w-0 items-center rounded-full px-4 text-sm"
     >
-      <ul class="flex items-center gap-2">
+      <ul class="flex min-w-0 items-center gap-2">
         <li
           v-for="(item, index) in [
             { label: t('nav.home'), icon: 'lucide:house', to: '/' },
             ...items,
           ]"
           :key="item.label"
-          class="group inline-flex items-center gap-1"
+          class="group inline-flex min-w-0 items-center gap-1"
         >
           <!-- <Icon v-if="item.icon" :name="item.icon" class="text-ui-text shrink-0" /> -->
-          <NuxtLink v-if="item.to" :to="item.to" class="shrink-0 transition-colors">
+          <NuxtLink
+            v-if="item.to"
+            :to="item.to"
+            :title="item.label"
+            class="truncate transition-colors"
+          >
             {{ item.label }}
           </NuxtLink>
-          <span v-else class="text-ui-text shrink-0 font-medium">{{ item.label }}</span>
+          <span v-else :title="item.label" class="text-ui-text truncate font-medium">{{
+            item.label
+          }}</span>
 
           <Icon
             v-if="index < items.length"
