@@ -36,6 +36,7 @@ export type FindAllForUserFilters = {
   subscription_id?: string;
   is_favorite?: boolean;
   in_progress?: boolean;
+  with_hidden?: boolean;
   duration?: VideoDurationFilter;
   created_after?: string;
   created_before?: string;

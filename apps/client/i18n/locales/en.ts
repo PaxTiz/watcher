@@ -280,6 +280,7 @@ export default {
       duration: "Duration",
       all_dates: "All dates",
       all_durations: "All durations",
+      with_hidden: "Hidden content",
       dates: {
         today: "Today",
         weekly: "This week",

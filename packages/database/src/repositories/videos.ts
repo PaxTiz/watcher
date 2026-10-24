@@ -32,17 +32,21 @@ function select_visible_for_user(user_id: string, filters: FindAllForUserFilters
     .selectFrom("videos")
     .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
     .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
-    .where((eb) =>
-      eb.not(
-        eb.exists(
-          eb
-            .selectFrom("hidden_users_videos")
-            .where("hidden_users_videos.video_id", "=", eb.ref("videos.id"))
-            .where("hidden_users_videos.user_id", "=", eb.ref("user_subscriptions.user_id")),
+    .$if(filters.with_hidden !== true, (qb) =>
+      qb.where((eb) =>
+        eb.not(
+          eb.exists(
+            eb
+              .selectFrom("hidden_users_videos")
+              .where("hidden_users_videos.video_id", "=", eb.ref("videos.id"))
+              .where("hidden_users_videos.user_id", "=", eb.ref("user_subscriptions.user_id")),
+          ),
         ),
       ),
     )
-    .$if(!filters.subscription_id, (qb) => qb.where("user_subscriptions.is_hidden", "=", false))
+    .$if(!filters.subscription_id && filters.with_hidden !== true, (qb) =>
+      qb.where("user_subscriptions.is_hidden", "=", false),
+    )
     .where("user_subscriptions.user_id", "=", user_id)
     .$if(!!filters.service, (qb) => qb.where("videos.service", "=", filters.service!))
     .$if(filters.is_favorite === true, (qb) =>

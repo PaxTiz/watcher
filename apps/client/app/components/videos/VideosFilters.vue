@@ -139,6 +139,15 @@ const chip_ui = (active: boolean) => ({
     />
 
     <WatcherButton
+      :icon="filters.with_hidden ? 'lucide:eye' : 'lucide:eye-off'"
+      :label="t('videos.filters.with_hidden')"
+      size="sm"
+      :aria-pressed="!!filters.with_hidden"
+      :ui="chip_ui(!!filters.with_hidden).button"
+      @click="filters.with_hidden = filters.with_hidden ? undefined : true"
+    />
+
+    <WatcherButton
       v-if="has_active_filters"
       :label="t('common.clear')"
       icon="lucide:x"

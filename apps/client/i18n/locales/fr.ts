@@ -283,6 +283,7 @@ export default {
       duration: "Durée",
       all_dates: "Toutes les dates",
       all_durations: "Toutes les durées",
+      with_hidden: "Contenu masqué",
       dates: {
         today: "Aujourd'hui",
         weekly: "Cette semaine",
