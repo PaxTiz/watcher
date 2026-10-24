@@ -227,7 +227,11 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
               class="shrink-0"
               :aria-label="video.service === 'youtube' ? 'YouTube' : 'Twitch'"
             />
-            <span class="truncate">{{ video.author.name }}</span>
+
+            <NuxtLink class="truncate" :to="`/subscriptions/${video.author.slug}`">
+              {{ video.author.name }}
+            </NuxtLink>
+
             <span aria-hidden="true">·</span>
             <time class="shrink-0" :datetime="video.created_at">
               {{ dates.ago(video.created_at) }}
