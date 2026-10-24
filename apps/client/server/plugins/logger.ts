@@ -33,6 +33,11 @@ const canLog = (event: H3Event) => {
 };
 
 export default defineNitroPlugin((app) => {
+  const config = useRuntimeConfig();
+  if (config.public.environment !== "local") {
+    return;
+  }
+
   app.hooks.hook("request", (event) => {
     event.context.__time = new Date();
   });
@@ -41,9 +46,12 @@ export default defineNitroPlugin((app) => {
     const startDate = event.context.__time as Date;
 
     if (canLog(event)) {
-      console.log(
-        `${startDate.toISOString()} ${event.method} ${event.path} ${getResponseStatus(event)} ${time(startDate)}`,
-      );
+      const date = startDate.toISOString();
+      const path = getRequestURL(event).pathname;
+      const status = getResponseStatus(event);
+      const timer = time(startDate);
+
+      console.log(`${date} ${event.method} ${path} ${status} ${timer}`);
     }
   });
 });

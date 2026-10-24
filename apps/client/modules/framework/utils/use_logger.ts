@@ -39,12 +39,24 @@ const _fileTransporter = () => {
   });
 };
 
+let _logger: pino.Logger;
 export function useLogger(service: string) {
   const config = useRuntimeConfig();
 
-  const logger = pino(
+  _logger ??= pino(
     config.public.environment === "local" ? _localTransporter() : _fileTransporter(),
   );
 
-  return logger.child({ service });
+  return _logger.child(
+    { service },
+    {
+      redact: [
+        "*.access_token",
+        "*.refresh_token",
+        "*.client_secret",
+        "headers.authorization",
+        "headers.cookie",
+      ],
+    },
+  );
 }
