@@ -77,6 +77,7 @@ export async function upsert({ data, options }: UpsertInput): Promise<UpsertOutp
     .onConflict((row) =>
       row.columns(["service", "service_id"]).doUpdateSet({
         logo: (c) => c.ref("excluded.logo"),
+        logo_etag: (c) => c.ref("excluded.logo_etag"),
         url: (c) => c.ref("excluded.url"),
         name: (c) => c.ref("excluded.name"),
         last_synced_at: (c) => c.ref("excluded.last_synced_at"),

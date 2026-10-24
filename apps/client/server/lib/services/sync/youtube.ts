@@ -109,7 +109,8 @@ export default class SyncYoutube extends AbstractService {
 
     const logo = await this.sync_subscription_logo(subscription);
     if (logo) {
-      subscription.channel.logo = logo;
+      subscription.channel.logo = logo.logo;
+      subscription.channel.logo_etag = logo.etag ?? "__INVALID_ETAG__";
     }
 
     await withTransaction(async (tx) => {
@@ -246,10 +247,12 @@ export default class SyncYoutube extends AbstractService {
   private async sync_video_thumbnail_and_palette(video: Sync["Video"]) {
     const thumbnails = await this.sync_video_thumbnail(video);
     if (thumbnails.small) {
-      video.video.thumbnail_small = thumbnails.small;
+      video.video.thumbnail_small = thumbnails.small.url;
+      video.video.thumbnail_small_etag = thumbnails.small.etag ?? "__INVALID_ETAG__";
     }
     if (thumbnails.large) {
-      video.video.thumbnail_large = thumbnails.large;
+      video.video.thumbnail_large = thumbnails.large.url;
+      video.video.thumbnail_large_etag = thumbnails.large.etag ?? "__INVALID_ETAG__";
     }
 
     const palette =
@@ -281,8 +284,9 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
-    const head = await fetch(subscription.channel.logo, { method: "OPTIONS" });
-    if (head.headers.get("etag") === subscription.channel.logo_etag) {
+    const head = await fetch(subscription.channel.logo, { method: "HEAD" });
+    const etag = head.headers.get("etag");
+    if (etag === subscription.channel.logo_etag) {
       return undefined;
     }
 
@@ -296,7 +300,7 @@ export default class SyncYoutube extends AbstractService {
 
     this.createImageDirectory("channels", subscription.channel.service_id, "videos");
 
-    return `/youtube/channels/${subscription.channel.service_id}/logo.jpg`;
+    return { etag, logo: `/youtube/channels/${subscription.channel.service_id}/logo.jpg` };
   }
 
   private async delete_video(video: Sync["Video"]) {
@@ -329,14 +333,18 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_video_thumbnail(video: Sync["Video"]) {
-    const paths: { small?: string; large?: string } = {
+    const paths: {
+      small?: { url: string; etag: string | null };
+      large?: { url: string; etag: string | null };
+    } = {
       small: undefined,
       large: undefined,
     };
 
     const inner = async (key: "small" | "large", path: string) => {
-      const head = await fetch(path, { method: "OPTIONS" });
-      if (head.headers.get("etag") === video.video[`thumbnail_${key}_etag`]) {
+      const head = await fetch(path, { method: "HEAD" });
+      const etag = head.headers.get("etag");
+      if (etag === video.video[`thumbnail_${key}_etag`]) {
         return;
       }
 
@@ -353,8 +361,10 @@ export default class SyncYoutube extends AbstractService {
         Buffer.from(image),
       );
 
-      paths[key] =
-        `/youtube/channels/${video.video.subscription_id}/videos/${video.video.service_id}_${key}.jpg`;
+      paths[key] = {
+        url: `/youtube/channels/${video.video.subscription_id}/videos/${video.video.service_id}_${key}.jpg`,
+        etag,
+      };
     };
 
     await Promise.all([
