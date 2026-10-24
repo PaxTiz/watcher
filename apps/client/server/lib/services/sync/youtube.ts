@@ -33,7 +33,7 @@ export default class SyncYoutube extends AbstractService {
   private async get_subscriptions(user: User) {
     const google_id = this.assert_google(user);
 
-    const google = useGoogle();
+    const google = useGoogle(user);
 
     const user_subscriptions: Sync["SubscriptionsList"] = await subscriptions
       .find_all_for_sync({ user_id: user.id, service: "youtube" })
@@ -127,15 +127,13 @@ export default class SyncYoutube extends AbstractService {
       subscription.channel.service_id,
     );
 
-    for (const video of channel_videos) {
-      await this.sync_video(video);
-    }
+    await this.sync_videos(channel_videos);
   }
 
   private async get_videos_by_channel_id(user: User, channel_id: string) {
     const google_id = this.assert_google(user);
 
-    const google = useGoogle();
+    const google = useGoogle(user);
 
     const channel_videos: Sync["VideosList"] = await videos
       .find_all_by_subscription({ service: "youtube", subscription_id: channel_id })
@@ -158,7 +156,7 @@ export default class SyncYoutube extends AbstractService {
         })),
       );
 
-    const current_videos = [];
+    const current_videos: Array<Google["Youtube"]["Videos"]["Item"]> = [];
 
     let all_videos = await google.youtube.videos.get_latests(
       { channel_id },
@@ -238,18 +236,36 @@ export default class SyncYoutube extends AbstractService {
     return channel_videos;
   }
 
-  private async sync_video(video: Sync["Video"]) {
-    if (video.status === "deleted") {
-      return await this.delete_video(video);
-    }
-
+  private async sync_video_thumbnail_and_palette(
+    video: Sync["Video"],
+  ): Promise<Sync["VideoWithPalette"]> {
     const thumbnails = await this.sync_video_thumbnail(video);
     video.video.thumbnail_small = thumbnails.small;
     video.video.thumbnail_large = thumbnails.large;
 
     const palette = await extract_image_palette(video.video.thumbnail_large);
 
-    await videos.upsert({ data: { ...video.video, palette } });
+    return {
+      ...video.video,
+      palette,
+    };
+  }
+
+  private async sync_videos(channel_videos: Array<Sync["Video"]>) {
+    const deleted = channel_videos.filter((video) => video.status === "deleted");
+    await Promise.all(deleted.map((video) => this.delete_video(video)));
+
+    const deleted_ids = deleted.map((video) => video.video.service_id);
+    const active_videos = channel_videos.filter(
+      (video) => !deleted_ids.includes(video.video.service_id),
+    );
+
+    const with_thumbnail_and_palette = active_videos.map((video) =>
+      this.sync_video_thumbnail_and_palette(video),
+    );
+    const patched_videos = await Promise.all(with_thumbnail_and_palette);
+
+    await videos.upsert_many({ data: patched_videos });
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {

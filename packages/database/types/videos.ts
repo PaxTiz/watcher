@@ -78,7 +78,7 @@ export type FindAllWithoutPaletteOutput = Array<
 export type UpsertData = Omit<DatabaseSchemaInsert["videos"], "id" | "palette"> & {
   palette: VideoPalette | null;
 };
-export type UpsertInput = { data: UpsertData; options?: RepositoryContext };
+export type UpsertInput = { data: Array<UpsertData>; options?: RepositoryContext };
 export type UpsertOutput = void;
 
 export type UpdatePaletteInput = { id: string; palette: VideoPalette; options?: RepositoryContext };

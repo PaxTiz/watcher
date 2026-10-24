@@ -26,7 +26,7 @@ let _database: Database | null = null;
 export function useDatabase(): Database {
   if (!_database) {
     _database = new Kysely<DatabaseInterface>({
-      log: process.env.NUXT_PUBLIC_ENVIRONMENT === "local" ? ["error", "query"] : false,
+      log: process.env.NUXT_PUBLIC_ENVIRONMENT === "local" ? ["error", "query"] : undefined,
       plugins: [new DeduplicateJoinsPlugin()],
       dialect: new PostgresDialect({
         pool: new Pool({

@@ -6,9 +6,9 @@ export default defineRoute({
   params: videosValidatorsSchema.url.params,
 
   async handler(event, { params }) {
-    require_user(event);
+    const user = require_user(event);
 
-    const response = await services.videos.get_url(params.id);
+    const response = await services.videos.get_url(user, params.id);
     if (!response.url) {
       throw createError({ statusCode: 404 });
     }

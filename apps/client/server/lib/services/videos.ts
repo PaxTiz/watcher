@@ -19,8 +19,11 @@ export default class VideosService extends AbstractService {
     return this.to_resource(video, video.subscription_is_hidden);
   }
 
-  async get_url(id: string): Promise<{ service: SubscriptionType; url: string | null }> {
-    const twitch = useTwitch();
+  async get_url(
+    user: User,
+    id: string,
+  ): Promise<{ service: SubscriptionType; url: string | null }> {
+    const twitch = useTwitch(user);
     const config = useRuntimeConfig();
 
     const video = await findOrFail(videos.find_source({ id }), { message: "video_not_found" });

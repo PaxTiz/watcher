@@ -91,6 +91,10 @@ export default defineNuxtConfig({
     experimental: {
       tasks: true,
     },
+
+    storage: {
+      oauth_tokens: { driver: "memory" },
+    },
   },
 
   runtimeConfig: {

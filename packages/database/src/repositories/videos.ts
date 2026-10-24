@@ -308,12 +308,17 @@ export async function find_all_without_palette({
     .execute();
 }
 
-export async function upsert({ data, options }: UpsertInput): Promise<UpsertOutput> {
+export async function upsert_many({ data, options }: UpsertInput): Promise<UpsertOutput> {
   const database = resolveDatabase(options);
 
   await database
     .insertInto("videos")
-    .values({ ...data, palette: data.palette ? JSON.stringify(data.palette) : null })
+    .values(
+      data.map((video) => ({
+        ...video,
+        palette: video.palette ? JSON.stringify(video.palette) : null,
+      })),
+    )
     .onConflict((row) =>
       row.columns(["service", "service_id"]).doUpdateSet({
         title: (c) => c.ref("excluded.title"),

@@ -24,6 +24,7 @@ export type UpsertInput = { data: UpsertData; options?: RepositoryContext };
 export type UpsertOutput = void;
 
 export type UpdateTokensInput = {
+  user_id: string;
   service: CredentialsType;
   service_id: string;
   tokens: CredentialTokens;

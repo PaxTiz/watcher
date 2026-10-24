@@ -1,10 +1,12 @@
 import type { Twitch } from "@watcher/common";
 
+import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
 
 export default class TwitcHelpersService extends AbstractService {
   async get_followers(
+    user: User,
     params: {
       user_id: string;
       cursor?: string;
@@ -12,7 +14,7 @@ export default class TwitcHelpersService extends AbstractService {
     config: { service_id: string },
   ): Promise<Twitch["Followers"]["List"]> {
     try {
-      const twitch = useTwitch();
+      const twitch = useTwitch(user);
 
       const followers = await twitch.followers.list(
         {
