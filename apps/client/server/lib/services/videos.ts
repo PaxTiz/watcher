@@ -1,6 +1,6 @@
 import type { Paginated, SubscriptionType, VideoResource } from "@watcher/common";
 import { findOrFail, repositoryTypes, videos } from "@watcher/database";
-import { formatISO, startOfDay, startOfWeek, sub } from "date-fns";
+import { formatISO, startOfDay, sub } from "date-fns";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
@@ -91,7 +91,7 @@ export default class VideosService extends AbstractService {
 
     const date = {
       today: () => formatISO(startOfDay(new Date())),
-      weekly: () => formatISO(startOfWeek(new Date())),
+      weekly: () => formatISO(sub(new Date(), { days: 7 })),
       monthly: () => formatISO(sub(new Date(), { days: 30 })),
       yearly: () => formatISO(sub(new Date(), { days: 365 })),
       older: () => formatISO(sub(new Date(), { days: 365 })),

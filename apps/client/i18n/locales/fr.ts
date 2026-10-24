@@ -127,7 +127,7 @@ export default {
     groups: {
       today: "Aujourd'hui",
       yesterday: "Hier",
-      weekly: "Cette semaine",
+      weekly: "7 derniers jours",
       monthly: "30 derniers jours",
       older: "Plus ancien",
     },
@@ -286,7 +286,7 @@ export default {
       with_hidden: "Contenu masqué",
       dates: {
         today: "Aujourd'hui",
-        weekly: "Cette semaine",
+        weekly: "7 derniers jours",
         monthly: "30 derniers jours",
         yearly: "365 derniers jours",
         older: "Plus ancien",
