@@ -70,6 +70,30 @@ export default class VideosService extends AbstractService {
     };
   }
 
+  async find_next_recommandetions(user: User, id: string) {
+    const surrounding = 10;
+
+    const newer = await videos.find_adjacent({
+      id,
+      user_id: user.id,
+      order: "asc",
+      limit: surrounding,
+    });
+
+    if (newer.length === 10) {
+      return newer.map((video) => this.to_resource(video, false));
+    }
+
+    const older = await videos.find_adjacent({
+      id,
+      user_id: user.id,
+      order: "desc",
+      limit: surrounding - newer.length,
+    });
+
+    return [...newer, ...older].map((video) => this.to_resource(video, false));
+  }
+
   async hide(user: User, id: string) {
     await videos.hide_for_user({ user_id: user.id, video_id: id });
   }

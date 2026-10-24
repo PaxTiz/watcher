@@ -10,6 +10,8 @@ import type {
   FindAllWithoutPaletteOutput,
   FindByIdForUserInput,
   FindByIdForUserOutput,
+  FindAdjacentInput,
+  FindAdjacentOutput,
   FindSourceInput,
   FindSourceOutput,
   HideForUserInput,
@@ -184,6 +186,7 @@ export async function find_by_id_for_user({
       "videos.palette as video_palette",
       "videos.created_at as video_created_at",
       "subscriptions.id as subscription_id",
+      "subscriptions.service_id as subscription_service_id",
       "subscriptions.name as subscription_name",
       "subscriptions.slug as subscription_slug",
       "subscriptions.service as subscription_service",
@@ -201,6 +204,74 @@ export async function find_by_id_for_user({
       ),
     ])
     .executeTakeFirst();
+}
+
+export async function find_adjacent({
+  id,
+  user_id,
+  limit,
+  order,
+}: FindAdjacentInput): Promise<FindAdjacentOutput> {
+  return useDatabase()
+    .selectFrom("videos")
+    .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
+    .leftJoin("users_videos_progression", (qb) =>
+      qb
+        .onRef("users_videos_progression.video_id", "=", "videos.id")
+        .on("users_videos_progression.user_id", "=", user_id),
+    )
+    .leftJoin("user_subscriptions", (qb) =>
+      qb
+        .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
+        .on("user_subscriptions.user_id", "=", user_id),
+    )
+    .select((eb) => [
+      "videos.id as video_id",
+      "videos.service as video_service",
+      "videos.title as video_title",
+      "videos.description as video_description",
+      "videos.duration as video_duration",
+      "videos.url as video_url",
+      "videos.thumbnail_small as video_thumbnail_small",
+      "videos.thumbnail_large as video_thumbnail_large",
+      "videos.palette as video_palette",
+      "videos.created_at as video_created_at",
+      "subscriptions.id as subscription_id",
+      "subscriptions.name as subscription_name",
+      "subscriptions.slug as subscription_slug",
+      "subscriptions.service as subscription_service",
+      "subscriptions.url as subscription_url",
+      "subscriptions.logo as subscription_logo",
+      "subscriptions.last_synced_at as subscription_last_synced_at",
+      sql<boolean>`COALESCE(${eb.ref("user_subscriptions.is_favorite")}, false)`.as(
+        "subscription_is_favorite",
+      ),
+      sql<number>`COALESCE(${eb.ref("users_videos_progression.progression")}, 0)`.as(
+        "video_viewing_progression",
+      ),
+    ])
+    .where("videos.id", "!=", id)
+    .where("videos.subscription_id", "=", (eb) =>
+      eb.selectFrom("videos").select("subscription_id").where("id", "=", id),
+    )
+    .where("videos.created_at", order === "asc" ? ">" : "<", (eb) =>
+      eb.selectFrom("videos").select("created_at").where("id", "=", id),
+    )
+    .where("users_videos_progression.progression", "is distinct from", 1)
+    .where((eb) =>
+      eb.not(
+        eb.exists(
+          eb
+            .selectFrom("hidden_users_videos")
+            .select([eb.lit(1).as("expect_not_exists")])
+            .where("hidden_users_videos.user_id", "=", user_id)
+            .where("hidden_users_videos.video_id", "=", (ib) => eb.ref("videos.id")),
+        ),
+      ),
+    )
+    .orderBy("videos.created_at", order)
+    .limit(limit)
+    .execute();
 }
 
 export async function find_source({ id }: FindSourceInput): Promise<FindSourceOutput> {

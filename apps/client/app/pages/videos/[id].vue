@@ -11,20 +11,8 @@ const { dates, videos } = useFormatter();
 
 const { data } = await useAppFetch<VideoResource>(`/api/videos/${route.params.id}`);
 
-const { data: channel_videos, status: channel_videos_status } = useVideos(
-  computed(() => ({
-    page: 1,
-    per_page: 13,
-    subscription_id: data.value?.author.id,
-  })),
-  { key: `videos_up_next_${route.params.id}`, lazy: true, server: false },
-);
-
-const up_next = computed(() => {
-  return (channel_videos.value?.items ?? []).filter((v) => v.id !== data.value?.id).slice(0, 12);
-});
-
-const next_video = computed(() => up_next.value.find((v) => v.viewing_progression <= 0.9));
+const { data: up_next, status: up_status } = useAppFetch(`/api/videos/${route.params.id}/next`);
+const next_video = computed(() => (up_next.value ?? []).find((v) => v.viewing_progression <= 0.9));
 
 usePageAmbient(() => data.value);
 
@@ -118,9 +106,9 @@ useMeta({
     <VideoUpNext
       v-model:autoplay="autoplay"
       class="px-4 md:px-0"
-      :videos="up_next"
+      :videos="up_next ?? []"
       :next-id="autoplay ? next_video?.id : undefined"
-      :loading="channel_videos_status === 'pending'"
+      :loading="up_status === 'pending'"
     />
   </div>
 </template>

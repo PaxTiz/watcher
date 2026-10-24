@@ -50,7 +50,17 @@ export type FindAllForUserInput = {
 export type FindAllForUserOutput = { total: number; items: Array<VideoRow> };
 
 export type FindByIdForUserInput = { id: string; user_id: string };
-export type FindByIdForUserOutput = (VideoRow & { subscription_is_hidden: boolean }) | undefined;
+export type FindByIdForUserOutput =
+  | (VideoRow & { subscription_is_hidden: boolean; subscription_service_id: string })
+  | undefined;
+
+export type FindAdjacentInput = {
+  id: string;
+  user_id: string;
+  limit: number;
+  order: "asc" | "desc";
+};
+export type FindAdjacentOutput = Array<VideoRow>;
 
 export type FindSourceInput = { id: string };
 export type FindSourceOutput =
