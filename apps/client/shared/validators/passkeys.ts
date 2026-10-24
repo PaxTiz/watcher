@@ -12,13 +12,6 @@ const nameSchema = z
   );
 
 export const passkeysValidatorsSchema = defineValidator({
-  signup: {
-    body: z.object({
-      name: nameSchema,
-      passkey_name: nameSchema,
-    }),
-  },
-
   name: {
     body: z.object({
       name: nameSchema,

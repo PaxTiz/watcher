@@ -47,12 +47,6 @@ export const usePasskeys = () => {
 
   const login = () => run(() => authenticate(), "passkeys.errors.login");
 
-  const signup = (name: string, passkey_name: string) =>
-    run(
-      () => register({ userName: name, displayName: name, passkeyName: passkey_name }),
-      "passkeys.errors.signup",
-    );
-
   // The server uses the authenticated user's name, the userName is only required by the endpoint
   const add = (user_name: string, passkey_name: string) =>
     run(
@@ -65,7 +59,6 @@ export const usePasskeys = () => {
     loading,
 
     login,
-    signup,
     add,
   };
 };

@@ -53,20 +53,10 @@ export default {
     },
     google: "Continue with Google",
     passkey: "Passkey",
-    no_account: "No account yet?",
-    signup_with_passkey: "Create an account with a passkey",
     read_only: "Read-only access to your YouTube and Twitch subscriptions.",
     preview: {
       title: "One feed",
       text: "all your channels, in the order they come out",
-    },
-    signup: {
-      title: "Create an account with a passkey",
-      description:
-        "Your passkey is stored on your device or in your password manager. No password to remember.",
-      name: "Your name",
-      name_placeholder: "John",
-      submit: "Create my account",
     },
   },
 
@@ -103,7 +93,6 @@ export default {
       unknown: "This passkey isn't linked to any Watcher account",
       expired: "The request has expired, please try again",
       login: "Something went wrong while logging in with your passkey",
-      signup: "Something went wrong while creating your account",
       add: "Something went wrong while adding your passkey",
     },
   },

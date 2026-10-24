@@ -2,7 +2,6 @@ import { withHttpErrors } from "#framework";
 import { services } from "#framework/server";
 import { passkeysValidatorsSchema } from "#shared/validators/passkeys";
 
-// Registers a passkey: attached to the authenticated user, or creates a new account otherwise.
 export default defineWebAuthnRegisterEventHandler<{
   userName: string;
   displayName: string;
@@ -27,21 +26,15 @@ export default defineWebAuthnRegisterEventHandler<{
   },
 
   async validateUser(body, event) {
-    const user = get_user(event);
+    const user = require_user(event);
 
-    const { name, passkey_name } = passkeysValidatorsSchema.signup.body.parse({
-      name: user?.name ?? body.userName,
-      passkey_name: body.passkeyName,
-    });
+    const { name } = passkeysValidatorsSchema.name.body.parse({ name: body.passkeyName });
 
-    return { userName: name, displayName: name, passkeyName: passkey_name };
+    return { userName: user.name, displayName: user.name, passkeyName: name };
   },
 
   async excludeCredentials(event) {
-    const user = get_user(event);
-    if (!user) {
-      return [];
-    }
+    const user = require_user(event);
 
     const passkeys = await services.passkeys.list(user.id);
 
@@ -49,17 +42,8 @@ export default defineWebAuthnRegisterEventHandler<{
   },
 
   async onSuccess(event, { user, credential }) {
-    const session_user = get_user(event);
+    const session_user = require_user(event);
 
-    if (session_user) {
-      await services.passkeys.create(session_user.id, credential, user.passkeyName);
-      return;
-    }
-
-    const database_user = await services.users.create({ name: user.userName });
-
-    await services.passkeys.create(database_user.id, credential, user.passkeyName);
-
-    await start_user_session(event, database_user, { integration: "passkey", id: credential.id });
+    await services.passkeys.create(session_user.id, credential, user.passkeyName);
   },
 });

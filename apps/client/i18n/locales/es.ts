@@ -55,20 +55,10 @@ export default {
     },
     google: "Continuar con Google",
     passkey: "Llave de acceso",
-    no_account: "¿Aún no tienes cuenta?",
-    signup_with_passkey: "Crear una cuenta con una llave de acceso",
     read_only: "Acceso de solo lectura a tus suscripciones de YouTube y Twitch.",
     preview: {
       title: "Un solo feed",
       text: "todos tus canales, en el orden en que salen",
-    },
-    signup: {
-      title: "Crear una cuenta con una llave de acceso",
-      description:
-        "Tu llave de acceso se guarda en tu dispositivo o en tu gestor de contraseñas. Ninguna contraseña que recordar.",
-      name: "Tu nombre",
-      name_placeholder: "Juan",
-      submit: "Crear mi cuenta",
     },
   },
 
@@ -105,7 +95,6 @@ export default {
       unknown: "Esta llave de acceso no está vinculada a ninguna cuenta de Watcher",
       expired: "La solicitud ha caducado, inténtalo de nuevo",
       login: "Se ha producido un error al iniciar sesión con tu llave de acceso",
-      signup: "Se ha producido un error al crear tu cuenta",
       add: "Se ha producido un error al añadir tu llave de acceso",
     },
   },

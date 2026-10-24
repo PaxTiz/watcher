@@ -55,20 +55,10 @@ export default {
     },
     google: "Continuer avec Google",
     passkey: "Clé d'accès",
-    no_account: "Pas encore de compte ?",
-    signup_with_passkey: "Créer un compte avec une clé d'accès",
     read_only: "Accès en lecture seule à vos abonnements YouTube et Twitch.",
     preview: {
       title: "Un seul fil",
       text: "toutes vos chaînes, dans l'ordre de leur sortie",
-    },
-    signup: {
-      title: "Créer un compte avec une clé d'accès",
-      description:
-        "Votre clé d'accès est enregistrée sur votre appareil ou dans votre gestionnaire de mots de passe. Aucun mot de passe à retenir.",
-      name: "Votre nom",
-      name_placeholder: "Jean",
-      submit: "Créer mon compte",
     },
   },
 
@@ -105,7 +95,6 @@ export default {
       unknown: "Cette clé d'accès n'est associée à aucun compte Watcher",
       expired: "La demande a expiré, veuillez réessayer",
       login: "Une erreur est survenue lors de la connexion avec votre clé d'accès",
-      signup: "Une erreur est survenue lors de la création de votre compte",
       add: "Une erreur est survenue lors de l'ajout de votre clé d'accès",
     },
   },

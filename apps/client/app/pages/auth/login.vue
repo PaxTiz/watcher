@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { LazyPasskeySignupModal } from "#components";
-
 definePageMeta({ layout: "auth" });
 
 const { t } = useI18n();
@@ -9,17 +7,12 @@ if (loggedIn.value) {
   await navigateTo("/");
 }
 
-const overlay = useWatcherOverlay();
 const { login: loginWithPasskey, loading: passkeyLoading } = usePasskeys();
 
 const onLoginWithPasskey = async () => {
   if (await loginWithPasskey()) {
     await navigateTo("/");
   }
-};
-
-const onShowPasskeySignupModal = () => {
-  overlay.create(LazyPasskeySignupModal).open();
 };
 
 const benefits = computed(() => [
@@ -81,17 +74,6 @@ useMeta({ title: () => t("auth.title") });
         />
       </div>
     </div>
-
-    <p class="text-ui-text-muted mt-4 text-center text-[13px]">
-      {{ t("auth.no_account") }}
-      <button
-        type="button"
-        class="text-ui-text font-medium underline-offset-4 hover:underline"
-        @click="onShowPasskeySignupModal"
-      >
-        {{ t("auth.signup_with_passkey") }}
-      </button>
-    </p>
 
     <p class="text-ui-text-muted mt-6 flex items-center gap-2 text-[13px]">
       <Icon name="lucide:lock" class="shrink-0" />
