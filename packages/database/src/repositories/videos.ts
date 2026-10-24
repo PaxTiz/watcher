@@ -311,6 +311,10 @@ export async function find_all_without_palette({
 export async function upsert_many({ data, options }: UpsertInput): Promise<UpsertOutput> {
   const database = resolveDatabase(options);
 
+  if (data.length === 0) {
+    return;
+  }
+
   await database
     .insertInto("videos")
     .values(

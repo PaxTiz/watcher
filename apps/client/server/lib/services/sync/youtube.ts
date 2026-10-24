@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import type { Google } from "@watcher/common";
 import { subscriptions, userSubscriptions, videos, withTransaction } from "@watcher/database";
-import { formatISO, differenceInHours } from "date-fns";
+import { formatISO } from "date-fns";
 import { parse, toSeconds } from "iso8601-duration";
 
 import type { User } from "#auth-utils";
@@ -47,6 +47,7 @@ export default class SyncYoutube extends AbstractService {
             slug: sub.slug,
             url: sub.url,
             logo: sub.logo,
+            logo_etag: sub.logo_etag,
             last_synced_at: sub.last_synced_at,
           },
         })),
@@ -67,10 +68,8 @@ export default class SyncYoutube extends AbstractService {
             name: subscription.snippet.title,
             slug: to_subscription_slug("youtube", subscription.snippet.title),
             url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
-            logo:
-              differenceInHours(new Date(), existing_subscription.channel.last_synced_at) < 24
-                ? existing_subscription.channel.logo
-                : subscription.snippet.thumbnails.default.url,
+            logo: subscription.snippet.thumbnails.default.url,
+            logo_etag: existing_subscription.channel.logo_etag,
             last_synced_at: formatISO(new Date()),
           };
         } else {
@@ -83,6 +82,7 @@ export default class SyncYoutube extends AbstractService {
               slug: to_subscription_slug("youtube", subscription.snippet.title),
               url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
               logo: subscription.snippet.thumbnails.default.url,
+              logo_etag: "",
               last_synced_at: formatISO(new Date()),
             },
           });
@@ -107,7 +107,10 @@ export default class SyncYoutube extends AbstractService {
       return;
     }
 
-    subscription.channel.logo = await this.sync_subscription_logo(subscription);
+    const logo = await this.sync_subscription_logo(subscription);
+    if (logo) {
+      subscription.channel.logo = logo;
+    }
 
     await withTransaction(async (tx) => {
       const patched_subscription = await subscriptions.upsert({
@@ -150,8 +153,11 @@ export default class SyncYoutube extends AbstractService {
             url: vid.url,
             duration: vid.duration,
             thumbnail_small: vid.thumbnail_small,
+            thumbnail_small_etag: vid.thumbnail_small_etag,
             thumbnail_large: vid.thumbnail_large,
+            thumbnail_large_etag: vid.thumbnail_large_etag,
             last_synced_at: vid.last_synced_at,
+            palette: vid.palette,
           },
         })),
       );
@@ -192,8 +198,6 @@ export default class SyncYoutube extends AbstractService {
       const existingVid = channel_videos.find((e) => e.video.service_id === video.id);
 
       if (existingVid) {
-        const isValid = differenceInHours(new Date(), existingVid.video.last_synced_at) < 3;
-
         existingVid.status = "updated";
         existingVid.video = {
           service: "youtube",
@@ -204,13 +208,13 @@ export default class SyncYoutube extends AbstractService {
           created_at: video.snippet.publishedAt,
           url: `https://www.youtube.com/watch?v=${video.id}`,
           duration: this.parse_duration(video.contentDetails.duration),
-          thumbnail_small: isValid
-            ? existingVid.video.thumbnail_small
-            : video.snippet.thumbnails.medium.url,
-          thumbnail_large: isValid
-            ? existingVid.video.thumbnail_large
-            : (video.snippet.thumbnails.maxres?.url ?? video.snippet.thumbnails.medium.url),
+          thumbnail_small: video.snippet.thumbnails.medium.url,
+          thumbnail_small_etag: existingVid.video.thumbnail_small_etag,
+          thumbnail_large:
+            video.snippet.thumbnails.maxres?.url ?? video.snippet.thumbnails.medium.url,
+          thumbnail_large_etag: existingVid.video.thumbnail_large_etag,
           last_synced_at: formatISO(new Date()),
+          palette: existingVid.video.palette,
         };
       } else {
         channel_videos.push({
@@ -225,9 +229,12 @@ export default class SyncYoutube extends AbstractService {
             url: `https://www.youtube.com/watch?v=${video.id}`,
             duration: this.parse_duration(video.contentDetails.duration),
             thumbnail_small: video.snippet.thumbnails.medium.url,
+            thumbnail_small_etag: "",
             thumbnail_large:
               video.snippet.thumbnails.maxres?.url ?? video.snippet.thumbnails.medium.url,
+            thumbnail_large_etag: "",
             last_synced_at: formatISO(new Date()),
+            palette: null,
           },
         });
       }
@@ -236,14 +243,19 @@ export default class SyncYoutube extends AbstractService {
     return channel_videos;
   }
 
-  private async sync_video_thumbnail_and_palette(
-    video: Sync["Video"],
-  ): Promise<Sync["VideoWithPalette"]> {
+  private async sync_video_thumbnail_and_palette(video: Sync["Video"]) {
     const thumbnails = await this.sync_video_thumbnail(video);
-    video.video.thumbnail_small = thumbnails.small;
-    video.video.thumbnail_large = thumbnails.large;
+    if (thumbnails.small) {
+      video.video.thumbnail_small = thumbnails.small;
+    }
+    if (thumbnails.large) {
+      video.video.thumbnail_large = thumbnails.large;
+    }
 
-    const palette = await extract_image_palette(video.video.thumbnail_large);
+    const palette =
+      thumbnails.large || !video.video.palette
+        ? await extract_image_palette(video.video.thumbnail_large)
+        : video.video.palette;
 
     return {
       ...video.video,
@@ -269,8 +281,9 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
-    if (subscription.channel.logo.startsWith("/")) {
-      return subscription.channel.logo;
+    const head = await fetch(subscription.channel.logo, { method: "OPTIONS" });
+    if (head.headers.get("etag") === subscription.channel.logo_etag) {
+      return undefined;
     }
 
     this.createImageDirectory("channels", subscription.channel.service_id);
@@ -316,19 +329,17 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_video_thumbnail(video: Sync["Video"]) {
-    const paths = {
-      small: video.video.thumbnail_small,
-      large: video.video.thumbnail_large,
+    const paths: { small?: string; large?: string } = {
+      small: undefined,
+      large: undefined,
     };
 
-    if (
-      video.video.thumbnail_small.startsWith("/") &&
-      video.video.thumbnail_large.startsWith("/")
-    ) {
-      return paths;
-    }
-
     const inner = async (key: "small" | "large", path: string) => {
+      const head = await fetch(path, { method: "OPTIONS" });
+      if (head.headers.get("etag") === video.video[`thumbnail_${key}_etag`]) {
+        return;
+      }
+
       const image = await fetch(path).then((res) => res.arrayBuffer());
 
       await writeFile(

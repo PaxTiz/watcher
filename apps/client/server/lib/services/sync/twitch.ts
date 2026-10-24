@@ -3,7 +3,7 @@ import { writeFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 
 import { subscriptions, userSubscriptions, videos, withTransaction } from "@watcher/database";
-import { formatISO, differenceInHours } from "date-fns";
+import { formatISO } from "date-fns";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
@@ -43,6 +43,7 @@ export default class SyncTwitch extends AbstractService {
             slug: sub.slug,
             url: sub.url,
             logo: sub.logo,
+            logo_etag: sub.logo_etag,
             last_synced_at: sub.last_synced_at,
           },
         })),
@@ -70,10 +71,8 @@ export default class SyncTwitch extends AbstractService {
             name: subscription.broadcaster_name,
             slug: to_subscription_slug("twitch", subscription.broadcaster_name),
             url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
-            logo:
-              differenceInHours(new Date(), existing_subscription.channel.last_synced_at) < 24
-                ? existing_subscription.channel.logo
-                : subscription.logo,
+            logo: subscription.logo,
+            logo_etag: existing_subscription.channel.logo_etag,
             last_synced_at: formatISO(new Date()),
           };
         } else {
@@ -86,6 +85,7 @@ export default class SyncTwitch extends AbstractService {
               slug: to_subscription_slug("twitch", subscription.broadcaster_name),
               url: `https://www.twitch.tv/${subscription.broadcaster_login}`,
               logo: subscription.logo,
+              logo_etag: "",
               last_synced_at: formatISO(new Date()),
             },
           });
@@ -114,7 +114,10 @@ export default class SyncTwitch extends AbstractService {
       return;
     }
 
-    subscription.channel.logo = await this.sync_subscription_logo(subscription);
+    const logo = await this.sync_subscription_logo(subscription);
+    if (logo) {
+      subscription.channel.logo = logo;
+    }
 
     await withTransaction(async (tx) => {
       const patched_subscription = await subscriptions.upsert({
@@ -157,8 +160,11 @@ export default class SyncTwitch extends AbstractService {
             url: vid.url,
             duration: vid.duration,
             thumbnail_small: vid.thumbnail_small,
+            thumbnail_small_etag: vid.thumbnail_small_etag,
             thumbnail_large: vid.thumbnail_large,
+            thumbnail_large_etag: vid.thumbnail_large_etag,
             last_synced_at: vid.last_synced_at,
+            palette: vid.palette,
           },
         })),
       );
@@ -170,8 +176,6 @@ export default class SyncTwitch extends AbstractService {
         const existingVid = channel_videos.find((e) => e.video.service_id === video.id);
 
         if (existingVid) {
-          const isValid = differenceInHours(new Date(), existingVid.video.last_synced_at) < 3;
-
           existingVid.status = "updated";
           existingVid.video = {
             service: "twitch",
@@ -181,10 +185,13 @@ export default class SyncTwitch extends AbstractService {
             description: video.description,
             created_at: video.created_at,
             url: video.url,
-            thumbnail_small: isValid ? existingVid.video.thumbnail_small : video.thumbnail_url,
-            thumbnail_large: isValid ? existingVid.video.thumbnail_large : video.thumbnail_url,
+            thumbnail_small: video.thumbnail_url,
+            thumbnail_small_etag: existingVid.video.thumbnail_small_etag,
+            thumbnail_large: video.thumbnail_url,
+            thumbnail_large_etag: existingVid.video.thumbnail_large_etag,
             duration: this.parseDurationToSeconds(video.duration),
             last_synced_at: formatISO(new Date()),
+            palette: existingVid.video.palette,
           };
         } else {
           channel_videos.push({
@@ -198,9 +205,12 @@ export default class SyncTwitch extends AbstractService {
               created_at: video.created_at,
               url: video.url,
               thumbnail_small: video.thumbnail_url,
+              thumbnail_small_etag: "",
               thumbnail_large: video.thumbnail_url,
+              thumbnail_large_etag: "",
               duration: this.parseDurationToSeconds(video.duration),
               last_synced_at: formatISO(new Date()),
+              palette: null,
             },
           });
         }
@@ -219,14 +229,19 @@ export default class SyncTwitch extends AbstractService {
     return channel_videos;
   }
 
-  private async sync_video_thumbnail_and_palette(
-    video: Sync["Video"],
-  ): Promise<Sync["VideoWithPalette"]> {
+  private async sync_video_thumbnail_and_palette(video: Sync["Video"]) {
     const thumbnails = await this.sync_video_thumbnail(video);
-    video.video.thumbnail_small = thumbnails.small;
-    video.video.thumbnail_large = thumbnails.large;
+    if (thumbnails.small) {
+      video.video.thumbnail_small = thumbnails.small;
+    }
+    if (thumbnails.large) {
+      video.video.thumbnail_large = thumbnails.large;
+    }
 
-    const palette = await extract_image_palette(video.video.thumbnail_large);
+    const palette =
+      thumbnails.large || !video.video.palette
+        ? await extract_image_palette(video.video.thumbnail_large)
+        : video.video.palette;
 
     return {
       ...video.video,
@@ -252,8 +267,9 @@ export default class SyncTwitch extends AbstractService {
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
-    if (subscription.channel.logo.startsWith("/")) {
-      return subscription.channel.logo;
+    const head = await fetch(subscription.channel.logo, { method: "OPTIONS" });
+    if (head.headers.get("etag") === subscription.channel.logo_etag) {
+      return;
     }
 
     this.createImageDirectory("channels", subscription.channel.service_id);
@@ -299,22 +315,20 @@ export default class SyncTwitch extends AbstractService {
   }
 
   private async sync_video_thumbnail(video: Sync["Video"]) {
-    const paths = {
-      small: video.video.thumbnail_small,
-      large: video.video.thumbnail_large,
+    const paths: { small?: string; large?: string } = {
+      small: undefined,
+      large: undefined,
     };
-
-    if (
-      video.video.thumbnail_small.startsWith("/") &&
-      video.video.thumbnail_large.startsWith("/")
-    ) {
-      return paths;
-    }
 
     const inner = async (key: "small" | "large") => {
       const url = video.video.thumbnail_small
         .replace("%{width}", key === "small" ? "320" : "700")
         .replace("%{height}", key === "small" ? "180" : "394");
+
+      const head = await fetch(url, { method: "OPTIONS" });
+      if (head.headers.get("etag") === video.video[`thumbnail_${key}_etag`]) {
+        return;
+      }
 
       const image = await fetch(url).then((res) => res.arrayBuffer());
 

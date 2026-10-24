@@ -32,6 +32,8 @@ export type SubscriptionTable = {
 
   logo: string;
 
+  logo_etag: string;
+
   last_synced_at: string;
 
   slug: ColumnType<string, string, never>;
@@ -72,7 +74,11 @@ export type VideoTable = {
 
   thumbnail_small: string;
 
+  thumbnail_small_etag: string;
+
   thumbnail_large: string;
+
+  thumbnail_large_etag: string;
 
   // jsonb: parsed on read, written as a JSON string
   palette: ColumnType<VideoPalette | null, string | null, string | null>;

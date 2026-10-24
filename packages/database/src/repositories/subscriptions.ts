@@ -62,7 +62,7 @@ export async function find_all_for_sync({
   return useDatabase()
     .selectFrom("user_subscriptions")
     .innerJoin("subscriptions", "subscriptions.id", "user_subscriptions.subscription_id")
-    .select(["service", "service_id", "name", "url", "logo", "last_synced_at", "slug"])
+    .select(["service", "service_id", "name", "url", "logo", "logo_etag", "last_synced_at", "slug"])
     .where("user_subscriptions.user_id", "=", user_id)
     .where("subscriptions.service", "=", service)
     .execute();

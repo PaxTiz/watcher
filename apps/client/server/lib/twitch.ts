@@ -12,6 +12,8 @@ const storage = useStorage("tokens");
 
 export const useTwitch = (user: User) => {
   if (!_client) {
+    const key = `${user.id}:twitch`;
+
     const config = useRuntimeConfig();
 
     _client = createClient({
@@ -21,7 +23,6 @@ export const useTwitch = (user: User) => {
       onRequest: async (service_id) => {
         let tokens: DatabaseSchema["credentials"] | null | undefined;
 
-        const key = `${user.id}:twitch`;
         const isCached = await storage.has(key);
         if (isCached) {
           tokens = await storage.get<DatabaseSchema["credentials"]>(key);
@@ -51,6 +52,8 @@ export const useTwitch = (user: User) => {
       },
 
       onRefreshToken: async ({ service_id, tokens }) => {
+        await storage.removeItem(key);
+
         await credentials.update_tokens({
           user_id: user.id,
           service: "twitch",

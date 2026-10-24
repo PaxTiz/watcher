@@ -24,7 +24,7 @@ export const async_pool = async <T>(
   for (let i = 0; i < items.length; i += count) {
     const sub_items = items.slice(i, i + count);
     const promises = sub_items.map(callback);
-    await Promise.all(promises);
+    await Promise.allSettled(promises);
   }
 };
 
@@ -38,7 +38,7 @@ export const async_pool_with_delay = async <T>(
 ) => {
   for (let i = 0; i < items.length; i += count) {
     const sub_items = items.slice(i, i + count);
-    await Promise.all(sub_items.map(callback));
+    await Promise.allSettled(sub_items.map(callback));
 
     if (i + count < items.length) {
       await sleep(delay_ms);
