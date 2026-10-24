@@ -15,11 +15,14 @@ export type VideoFilterEmit = {
   value: VideosValidators["list"]["query"][VideoFilterType];
 };
 
-const stringify_filters = (filters: VideoFilters) => {
+const stringify_filters = (
+  filters: VideoFilters,
+  ignored_properties?: Array<VideoFilterTypeInclusive>,
+) => {
   const patched: Record<string, string> = {};
 
   for (const [k, v] of Object.entries(filters)) {
-    if (v !== undefined) {
+    if (!ignored_properties?.includes(k as VideoFilterTypeInclusive) && v !== undefined) {
       patched[k] = v.toString();
     }
   }
@@ -89,7 +92,7 @@ export const useVideosFilters = (
       }
 
       await router.replace({
-        query: stringify_filters(new_value),
+        query: stringify_filters(new_value, ignored_properties),
       });
 
       if (changed_property === "page" && import.meta.client) {

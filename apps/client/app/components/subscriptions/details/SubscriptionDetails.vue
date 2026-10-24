@@ -56,7 +56,8 @@ onUnmounted(() => {
               class="control-field w-full !rounded-full !pl-9"
             />
           </label>
-          <VideosFilters v-model="filters" :hide="['service', 'is_favorite']" />
+
+          <VideosFilters v-model="filters" :hide="['service', 'is_favorite', 'subscription_id']" />
         </div>
       </div>
 
