@@ -10,7 +10,7 @@ defineProps<{ title: string; description?: string; danger?: boolean }>();
     </div>
 
     <div
-      class="bg-ui-bg divide-ui-border divide-y overflow-hidden rounded-2xl shadow-[0_0_0_1px_var(--ui-border)]"
+      class="bg-ui-bg divide-ui-border divide-y self-start overflow-hidden rounded-2xl shadow-[0_0_0_1px_var(--ui-border)]"
       :class="{ 'shadow-[0_0_0_1px_rgb(239_68_68/0.3)]': danger }"
     >
       <slot />

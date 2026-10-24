@@ -12,7 +12,7 @@ export default defineRoute({
   }),
 
   async handler(event, { params, body }) {
-    const { user } = await requireUserSession(event);
+    const user = require_user(event);
 
     await services.videos.update_progress(user, params.id, body.progression);
   },

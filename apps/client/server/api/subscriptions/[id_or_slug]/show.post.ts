@@ -9,7 +9,7 @@ export default defineRoute({
   }),
 
   async handler(event, { params }) {
-    const { user } = await requireUserSession(event);
+    const user = require_user(event);
 
     await services.subscriptions.show(user, params.id_or_slug);
   },

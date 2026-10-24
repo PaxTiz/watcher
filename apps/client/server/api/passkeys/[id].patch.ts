@@ -7,7 +7,7 @@ export default defineRoute({
   body: passkeysValidatorsSchema.rename.body,
 
   async handler(event, { params, body }) {
-    const { user } = await requireUserSession(event);
+    const user = require_user(event);
 
     const renamed = await services.passkeys.rename(user.id, params.id, body.name);
     if (!renamed) {

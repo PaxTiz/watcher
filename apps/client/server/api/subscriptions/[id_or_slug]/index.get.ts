@@ -9,7 +9,7 @@ export default defineRoute({
   }),
 
   async handler(event, { params }) {
-    const { user } = await requireUserSession(event);
+    const user = require_user(event);
 
     return services.subscriptions.find_one(user, params.id_or_slug);
   },

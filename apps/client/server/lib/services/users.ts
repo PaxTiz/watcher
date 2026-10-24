@@ -60,6 +60,12 @@ export default class UsersService extends AbstractService {
     await users.remove({ id });
   }
 
+  async count_login_methods(user: UserResource): Promise<number> {
+    const integrations = Object.values(user.integrations).filter(Boolean).length;
+
+    return integrations + (await services.passkeys.count(user.id));
+  }
+
   async onboard(user: User, sync: boolean) {
     if (user.is_onboarded) {
       throw new ForbiddenError({ message: "user_is_already_onboarded" });

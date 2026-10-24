@@ -10,10 +10,8 @@ export default defineRoute({
   }),
 
   async handler(event, { body }) {
-    const { user } = await requireUserSession(event);
+    const user = require_user(event);
 
-    const { user: onboarded_user } = await services.users.onboard(user, body.sync);
-
-    await set_user_session(event, onboarded_user, onboarded_user.login_with);
+    await services.users.onboard(user, body.sync);
   },
 });

@@ -110,6 +110,31 @@ export default {
     },
   },
 
+  sessions: {
+    title: "Sessions actives",
+    description:
+      "Les appareils connectés à votre compte. Déconnectez ceux que vous ne reconnaissez pas.",
+    current: "Cet appareil",
+    active_ago: "Actif {ago}",
+    signed_in_with: "Connecté avec {method}",
+    passkey: "une clé d'accès",
+    unknown_device: "Appareil inconnu",
+    revoke: {
+      action: "Déconnecter",
+      title: "Déconnecter cet appareil",
+      description: "Cet appareil devra se reconnecter pour accéder à votre compte.",
+      success: "L'appareil a été déconnecté",
+      failed: "La déconnexion de l'appareil a échoué, réessayez plus tard",
+    },
+    revoke_others: {
+      title: "Déconnecter tous les autres appareils",
+      hint: "Seul cet appareil restera connecté.",
+      description: "Tous les autres appareils devront se reconnecter pour accéder à votre compte.",
+      success: "Tous les autres appareils ont été déconnectés",
+      failed: "La déconnexion des autres appareils a échoué, réessayez plus tard",
+    },
+  },
+
   dashboard: {
     description: "Découvrez les dernières sorties de vos créateurs favoris.",
     greeting: "Bonjour {name}",
@@ -163,6 +188,8 @@ export default {
         "Si vous déconnectez votre compte, vos abonnements ainsi que les vidéos liées à vos abonnements ne seront plus mis à jour.",
       success: "Le compte {name} a été déconnecté",
       failed: "Une erreur est survenue lors de la déconnexion de {name}",
+      last_login_method:
+        "Associez un autre compte ou ajoutez une clé d'accès avant de déconnecter {name}",
     },
     oauth: {
       success: "Votre compte {provider} est désormais connecté",

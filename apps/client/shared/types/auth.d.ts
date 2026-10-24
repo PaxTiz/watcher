@@ -1,9 +1,9 @@
-import type { UserResource } from "@watcher/common";
+import type { SessionLoginWith, UserResource } from "@watcher/common";
 
 declare module "#auth-utils" {
   interface User extends UserResource {
     login_with: {
-      integration: "google" | "twitch" | "passkey";
+      integration: SessionLoginWith;
       id: string;
     };
   }
@@ -13,7 +13,8 @@ declare module "#auth-utils" {
   }
 
   interface SecureSessionData {
-    // Add your own fields
+    // Server-side session (`sessions` table): the cookie is only valid while this row exists
+    session_id: string;
   }
 }
 

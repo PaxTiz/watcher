@@ -6,7 +6,7 @@ export default defineRoute({
   params: videosValidatorsSchema.hide.params,
 
   async handler(event, { params }) {
-    const { user } = await requireUserSession(event);
+    const user = require_user(event);
 
     await services.videos.hide(user, params.id);
   },

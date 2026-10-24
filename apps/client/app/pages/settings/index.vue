@@ -75,6 +75,8 @@ usePageNavigation()([{ label: t("nav.settings"), icon: "lucide:settings" }]);
 
       <SettingsPasskeys />
 
+      <SettingsSessions />
+
       <SettingsSection :title="t('settings.interface')">
         <SettingsRow
           v-for="preference in preferences"

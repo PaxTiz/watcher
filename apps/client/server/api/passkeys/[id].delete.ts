@@ -6,11 +6,10 @@ export default defineRoute({
   params: passkeysValidatorsSchema.delete.params,
 
   async handler(event, { params }) {
-    const { user } = await requireUserSession(event);
+    const user = require_user(event);
 
     // Prevents the user from locking themselves out of their account
-    const has_integrations = !!user.integrations.google || !!user.integrations.twitch;
-    if (!has_integrations && (await services.passkeys.count(user.id)) <= 1) {
+    if ((await services.users.count_login_methods(user)) <= 1) {
       throw createError({ statusCode: 409, message: "last_login_method" });
     }
 
@@ -18,5 +17,11 @@ export default defineRoute({
     if (!deleted) {
       throw createError({ statusCode: 404, message: "passkey_not_found" });
     }
+
+    await services.sessions.revoke_by_login_method(
+      user.id,
+      { integration: "passkey", id: params.id },
+      event.context.session_id,
+    );
   },
 });

@@ -31,6 +31,6 @@ export default defineWebAuthnAuthenticateEventHandler({
       throw createError({ statusCode: 401, message: "unknown_passkey" });
     }
 
-    await set_user_session(event, database_user, { integration: "passkey", id: credential.id });
+    await start_user_session(event, database_user, { integration: "passkey", id: credential.id });
   },
 });

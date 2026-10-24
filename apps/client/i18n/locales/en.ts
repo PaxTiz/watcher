@@ -108,6 +108,31 @@ export default {
     },
   },
 
+  sessions: {
+    title: "Active sessions",
+    description:
+      "Devices currently signed in to your account. Sign out the ones you do not recognize.",
+    current: "This device",
+    active_ago: "Active {ago}",
+    signed_in_with: "Signed in with {method}",
+    passkey: "a passkey",
+    unknown_device: "Unknown device",
+    revoke: {
+      action: "Sign out",
+      title: "Sign out this device",
+      description: "This device will have to sign in again to access your account.",
+      success: "The device has been signed out",
+      failed: "Signing out the device failed, try again later",
+    },
+    revoke_others: {
+      title: "Sign out all other devices",
+      hint: "Only this device stays signed in.",
+      description: "Every other device will have to sign in again to access your account.",
+      success: "All other devices have been signed out",
+      failed: "Signing out the other devices failed, try again later",
+    },
+  },
+
   dashboard: {
     description: "Discover the latest releases from your favorite creators.",
     greeting: "Hi {name}",
@@ -161,6 +186,7 @@ export default {
         "If you disconnect your account, your subscriptions and their videos will no longer be updated.",
       success: "Your {name} account has been disconnected",
       failed: "Something went wrong while disconnecting {name}",
+      last_login_method: "Link another account or add a passkey before disconnecting {name}",
     },
     oauth: {
       success: "Your {provider} account is now connected",

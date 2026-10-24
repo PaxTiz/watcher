@@ -6,7 +6,7 @@ export default defineRoute({
   query: videosValidatorsSchema.list.query,
 
   async handler(event, { query }) {
-    const { user } = await requireUserSession(event);
+    const user = require_user(event);
 
     return services.videos.find_all(user, {
       page: query.page,

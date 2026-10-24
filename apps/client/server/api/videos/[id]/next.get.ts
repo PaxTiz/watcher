@@ -6,7 +6,7 @@ export default defineRoute({
   params: videosValidatorsSchema.find.params,
 
   async handler(event, { params }) {
-    const { user } = await requireUserSession(event);
+    const user = require_user(event);
     return services.videos.find_next_recommandetions(user, params.id);
   },
 });

@@ -4,6 +4,7 @@ export * from "./types/subscriptions";
 export * from "./types/videos";
 export * from "./types/palette";
 export * from "./types/passkeys";
+export * from "./types/sessions";
 
 export * from "./resources/subscriptions";
 export * from "./resources/users";

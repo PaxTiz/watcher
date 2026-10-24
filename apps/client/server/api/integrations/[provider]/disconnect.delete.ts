@@ -6,18 +6,24 @@ export default defineRoute({
   params: integrationsValidatorsSchema.disconnect.params,
 
   async handler(event, { params }) {
-    const { user: sessionUser } = await requireUserSession(event);
+    const user = require_user(event);
 
-    await services.credentials.delete(sessionUser.id, params.provider);
-
-    const database_user = await services.users.find_by_id(sessionUser.id);
-    if (!database_user) {
-      throw createError({
-        statusCode: 500,
-        message: "authenticated_user_not_found",
-      });
+    const service_id = user.integrations[params.provider];
+    if (!service_id) {
+      throw createError({ statusCode: 404, message: "integration_not_found" });
     }
 
-    await set_user_session(event, database_user, sessionUser.login_with);
+    // Prevents the user from locking themselves out of their account
+    if ((await services.users.count_login_methods(user)) <= 1) {
+      throw createError({ statusCode: 409, message: "last_login_method" });
+    }
+
+    await services.credentials.delete(user.id, params.provider);
+
+    await services.sessions.revoke_by_login_method(
+      user.id,
+      { integration: params.provider, id: service_id },
+      event.context.session_id,
+    );
   },
 });

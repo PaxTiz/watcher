@@ -60,7 +60,14 @@ export const useIntegrations = () => {
     });
 
     if (error) {
-      toast.error(t("integrations.disconnect.failed", { name: integration.name }));
+      toast.error(
+        t(
+          error.message === "last_login_method"
+            ? "integrations.disconnect.last_login_method"
+            : "integrations.disconnect.failed",
+          { name: integration.name },
+        ),
+      );
     } else {
       await refresh_session();
       toast.success(t("integrations.disconnect.success", { name: integration.name }));

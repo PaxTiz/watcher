@@ -15,7 +15,7 @@ export default defineRoute({
   params: videosValidatorsSchema.segment.params,
 
   async handler(event, { query, params }) {
-    await requireUserSession(event);
+    require_user(event);
 
     const base_url = query.base_url;
     if (!verify_proxy_url(params.id, base_url, query.signature)) {

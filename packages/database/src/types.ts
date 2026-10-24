@@ -1,6 +1,7 @@
 import type {
   CredentialsType,
   PasskeyTransport,
+  SessionLoginWith,
   SubscriptionType,
   VideoPalette,
 } from "@watcher/common";
@@ -130,8 +131,27 @@ export type PasskeyTable = {
   last_used_at: ColumnType<string | null, string | undefined, string>;
 };
 
+export type SessionTable = {
+  id: Generated<string>;
+
+  user_id: string;
+
+  login_with: SessionLoginWith;
+
+  login_with_id: string;
+
+  user_agent: string | null;
+
+  created_at: ColumnType<string, string | undefined, never>;
+
+  expires_at: ColumnType<string, string, never>;
+
+  last_seen_at: ColumnType<string, string | undefined, string>;
+};
+
 export type DatabaseInterface = {
   users: UserTable;
+  sessions: SessionTable;
   passkeys: PasskeyTable;
   subscriptions: SubscriptionTable;
   user_subscriptions: UserSubscriptionTable;

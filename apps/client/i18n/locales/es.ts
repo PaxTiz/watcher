@@ -110,6 +110,32 @@ export default {
     },
   },
 
+  sessions: {
+    title: "Sesiones activas",
+    description:
+      "Los dispositivos conectados a tu cuenta. Cierra la sesión de los que no reconozcas.",
+    current: "Este dispositivo",
+    active_ago: "Activo {ago}",
+    signed_in_with: "Conectado con {method}",
+    passkey: "una llave de acceso",
+    unknown_device: "Dispositivo desconocido",
+    revoke: {
+      action: "Cerrar sesión",
+      title: "Cerrar la sesión de este dispositivo",
+      description: "Este dispositivo tendrá que volver a iniciar sesión para acceder a tu cuenta.",
+      success: "Se ha cerrado la sesión del dispositivo",
+      failed: "No se ha podido cerrar la sesión del dispositivo, inténtalo más tarde",
+    },
+    revoke_others: {
+      title: "Cerrar la sesión de los demás dispositivos",
+      hint: "Solo este dispositivo seguirá conectado.",
+      description:
+        "Los demás dispositivos tendrán que volver a iniciar sesión para acceder a tu cuenta.",
+      success: "Se ha cerrado la sesión de los demás dispositivos",
+      failed: "No se ha podido cerrar la sesión de los demás dispositivos, inténtalo más tarde",
+    },
+  },
+
   dashboard: {
     description: "Descubre las últimas novedades de tus creadores favoritos.",
     greeting: "Hola {name}",
@@ -163,6 +189,8 @@ export default {
         "Si desconectas tu cuenta, tus suscripciones y sus vídeos dejarán de actualizarse.",
       success: "Tu cuenta de {name} se ha desconectado",
       failed: "Se ha producido un error al desconectar {name}",
+      last_login_method:
+        "Vincula otra cuenta o añade una llave de acceso antes de desconectar {name}",
     },
     oauth: {
       success: "Tu cuenta de {provider} ya está conectada",

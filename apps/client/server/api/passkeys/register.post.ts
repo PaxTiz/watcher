@@ -27,7 +27,7 @@ export default defineWebAuthnRegisterEventHandler<{
   },
 
   async validateUser(body, event) {
-    const { user } = await getUserSession(event);
+    const user = get_user(event);
 
     const { name, passkey_name } = passkeysValidatorsSchema.signup.body.parse({
       name: user?.name ?? body.userName,
@@ -38,7 +38,7 @@ export default defineWebAuthnRegisterEventHandler<{
   },
 
   async excludeCredentials(event) {
-    const { user } = await getUserSession(event);
+    const user = get_user(event);
     if (!user) {
       return [];
     }
@@ -49,22 +49,17 @@ export default defineWebAuthnRegisterEventHandler<{
   },
 
   async onSuccess(event, { user, credential }) {
-    const { user: session_user } = await getUserSession(event);
+    const session_user = get_user(event);
 
-    const database_user = session_user
-      ? await services.users.find_by_id(session_user.id)
-      : await services.users.create({ name: user.userName });
-
-    if (!database_user) {
-      throw createError({ statusCode: 500, message: "authenticated_user_not_found" });
+    if (session_user) {
+      await services.passkeys.create(session_user.id, credential, user.passkeyName);
+      return;
     }
+
+    const database_user = await services.users.create({ name: user.userName });
 
     await services.passkeys.create(database_user.id, credential, user.passkeyName);
 
-    await set_user_session(
-      event,
-      database_user,
-      session_user?.login_with ?? { integration: "passkey", id: credential.id },
-    );
+    await start_user_session(event, database_user, { integration: "passkey", id: credential.id });
   },
 });

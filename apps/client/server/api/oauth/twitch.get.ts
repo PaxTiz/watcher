@@ -10,7 +10,7 @@ export default defineOAuthTwitchEventHandler({
 
   async onSuccess(event, { user, tokens }) {
     try {
-      const { user: sessionUser } = await getUserSession(event);
+      const sessionUser = get_user(event);
 
       const existing_credential = await services.credentials.find_by_service("twitch", user.id);
 
@@ -40,12 +40,15 @@ export default defineOAuthTwitchEventHandler({
         refresh_token_expires_at: add(new Date(), { seconds: tokens.expires_in }),
       });
 
-      database_user = (await services.users.find_by_id(database_user.id))!;
+      // Linking an integration keeps the current session; otherwise, this is a login
+      if (!sessionUser) {
+        database_user = (await services.users.find_by_id(database_user.id))!;
 
-      await set_user_session(event, database_user, {
-        integration: "twitch",
-        id: user.id,
-      });
+        await start_user_session(event, database_user, {
+          integration: "twitch",
+          id: user.id,
+        });
+      }
 
       return sendRedirect(event, "/?provider=twitch&oauth-state=success");
     } catch (error) {
