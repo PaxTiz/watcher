@@ -47,6 +47,7 @@ export default class SyncYoutube extends AbstractService {
             slug: sub.slug,
             url: sub.url,
             logo: sub.logo,
+            logo_local: sub.logo,
             logo_etag: sub.logo_etag,
             last_synced_at: sub.last_synced_at,
           },
@@ -69,6 +70,7 @@ export default class SyncYoutube extends AbstractService {
             slug: to_subscription_slug("youtube", subscription.snippet.title),
             url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
             logo: subscription.snippet.thumbnails.default.url,
+            logo_local: existing_subscription.channel.logo,
             logo_etag: existing_subscription.channel.logo_etag,
             last_synced_at: formatISO(new Date()),
           };
@@ -82,6 +84,7 @@ export default class SyncYoutube extends AbstractService {
               slug: to_subscription_slug("youtube", subscription.snippet.title),
               url: `https://www.youtube.com/channel/${subscription.snippet.resourceId.channelId}`,
               logo: subscription.snippet.thumbnails.default.url,
+              logo_local: "",
               logo_etag: "",
               last_synced_at: formatISO(new Date()),
             },
@@ -108,14 +111,13 @@ export default class SyncYoutube extends AbstractService {
     }
 
     const logo = await this.sync_subscription_logo(subscription);
-    if (logo) {
-      subscription.channel.logo = logo.logo;
-      subscription.channel.logo_etag = logo.etag ?? "__INVALID_ETAG__";
-    }
+    subscription.channel.logo = logo.logo;
+    subscription.channel.logo_etag = logo.etag ?? "__INVALID_ETAG__";
 
     await withTransaction(async (tx) => {
+      const { logo_local, ...subscription_data } = subscription.channel;
       const patched_subscription = await subscriptions.upsert({
-        data: subscription.channel,
+        data: subscription_data,
         options: { tx },
       });
 
@@ -154,8 +156,10 @@ export default class SyncYoutube extends AbstractService {
             url: vid.url,
             duration: vid.duration,
             thumbnail_small: vid.thumbnail_small,
+            thumbnail_small_local: vid.thumbnail_small,
             thumbnail_small_etag: vid.thumbnail_small_etag,
             thumbnail_large: vid.thumbnail_large,
+            thumbnail_large_local: vid.thumbnail_large,
             thumbnail_large_etag: vid.thumbnail_large_etag,
             last_synced_at: vid.last_synced_at,
             palette: vid.palette,
@@ -210,9 +214,11 @@ export default class SyncYoutube extends AbstractService {
           url: `https://www.youtube.com/watch?v=${video.id}`,
           duration: this.parse_duration(video.contentDetails.duration),
           thumbnail_small: video.snippet.thumbnails.medium.url,
+          thumbnail_small_local: existingVid.video.thumbnail_small,
           thumbnail_small_etag: existingVid.video.thumbnail_small_etag,
           thumbnail_large:
             video.snippet.thumbnails.maxres?.url ?? video.snippet.thumbnails.medium.url,
+          thumbnail_large_local: existingVid.video.thumbnail_small,
           thumbnail_large_etag: existingVid.video.thumbnail_large_etag,
           last_synced_at: formatISO(new Date()),
           palette: existingVid.video.palette,
@@ -230,9 +236,11 @@ export default class SyncYoutube extends AbstractService {
             url: `https://www.youtube.com/watch?v=${video.id}`,
             duration: this.parse_duration(video.contentDetails.duration),
             thumbnail_small: video.snippet.thumbnails.medium.url,
+            thumbnail_small_local: "",
             thumbnail_small_etag: "",
             thumbnail_large:
               video.snippet.thumbnails.maxres?.url ?? video.snippet.thumbnails.medium.url,
+            thumbnail_large_local: "",
             thumbnail_large_etag: "",
             last_synced_at: formatISO(new Date()),
             palette: null,
@@ -246,22 +254,20 @@ export default class SyncYoutube extends AbstractService {
 
   private async sync_video_thumbnail_and_palette(video: Sync["Video"]) {
     const thumbnails = await this.sync_video_thumbnail(video);
-    if (thumbnails.small) {
-      video.video.thumbnail_small = thumbnails.small.url;
-      video.video.thumbnail_small_etag = thumbnails.small.etag ?? "__INVALID_ETAG__";
-    }
-    if (thumbnails.large) {
-      video.video.thumbnail_large = thumbnails.large.url;
-      video.video.thumbnail_large_etag = thumbnails.large.etag ?? "__INVALID_ETAG__";
-    }
+    video.video.thumbnail_small = thumbnails.small.url;
+    video.video.thumbnail_small_etag = thumbnails.small.etag ?? "__INVALID_ETAG__";
+    video.video.thumbnail_large = thumbnails.large.url;
+    video.video.thumbnail_large_etag = thumbnails.large.etag ?? "__INVALID_ETAG__";
 
     const palette =
       thumbnails.large || !video.video.palette
         ? await extract_image_palette(video.video.thumbnail_large)
         : video.video.palette;
 
+    const { thumbnail_small_local, thumbnail_large_local, ...vid } = video.video;
+
     return {
-      ...video.video,
+      ...vid,
       palette,
     };
   }
@@ -287,7 +293,7 @@ export default class SyncYoutube extends AbstractService {
     const head = await fetch(subscription.channel.logo, { method: "HEAD" });
     const etag = head.headers.get("etag");
     if (etag === subscription.channel.logo_etag) {
-      return undefined;
+      return { etag: subscription.channel.logo_etag, logo: subscription.channel.logo_local };
     }
 
     this.createImageDirectory("channels", subscription.channel.service_id);
@@ -334,11 +340,11 @@ export default class SyncYoutube extends AbstractService {
 
   private async sync_video_thumbnail(video: Sync["Video"]) {
     const paths: {
-      small?: { url: string; etag: string | null };
-      large?: { url: string; etag: string | null };
+      small: { url: string; etag: string | null };
+      large: { url: string; etag: string | null };
     } = {
-      small: undefined,
-      large: undefined,
+      small: { url: video.video.thumbnail_small_local, etag: video.video.thumbnail_small_etag },
+      large: { url: video.video.thumbnail_large_local, etag: video.video.thumbnail_large_etag },
     };
 
     const inner = async (key: "small" | "large", path: string) => {
