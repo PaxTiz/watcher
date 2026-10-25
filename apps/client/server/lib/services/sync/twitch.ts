@@ -274,15 +274,21 @@ export default class SyncTwitch extends AbstractService {
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
-    const head = await fetch(subscription.channel.logo, { method: "HEAD" });
-    const etag = head.headers.get("etag");
-    if (etag === subscription.channel.logo_etag) {
+    const response = await fetch(subscription.channel.logo, {
+      headers: {
+        "If-None-Match": subscription.channel.logo_etag,
+      },
+    });
+
+    if (response.status === 304) {
       return { etag: subscription.channel.logo_etag, logo: subscription.channel.logo_local };
     }
 
+    const etag = response.headers.get("etag");
+    const image = await response.arrayBuffer();
+
     this.createImageDirectory("channels", subscription.channel.service_id);
 
-    const image = await fetch(subscription.channel.logo).then((res) => res.arrayBuffer());
     await writeFile(
       join(UPLOADS_DIRECTORY, "channels", subscription.channel.service_id, `logo.jpg`),
       Buffer.from(image),
@@ -336,13 +342,16 @@ export default class SyncTwitch extends AbstractService {
         .replace("%{width}", key === "small" ? "320" : "700")
         .replace("%{height}", key === "small" ? "180" : "394");
 
-      const head = await fetch(url, { method: "HEAD" });
-      const etag = head.headers.get("etag");
-      if (etag === video.video[`thumbnail_${key}_etag`]) {
+      const response = await fetch(url, {
+        headers: { "If-None-Match": video.video[`thumbnail_${key}_etag`] },
+      });
+
+      if (response.status === 304) {
         return;
       }
 
-      const image = await fetch(url).then((res) => res.arrayBuffer());
+      const etag = response.headers.get("etag");
+      const image = await response.arrayBuffer();
 
       await writeFile(
         join(
