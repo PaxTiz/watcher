@@ -93,7 +93,7 @@ export default defineNuxtConfig({
     },
 
     storage: {
-      oauth_tokens: { driver: "memory" },
+      oauth_tokens: { driver: "lru-cache" },
     },
   },
 

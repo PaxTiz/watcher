@@ -2,18 +2,16 @@ import { credentials, type DatabaseSchema } from "@watcher/database";
 import { type Client, createClient } from "@watcher/integration-twitch";
 import { differenceInSeconds } from "date-fns";
 
-import type { User } from "#auth-utils";
-
 import { decrypt, encrypt } from "../utils/encryption";
 
 let _client: Client | null = null;
 
-const storage = useStorage("tokens");
+const storage = useStorage("oauth_tokens");
 
-export const useTwitch = (user: User) => {
+export const useTwitch = () => {
+  const to_key = (id: string) => `${id}:twitch`;
+
   if (!_client) {
-    const key = `${user.id}:twitch`;
-
     const config = useRuntimeConfig();
 
     _client = createClient({
@@ -21,6 +19,8 @@ export const useTwitch = (user: User) => {
       client_secret: config.oauth.twitch.clientSecret,
 
       onRequest: async (service_id) => {
+        const key = to_key(service_id);
+
         let tokens: DatabaseSchema["credentials"] | null | undefined;
 
         const isCached = await storage.has(key);
@@ -39,7 +39,7 @@ export const useTwitch = (user: User) => {
 
         if (!isCached) {
           await storage.setItem(key, tokens, {
-            ttl: differenceInSeconds(new Date(), tokens.access_token_expires_at),
+            ttl: differenceInSeconds(tokens.access_token_expires_at, new Date()),
           });
         }
 
@@ -52,10 +52,11 @@ export const useTwitch = (user: User) => {
       },
 
       onRefreshToken: async ({ service_id, tokens }) => {
+        const key = to_key(service_id);
+
         await storage.removeItem(key);
 
         await credentials.update_tokens({
-          user_id: user.id,
           service: "twitch",
           service_id,
           tokens: {

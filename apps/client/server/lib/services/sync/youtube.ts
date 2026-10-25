@@ -33,7 +33,7 @@ export default class SyncYoutube extends AbstractService {
   private async get_subscriptions(user: User) {
     const google_id = this.assert_google(user);
 
-    const google = useGoogle(user);
+    const google = useGoogle();
 
     const user_subscriptions: Sync["SubscriptionsList"] = await subscriptions
       .find_all_for_sync({ user_id: user.id, service: "youtube" })
@@ -137,7 +137,7 @@ export default class SyncYoutube extends AbstractService {
   private async get_videos_by_channel_id(user: User, channel_id: string) {
     const google_id = this.assert_google(user);
 
-    const google = useGoogle(user);
+    const google = useGoogle();
 
     const channel_videos: Sync["VideosList"] = await videos
       .find_all_by_subscription({ service: "youtube", subscription_id: channel_id })

@@ -68,7 +68,6 @@ export async function upsert({ data, options }: UpsertInput): Promise<UpsertOutp
 export async function update_tokens({
   service,
   service_id,
-  user_id,
   tokens,
   options,
 }: UpdateTokensInput): Promise<UpdateTokensOutput> {
@@ -79,7 +78,6 @@ export async function update_tokens({
     .set(tokens)
     .where("service", "=", service)
     .where("service_id", "=", service_id)
-    .where("user_id", "=", user_id)
     .execute();
 }
 

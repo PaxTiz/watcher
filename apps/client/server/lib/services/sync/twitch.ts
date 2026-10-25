@@ -50,7 +50,6 @@ export default class SyncTwitch extends AbstractService {
       );
 
     let response = await services.external.twitch.helpers.get_followers(
-      user,
       {
         user_id: service_id,
       },
@@ -94,7 +93,6 @@ export default class SyncTwitch extends AbstractService {
 
       if (response.pagination.cursor) {
         response = await services.external.twitch.helpers.get_followers(
-          user,
           {
             user_id: service_id,
             cursor: response.pagination.cursor,
@@ -144,7 +142,7 @@ export default class SyncTwitch extends AbstractService {
   private async get_videos_by_channel_id(user: User, channel_id: string) {
     const twitch_id = this.assert_twitch(user);
 
-    const twitch = useTwitch(user);
+    const twitch = useTwitch();
 
     const channel_videos: Sync["VideosList"] = await videos
       .find_all_by_subscription({ service: "twitch", subscription_id: channel_id })

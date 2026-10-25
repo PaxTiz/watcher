@@ -23,7 +23,7 @@ export default class VideosService extends AbstractService {
     user: User,
     id: string,
   ): Promise<{ service: SubscriptionType; url: string | null }> {
-    const twitch = useTwitch(user);
+    const twitch = useTwitch();
     const config = useRuntimeConfig();
 
     const video = await findOrFail(videos.find_source({ id }), { message: "video_not_found" });
