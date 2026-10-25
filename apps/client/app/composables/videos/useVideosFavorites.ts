@@ -7,6 +7,6 @@ export const useVideosFavorites = () => {
       per_page: 12,
       is_favorite: true,
     },
-    { key: "home_videos_favorites" },
+    { key: "home_videos_favorites", lazy: true },
   );
 };

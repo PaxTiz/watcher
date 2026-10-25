@@ -9,7 +9,10 @@ export const useInfiniteVideos = (
     loadMoreTrigger: MaybeRefOrGetter<HTMLElement | null>;
   },
 ) => {
-  const before = ref<string | undefined>();
+  const before = options?.key
+    ? useState<string | undefined>(`${options.key}:before`, () => undefined)
+    : ref<string | undefined>();
+  before.value = undefined;
   const items = ref<VideoResource[]>([]);
   const hasMore = ref(true);
   const total = ref(0);
@@ -26,6 +29,7 @@ export const useInfiniteVideos = (
 
   const response = useVideos(query, {
     ...options,
+    lazy: true,
     watch: false,
   });
   const { data, status, refresh } = response;
@@ -90,6 +94,16 @@ export const useInfiniteVideos = (
     syncItems(d);
   });
 
+  // Watchers don't re-run during SSR, so the first page has to be synced once fetched
+  if (import.meta.server) {
+    onServerPrefetch(async () => {
+      await response;
+      if (data.value) {
+        syncItems(data.value);
+      }
+    });
+  }
+
   return {
     items,
     hasMore,
@@ -97,5 +111,15 @@ export const useInfiniteVideos = (
     loadMore,
     total,
     refresh,
+  };
+};
+
+export const useResetInfiniteVideos = (key: string) => {
+  const nuxtApp = useNuxtApp();
+  const before = useState<string | undefined>(`${key}:before`, () => undefined);
+
+  return async () => {
+    before.value = undefined;
+    await nuxtApp.runWithContext(() => refreshNuxtData(key));
   };
 };

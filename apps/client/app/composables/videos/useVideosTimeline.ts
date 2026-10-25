@@ -1,3 +1,5 @@
+const KEY = "home_videos_timeline";
+
 export const useVideosTimeline = () => {
   const loadMoreTrigger = ref<HTMLElement | null>(null);
 
@@ -9,7 +11,7 @@ export const useVideosTimeline = () => {
   } = useInfiniteVideos(
     { per_page: 30 },
     {
-      key: "home_videos_timeline",
+      key: KEY,
       loadMoreTrigger,
     },
   );
@@ -22,3 +24,5 @@ export const useVideosTimeline = () => {
     loadMoreTrigger,
   };
 };
+
+export const useResetVideosTimeline = () => useResetInfiniteVideos(KEY);

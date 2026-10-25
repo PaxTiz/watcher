@@ -4,7 +4,7 @@ import type { VideoResource } from "@watcher/common";
 import { useVideo } from "~/composables/videos/useVideo";
 import { useVideosInProgress } from "~/composables/videos/useVideosInProgress";
 
-const { data: videos, refresh } = await useVideosInProgress();
+const { data: videos, status, refresh } = useVideosInProgress();
 const { t } = useI18n();
 const { numbers } = useFormatter();
 
@@ -19,7 +19,9 @@ const on_mark_as_view = async (video: VideoResource) => {
 </script>
 
 <template>
-  <div v-if="featured" class="space-y-8">
+  <VideosGridSkeleton v-if="status === 'pending' && videos?.items.length === 0" />
+
+  <div v-else-if="featured" class="space-y-8">
     <section
       class="video-tinted bg-ui-bg relative isolate grid items-center gap-5 overflow-hidden rounded-3xl p-3 shadow-[0_0_0_1px_var(--ui-border),0_30px_60px_-34px_rgb(var(--c)/0.55)] sm:p-4 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:gap-8 md:p-5 dark:bg-[rgb(var(--c-dark)/0.3)] dark:shadow-[inset_0_0_0_1px_rgb(var(--c-light)/0.12),0_24px_50px_-30px_rgb(var(--c)/0.45)]"
       :style="video_tones_style(featured.palette)"

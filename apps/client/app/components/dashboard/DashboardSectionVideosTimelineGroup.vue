@@ -2,7 +2,6 @@
 import type { VideoResource } from "@watcher/common";
 
 import { useVideosFavorites } from "~/composables/videos/useVideosFavorites";
-import { useVideosTimeline } from "~/composables/videos/useVideosTimeline";
 
 export type Label = "today" | "yesterday" | "weekly" | "monthly" | "older";
 
