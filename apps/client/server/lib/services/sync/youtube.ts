@@ -167,6 +167,14 @@ export default class SyncYoutube extends AbstractService {
         })),
       );
 
+    const channel_videos_indexed = channel_videos.reduce(
+      (acc, video) => {
+        acc[video.video.service_id] = video;
+        return acc;
+      },
+      {} as Record<string, Sync["VideosList"][number]>,
+    );
+
     const current_videos: Array<Google["Youtube"]["Videos"]["Item"]> = [];
 
     let all_videos = await google.youtube.videos.get_latests(
@@ -177,7 +185,8 @@ export default class SyncYoutube extends AbstractService {
     while (true) {
       await async_pool_with_delay(all_videos.items, 5, 300, (video) =>
         with_retry(async () => {
-          if (await this.is_maybe_a_short(video)) {
+          const is_known = channel_videos_indexed[video.id];
+          if (!is_known && (await this.is_maybe_a_short(video))) {
             return;
           }
 
@@ -200,7 +209,7 @@ export default class SyncYoutube extends AbstractService {
     }
 
     for (const video of current_videos) {
-      const existingVid = channel_videos.find((e) => e.video.service_id === video.id);
+      const existingVid = channel_videos_indexed[video.id];
 
       if (existingVid) {
         existingVid.status = "updated";

@@ -172,11 +172,19 @@ export default class SyncTwitch extends AbstractService {
         })),
       );
 
+    const channel_videos_indexed = channel_videos.reduce(
+      (acc, video) => {
+        acc[video.video.service_id] = video;
+        return acc;
+      },
+      {} as Record<string, Sync["VideosList"][number]>,
+    );
+
     let response = await twitch.videos.list({ user_id: channel_id }, { service_id: twitch_id });
 
     while (true) {
       for (const video of response.data) {
-        const existingVid = channel_videos.find((e) => e.video.service_id === video.id);
+        const existingVid = channel_videos_indexed[video.id];
 
         if (existingVid) {
           existingVid.status = "updated";
