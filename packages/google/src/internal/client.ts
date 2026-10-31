@@ -31,7 +31,7 @@ export class GoogleClient {
     this.youtube = new YoutubeService(this);
   }
 
-  revoke_token(token: string) {
-    return oauth.revoke_token(this.settings, token);
+  revoke(tokens: ClientTokens) {
+    return oauth.revoke_token(this.settings, tokens.refresh_token);
   }
 }

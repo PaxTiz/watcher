@@ -25,7 +25,7 @@ export default defineRoute({
     return response.url.replaceAll(
       /((.*)\/(.*)\/((.*)\.m3u8))/g,
       (base_url: string, _: string, __: string, quality: string, path: string) =>
-        to_proxy_url(params.id, quality, path, base_url),
+        to_proxy_url({ video_id: params.id, user_id: user.id }, quality, path, base_url),
     );
   },
 });

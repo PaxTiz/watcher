@@ -166,7 +166,7 @@ export async function find_by_id_for_user({
     .selectFrom("videos")
     .where("videos.id", "=", id)
     .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
-    .leftJoin("user_subscriptions", (qb) =>
+    .innerJoin("user_subscriptions", (qb) =>
       qb
         .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
         .on("user_subscriptions.user_id", "=", user_id),
@@ -222,7 +222,7 @@ export async function find_adjacent({
         .onRef("users_videos_progression.video_id", "=", "videos.id")
         .on("users_videos_progression.user_id", "=", user_id),
     )
-    .leftJoin("user_subscriptions", (qb) =>
+    .innerJoin("user_subscriptions", (qb) =>
       qb
         .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
         .on("user_subscriptions.user_id", "=", user_id),
@@ -276,11 +276,17 @@ export async function find_adjacent({
     .execute();
 }
 
-export async function find_source({ id }: FindSourceInput): Promise<FindSourceOutput> {
+export async function find_source({ id, user_id }: FindSourceInput): Promise<FindSourceOutput> {
   return useDatabase()
     .selectFrom("videos")
-    .select(["service", "service_id", "url"])
-    .where("id", "=", id)
+    .innerJoin("subscriptions", "subscriptions.service_id", "videos.subscription_id")
+    .innerJoin("user_subscriptions", (qb) =>
+      qb
+        .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
+        .on("user_subscriptions.user_id", "=", user_id),
+    )
+    .select(["videos.service", "videos.service_id", "videos.url"])
+    .where("videos.id", "=", id)
     .executeTakeFirst();
 }
 

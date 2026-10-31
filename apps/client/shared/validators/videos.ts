@@ -43,6 +43,7 @@ export const videosValidatorsSchema = defineValidator({
   segment: {
     query: z.object({
       base_url: z.url({ protocol: /^https$/ }),
+      expires: z.coerce.number().check(z.int(), z.positive()),
       signature: z.string().check(z.maxLength(64)),
     }),
     params: z.object({

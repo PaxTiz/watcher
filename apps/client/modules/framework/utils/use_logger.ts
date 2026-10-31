@@ -54,7 +54,11 @@ export function useLogger(service: string) {
       redact: [
         "*.access_token",
         "*.refresh_token",
+        "*.id_token",
         "*.client_secret",
+        "*.data.access_token",
+        "*.data.refresh_token",
+        "*.data.id_token",
         "headers.authorization",
         "headers.cookie",
       ],

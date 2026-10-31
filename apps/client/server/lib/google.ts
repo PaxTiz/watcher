@@ -10,9 +10,11 @@ let _client: Client | null = null;
 
 const storage = useStorage("oauth_tokens");
 
-export const useGoogle = () => {
-  const to_key = (id: string) => `${id}:youtube`;
+const to_key = (id: string) => `${id}:youtube`;
 
+export const forget_google_tokens = (service_id: string) => storage.removeItem(to_key(service_id));
+
+export const useGoogle = () => {
   if (!_client) {
     const config = useRuntimeConfig();
 

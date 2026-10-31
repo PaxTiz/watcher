@@ -10,9 +10,11 @@ let _client: Client | null = null;
 
 const storage = useStorage("oauth_tokens");
 
-export const useTwitch = () => {
-  const to_key = (id: string) => `${id}:twitch`;
+const to_key = (id: string) => `${id}:twitch`;
 
+export const forget_twitch_tokens = (service_id: string) => storage.removeItem(to_key(service_id));
+
+export const useTwitch = () => {
   if (!_client) {
     const config = useRuntimeConfig();
 

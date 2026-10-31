@@ -12,9 +12,7 @@ const oauth_handler = defineOAuthTwitchEventHandler({
     scope: ["user:read:email", "user:read:follows", "user:read:subscriptions"],
   },
 
-  async onSuccess(request_event, { user, tokens }) {
-    const event = request_event;
-
+  async onSuccess(event, { user, tokens }) {
     try {
       const sessionUser = get_user(event);
       const link_requested = await consume_link_intent(event, "twitch");
@@ -71,10 +69,11 @@ const oauth_handler = defineOAuthTwitchEventHandler({
     }
   },
 
-  onError(request_event, error) {
-    const event = request_event;
-
-    useLogger("oauth.twitch.onError").error(error);
+  onError(event, error) {
+    useLogger("oauth.twitch.onError").error(
+      { status: error.status, message: error.message },
+      "OAuth flow failed",
+    );
     return sendRedirect(event, "/?provider=twitch&oauth-state=error");
   },
 });

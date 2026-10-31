@@ -43,7 +43,7 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
       },
       body: {
         grant_type: "refresh_token",
-        refresh_token: encodeURI(refresh_token),
+        refresh_token,
         client_id: settings.client_id,
         client_secret: settings.client_secret,
       },

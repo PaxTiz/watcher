@@ -16,9 +16,7 @@ const oauth_handler = defineOAuthGoogleEventHandler({
     authorizationParams: { prompt: "consent" },
   },
 
-  async onSuccess(request_event, { user, tokens }) {
-    const event = request_event;
-
+  async onSuccess(event, { user, tokens }) {
     try {
       const sessionUser = get_user(event);
       const link_requested = await consume_link_intent(event, "google");
@@ -77,10 +75,11 @@ const oauth_handler = defineOAuthGoogleEventHandler({
     }
   },
 
-  onError(request_event, error) {
-    const event = request_event;
-
-    useLogger("oauth.google.onError").error(error);
+  onError(event, error) {
+    useLogger("oauth.google.onError").error(
+      { status: error.status, message: error.message },
+      "OAuth flow failed",
+    );
     return sendRedirect(event, "/?provider=google&oauth-state=error");
   },
 });

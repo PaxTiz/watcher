@@ -1,3 +1,5 @@
+import { add, isBefore } from "date-fns";
+
 import { FollowersService } from "../followers";
 import { UsersService } from "../users";
 import { VideosService } from "../videos";
@@ -37,7 +39,23 @@ export class TwitchClient {
     this.videos = new VideosService(this);
   }
 
-  revoke_token(token: string) {
-    return oauth.revoke_token(this.settings, token);
+  async revoke(tokens: ClientTokens) {
+    let { access_token, refresh_token } = tokens;
+
+    if (isBefore(tokens.access_token_expires_at, add(new Date(), { minutes: 1 }))) {
+      ({ access_token, refresh_token } = await oauth.refresh_access_token(
+        this.settings,
+        refresh_token,
+      ));
+    }
+
+    const [access] = await Promise.allSettled([
+      oauth.revoke_token(this.settings, access_token),
+      oauth.revoke_token(this.settings, refresh_token),
+    ]);
+
+    if (access.status === "rejected") {
+      throw access.reason;
+    }
   }
 }

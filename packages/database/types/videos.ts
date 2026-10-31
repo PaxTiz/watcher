@@ -62,7 +62,7 @@ export type FindAdjacentInput = {
 };
 export type FindAdjacentOutput = Array<VideoRow>;
 
-export type FindSourceInput = { id: string };
+export type FindSourceInput = { id: string; user_id: string };
 export type FindSourceOutput =
   | Pick<DatabaseSchema["videos"], "service" | "service_id" | "url">
   | undefined;

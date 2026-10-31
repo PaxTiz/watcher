@@ -27,7 +27,7 @@ export default class VideosService extends AbstractService {
     const twitch = useTwitch();
     const config = useRuntimeConfig();
 
-    const video = await findOrFail(videos.find_source({ id }), { message: "video_not_found" });
+    const video = await this.find_source_or_fail(user, id);
 
     if (video.service === "twitch") {
       return {
@@ -99,15 +99,23 @@ export default class VideosService extends AbstractService {
   }
 
   async hide(user: User, id: string) {
+    await this.find_source_or_fail(user, id);
+
     await videos.hide_for_user({ user_id: user.id, video_id: id });
   }
 
   async update_progress(user: User, id: string, progression: number) {
+    await this.find_source_or_fail(user, id);
+
     await videos.upsert_progression({
       user_id: user.id,
       video_id: id,
       progression: Math.max(0, progression > 0.9 ? 1 : progression),
     });
+  }
+
+  private find_source_or_fail(user: User, id: string) {
+    return findOrFail(videos.find_source({ id, user_id: user.id }), { message: "video_not_found" });
   }
 
   private parse_date_filter(
