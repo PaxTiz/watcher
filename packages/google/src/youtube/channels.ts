@@ -1,4 +1,4 @@
-import type { Google } from "@watcher/common";
+import { request_options, type Google } from "@watcher/common";
 import { ofetch } from "ofetch";
 
 import type { GoogleClient } from "../internal/client";
@@ -16,6 +16,7 @@ export class YoutubeChannelsService extends GoogleService {
       url.searchParams.set("part", "contentDetails");
 
       const response = await ofetch<Google["Youtube"]["Channels"]["List"]>(url.toString(), {
+        ...request_options(),
         headers: {
           Authorization: `Bearer ${token}`,
         },

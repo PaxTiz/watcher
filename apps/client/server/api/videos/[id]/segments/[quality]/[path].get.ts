@@ -1,12 +1,9 @@
+import { request_options } from "@watcher/common";
 import { createError } from "nuxt/server";
+import { ofetch } from "ofetch";
 
 import { defineRoute } from "#framework";
-import {
-  OUTGOING_REQUEST_TIMEOUT,
-  content_type_of,
-  read_body_with_limit,
-  stream_body_with_limit,
-} from "#server/utils/http";
+import { content_type_of, read_body_with_limit, stream_body_with_limit } from "#server/utils/http";
 import { is_allowed_upstream, to_proxy_url, verify_proxy_url } from "#server/utils/proxy";
 import { require_user } from "#server/utils/session";
 import { videosValidatorsSchema } from "#shared/validators/videos";
@@ -19,13 +16,11 @@ const fetch_upstream = async (url: string) => {
     throw createError({ status: 403 });
   }
 
-  const response = await fetch(url, {
-    redirect: "error",
-    signal: AbortSignal.timeout(OUTGOING_REQUEST_TIMEOUT),
-  }).catch(() => null);
+  const response = await ofetch
+    .raw(url, { ...request_options({ retry: 0 }), responseType: "stream", redirect: "error" })
+    .catch(() => null);
 
-  if (!response?.ok) {
-    await response?.body?.cancel();
+  if (!response) {
     throw createError({ status: 502 });
   }
 

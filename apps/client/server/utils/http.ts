@@ -1,6 +1,3 @@
-// Outgoing requests to third parties (CDNs, APIs) must never hang a request or a sync forever
-export const OUTGOING_REQUEST_TIMEOUT = 10_000; // 10 seconds, in ms
-
 export const content_type_of = (response: Response) =>
   response.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
 

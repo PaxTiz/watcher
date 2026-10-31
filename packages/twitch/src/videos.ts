@@ -1,4 +1,4 @@
-import type { Twitch } from "@watcher/common";
+import { request_options, type Twitch } from "@watcher/common";
 import { isAfter } from "date-fns";
 import { ofetch } from "ofetch";
 
@@ -37,6 +37,7 @@ export class VideosService extends TwitchService {
       }
 
       return await ofetch<Twitch["Videos"]["List"]>(url.toString(), {
+        ...request_options(),
         headers: {
           Authorization: `Bearer ${token}`,
           "Client-Id": this.client.settings.client_id,
@@ -88,6 +89,7 @@ export class VideosService extends TwitchService {
       const response = await ofetch<Twitch["Videos"]["__INTERNAL__"]["GetSingleVideo"]>(
         "https://gql.twitch.tv/gql",
         {
+          ...request_options(),
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -138,19 +140,23 @@ export class VideosService extends TwitchService {
   }
 
   private async check_quality(url: string) {
-    const resp = await fetch(url);
-    if (!resp.ok) return null;
+    const text = await ofetch(url, { ...request_options(), responseType: "text" }).catch(
+      () => null,
+    );
 
-    const text = await resp.text();
+    if (!text) return null;
 
     if (text.includes(".ts")) {
       return "avc1.4D001E";
     }
 
     if (text.includes(".mp4")) {
-      const initResp = await fetch(url.replace("index-dvr.m3u8", "init-0.mp4"));
-      if (initResp.ok) {
-        const content = await initResp.text();
+      const content = await ofetch(url.replace("index-dvr.m3u8", "init-0.mp4"), {
+        ...request_options(),
+        responseType: "text",
+      }).catch(() => null);
+
+      if (content) {
         return content.includes("hev1") ? "hev1.1.6.L93.B0" : "avc1.4D001E";
       }
 

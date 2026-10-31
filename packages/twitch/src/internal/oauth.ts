@@ -1,4 +1,4 @@
-import type { Twitch } from "@watcher/common";
+import { request_options, type Twitch } from "@watcher/common";
 import { ofetch } from "ofetch";
 
 import type { ClientSettings } from "./client";
@@ -12,6 +12,7 @@ async function get_current_user(settings: ClientSettings, config: TwitchServiceR
     }
 
     const response = await ofetch<Twitch["OAuth"]["User"]>("https://id.twitch.tv/oauth2/userinfo", {
+      ...request_options(),
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${tokens.access_token}`,
@@ -37,6 +38,7 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
       scope: Array<string>;
       token_type: "bearer";
     }>("https://id.twitch.tv/oauth2/token", {
+      ...request_options({ retry: 0 }),
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -58,6 +60,7 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
 async function revoke_token(settings: ClientSettings, token: string) {
   try {
     await ofetch("https://id.twitch.tv/oauth2/revoke", {
+      ...request_options({ retry: 0 }),
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

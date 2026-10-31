@@ -2,10 +2,11 @@ import { existsSync, mkdirSync } from "node:fs";
 import { writeFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 
-import type { Google } from "@watcher/common";
+import { type Google, request_options } from "@watcher/common";
 import { subscriptions, userSubscriptions, videos, withTransaction } from "@watcher/database";
 import { formatISO } from "date-fns";
 import { parse, toSeconds } from "iso8601-duration";
+import { ofetch } from "ofetch";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
@@ -301,13 +302,17 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
-    const response = await fetch(subscription.channel.logo, {
-      headers: {
-        "If-None-Match": subscription.channel.logo_etag,
-      },
-    });
+    const response = await ofetch
+      .raw(subscription.channel.logo, {
+        ...request_options(),
+        responseType: "stream",
+        headers: {
+          "If-None-Match": subscription.channel.logo_etag,
+        },
+      })
+      .catch(() => null);
 
-    if (response.status === 304) {
+    if (!response || response.status === 304) {
       return { etag: subscription.channel.logo_etag, logo: subscription.channel.logo_local };
     }
 
@@ -369,11 +374,15 @@ export default class SyncYoutube extends AbstractService {
     };
 
     const inner = async (key: "small" | "large", path: string) => {
-      const response = await fetch(path, {
-        headers: { "If-None-Match": video.video[`thumbnail_${key}_etag`] },
-      });
+      const response = await ofetch
+        .raw(path, {
+          ...request_options(),
+          responseType: "stream",
+          headers: { "If-None-Match": video.video[`thumbnail_${key}_etag`] },
+        })
+        .catch(() => null);
 
-      if (response.status === 304) {
+      if (!response || response.status === 304) {
         return;
       }
 
@@ -420,7 +429,8 @@ export default class SyncYoutube extends AbstractService {
   private async is_maybe_a_short(video: Google["Youtube"]["Videos"]["Item"]): Promise<boolean> {
     const url = `https://www.youtube.com/shorts/${video.id}`;
 
-    const response = await fetch(url, {
+    const response = await ofetch.raw(url, {
+      ...request_options({ retry: 0 }),
       method: "HEAD",
       redirect: "manual",
       headers: {

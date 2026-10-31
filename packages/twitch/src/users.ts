@@ -1,4 +1,4 @@
-import type { Twitch } from "@watcher/common";
+import { request_options, type Twitch } from "@watcher/common";
 import { ofetch } from "ofetch";
 
 import type { TwitchClient } from "./internal/client";
@@ -20,6 +20,7 @@ export class UsersService extends TwitchService {
       }
 
       return await ofetch<Twitch["Users"]["List"]>(url.toString(), {
+        ...request_options(),
         headers: {
           Authorization: `Bearer ${token}`,
           "Client-Id": this.client.settings.client_id,

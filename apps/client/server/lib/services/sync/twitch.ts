@@ -2,8 +2,10 @@ import { existsSync, mkdirSync } from "node:fs";
 import { writeFile, unlink } from "node:fs/promises";
 import { join } from "node:path";
 
+import { request_options } from "@watcher/common";
 import { subscriptions, userSubscriptions, videos, withTransaction } from "@watcher/database";
 import { formatISO } from "date-fns";
+import { ofetch } from "ofetch";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
@@ -284,13 +286,17 @@ export default class SyncTwitch extends AbstractService {
   }
 
   private async sync_subscription_logo(subscription: Sync["Subscription"]) {
-    const response = await fetch(subscription.channel.logo, {
-      headers: {
-        "If-None-Match": subscription.channel.logo_etag,
-      },
-    });
+    const response = await ofetch
+      .raw(subscription.channel.logo, {
+        ...request_options(),
+        responseType: "stream",
+        headers: {
+          "If-None-Match": subscription.channel.logo_etag,
+        },
+      })
+      .catch(() => null);
 
-    if (response.status === 304) {
+    if (!response || response.status === 304) {
       return { etag: subscription.channel.logo_etag, logo: subscription.channel.logo_local };
     }
 
@@ -356,11 +362,15 @@ export default class SyncTwitch extends AbstractService {
         .replace("%{width}", key === "small" ? "320" : "700")
         .replace("%{height}", key === "small" ? "180" : "394");
 
-      const response = await fetch(url, {
-        headers: { "If-None-Match": video.video[`thumbnail_${key}_etag`] },
-      });
+      const response = await ofetch
+        .raw(url, {
+          ...request_options(),
+          responseType: "stream",
+          headers: { "If-None-Match": video.video[`thumbnail_${key}_etag`] },
+        })
+        .catch(() => null);
 
-      if (response.status === 304) {
+      if (!response || response.status === 304) {
         return;
       }
 

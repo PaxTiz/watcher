@@ -1,4 +1,4 @@
-import type { Google } from "@watcher/common";
+import { request_options, type Google } from "@watcher/common";
 import { ofetch } from "ofetch";
 
 import type { ClientSettings } from "./client";
@@ -14,6 +14,7 @@ async function get_current_user(settings: ClientSettings, config: GoogleServiceR
     const response = await ofetch<Google["OAuth"]["User"]>(
       `https://www.googleapis.com/oauth2/v1/userinfo`,
       {
+        ...request_options(),
         headers: {
           Authorization: `Bearer ${tokens.access_token}`,
         },
@@ -38,6 +39,7 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
       scope: Array<string>;
       token_type: "Bearer";
     }>("https://oauth2.googleapis.com/token", {
+      ...request_options({ retry: 0 }),
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -59,6 +61,7 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
 async function revoke_token(_settings: ClientSettings, token: string) {
   try {
     await ofetch("https://oauth2.googleapis.com/revoke", {
+      ...request_options({ retry: 0 }),
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

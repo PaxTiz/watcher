@@ -14,5 +14,6 @@ export * from "./integrations/google";
 export * from "./integrations/twitch";
 
 export * from "./shared/promises";
+export * from "./shared/http";
 
 export * from "./errors/http";
