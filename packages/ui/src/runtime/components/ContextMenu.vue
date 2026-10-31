@@ -1,16 +1,15 @@
 <script lang="ts" generic="T extends string" setup>
-import { type ComponentPublicInstance } from "vue";
-
 export type ContextMenuEntry<V extends string> =
   | { type: "label"; label: string }
-  | { type: "separator" }
+  | { type: "divider" }
   | {
-      type: "item";
+      type?: "item";
       label: string;
-      value: V;
+      key: V;
       icon?: string;
       disabled?: boolean;
       destructive?: boolean;
+      on_select?: () => Promise<unknown>;
     };
 
 const props = defineProps<{
@@ -48,15 +47,15 @@ const onSelect = (value: T) => {
               {{ entry.label }}
             </ContextMenuLabel>
 
-            <ContextMenuSeparator v-else-if="entry.type === 'separator'" class="menu-separator" />
+            <ContextMenuSeparator v-else-if="entry.type === 'divider'" class="menu-separator" />
 
             <ContextMenuItem
               v-else
-              :value="entry.value"
+              :value="entry.key"
               :disabled="entry.disabled"
               class="menu-item"
               :class="{ '!text-red-500 [&_svg]:!text-red-500': entry.destructive }"
-              @select="onSelect(entry.value)"
+              @select="() => entry?.on_select?.() ?? onSelect(entry.key)"
             >
               <Icon v-if="entry.icon" :name="entry.icon" />
               <span class="flex-1">{{ entry.label }}</span>

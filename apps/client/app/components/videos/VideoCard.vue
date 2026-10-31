@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { VideoResource } from "@watcher/common";
+import type { DropdownItem } from "@watcher/ui";
 
 import { useVideo } from "~/composables/videos/useVideo";
 
@@ -25,11 +26,13 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const { dates, numbers } = useFormatter();
 const { forceRefresh: refresh_subscriptions } = useSubscriptions();
+const { integration_data } = useIntegrations();
 
 const viewing_progression = ref(video.viewing_progression);
 const hidden_reason = ref<"video" | "channel" | undefined>();
 
 const is_watched = computed(() => viewing_progression.value > 0.9);
+const integration = computed(() => integration_data(video.service));
 
 const dropdown_items = computed(() => {
   const video_items = [];
@@ -95,9 +98,24 @@ const dropdown_items = computed(() => {
     });
   }
 
-  const items = [];
+  const items: Array<DropdownItem> = [
+    { key: "video", label: t("videos.video"), type: "label" as const },
+  ];
   if (video_items.length > 0) {
-    items.push({ key: "video", label: t("videos.video"), type: "label" as const });
+    items.push({
+      type: "item",
+      label: t("subscriptions.open_new_tab"),
+      icon: "lucide:external-link",
+      on_select: () => window.open(`/videos/${video.id}`, "_blank"),
+    });
+    items.push({
+      type: "item",
+      label: t("subscriptions.open_on", {
+        service: video.service === "youtube" ? "YouTube" : "Twitch",
+      }),
+      icon: integration.value.icon,
+      on_select: () => window.open(video.url, "_blank"),
+    });
     items.push(...video_items);
   }
 
@@ -121,139 +139,141 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
 </script>
 
 <template>
-  <div
-    v-if="hidden_reason"
-    class="border-ui-border text-ui-text-muted flex aspect-video flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed p-4 text-center"
-  >
-    <Icon
-      :name="hidden_reason === 'video' ? 'lucide:video-off' : 'lucide:circle-off'"
-      class="mb-1 text-2xl"
-    />
-    <p class="text-ui-text font-semibold">
-      {{ t(hidden_reason === "video" ? "videos.hide.hidden" : "videos.hide_channel.hidden") }}
-    </p>
-    <p class="text-sm">
-      {{
-        t(
-          hidden_reason === "video"
-            ? "videos.hide.hidden_description"
-            : "videos.hide_channel.hidden_description",
-        )
-      }}
-    </p>
-  </div>
-
-  <article
-    v-else
-    class="group video-tinted transition-transform duration-300 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-    :style="tones_style"
-  >
-    <NuxtLink
-      :to="`/videos/${video.id}`"
-      class="focus-visible:outline-alt relative block rounded-xl"
-      tabindex="-1"
-      aria-hidden="true"
+  <WatcherContextMenu :items="dropdown_items">
+    <div
+      v-if="hidden_reason"
+      class="border-ui-border text-ui-text-muted flex aspect-video flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed p-4 text-center"
     >
-      <div
-        class="bg-ui-border/40 relative aspect-video overflow-hidden rounded-xl shadow-[0_0_0_1px_rgb(255_255_255/0.06)] transition-shadow duration-500 group-hover:shadow-[0_0_0_1px_rgb(255_255_255/0.06),0_18px_44px_-16px_rgb(var(--c)/0.75)] motion-reduce:transition-none"
-      >
-        <NuxtImg
-          class="size-full object-cover"
-          :class="{ 'opacity-60': is_watched }"
-          loading="lazy"
-          format="avif,webp"
-          width="420"
-          quality="90"
-          :src="video.thumbnails.small"
-          alt=""
-        />
+      <Icon
+        :name="hidden_reason === 'video' ? 'lucide:video-off' : 'lucide:circle-off'"
+        class="mb-1 text-2xl"
+      />
+      <p class="text-ui-text font-semibold">
+        {{ t(hidden_reason === "video" ? "videos.hide.hidden" : "videos.hide_channel.hidden") }}
+      </p>
+      <p class="text-sm">
+        {{
+          t(
+            hidden_reason === "video"
+              ? "videos.hide.hidden_description"
+              : "videos.hide_channel.hidden_description",
+          )
+        }}
+      </p>
+    </div>
 
-        <span
-          v-if="is_watched"
-          class="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-semibold text-white"
-        >
-          <Icon name="lucide:check" /> {{ t("videos.watched") }}
-        </span>
-        <span
-          v-else-if="is_new"
-          class="bg-alt absolute top-2 left-2 rounded-md px-1.5 py-0.5 text-[11px] font-bold tracking-wide text-black uppercase"
-        >
-          {{ t("videos.new") }}
-        </span>
-
-        <span
-          class="absolute right-2 bottom-2 rounded-lg bg-[rgb(var(--c-dark)/0.8)] px-1.5 py-0.5 text-xs font-semibold text-white tabular-nums shadow-[inset_1px_1px_0_-0.5px_rgb(255_255_255/0.5),inset_-1px_-1px_0_-0.5px_rgb(255_255_255/0.15)]"
-          :class="{ 'bottom-3': viewing_progression > 0 }"
-        >
-          {{ numbers.displaySeconds(video.duration) }}
-        </span>
-
-        <div v-if="viewing_progression > 0" class="absolute inset-x-0 bottom-0 h-1 bg-white/25">
-          <div
-            class="h-full bg-[rgb(var(--c-vivid))]"
-            :style="{ width: `${Math.min(viewing_progression, 1) * 100}%` }"
-          />
-        </div>
-      </div>
-    </NuxtLink>
-
-    <div class="mt-3 flex items-start gap-1">
+    <article
+      v-else
+      class="group video-tinted transition-transform duration-300 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      :style="tones_style"
+    >
       <NuxtLink
         :to="`/videos/${video.id}`"
-        class="focus-visible:outline-alt flex min-w-0 flex-1 gap-3 rounded-lg"
+        class="focus-visible:outline-alt relative block rounded-xl"
+        tabindex="-1"
+        aria-hidden="true"
       >
-        <NuxtImg
-          class="bg-ui-border size-9 shrink-0 rounded-full object-cover"
-          loading="lazy"
-          format="avif,webp"
-          width="36"
-          height="36"
-          :src="video.author.channel.logo"
-          alt=""
-        />
+        <div
+          class="bg-ui-border/40 relative aspect-video overflow-hidden rounded-xl shadow-[0_0_0_1px_rgb(255_255_255/0.06)] transition-shadow duration-500 group-hover:shadow-[0_0_0_1px_rgb(255_255_255/0.06),0_18px_44px_-16px_rgb(var(--c)/0.75)] motion-reduce:transition-none"
+        >
+          <NuxtImg
+            class="size-full object-cover"
+            :class="{ 'opacity-60': is_watched }"
+            loading="lazy"
+            format="avif,webp"
+            width="420"
+            quality="90"
+            :src="video.thumbnails.small"
+            alt=""
+          />
 
-        <div class="min-w-0">
-          <h2
-            class="text-ui-text line-clamp-2 text-[15px] leading-snug font-medium transition-colors duration-300 group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
-            :title="video.title"
+          <span
+            v-if="is_watched"
+            class="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-semibold text-white"
           >
-            {{ video.title }}
-          </h2>
+            <Icon name="lucide:check" /> {{ t("videos.watched") }}
+          </span>
+          <span
+            v-else-if="is_new"
+            class="bg-alt absolute top-2 left-2 rounded-md px-1.5 py-0.5 text-[11px] font-bold tracking-wide text-black uppercase"
+          >
+            {{ t("videos.new") }}
+          </span>
 
-          <p class="text-ui-text-muted mt-1 flex items-center gap-1.5 text-sm">
-            <Icon
-              :name="video.service === 'youtube' ? 'fa7-brands:youtube' : 'fa7-brands:twitch'"
-              :class="video.service === 'youtube' ? 'text-[#ff0033]' : 'text-[#9146ff]'"
-              class="shrink-0"
-              :aria-label="video.service === 'youtube' ? 'YouTube' : 'Twitch'"
+          <span
+            class="absolute right-2 bottom-2 rounded-lg bg-[rgb(var(--c-dark)/0.8)] px-1.5 py-0.5 text-xs font-semibold text-white tabular-nums shadow-[inset_1px_1px_0_-0.5px_rgb(255_255_255/0.5),inset_-1px_-1px_0_-0.5px_rgb(255_255_255/0.15)]"
+            :class="{ 'bottom-3': viewing_progression > 0 }"
+          >
+            {{ numbers.displaySeconds(video.duration) }}
+          </span>
+
+          <div v-if="viewing_progression > 0" class="absolute inset-x-0 bottom-0 h-1 bg-white/25">
+            <div
+              class="h-full bg-[rgb(var(--c-vivid))]"
+              :style="{ width: `${Math.min(viewing_progression, 1) * 100}%` }"
             />
-
-            <NuxtLink class="truncate" :to="`/subscriptions/${video.author.slug}`">
-              {{ video.author.name }}
-            </NuxtLink>
-
-            <span aria-hidden="true">·</span>
-            <time class="shrink-0" :datetime="video.created_at">
-              {{ dates.ago(video.created_at) }}
-            </time>
-          </p>
+          </div>
         </div>
       </NuxtLink>
 
-      <div
-        v-if="dropdown_items.length > 0"
-        class="-mt-1 -mr-2 shrink-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 [@media(hover:hover)]:opacity-0"
-      >
-        <WatcherDropdownButton
-          color="ghost"
-          align="end"
-          size="sm"
-          icon-size="lg"
-          icon="lucide:ellipsis-vertical"
-          :aria-label="t('videos.actions')"
-          :items="dropdown_items"
-        />
+      <div class="mt-3 flex items-start gap-1">
+        <NuxtLink
+          :to="`/videos/${video.id}`"
+          class="focus-visible:outline-alt flex min-w-0 flex-1 gap-3 rounded-lg"
+        >
+          <NuxtImg
+            class="bg-ui-border size-9 shrink-0 rounded-full object-cover"
+            loading="lazy"
+            format="avif,webp"
+            width="36"
+            height="36"
+            :src="video.author.channel.logo"
+            alt=""
+          />
+
+          <div class="min-w-0">
+            <h2
+              class="text-ui-text line-clamp-2 text-[15px] leading-snug font-medium transition-colors duration-300 group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
+              :title="video.title"
+            >
+              {{ video.title }}
+            </h2>
+
+            <p class="text-ui-text-muted mt-1 flex items-center gap-1.5 text-sm">
+              <Icon
+                :name="video.service === 'youtube' ? 'fa7-brands:youtube' : 'fa7-brands:twitch'"
+                :class="video.service === 'youtube' ? 'text-[#ff0033]' : 'text-[#9146ff]'"
+                class="shrink-0"
+                :aria-label="video.service === 'youtube' ? 'YouTube' : 'Twitch'"
+              />
+
+              <NuxtLink class="truncate" :to="`/subscriptions/${video.author.slug}`">
+                {{ video.author.name }}
+              </NuxtLink>
+
+              <span aria-hidden="true">·</span>
+              <time class="shrink-0" :datetime="video.created_at">
+                {{ dates.ago(video.created_at) }}
+              </time>
+            </p>
+          </div>
+        </NuxtLink>
+
+        <div
+          v-if="dropdown_items.length > 0"
+          class="-mt-1 -mr-2 shrink-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 [@media(hover:hover)]:opacity-0"
+        >
+          <WatcherDropdownButton
+            color="ghost"
+            align="end"
+            size="sm"
+            icon-size="lg"
+            icon="lucide:ellipsis-vertical"
+            :aria-label="t('videos.actions')"
+            :items="dropdown_items"
+          />
+        </div>
       </div>
-    </div>
-  </article>
+    </article>
+  </WatcherContextMenu>
 </template>

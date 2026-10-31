@@ -74,8 +74,19 @@ export const useIntegrations = () => {
     }
   };
 
+  const integration_data = (_id: Integration["id"] | "youtube") => {
+    const id = _id === "youtube" ? "google" : _id;
+    const data = integrations.find((e) => e.id === id);
+    if (!data) {
+      throw new Error(`Integration ${id} not found`);
+    }
+
+    return data;
+  };
+
   return {
     integrations,
+    integration_data,
 
     is_linked,
     on_link,

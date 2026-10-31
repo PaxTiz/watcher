@@ -221,6 +221,7 @@ export default {
     discover: "Discover the latest videos from {name}.",
     last_video: "Last video {ago}",
     open_on: "Open on {service}",
+    open_new_tab: "Open in a new tab",
     search_in: "Search in {name}",
     search_in_label: "Search {name}'s videos",
     favorite: {
