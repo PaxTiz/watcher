@@ -217,27 +217,36 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
       </NuxtLink>
 
       <div class="mt-3 flex items-start gap-1">
-        <NuxtLink
-          :to="`/videos/${video.id}`"
-          class="focus-visible:outline-alt flex min-w-0 flex-1 gap-3 rounded-lg"
-        >
-          <NuxtImg
-            class="bg-ui-border size-9 shrink-0 rounded-full object-cover"
-            loading="lazy"
-            format="avif,webp"
-            width="36"
-            height="36"
-            :src="video.author.channel.logo"
-            alt=""
-          />
+        <div class="flex min-w-0 flex-1 gap-3">
+          <NuxtLink
+            :to="`/videos/${video.id}`"
+            class="focus-visible:outline-alt shrink-0 rounded-full"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <NuxtImg
+              class="bg-ui-border size-9 rounded-full object-cover"
+              loading="lazy"
+              format="avif,webp"
+              width="36"
+              height="36"
+              :src="video.author.channel.logo"
+              alt=""
+            />
+          </NuxtLink>
 
           <div class="min-w-0">
-            <h2
-              class="text-ui-text line-clamp-2 text-[15px] leading-snug font-medium transition-colors duration-300 group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
-              :title="video.title"
+            <NuxtLink
+              :to="`/videos/${video.id}`"
+              class="focus-visible:outline-alt block rounded-lg"
             >
-              {{ video.title }}
-            </h2>
+              <h2
+                class="text-ui-text line-clamp-2 text-[15px] leading-snug font-medium transition-colors duration-300 group-hover:text-[rgb(var(--c-ink))] dark:group-hover:text-[rgb(var(--c-light))]"
+                :title="video.title"
+              >
+                {{ video.title }}
+              </h2>
+            </NuxtLink>
 
             <p class="text-ui-text-muted mt-1 flex items-center gap-1.5 text-sm">
               <Icon
@@ -257,7 +266,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
               </time>
             </p>
           </div>
-        </NuxtLink>
+        </div>
 
         <div
           v-if="dropdown_items.length > 0"
