@@ -10,6 +10,13 @@ export const useFormatter = () => {
     numbers,
     dates,
 
+    errors: {
+      too_many_attempts: (retry_after?: number) =>
+        retry_after
+          ? t("errors.too_many_attempts", { delay: dates.ago(Date.now() + retry_after * 1000) })
+          : t("errors.too_many_attempts_later"),
+    },
+
     videos: {
       filters: {
         service: (key: Query["service"]) => {

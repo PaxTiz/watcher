@@ -34,11 +34,14 @@ export default {
     running: "Synchronisation en cours…",
     done: "Synchronisation terminée",
     failed: "La synchronisation a échoué, réessayez dans quelques minutes",
+    in_progress: "Une synchronisation est déjà en cours",
   },
 
   errors: {
     generic: "Une erreur est survenue, réessayez dans quelques instants",
     internal: "Une erreur interne s'est produite",
+    too_many_attempts: "Trop de tentatives, réessayez {delay}",
+    too_many_attempts_later: "Trop de tentatives, réessayez plus tard",
   },
 
   validation: {

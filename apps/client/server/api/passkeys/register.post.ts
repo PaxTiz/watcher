@@ -1,11 +1,14 @@
+import { defineEventHandler } from "nuxt/server";
+
 import { withHttpErrors } from "#framework";
 import { defineWebAuthnRegisterEventHandler } from "#framework/auth";
 import { services } from "#framework/server";
+import { useRateLimiter } from "#server/lib/rate_limiter";
 import { require_user } from "#server/utils/session";
 import { require_user_verification, require_webauthn_rp_id } from "#server/utils/webauthn";
 import { passkeysValidatorsSchema } from "#shared/validators/passkeys";
 
-export default defineWebAuthnRegisterEventHandler<{
+const register_handler = defineWebAuthnRegisterEventHandler<{
   userName: string;
   displayName: string;
   passkeyName: string;
@@ -52,4 +55,10 @@ export default defineWebAuthnRegisterEventHandler<{
 
     await services.passkeys.create(session_user.id, credential, user.passkeyName);
   },
+});
+
+export default defineEventHandler(async (event) => {
+  await useRateLimiter("passkeys_register").consume(event, require_user(event).id);
+
+  return register_handler(event);
 });

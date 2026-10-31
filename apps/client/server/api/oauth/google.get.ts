@@ -4,6 +4,7 @@ import { defineEventHandler, sendRedirect } from "nuxt/server";
 import { useLogger } from "#framework";
 import { defineOAuthGoogleEventHandler } from "#framework/auth";
 import { services } from "#framework/server";
+import { get_client_ip, useRateLimiter } from "#server/lib/rate_limiter";
 import { consume_link_intent, handle_link_intent } from "#server/utils/oauth";
 import { get_user, start_user_session } from "#server/utils/session";
 
@@ -85,6 +86,20 @@ const oauth_handler = defineOAuthGoogleEventHandler({
 });
 
 export default defineEventHandler(async (event) => {
+  const ip = get_client_ip(event);
+  if (ip) {
+    const limiter = useRateLimiter("oauth");
+    const state = await limiter.increment(ip);
+    limiter.set_headers(event, state);
+
+    if (!state.is_valid) {
+      return sendRedirect(
+        event,
+        `/?provider=google&oauth-state=error&error=too_many_attempts&retry_after=${state.reset_in}`,
+      );
+    }
+  }
+
   await handle_link_intent(event, "google");
 
   return oauth_handler(event);

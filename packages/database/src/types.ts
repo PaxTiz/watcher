@@ -155,6 +155,24 @@ export type SessionTable = {
   last_seen_at: ColumnType<string, string | undefined, string>;
 };
 
+export type RateLimitTable = {
+  type: string;
+
+  key: string;
+
+  attempts: number;
+
+  expires_at: ColumnType<string, string, string>;
+};
+
+export type WebauthnChallengeTable = {
+  id: string;
+
+  challenge: string;
+
+  expires_at: ColumnType<string, string, never>;
+};
+
 export type DatabaseInterface = {
   users: UserTable;
   sessions: SessionTable;
@@ -165,6 +183,8 @@ export type DatabaseInterface = {
   videos: VideoTable;
   hidden_users_videos: HiddenUsersVideosTable;
   users_videos_progression: UsersVideosProgressionTable;
+  rate_limits: RateLimitTable;
+  webauthn_challenges: WebauthnChallengeTable;
 };
 
 export type DatabaseSchema = {

@@ -32,11 +32,14 @@ export default {
     running: "Syncing…",
     done: "Sync complete",
     failed: "Sync failed, please try again in a few minutes",
+    in_progress: "A sync is already running",
   },
 
   errors: {
     generic: "Something went wrong, please try again in a moment",
     internal: "An internal error occurred",
+    too_many_attempts: "Too many attempts, please try again {delay}",
+    too_many_attempts_later: "Too many attempts, please try again later",
   },
 
   validation: {

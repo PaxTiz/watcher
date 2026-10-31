@@ -10,13 +10,6 @@ const ERRORS: Record<string, string> = {
   user_verification_required: "passkeys.errors.user_verification_required",
 };
 
-const error_message = (error: unknown, fallback: string) => {
-  const key =
-    (error as { data?: { message?: string } })?.data?.message ?? (error as Error)?.name ?? "";
-
-  return ERRORS[key] ?? fallback;
-};
-
 export const usePasskeys = () => {
   const { register, authenticate, isSupported } = useWebAuthn({
     registerEndpoint: "/api/passkeys/register",
@@ -24,6 +17,20 @@ export const usePasskeys = () => {
   });
   const { fetch: refresh_session } = useUserSession();
   const { t } = useNuxtApp().$i18n;
+  const { errors } = useFormatter();
+
+  const error_message = (error: unknown, fallback: string) => {
+    const data = (error as { data?: { message?: string; data?: { retry_after?: number } } })?.data;
+    const key = data?.message ?? (error as Error)?.name ?? "";
+
+    if (key === "too_many_attempts") {
+      return errors.too_many_attempts(data?.data?.retry_after);
+    }
+
+    const translation_key = ERRORS[key] ?? fallback;
+
+    return translation_key ? t(translation_key) : "";
+  };
 
   const loading = ref(false);
 
@@ -37,7 +44,7 @@ export const usePasskeys = () => {
     } catch (error) {
       const message = error_message(error, fallback);
       if (message) {
-        toast.error(t(message));
+        toast.error(message);
       }
 
       return false;

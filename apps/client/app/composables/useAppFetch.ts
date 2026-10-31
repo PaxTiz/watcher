@@ -8,7 +8,12 @@ import type {
   TypedServerResponse,
 } from "#app";
 
-export type ApiError = { status: number; message?: string };
+export type ApiError = {
+  status: number;
+  message?: string;
+  retry_after?: number;
+  display_message?: string;
+};
 
 type ResponseError = { status?: number };
 
@@ -86,6 +91,7 @@ export const callApi = async <
   | { data: undefined; error: ApiError }
 > => {
   const request_fetch = useRequestFetch();
+  const { errors } = useFormatter();
   const { form, ...fetchOptions } = options ?? {};
 
   if (form) {
@@ -99,11 +105,17 @@ export const callApi = async <
     )) as TypedServerResponse<R, unknown, M>;
     return { data, error: undefined };
   } catch (error) {
-    const fetchError = error as FetchError<{ message?: string }>;
+    const fetchError = error as FetchError<{ message?: string; data?: { retry_after?: number } }>;
+    const retry_after =
+      fetchError.data?.data?.retry_after ??
+      (Number(fetchError.response?.headers.get("retry-after")) || undefined);
 
+    const status = fetchError.status ?? 500;
     const apiError: ApiError = {
-      status: fetchError.status ?? 500,
+      status,
       message: fetchError.data?.message,
+      retry_after,
+      display_message: status === 429 ? errors.too_many_attempts(retry_after) : undefined,
     };
 
     if (form) {

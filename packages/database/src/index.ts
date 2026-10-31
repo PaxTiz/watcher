@@ -16,3 +16,5 @@ export * as sessions from "./repositories/sessions";
 export * as subscriptions from "./repositories/subscriptions";
 export * as userSubscriptions from "./repositories/user_subscriptions";
 export * as videos from "./repositories/videos";
+export * as rateLimits from "./repositories/rate_limits";
+export * as webauthnChallenges from "./repositories/webauthn_challenges";

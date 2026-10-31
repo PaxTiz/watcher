@@ -103,7 +103,7 @@ export default defineNuxtConfig({
     },
 
     scheduledTasks: {
-      "0 * * * *": ["sessions:purge"],
+      "0 * * * *": ["database:purge"],
     },
 
     storage: {

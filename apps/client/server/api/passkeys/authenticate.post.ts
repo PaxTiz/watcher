@@ -1,12 +1,13 @@
-import { createError } from "nuxt/server";
+import { createError, defineEventHandler } from "nuxt/server";
 
 import { withHttpErrors } from "#framework";
 import { defineWebAuthnAuthenticateEventHandler } from "#framework/auth";
 import { services } from "#framework/server";
+import { get_client_ip, useRateLimiter } from "#server/lib/rate_limiter";
 import { start_user_session } from "#server/utils/session";
 import { require_user_verification, require_webauthn_rp_id } from "#server/utils/webauthn";
 
-export default defineWebAuthnAuthenticateEventHandler({
+const authenticate_handler = defineWebAuthnAuthenticateEventHandler({
   async storeChallenge(_event, challenge, attempt_id) {
     await services.passkeys.store_challenge(attempt_id, challenge);
   },
@@ -43,4 +44,13 @@ export default defineWebAuthnAuthenticateEventHandler({
       id: credential.id,
     });
   },
+});
+
+export default defineEventHandler(async (event) => {
+  const ip = get_client_ip(event);
+  if (ip) {
+    await useRateLimiter("passkeys_authenticate").consume(event, ip);
+  }
+
+  return authenticate_handler(event);
 });

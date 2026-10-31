@@ -2,6 +2,7 @@ import { createError } from "nuxt/server";
 
 import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { useRateLimiter } from "#server/lib/rate_limiter";
 import { to_proxy_url } from "#server/utils/proxy";
 import { require_user } from "#server/utils/session";
 import { videosValidatorsSchema } from "#shared/validators/videos";
@@ -11,6 +12,8 @@ export default defineRoute({
 
   async handler(event, { params }) {
     const user = require_user(event);
+
+    await useRateLimiter("video_url").consume(event, user.id);
 
     const response = await services.videos.get_url(user, params.id);
     if (!response.url) {

@@ -1,6 +1,5 @@
 import { BadRequestError, type PasskeyResource } from "@watcher/common";
-import { passkeys } from "@watcher/database";
-import { useStorage } from "nitropack/runtime";
+import { passkeys, webauthnChallenges } from "@watcher/database";
 
 import type { WebAuthnCredential } from "#auth-utils";
 import { AbstractService } from "#framework";
@@ -64,25 +63,21 @@ export default class PasskeysService extends AbstractService {
   }
 
   async store_challenge(attempt_id: string, challenge: string) {
-    // The memory driver ignores `ttl`, so the expiration is stored alongside the challenge
-    await useStorage().setItem(`webauthn:challenges:${attempt_id}`, {
-      challenge,
-      expires_at: Date.now() + CHALLENGE_TTL * 1000,
+    await webauthnChallenges.create({
+      data: {
+        id: attempt_id,
+        challenge,
+        expires_at: new Date(Date.now() + CHALLENGE_TTL * 1000).toISOString(),
+      },
     });
   }
 
-  // Challenges are single-use: consuming one removes it from the storage.
   async consume_challenge(attempt_id: string) {
-    const storage = useStorage();
-    const key = `webauthn:challenges:${attempt_id}`;
-
-    const item = await storage.getItem<{ challenge: string; expires_at: number }>(key);
-    await storage.removeItem(key);
-
-    if (!item || item.expires_at < Date.now()) {
+    const challenge = await webauthnChallenges.consume({ id: attempt_id });
+    if (!challenge) {
       throw new BadRequestError({ message: "challenge_expired" });
     }
 
-    return item.challenge;
+    return challenge;
   }
 }

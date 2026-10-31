@@ -4,6 +4,7 @@ export const useOAuthRedirectionHandler = () => {
   const route = useRoute();
   const router = useRouter();
   const { t } = useNuxtApp().$i18n;
+  const { errors } = useFormatter();
 
   const providers: Record<string, string> = {
     google: "Google",
@@ -25,6 +26,7 @@ export const useOAuthRedirectionHandler = () => {
   const messages: Record<string, string> = {
     already_linked: t("integrations.oauth.already_linked", { provider }),
     link_not_requested: t("integrations.oauth.link_not_requested", { provider }),
+    too_many_attempts: errors.too_many_attempts(Number(route.query.retry_after) || undefined),
     default_error: t("integrations.oauth.failed", { provider }),
   };
 
@@ -45,6 +47,7 @@ export const useOAuthRedirectionHandler = () => {
       "oauth-state": undefined,
       provider: undefined,
       error: undefined,
+      retry_after: undefined,
     },
   });
 };
