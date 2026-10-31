@@ -8,10 +8,6 @@ export default defineNuxtConfig({
     compatibilityVersion: 5,
   },
 
-  experimental: {
-    nitroAutoImports: true,
-  },
-
   typescript: {
     strict: true,
   },
@@ -92,6 +88,16 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    // Server code imports everything explicitly (`nuxt/server`, `nitropack/runtime`,
+    // `#framework/auth` for nuxt-auth-utils, `#server/...`): nothing is injected implicitly
+    imports: {
+      autoImport: false,
+
+      // Only reachable through `#imports`: `@nuxtjs/i18n` (10.6.0) still imports it from there in
+      // its shared runtime, and Nitro no longer provides it with `nitroAutoImports: false`
+      imports: [{ name: "useRuntimeConfig", from: "nitropack/runtime" }],
+    },
+
     experimental: {
       tasks: true,
     },

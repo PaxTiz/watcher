@@ -10,18 +10,18 @@ import type {
 
 export type ApiError = { status: number; message?: string };
 
-type ResponseError = { statusCode?: number };
+type ResponseError = { status?: number };
 
 // Business-rule errors (`UnprocessableEntityError`) are meant to be displayed by the caller
 const NON_FATAL_STATUS_CODES = [422];
 
 const toFatalError = (error: MaybeRef<ResponseError | null | undefined>): NuxtError | undefined => {
   const e = unref(error);
-  if (!e || (e.statusCode && NON_FATAL_STATUS_CODES.includes(e.statusCode))) {
+  if (!e || (e.status && NON_FATAL_STATUS_CODES.includes(e.status))) {
     return;
   }
 
-  return createError({ statusCode: e.statusCode, fatal: true });
+  return createError({ status: e.status, fatal: true });
 };
 
 // Shows the error page when a read fails, unless `fatal: false` is passed. Awaiting the
@@ -102,7 +102,7 @@ export const callApi = async <
     const fetchError = error as FetchError<{ message?: string }>;
 
     const apiError: ApiError = {
-      status: fetchError.statusCode ?? 500,
+      status: fetchError.status ?? 500,
       message: fetchError.data?.message,
     };
 

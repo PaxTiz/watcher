@@ -1,5 +1,8 @@
+import { createError } from "nuxt/server";
+
 import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { require_user } from "#server/utils/session";
 import { passkeysValidatorsSchema } from "#shared/validators/passkeys";
 
 export default defineRoute({
@@ -11,7 +14,7 @@ export default defineRoute({
 
     const renamed = await services.passkeys.rename(user.id, params.id, body.name);
     if (!renamed) {
-      throw createError({ statusCode: 404, message: "passkey_not_found" });
+      throw createError({ status: 404, message: "passkey_not_found" });
     }
   },
 });

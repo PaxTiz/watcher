@@ -1,4 +1,5 @@
 import { sessions } from "@watcher/database";
+import { defineTask } from "nitropack/runtime";
 
 export default defineTask({
   meta: {

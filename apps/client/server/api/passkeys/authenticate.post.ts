@@ -1,5 +1,10 @@
+import { createError } from "nuxt/server";
+
 import { withHttpErrors } from "#framework";
+import { defineWebAuthnAuthenticateEventHandler } from "#framework/auth";
 import { services } from "#framework/server";
+import { start_user_session } from "#server/utils/session";
+import { require_user_verification, require_webauthn_rp_id } from "#server/utils/webauthn";
 
 export default defineWebAuthnAuthenticateEventHandler({
   async storeChallenge(_event, challenge, attempt_id) {
@@ -11,13 +16,13 @@ export default defineWebAuthnAuthenticateEventHandler({
   },
 
   getOptions(event) {
-    return { rpID: require_webauthn_rp_id(to_h3_event(event)), userVerification: "required" };
+    return { rpID: require_webauthn_rp_id(event), userVerification: "required" };
   },
 
   async getCredential(_event, credential_id) {
     const credential = await services.passkeys.find_by_id(credential_id);
     if (!credential) {
-      throw createError({ statusCode: 401, message: "unknown_passkey" });
+      throw createError({ status: 401, message: "unknown_passkey" });
     }
 
     return credential;
@@ -30,10 +35,10 @@ export default defineWebAuthnAuthenticateEventHandler({
 
     const database_user = await services.users.find_by_id(credential.userId);
     if (!database_user) {
-      throw createError({ statusCode: 401, message: "unknown_passkey" });
+      throw createError({ status: 401, message: "unknown_passkey" });
     }
 
-    await start_user_session(to_h3_event(event), database_user, {
+    await start_user_session(event, database_user, {
       integration: "passkey",
       id: credential.id,
     });

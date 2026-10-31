@@ -1,5 +1,6 @@
 import { join } from "node:path";
 
+import { useRuntimeConfig } from "nuxt/server";
 import pino from "pino";
 
 const _localTransporter = () =>

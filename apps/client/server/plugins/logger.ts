@@ -1,4 +1,6 @@
-import { H3Event } from "h3";
+import { getRequestURL, getResponseStatus, type H3Event } from "h3";
+import { defineNitroPlugin } from "nitropack/runtime";
+import { useRuntimeConfig } from "nuxt/server";
 
 // https://github.com/honojs/hono/blob/fe689eceb7834db653a64ecae5f8d203d9c23b9a/src/middleware/logger/index.ts
 

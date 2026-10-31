@@ -4,6 +4,7 @@ import { credentials, type DatabaseSchema } from "@watcher/database";
 import { AbstractService, useLogger } from "#framework";
 import { useGoogle } from "#server/lib/google";
 import { useTwitch } from "#server/lib/twitch";
+import { decrypt, encrypt } from "#server/utils/encryption";
 
 export default class CredentialsService extends AbstractService {
   async get(user_id: string, service: CredentialsType): Promise<ServiceCredentials | null> {

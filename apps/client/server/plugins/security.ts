@@ -1,5 +1,8 @@
 import { randomBytes } from "node:crypto";
 
+import { defineNitroPlugin } from "nitropack/runtime";
+import { useServerHooks } from "nuxt/server";
+
 const SECURITY_HEADERS = {
   // Force HTTPS
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
@@ -50,7 +53,7 @@ export default defineNitroPlugin((app) => {
     event.node.res.setHeaders(new Map(Object.entries(headers)));
   });
 
-  app.hooks.hook("render:html", (html, { event }) => {
+  useServerHooks().hook("render:html", (html, { event }) => {
     const nonce = randomBytes(16).toString("base64");
     const add_nonce = (chunk: string) =>
       chunk.replaceAll(/<script(?=[\s>])/g, `<script nonce="${nonce}"`);

@@ -1,5 +1,6 @@
 import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { require_user } from "#server/utils/session";
 import { subscriptionsValidatorsSchema } from "#shared/validators/subscriptions";
 
 export default defineRoute({

@@ -2,6 +2,7 @@ import { z } from "zod/mini";
 
 import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { require_user } from "#server/utils/session";
 import { videosValidatorsSchema } from "#shared/validators/videos";
 
 export default defineRoute({

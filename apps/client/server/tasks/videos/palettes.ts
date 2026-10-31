@@ -1,5 +1,7 @@
 import { videos } from "@watcher/database";
+import { defineTask } from "nitropack/runtime";
 
+import { extract_image_palette } from "#server/utils/palette";
 import { async_pool } from "#shared/utils/random";
 
 const BATCH_SIZE = 200;

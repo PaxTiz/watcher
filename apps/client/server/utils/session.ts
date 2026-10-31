@@ -1,20 +1,21 @@
 import type { UserResource } from "@watcher/common";
-import { type H3Event } from "h3";
+import { createError, getRequestHeader, type RequestEvent } from "nuxt/server";
 
 import type { User } from "#auth-utils";
+import { replaceUserSession } from "#framework/auth";
 import { services } from "#framework/server";
 
 const SESSION_DURATION = 3600 * 24 * 7; // one week, in seconds
 
-declare module "h3" {
-  interface H3EventContext {
+declare module "nuxt/schema" {
+  interface RequestEventContext {
     user?: User;
     session_id?: string;
   }
 }
 
 export const start_user_session = async (
-  event: H3Event,
+  event: RequestEvent,
   user: UserResource,
   login_with: User["login_with"],
 ) => {
@@ -53,19 +54,19 @@ export const start_user_session = async (
   event.context.session_id = session_id;
 };
 
-export const get_user = (event: H3Event): User | null => event.context.user ?? null;
+export const get_user = (event: RequestEvent): User | null => event.context.user ?? null;
 
-export const require_user = (event: H3Event): User => {
+export const require_user = (event: RequestEvent): User => {
   if (!event.context.user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
+    throw createError({ status: 401, message: "Unauthorized" });
   }
 
   return event.context.user;
 };
 
-export const require_session_id = (event: H3Event): string => {
+export const require_session_id = (event: RequestEvent): string => {
   if (!event.context.session_id) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
+    throw createError({ status: 401, message: "Unauthorized" });
   }
 
   return event.context.session_id;

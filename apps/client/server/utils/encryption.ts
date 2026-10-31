@@ -1,5 +1,7 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 
+import { useRuntimeConfig } from "nuxt/server";
+
 type TokenType = "access_token" | "refresh_token";
 
 const ALGORITHM = "aes-256-gcm";

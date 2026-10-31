@@ -9,6 +9,8 @@ import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useTwitch } from "#server/lib/twitch";
+import { read_image_response } from "#server/utils/images";
+import { extract_image_palette } from "#server/utils/palette";
 import type { Sync } from "#shared/types/sync";
 import { async_pool } from "#shared/utils/random";
 import { to_subscription_slug } from "#shared/utils/subscriptions";

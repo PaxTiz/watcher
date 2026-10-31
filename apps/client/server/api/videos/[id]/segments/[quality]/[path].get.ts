@@ -1,10 +1,14 @@
+import { createError } from "nuxt/server";
+
 import { defineRoute } from "#framework";
+import { to_proxy_url, verify_proxy_url } from "#server/utils/proxy";
+import { require_user } from "#server/utils/session";
 import { videosValidatorsSchema } from "#shared/validators/videos";
 
 const fetch_upstream = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
-    throw createError({ statusCode: 502 });
+    throw createError({ status: 502 });
   }
 
   return response;
@@ -19,7 +23,7 @@ export default defineRoute({
 
     const base_url = query.base_url;
     if (!verify_proxy_url(params.id, base_url, query.signature)) {
-      throw createError({ statusCode: 403 });
+      throw createError({ status: 403 });
     }
 
     const base_path = base_url.slice(0, base_url.lastIndexOf("/"));

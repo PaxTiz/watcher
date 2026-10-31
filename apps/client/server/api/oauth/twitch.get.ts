@@ -1,8 +1,11 @@
 import { add } from "date-fns";
-import { defineEventHandler } from "nuxt/server";
+import { defineEventHandler, sendRedirect } from "nuxt/server";
 
 import { useLogger } from "#framework";
+import { defineOAuthTwitchEventHandler } from "#framework/auth";
 import { services } from "#framework/server";
+import { consume_link_intent, handle_link_intent } from "#server/utils/oauth";
+import { get_user, start_user_session } from "#server/utils/session";
 
 const oauth_handler = defineOAuthTwitchEventHandler({
   config: {
@@ -10,7 +13,7 @@ const oauth_handler = defineOAuthTwitchEventHandler({
   },
 
   async onSuccess(request_event, { user, tokens }) {
-    const event = to_h3_event(request_event);
+    const event = request_event;
 
     try {
       const sessionUser = get_user(event);
@@ -69,7 +72,7 @@ const oauth_handler = defineOAuthTwitchEventHandler({
   },
 
   onError(request_event, error) {
-    const event = to_h3_event(request_event);
+    const event = request_event;
 
     useLogger("oauth.twitch.onError").error(error);
     return sendRedirect(event, "/?provider=twitch&oauth-state=error");
@@ -77,7 +80,7 @@ const oauth_handler = defineOAuthTwitchEventHandler({
 });
 
 export default defineEventHandler(async (event) => {
-  await handle_link_intent(to_h3_event(event), "twitch");
+  await handle_link_intent(event, "twitch");
 
   return oauth_handler(event);
 });

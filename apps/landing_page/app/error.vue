@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 const props = defineProps<{
-  error?: { statusCode: number; statusMessage?: string; message?: string };
+  error?: { status?: number; statusText?: string; message?: string };
 }>();
 
 const { t } = useI18n();
 
-const statusCode = computed(() => props.error?.statusCode ?? 404);
-const isNotFound = computed(() => statusCode.value === 404);
+const status = computed(() => props.error?.status ?? 404);
+const isNotFound = computed(() => status.value === 404);
 const title = computed(() => t(isNotFound.value ? "error.not_found.title" : "error.generic.title"));
 const description = computed(() =>
   t(isNotFound.value ? "error.not_found.description" : "error.generic.description"),
@@ -28,7 +28,7 @@ function handleBackHome() {
   <main id="main-content">
     <section class="flex min-h-[70vh] items-center pt-24">
       <div class="container">
-        <p class="text-alt font-mono text-sm">{{ statusCode }}</p>
+        <p class="text-alt font-mono text-sm">{{ status }}</p>
         <TwoToneTitle
           as="h1"
           size="hero"

@@ -1,6 +1,7 @@
 import type { Paginated, SubscriptionType, VideoResource } from "@watcher/common";
 import { findOrFail, repositoryTypes, videos } from "@watcher/database";
 import { formatISO, startOfDay, sub } from "date-fns";
+import { useRuntimeConfig } from "nuxt/server";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";

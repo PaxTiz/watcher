@@ -4,6 +4,7 @@ import type { VideoPalette } from "@watcher/common";
 import sharp from "sharp";
 
 import { useLogger } from "#framework";
+import { MAX_IMAGE_PIXELS } from "#server/utils/images";
 
 const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads");
 

@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { createResolver, defineNuxtModule } from "nuxt/kit";
 
+import { buildAuth } from "./builders/build_auth.ts";
 import { buildClient } from "./builders/build_client.ts";
 import { buildIndex } from "./builders/build_index.ts";
 import { buildServer } from "./builders/build_server.ts";
@@ -24,10 +25,12 @@ export default defineNuxtModule({
 
     nuxt.options.alias["#framework/client"] = join(rootDir, "client.ts");
     nuxt.options.alias["#framework/server"] = join(rootDir, "server.ts");
+    nuxt.options.alias["#framework/auth"] = join(rootDir, "auth.ts");
     nuxt.options.alias["#framework"] = join(rootDir, "index.ts");
 
     await buildIndex(rootDir);
     await buildClient(rootDir);
     await buildServer(nuxt.options.rootDir, rootDir);
+    await buildAuth(nuxt.options.rootDir, rootDir);
   },
 });

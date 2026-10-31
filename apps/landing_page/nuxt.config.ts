@@ -6,10 +6,6 @@ export default defineNuxtConfig({
     compatibilityVersion: 5,
   },
 
-  experimental: {
-    nitroAutoImports: true,
-  },
-
   typescript: {
     strict: true,
   },

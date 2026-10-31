@@ -1,5 +1,8 @@
+import { createError } from "nuxt/server";
+
 import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { require_user } from "#server/utils/session";
 import { integrationsValidatorsSchema } from "#shared/validators/integrations";
 
 export default defineRoute({
@@ -10,12 +13,12 @@ export default defineRoute({
 
     const service_id = user.integrations[params.provider];
     if (!service_id) {
-      throw createError({ statusCode: 404, message: "integration_not_found" });
+      throw createError({ status: 404, message: "integration_not_found" });
     }
 
     // Prevents the user from locking themselves out of their account
     if ((await services.users.count_login_methods(user)) <= 1) {
-      throw createError({ statusCode: 409, message: "last_login_method" });
+      throw createError({ status: 409, message: "last_login_method" });
     }
 
     await services.credentials.delete(user.id, params.provider);

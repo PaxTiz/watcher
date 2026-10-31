@@ -1,9 +1,13 @@
+import { defineEventHandler } from "nuxt/server";
+
+import { clearUserSession, getUserSession } from "#framework/auth";
 import { services } from "#framework/server";
 
 // Checks the session cookie against the `sessions` table, and loads the user from the
 // database: a revoked or expired session is cleared, whatever the cookie still contains.
 export default defineEventHandler(async (event) => {
-  if (!event.path.startsWith("/api/") || event.path.startsWith("/api/_nuxt_icon")) {
+  const { pathname } = event.url;
+  if (!pathname.startsWith("/api/") || pathname.startsWith("/api/_nuxt_icon")) {
     return;
   }
 

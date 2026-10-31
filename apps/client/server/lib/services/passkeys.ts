@@ -1,5 +1,6 @@
 import { BadRequestError, type PasskeyResource } from "@watcher/common";
 import { passkeys } from "@watcher/database";
+import { useStorage } from "nitropack/runtime";
 
 import type { WebAuthnCredential } from "#auth-utils";
 import { AbstractService } from "#framework";

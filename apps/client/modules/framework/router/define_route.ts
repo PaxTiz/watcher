@@ -1,10 +1,11 @@
 import {
-  H3Event,
+  createError,
   defineEventHandler,
-  readValidatedBody,
+  getRouterParams,
   getValidatedQuery,
-  getValidatedRouterParams,
-} from "h3";
+  readValidatedBody,
+  type RequestEvent,
+} from "nuxt/server";
 import { type ZodMiniType, type infer as zodInfer } from "zod/mini";
 
 import { withHttpErrors } from "./http_errors";
@@ -33,7 +34,23 @@ type Route<
 
   params?: Params;
 
-  handler: (event: H3Event, input: RouteHandler<Body, Query, Params>) => Promise<O>;
+  handler: (event: RequestEvent, input: RouteHandler<Body, Query, Params>) => Promise<O>;
+};
+
+// `nuxt/server` has no `getValidatedRouterParams`: same error as `getValidatedQuery`/`readValidatedBody`
+const validate_params = async <Params extends ZodMiniType>(event: RequestEvent, schema: Params) => {
+  const result = await schema["~standard"].validate(getRouterParams(event));
+
+  if (result.issues) {
+    throw createError({
+      status: 400,
+      statusText: "Validation failed",
+      message: "Validation failed",
+      data: { issues: result.issues, message: "Validation failed" },
+    });
+  }
+
+  return result.value as zodInfer<Params>;
 };
 
 export const defineRoute = <
@@ -46,14 +63,9 @@ export const defineRoute = <
 ) => {
   return defineEventHandler(async (event) => {
     const [body, query, params] = await Promise.all([
-      // oxlint-disable-next-line
-      route.body ? readValidatedBody(event, route.body.parse) : Promise.resolve(null),
-
-      // oxlint-disable-next-line
-      route.query ? getValidatedQuery(event, route.query.parse) : Promise.resolve(null),
-
-      // oxlint-disable-next-line
-      route.params ? getValidatedRouterParams(event, route.params.parse) : Promise.resolve(null),
+      route.body ? readValidatedBody(event, route.body) : Promise.resolve(null),
+      route.query ? getValidatedQuery(event, route.query) : Promise.resolve(null),
+      route.params ? validate_params(event, route.params) : Promise.resolve(null),
     ]);
 
     return withHttpErrors(() =>

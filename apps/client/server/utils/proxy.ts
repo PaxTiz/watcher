@@ -1,5 +1,7 @@
 import { createHmac, hkdfSync, timingSafeEqual } from "node:crypto";
 
+import { useRuntimeConfig } from "nuxt/server";
+
 // Derived from an existing secret so the proxy doesn't need its own env variable
 const get_key = () => {
   const secret = Buffer.from(useRuntimeConfig().encryption.credentials.access_token, "hex");

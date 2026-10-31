@@ -1,8 +1,10 @@
 import { credentials, type DatabaseSchema } from "@watcher/database";
 import { type Client, createClient } from "@watcher/integration-twitch";
 import { differenceInSeconds } from "date-fns";
+import { useStorage } from "nitropack/runtime";
+import { useRuntimeConfig } from "nuxt/server";
 
-import { decrypt, encrypt } from "../utils/encryption";
+import { decrypt, encrypt } from "#server/utils/encryption";
 
 let _client: Client | null = null;
 
