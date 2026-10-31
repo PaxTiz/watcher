@@ -58,18 +58,16 @@ defineExpose({
       <SelectPortal>
         <Transition appear>
           <SelectContent
-            class="menu-surface absolute z-1000 mt-2 flex w-max min-w-[var(--reka-select-trigger-width)] flex-col"
+            class="menu-surface z-1000 flex w-max min-w-[max(var(--reka-select-trigger-width),11rem)] flex-col"
             position="popper"
             :side-offset="5"
           >
             <SelectViewport>
-              <SelectItem value="none" class="menu-item relative pl-8 select-none">
-                <span class="absolute left-2.5 flex h-3.5 w-3.5 items-center justify-center">
-                  <SelectItemIndicator>
-                    <Icon name="lucide:check" class="size-4" />
-                  </SelectItemIndicator>
-                </span>
-                <SelectItemText>{{ placeholder ?? "-" }}</SelectItemText>
+              <SelectItem value="none" class="menu-item data-[state=checked]:font-medium">
+                <SelectItemText class="flex-1">{{ placeholder ?? "-" }}</SelectItemText>
+                <SelectItemIndicator class="ml-auto flex shrink-0">
+                  <Icon name="lucide:check" class="!text-alt" />
+                </SelectItemIndicator>
               </SelectItem>
 
               <SelectItem
@@ -77,14 +75,12 @@ defineExpose({
                 :key="item.value"
                 :value="item.value"
                 :disabled="item.disabled"
-                class="menu-item relative pl-8 select-none"
+                class="menu-item data-[state=checked]:font-medium"
               >
-                <span class="absolute left-2.5 flex h-3.5 w-3.5 items-center justify-center">
-                  <SelectItemIndicator>
-                    <Icon name="lucide:check" class="size-4" />
-                  </SelectItemIndicator>
-                </span>
-                <SelectItemText>{{ item.label }}</SelectItemText>
+                <SelectItemText class="flex-1">{{ item.label }}</SelectItemText>
+                <SelectItemIndicator class="ml-auto flex shrink-0">
+                  <Icon name="lucide:check" class="!text-alt" />
+                </SelectItemIndicator>
               </SelectItem>
             </SelectViewport>
           </SelectContent>
