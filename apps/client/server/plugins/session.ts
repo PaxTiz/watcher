@@ -4,7 +4,7 @@ export default defineNitroPlugin(() => {
   // `GET /api/_auth/session` reads the cookie: expose the user checked by the session middleware
   // instead, so the client never sees a revoked session or stale user data.
   sessionHooks.hook("fetch", (session, event) => {
-    session.user = event.context.user;
+    session.user = to_h3_event(event).context.user;
   });
 
   sessionHooks.hook("clear", async (session) => {

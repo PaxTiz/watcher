@@ -10,8 +10,8 @@ export default defineWebAuthnAuthenticateEventHandler({
     return withHttpErrors(() => services.passkeys.consume_challenge(attempt_id));
   },
 
-  getOptions() {
-    return { userVerification: "preferred" };
+  getOptions(event) {
+    return { rpID: require_webauthn_rp_id(to_h3_event(event)), userVerification: "required" };
   },
 
   async getCredential(_event, credential_id) {
@@ -24,6 +24,8 @@ export default defineWebAuthnAuthenticateEventHandler({
   },
 
   async onSuccess(event, { credential, authenticationInfo }) {
+    require_user_verification(authenticationInfo.userVerified);
+
     await services.passkeys.mark_as_used(credential.id, authenticationInfo.newCounter);
 
     const database_user = await services.users.find_by_id(credential.userId);
@@ -31,6 +33,9 @@ export default defineWebAuthnAuthenticateEventHandler({
       throw createError({ statusCode: 401, message: "unknown_passkey" });
     }
 
-    await start_user_session(event, database_user, { integration: "passkey", id: credential.id });
+    await start_user_session(to_h3_event(event), database_user, {
+      integration: "passkey",
+      id: credential.id,
+    });
   },
 });

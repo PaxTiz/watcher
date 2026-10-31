@@ -92,6 +92,8 @@ export default {
       already_registered: "This passkey is already linked to your account",
       unknown: "This passkey isn't linked to any Watcher account",
       expired: "The request has expired, please try again",
+      user_verification_required:
+        "Your device must confirm your identity (PIN, fingerprint or face)",
       login: "Something went wrong while logging in with your passkey",
       add: "Something went wrong while adding your passkey",
     },
@@ -180,6 +182,7 @@ export default {
     oauth: {
       success: "Your {provider} account is now connected",
       already_linked: "This {provider} account is already linked to another Watcher account.",
+      link_not_requested: "Connect {provider} from the settings page to link it to your account.",
       failed: "Something went wrong while connecting to your {provider} account",
     },
   },

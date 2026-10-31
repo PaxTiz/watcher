@@ -1,4 +1,4 @@
-import type { SessionLoginWith, UserResource } from "@watcher/common";
+import type { CredentialsType, SessionLoginWith, UserResource } from "@watcher/common";
 
 declare module "#auth-utils" {
   interface User extends UserResource {
@@ -15,6 +15,12 @@ declare module "#auth-utils" {
   interface SecureSessionData {
     // Server-side session (`sessions` table): the cookie is only valid while this row exists
     session_id: string;
+
+    // Set when the user asks to link a provider, see `server/utils/oauth.ts`
+    link_intent?: {
+      provider: CredentialsType;
+      expires_at: number;
+    };
   }
 }
 

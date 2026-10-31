@@ -292,14 +292,18 @@ export default class SyncTwitch extends AbstractService {
       return { etag: subscription.channel.logo_etag, logo: subscription.channel.logo_local };
     }
 
+    const image = await read_image_response(response);
+    if (!image) {
+      return { etag: subscription.channel.logo_etag, logo: subscription.channel.logo_local };
+    }
+
     const etag = response.headers.get("etag");
-    const image = await response.arrayBuffer();
 
     this.createImageDirectory("channels", subscription.channel.service_id);
 
     await writeFile(
       join(UPLOADS_DIRECTORY, "channels", subscription.channel.service_id, `logo.jpg`),
-      Buffer.from(image),
+      image,
     );
 
     this.createImageDirectory("channels", subscription.channel.service_id, "videos");
@@ -358,8 +362,12 @@ export default class SyncTwitch extends AbstractService {
         return;
       }
 
+      const image = await read_image_response(response);
+      if (!image) {
+        return;
+      }
+
       const etag = response.headers.get("etag");
-      const image = await response.arrayBuffer();
 
       await writeFile(
         join(
@@ -369,7 +377,7 @@ export default class SyncTwitch extends AbstractService {
           "videos",
           `${video.video.service_id}_${key}.jpg`,
         ),
-        Buffer.from(image),
+        image,
       );
 
       paths[key] = {

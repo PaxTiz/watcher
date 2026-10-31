@@ -94,6 +94,8 @@ export default {
       already_registered: "Cette clé d'accès est déjà associée à votre compte",
       unknown: "Cette clé d'accès n'est associée à aucun compte Watcher",
       expired: "La demande a expiré, veuillez réessayer",
+      user_verification_required:
+        "Votre appareil doit confirmer votre identité (code PIN, empreinte ou visage)",
       login: "Une erreur est survenue lors de la connexion avec votre clé d'accès",
       add: "Une erreur est survenue lors de l'ajout de votre clé d'accès",
     },
@@ -183,6 +185,8 @@ export default {
     oauth: {
       success: "Votre compte {provider} est désormais connecté",
       already_linked: "Ce compte {provider} est déjà lié à un autre compte Watcher.",
+      link_not_requested:
+        "Connectez {provider} depuis la page Paramètres pour le lier à votre compte.",
       failed: "Une erreur est survenue lors de la connexion à votre compte {provider}",
     },
   },

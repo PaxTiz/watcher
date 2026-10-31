@@ -1,7 +1,9 @@
 import type { CredentialsType, ServiceCredentials } from "@watcher/common";
 import { credentials, type DatabaseSchema } from "@watcher/database";
 
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
+import { useGoogle } from "#server/lib/google";
+import { useTwitch } from "#server/lib/twitch";
 
 export default class CredentialsService extends AbstractService {
   async get(user_id: string, service: CredentialsType): Promise<ServiceCredentials | null> {
@@ -36,7 +38,42 @@ export default class CredentialsService extends AbstractService {
   }
 
   async delete(user_id: string, service: CredentialsType) {
+    const credential = await this.get(user_id, service);
+    if (!credential) {
+      return;
+    }
+
+    await this.revoke(credential);
     await credentials.remove({ user_id, service });
+  }
+
+  async revoke_all(user_id: string) {
+    const rows = await credentials.find_all_by_user({ user_id });
+
+    for (const { service } of rows) {
+      const credential = await this.get(user_id, service);
+      if (credential) {
+        await this.revoke(credential);
+      }
+    }
+  }
+
+  private async revoke(credential: ServiceCredentials) {
+    const revocations =
+      credential.service === "google"
+        ? [useGoogle().revoke_token(credential.refresh_token)]
+        : [
+            useTwitch().revoke_token(credential.access_token),
+            useTwitch().revoke_token(credential.refresh_token),
+          ];
+
+    const results = await Promise.allSettled(revocations);
+    if (results.every((result) => result.status === "rejected")) {
+      useLogger("services.credentials.revoke").warn(
+        { err: results.map((result) => result.reason), service: credential.service },
+        "Failed to revoke the provider tokens",
+      );
+    }
   }
 
   private to_service_credentials(row: DatabaseSchema["credentials"]): ServiceCredentials {

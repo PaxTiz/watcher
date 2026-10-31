@@ -11,6 +11,8 @@ import type {
   RemoveAllByUserOutput,
   RemoveByLoginMethodInput,
   RemoveByLoginMethodOutput,
+  RemoveExpiredInput,
+  RemoveExpiredOutput,
   RemoveInput,
   RemoveOutput,
   TouchInput,
@@ -127,4 +129,17 @@ export async function remove_by_login_method({
   }
 
   await query.execute();
+}
+
+export async function remove_expired({
+  options,
+}: RemoveExpiredInput = {}): Promise<RemoveExpiredOutput> {
+  const database = resolveDatabase(options);
+
+  const result = await database
+    .deleteFrom("sessions")
+    .where("expires_at", "<=", sql<string>`CURRENT_TIMESTAMP`)
+    .executeTakeFirst();
+
+  return Number(result.numDeletedRows);
 }

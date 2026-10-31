@@ -13,10 +13,10 @@ export const videosValidatorsSchema = defineValidator({
 
   list: {
     query: z.object({
-      page: z.coerce.number().check(z.gte(1)),
-      per_page: z._default(z.coerce.number(), 21),
+      page: z.coerce.number().check(z.int(), z.gte(1), z.lte(1000)),
+      per_page: z._default(z.coerce.number().check(z.int(), z.gte(1), z.lte(50)), 21),
       before: z.optional(z.uuidv7()),
-      query: z.optional(z.string()),
+      query: z.optional(z.string().check(z.maxLength(100))),
       service: z.optional(z.enum(["youtube", "twitch"])),
       is_favorite: z.optional(booleanSchema),
       in_progress: z.optional(booleanSchema),
@@ -43,12 +43,12 @@ export const videosValidatorsSchema = defineValidator({
   segment: {
     query: z.object({
       base_url: z.url({ protocol: /^https$/ }),
-      signature: z.string(),
+      signature: z.string().check(z.maxLength(64)),
     }),
     params: z.object({
       id: z.uuidv7(),
       path: z.string().check(z.regex(/^[\w-]+\.(ts|m3u8)$/)),
-      quality: z.string(),
+      quality: z.string().check(z.regex(/^[\w-]{1,32}$/)),
     }),
   },
 

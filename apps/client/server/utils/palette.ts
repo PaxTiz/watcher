@@ -81,7 +81,9 @@ const boosted_saturation = (s: number) => Math.min(1, Math.max(0.45, s * 1.4));
 
 export const extract_image_palette = async (path: string): Promise<VideoPalette | null> => {
   try {
-    const { data } = await sharp(join(UPLOADS_DIRECTORY, path))
+    const { data } = await sharp(join(UPLOADS_DIRECTORY, path), {
+      limitInputPixels: MAX_IMAGE_PIXELS,
+    })
       .resize(SAMPLE_WIDTH, SAMPLE_HEIGHT, { fit: "fill" })
       .removeAlpha()
       .raw()

@@ -7,6 +7,7 @@ const ERRORS: Record<string, string> = {
   InvalidStateError: "passkeys.errors.already_registered",
   unknown_passkey: "passkeys.errors.unknown",
   challenge_expired: "passkeys.errors.expired",
+  user_verification_required: "passkeys.errors.user_verification_required",
 };
 
 const error_message = (error: unknown, fallback: string) => {

@@ -15,18 +15,19 @@ export default defineWebAuthnRegisterEventHandler<{
     return withHttpErrors(() => services.passkeys.consume_challenge(attempt_id));
   },
 
-  getOptions() {
+  getOptions(event) {
     return {
+      rpID: require_webauthn_rp_id(to_h3_event(event)),
       rpName: "Watcher",
       authenticatorSelection: {
         residentKey: "required",
-        userVerification: "preferred",
+        userVerification: "required",
       },
     };
   },
 
   async validateUser(body, event) {
-    const user = require_user(event);
+    const user = require_user(to_h3_event(event));
 
     const { name } = passkeysValidatorsSchema.name.body.parse({ name: body.passkeyName });
 
@@ -34,15 +35,17 @@ export default defineWebAuthnRegisterEventHandler<{
   },
 
   async excludeCredentials(event) {
-    const user = require_user(event);
+    const user = require_user(to_h3_event(event));
 
     const passkeys = await services.passkeys.list(user.id);
 
     return passkeys.map((passkey) => ({ id: passkey.id }));
   },
 
-  async onSuccess(event, { user, credential }) {
-    const session_user = require_user(event);
+  async onSuccess(event, { user, credential, registrationInfo }) {
+    const session_user = require_user(to_h3_event(event));
+
+    require_user_verification(registrationInfo.userVerified);
 
     await services.passkeys.create(session_user.id, credential, user.passkeyName);
   },

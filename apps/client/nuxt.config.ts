@@ -8,6 +8,10 @@ export default defineNuxtConfig({
     compatibilityVersion: 5,
   },
 
+  experimental: {
+    nitroAutoImports: true,
+  },
+
   typescript: {
     strict: true,
   },
@@ -92,6 +96,10 @@ export default defineNuxtConfig({
       tasks: true,
     },
 
+    scheduledTasks: {
+      "0 * * * *": ["sessions:purge"],
+    },
+
     storage: {
       oauth_tokens: { driver: "lru-cache" },
     },
@@ -101,6 +109,8 @@ export default defineNuxtConfig({
     public: {
       environment: "local", // 'local' | 'production'
     },
+
+    siteUrl: "",
 
     encryption: {
       credentials: {

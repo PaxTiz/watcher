@@ -94,6 +94,8 @@ export default {
       already_registered: "Esta llave de acceso ya está vinculada a tu cuenta",
       unknown: "Esta llave de acceso no está vinculada a ninguna cuenta de Watcher",
       expired: "La solicitud ha caducado, inténtalo de nuevo",
+      user_verification_required:
+        "Tu dispositivo debe confirmar tu identidad (PIN, huella o rostro)",
       login: "Se ha producido un error al iniciar sesión con tu llave de acceso",
       add: "Se ha producido un error al añadir tu llave de acceso",
     },
@@ -184,6 +186,8 @@ export default {
     oauth: {
       success: "Tu cuenta de {provider} ya está conectada",
       already_linked: "Esta cuenta de {provider} ya está vinculada a otra cuenta de Watcher.",
+      link_not_requested:
+        "Conecta {provider} desde la página de ajustes para vincularlo a tu cuenta.",
       failed: "Se ha producido un error al conectar tu cuenta de {provider}",
     },
   },

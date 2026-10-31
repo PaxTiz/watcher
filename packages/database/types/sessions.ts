@@ -50,3 +50,6 @@ export type RemoveByLoginMethodInput = {
   options?: RepositoryContext;
 };
 export type RemoveByLoginMethodOutput = void;
+
+export type RemoveExpiredInput = { options?: RepositoryContext };
+export type RemoveExpiredOutput = number;

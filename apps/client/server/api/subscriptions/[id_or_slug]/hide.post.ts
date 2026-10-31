@@ -1,12 +1,9 @@
-import { z } from "zod/mini";
-
 import { defineRoute } from "#framework";
 import { services } from "#framework/server";
+import { subscriptionsValidatorsSchema } from "#shared/validators/subscriptions";
 
 export default defineRoute({
-  params: z.object({
-    id_or_slug: z.string(),
-  }),
+  params: subscriptionsValidatorsSchema.hide.params,
 
   async handler(event, { params }) {
     const user = require_user(event);

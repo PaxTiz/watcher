@@ -50,7 +50,7 @@ export type CredentialTable = {
 
   refresh_token: string;
 
-  refresh_token_expires_at: Date;
+  refresh_token_expires_at: Date | null;
 
   user_id: string;
 };

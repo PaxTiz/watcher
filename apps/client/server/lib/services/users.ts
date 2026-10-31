@@ -57,6 +57,7 @@ export default class UsersService extends AbstractService {
   }
 
   async delete(id: string) {
+    await services.credentials.revoke_all(id);
     await users.remove({ id });
   }
 

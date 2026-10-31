@@ -9,7 +9,7 @@
   "dependencies": {
     "date-fns": "catalog:",
     "iso8601-duration": "catalog:",
-    "nuxt": "^4.6.1",
+    "nuxt": "^4.6.3",
     "ofetch": "catalog:",
     "zod": "catalog:"
   },

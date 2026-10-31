@@ -1,22 +1,33 @@
 import { add } from "date-fns";
+import { defineEventHandler } from "nuxt/server";
 
 import { useLogger } from "#framework";
 import { services } from "#framework/server";
 
-export default defineOAuthTwitchEventHandler({
+const oauth_handler = defineOAuthTwitchEventHandler({
   config: {
     scope: ["user:read:email", "user:read:follows", "user:read:subscriptions"],
   },
 
-  async onSuccess(event, { user, tokens }) {
+  async onSuccess(request_event, { user, tokens }) {
+    const event = to_h3_event(request_event);
+
     try {
       const sessionUser = get_user(event);
+      const link_requested = await consume_link_intent(event, "twitch");
 
       const existing_credential = await services.credentials.find_by_service("twitch", user.id);
 
       let database_user;
 
       if (sessionUser) {
+        if (!link_requested) {
+          return sendRedirect(
+            event,
+            "/?provider=twitch&oauth-state=error&error=link_not_requested",
+          );
+        }
+
         if (existing_credential && existing_credential.userId !== sessionUser.id) {
           return sendRedirect(event, "/?provider=twitch&oauth-state=error&error=already_linked");
         }
@@ -37,7 +48,7 @@ export default defineOAuthTwitchEventHandler({
         access_token: tokens.access_token,
         access_token_expires_at: add(new Date(), { seconds: tokens.expires_in }),
         refresh_token: tokens.refresh_token,
-        refresh_token_expires_at: add(new Date(), { seconds: tokens.expires_in }),
+        refresh_token_expires_at: null,
       });
 
       // Linking an integration keeps the current session; otherwise, this is a login
@@ -57,8 +68,16 @@ export default defineOAuthTwitchEventHandler({
     }
   },
 
-  onError(event, error) {
+  onError(request_event, error) {
+    const event = to_h3_event(request_event);
+
     useLogger("oauth.twitch.onError").error(error);
     return sendRedirect(event, "/?provider=twitch&oauth-state=error");
   },
+});
+
+export default defineEventHandler(async (event) => {
+  await handle_link_intent(to_h3_event(event), "twitch");
+
+  return oauth_handler(event);
 });

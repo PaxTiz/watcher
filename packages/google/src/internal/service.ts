@@ -1,11 +1,13 @@
 import { add, isBefore, sub } from "date-fns";
 
-import type { GoogleClient } from "./client";
+import type { ClientTokens, GoogleClient } from "./client";
 import { oauth } from "./oauth";
 
 export type GoogleServiceRequest = {
   service_id: string;
 };
+
+const pending_refreshes = new Map<string, Promise<ClientTokens>>();
 
 export class GoogleService {
   constructor(protected client: GoogleClient) {}
@@ -30,6 +32,19 @@ export class GoogleService {
       return credentials;
     }
 
+    let pending = pending_refreshes.get(service_id);
+    if (!pending) {
+      pending = this.refresh_token(service_id, credentials).finally(() =>
+        pending_refreshes.delete(service_id),
+      );
+
+      pending_refreshes.set(service_id, pending);
+    }
+
+    return pending;
+  }
+
+  private async refresh_token(service_id: string, credentials: ClientTokens) {
     const updated_credentials = await oauth.refresh_access_token(
       this.client.settings,
       credentials.refresh_token,

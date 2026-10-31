@@ -27,6 +27,8 @@ import type {
 } from "../../types/videos";
 import { resolveDatabase, useDatabase } from "../database";
 
+const escape_like = (value: string) => value.replace(/[\\%_]/g, "\\$&");
+
 // Videos visible to the user (followed subscriptions, minus hidden videos) matching `filters`.
 // Shared by the count and the page query of `find_all_for_user` so both always agree.
 function select_visible_for_user(user_id: string, filters: FindAllForUserFilters) {
@@ -83,7 +85,7 @@ function select_visible_for_user(user_id: string, filters: FindAllForUserFilters
             "@@",
             sql<string>`(websearch_to_tsquery('french', ${filters.query!}))`,
           ),
-          eb("videos.title", "ilike", `%${filters.query!}%`),
+          eb("videos.title", "ilike", `%${escape_like(filters.query!)}%`),
         ]),
       ),
     )

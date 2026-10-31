@@ -56,8 +56,25 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
   }
 }
 
+async function revoke_token(_settings: ClientSettings, token: string) {
+  try {
+    await ofetch("https://oauth2.googleapis.com/revoke", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: {
+        token,
+      },
+    });
+  } catch (err) {
+    throw new Error("Failed to revoke Google token", { cause: err });
+  }
+}
+
 export const oauth = {
   get_current_user,
   get_access_token,
   refresh_access_token,
+  revoke_token,
 };

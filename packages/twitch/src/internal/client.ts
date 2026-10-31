@@ -1,6 +1,7 @@
 import { FollowersService } from "../followers";
 import { UsersService } from "../users";
 import { VideosService } from "../videos";
+import { oauth } from "./oauth";
 
 export type ClientTokens = {
   access_token: string;
@@ -9,7 +10,7 @@ export type ClientTokens = {
 
   refresh_token: string;
 
-  refresh_token_expires_at: Date;
+  refresh_token_expires_at: Date | null;
 };
 
 export type ClientSettings = {
@@ -34,5 +35,9 @@ export class TwitchClient {
     this.followers = new FollowersService(this);
     this.users = new UsersService(this);
     this.videos = new VideosService(this);
+  }
+
+  revoke_token(token: string) {
+    return oauth.revoke_token(this.settings, token);
   }
 }

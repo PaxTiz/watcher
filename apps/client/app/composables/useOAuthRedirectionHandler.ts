@@ -24,6 +24,7 @@ export const useOAuthRedirectionHandler = () => {
 
   const messages: Record<string, string> = {
     already_linked: t("integrations.oauth.already_linked", { provider }),
+    link_not_requested: t("integrations.oauth.link_not_requested", { provider }),
     default_error: t("integrations.oauth.failed", { provider }),
   };
 

@@ -18,7 +18,7 @@ catalog:
   "@iconify-json/lucide": ^1.2.145
   "@iconify-json/circle-flags": ^1.2.12
   reka-ui: ^2.11.0
-  nuxt: ^4.6.1
+  nuxt: ^4.6.3
   "@nuxt/fonts": ^0.14.0
   "@nuxt/icon": ^2.3.1
   "@nuxtjs/color-mode": ^4.0.1
@@ -39,3 +39,12 @@ allowBuilds:
   esbuild: true
   sharp: true
   vue-demi: true
+
+overrides:
+  sharp: ^0.35.5
+  node-forge: ^1.4.2
+
+minimumReleaseAgeExclude:
+  - "@nuxt/image@2.2.1"
+  - ipx@4.1.0
+  - nuxt-auth-utils@0.6.0

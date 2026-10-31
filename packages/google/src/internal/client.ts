@@ -1,4 +1,5 @@
 import { YoutubeService } from "../youtube";
+import { oauth } from "./oauth";
 
 export type ClientTokens = {
   access_token: string;
@@ -7,7 +8,7 @@ export type ClientTokens = {
 
   refresh_token: string;
 
-  refresh_token_expires_at: Date;
+  refresh_token_expires_at: Date | null;
 };
 
 export type ClientSettings = {
@@ -28,5 +29,9 @@ export class GoogleClient {
   constructor(options: ClientSettings) {
     this.settings = options;
     this.youtube = new YoutubeService(this);
+  }
+
+  revoke_token(token: string) {
+    return oauth.revoke_token(this.settings, token);
   }
 }

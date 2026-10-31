@@ -55,8 +55,26 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
   }
 }
 
+async function revoke_token(settings: ClientSettings, token: string) {
+  try {
+    await ofetch("https://id.twitch.tv/oauth2/revoke", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: {
+        client_id: settings.client_id,
+        token,
+      },
+    });
+  } catch (err) {
+    throw new Error("Failed to revoke Twitch token", { cause: err });
+  }
+}
+
 export const oauth = {
   get_current_user,
   get_access_token,
   refresh_access_token,
+  revoke_token,
 };
