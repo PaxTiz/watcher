@@ -101,7 +101,16 @@ export default {
         "Tu dispositivo debe confirmar tu identidad (PIN, huella o rostro)",
       login: "Se ha producido un error al iniciar sesión con tu llave de acceso",
       add: "Se ha producido un error al añadir tu llave de acceso",
+      wrong_account: "Esta llave de acceso pertenece a otra cuenta de Watcher",
     },
+  },
+
+  reauthentication: {
+    title: "Confirma tu identidad",
+    description: "Esta acción es sensible: confirma que eres tú antes de continuar.",
+    passkey: "Usar una llave de acceso",
+    integration: "Continuar con {name}",
+    failed: "No se ha podido verificar tu identidad, inténtalo más tarde",
   },
 
   sessions: {
@@ -191,6 +200,9 @@ export default {
       already_linked: "Esta cuenta de {provider} ya está vinculada a otra cuenta de Watcher.",
       link_not_requested:
         "Conecta {provider} desde la página de ajustes para vincularlo a tu cuenta.",
+      reauthenticated: "Identidad confirmada, ya puedes repetir tu acción",
+      reauthentication_required: "Confirma primero tu identidad desde la página de ajustes",
+      wrong_account: "Esta cuenta de {provider} no es la vinculada a tu cuenta de Watcher",
       failed: "Se ha producido un error al conectar tu cuenta de {provider}",
     },
   },

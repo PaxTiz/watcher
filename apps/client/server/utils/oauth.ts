@@ -1,51 +1,91 @@
-import type { CredentialsType } from "@watcher/common";
-import { getQuery, type RequestEvent } from "nuxt/server";
+import type { CredentialsType, ServiceCredentials } from "@watcher/common";
+import { getQuery, type RequestEvent, sendRedirect } from "nuxt/server";
 
 import type { SecureSessionData } from "#auth-utils";
 import { getUserSession, replaceUserSession } from "#framework/auth";
+import { services } from "#framework/server";
+import { require_session_id, require_user } from "#server/utils/session";
 
-const LINK_INTENT_TTL = 60 * 10 * 1000; // 10 minutes (the OAuth state cookie lifetime), in ms
+type OAuthIntent = NonNullable<SecureSessionData["oauth_intent"]>;
 
-const write_link_intent = async (
-  event: RequestEvent,
-  link_intent?: SecureSessionData["link_intent"],
-) => {
+const OAUTH_INTENT_TTL = 60 * 10 * 1000; // 10 minutes (the OAuth state cookie lifetime), in ms
+
+const write_oauth_intent = async (event: RequestEvent, oauth_intent?: OAuthIntent) => {
   const { user, secure } = await getUserSession(event);
-  if (!user || !secure || (!secure.link_intent && !link_intent)) {
+  if (!user || !secure || (!secure.oauth_intent && !oauth_intent)) {
     return;
   }
 
-  await replaceUserSession(event, { user, secure: { ...secure, link_intent } });
+  await replaceUserSession(event, { user, secure: { ...secure, oauth_intent } });
 };
 
-// Linking a provider to the signed-in account must be explicitly requested by the user (from the
-// settings page, `?integration=true`) at the start of the flow, then confirmed in the callback.
-// A callback reaching a signed-in session without this intent is never turned into a link.
-export const handle_link_intent = async (event: RequestEvent, provider: CredentialsType) => {
+const requested_purpose = (event: RequestEvent): OAuthIntent["purpose"] | undefined => {
+  if (!event.context.user) {
+    return;
+  }
+
   const query = getQuery(event);
 
-  // Callback: the intent is consumed by `consume_link_intent`
-  if (query.code) {
-    return;
+  if (query.integration === "true") {
+    return "link";
   }
 
-  const requested = query.integration === "true" && !!event.context.user;
-
-  await write_link_intent(
-    event,
-    requested ? { provider, expires_at: Date.now() + LINK_INTENT_TTL } : undefined,
-  );
+  return query.reauthenticate === "true" ? "reauthenticate" : undefined;
 };
 
-export const consume_link_intent = async (event: RequestEvent, provider: CredentialsType) => {
-  const { secure } = await getUserSession(event);
-  const link_intent = secure?.link_intent;
+export const handle_oauth_intent = async (event: RequestEvent, provider: CredentialsType) => {
+  if (getQuery(event).code) {
+    return true;
+  }
 
-  if (!link_intent) {
+  const purpose = requested_purpose(event);
+
+  if (
+    purpose === "link" &&
+    !(await services.sessions.is_recently_authenticated(require_session_id(event)))
+  ) {
     return false;
   }
 
-  await write_link_intent(event, undefined);
+  await write_oauth_intent(
+    event,
+    purpose ? { provider, purpose, expires_at: Date.now() + OAUTH_INTENT_TTL } : undefined,
+  );
 
-  return link_intent.provider === provider && link_intent.expires_at > Date.now();
+  return true;
+};
+
+export const consume_oauth_intent = async (event: RequestEvent, provider: CredentialsType) => {
+  const { secure } = await getUserSession(event);
+  const oauth_intent = secure?.oauth_intent;
+
+  if (!oauth_intent) {
+    return null;
+  }
+
+  await write_oauth_intent(event, undefined);
+
+  return oauth_intent.provider === provider && oauth_intent.expires_at > Date.now()
+    ? oauth_intent.purpose
+    : null;
+};
+
+export const confirm_reauthentication = async (
+  event: RequestEvent,
+  provider: CredentialsType,
+  credential: ServiceCredentials | null,
+) => {
+  if (credential?.userId !== require_user(event).id) {
+    return sendRedirect(
+      event,
+      `/settings?provider=${provider}&oauth-state=error&error=wrong_account`,
+    );
+  }
+
+  await services.sessions.mark_authenticated(require_session_id(event));
+
+  return sendRedirect(
+    event,
+    `/settings?provider=${provider}&oauth-state=success&reauthenticated=true`,
+  );
 };

@@ -99,7 +99,16 @@ export default {
         "Your device must confirm your identity (PIN, fingerprint or face)",
       login: "Something went wrong while logging in with your passkey",
       add: "Something went wrong while adding your passkey",
+      wrong_account: "This passkey belongs to another Watcher account",
     },
+  },
+
+  reauthentication: {
+    title: "Confirm your identity",
+    description: "This action is sensitive: confirm it's really you before continuing.",
+    passkey: "Use a passkey",
+    integration: "Continue with {name}",
+    failed: "Your identity couldn't be checked, please try again later",
   },
 
   sessions: {
@@ -186,6 +195,9 @@ export default {
       success: "Your {provider} account is now connected",
       already_linked: "This {provider} account is already linked to another Watcher account.",
       link_not_requested: "Connect {provider} from the settings page to link it to your account.",
+      reauthenticated: "Identity confirmed, you can now start your action again",
+      reauthentication_required: "Confirm your identity from the settings page first",
+      wrong_account: "This {provider} account isn't the one linked to your Watcher account",
       failed: "Something went wrong while connecting to your {provider} account",
     },
   },

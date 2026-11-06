@@ -8,6 +8,7 @@ const ERRORS: Record<string, string> = {
   unknown_passkey: "passkeys.errors.unknown",
   challenge_expired: "passkeys.errors.expired",
   user_verification_required: "passkeys.errors.user_verification_required",
+  wrong_account: "passkeys.errors.wrong_account",
 };
 
 export const usePasskeys = () => {

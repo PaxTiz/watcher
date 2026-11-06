@@ -29,8 +29,16 @@ export type FindAllActiveByUserOutput = Array<
   >
 >;
 
+export type FindAuthenticatedAtInput = { id: string };
+export type FindAuthenticatedAtOutput =
+  | Pick<DatabaseSchema["sessions"], "authenticated_at">
+  | undefined;
+
 export type TouchInput = { id: string; options?: RepositoryContext };
 export type TouchOutput = void;
+
+export type MarkAuthenticatedInput = { id: string; options?: RepositoryContext };
+export type MarkAuthenticatedOutput = void;
 
 export type RemoveInput = { id: string; user_id?: string; options?: RepositoryContext };
 export type RemoveOutput = boolean;

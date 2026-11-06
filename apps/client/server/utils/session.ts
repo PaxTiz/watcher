@@ -71,3 +71,9 @@ export const require_session_id = (event: RequestEvent): string => {
 
   return event.context.session_id;
 };
+
+export const require_recent_authentication = async (event: RequestEvent) => {
+  if (!(await services.sessions.is_recently_authenticated(require_session_id(event)))) {
+    throw createError({ status: 403, message: "reauthentication_required" });
+  }
+};

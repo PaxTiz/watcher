@@ -6,6 +6,7 @@ import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 
 const LAST_SEEN_THROTTLE = 60 * 5 * 1000; // 5 minutes, in milliseconds
+const RECENT_AUTHENTICATION_WINDOW = 60 * 10 * 1000; // 10 minutes, in milliseconds
 
 export default class SessionsService extends AbstractService {
   async create(
@@ -54,6 +55,18 @@ export default class SessionsService extends AbstractService {
         id: row.login_with_id,
       },
     };
+  }
+
+  async is_recently_authenticated(id: string) {
+    const row = await sessions.find_authenticated_at({ id });
+
+    return (
+      !!row && Date.now() - new Date(row.authenticated_at).getTime() < RECENT_AUTHENTICATION_WINDOW
+    );
+  }
+
+  async mark_authenticated(id: string) {
+    await sessions.mark_authenticated({ id });
   }
 
   async list(user_id: string, current_id: string): Promise<Array<SessionResource>> {

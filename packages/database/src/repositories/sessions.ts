@@ -7,6 +7,10 @@ import type {
   FindActiveWithUserOutput,
   FindAllActiveByUserInput,
   FindAllActiveByUserOutput,
+  FindAuthenticatedAtInput,
+  FindAuthenticatedAtOutput,
+  MarkAuthenticatedInput,
+  MarkAuthenticatedOutput,
   RemoveAllByUserInput,
   RemoveAllByUserOutput,
   RemoveByLoginMethodInput,
@@ -69,12 +73,35 @@ export async function find_all_active_by_user({
     .execute();
 }
 
+export async function find_authenticated_at({
+  id,
+}: FindAuthenticatedAtInput): Promise<FindAuthenticatedAtOutput> {
+  return useDatabase()
+    .selectFrom("sessions")
+    .select("authenticated_at")
+    .where("id", "=", id)
+    .executeTakeFirst();
+}
+
 export async function touch({ id, options }: TouchInput): Promise<TouchOutput> {
   const database = resolveDatabase(options);
 
   await database
     .updateTable("sessions")
     .set({ last_seen_at: new Date().toISOString() })
+    .where("id", "=", id)
+    .execute();
+}
+
+export async function mark_authenticated({
+  id,
+  options,
+}: MarkAuthenticatedInput): Promise<MarkAuthenticatedOutput> {
+  const database = resolveDatabase(options);
+
+  await database
+    .updateTable("sessions")
+    .set({ authenticated_at: new Date().toISOString() })
     .where("id", "=", id)
     .execute();
 }

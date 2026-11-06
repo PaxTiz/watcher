@@ -153,6 +153,8 @@ export type SessionTable = {
   expires_at: ColumnType<string, string, never>;
 
   last_seen_at: ColumnType<string, string | undefined, string>;
+
+  authenticated_at: ColumnType<string, string | undefined, string>;
 };
 
 export type RateLimitTable = {

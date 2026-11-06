@@ -7,11 +7,13 @@ export type Integration = {
   color: string;
   bgColor: string;
   linkUrl: string;
+  reauthenticateUrl: string;
 };
 
 export const useIntegrations = () => {
   const { user, fetch: refresh_session } = useUserSession();
   const { t } = useNuxtApp().$i18n;
+  const { confirm_identity } = useReauthentication();
 
   const integrations: Array<Integration> = [
     {
@@ -21,6 +23,7 @@ export const useIntegrations = () => {
       color: "text-red-500",
       bgColor: "bg-red-500/10",
       linkUrl: "/api/oauth/google?integration=true",
+      reauthenticateUrl: "/api/oauth/google?reauthenticate=true",
     },
     {
       id: "twitch",
@@ -29,6 +32,7 @@ export const useIntegrations = () => {
       color: "text-purple-500",
       bgColor: "bg-purple-500/10",
       linkUrl: "/api/oauth/twitch?integration=true",
+      reauthenticateUrl: "/api/oauth/twitch?reauthenticate=true",
     },
   ] as const;
 
@@ -40,8 +44,10 @@ export const useIntegrations = () => {
     return !!user.value.integrations[id];
   };
 
-  const on_link = (integration: Integration) => {
-    window.open(integration.linkUrl, "_self");
+  const on_link = async (integration: Integration) => {
+    if (await confirm_identity()) {
+      window.open(integration.linkUrl, "_self");
+    }
   };
 
   const on_disconnect = async (integration: Integration) => {
@@ -51,7 +57,7 @@ export const useIntegrations = () => {
       description: t("integrations.disconnect.description"),
     });
 
-    if (!ok) {
+    if (!ok || !(await confirm_identity())) {
       return;
     }
 

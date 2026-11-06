@@ -101,7 +101,17 @@ export default {
         "Votre appareil doit confirmer votre identité (code PIN, empreinte ou visage)",
       login: "Une erreur est survenue lors de la connexion avec votre clé d'accès",
       add: "Une erreur est survenue lors de l'ajout de votre clé d'accès",
+      wrong_account: "Cette clé d'accès appartient à un autre compte Watcher",
     },
+  },
+
+  reauthentication: {
+    title: "Confirmez votre identité",
+    description:
+      "Cette action est sensible : confirmez qu'il s'agit bien de vous avant de continuer.",
+    passkey: "Utiliser une clé d'accès",
+    integration: "Continuer avec {name}",
+    failed: "Votre identité n'a pas pu être vérifiée, réessayez plus tard",
   },
 
   sessions: {
@@ -190,6 +200,9 @@ export default {
       already_linked: "Ce compte {provider} est déjà lié à un autre compte Watcher.",
       link_not_requested:
         "Connectez {provider} depuis la page Paramètres pour le lier à votre compte.",
+      reauthenticated: "Identité confirmée, vous pouvez relancer votre action",
+      reauthentication_required: "Confirmez d'abord votre identité depuis la page Paramètres",
+      wrong_account: "Ce compte {provider} n'est pas celui lié à votre compte Watcher",
       failed: "Une erreur est survenue lors de la connexion à votre compte {provider}",
     },
   },

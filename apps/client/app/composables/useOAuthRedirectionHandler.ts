@@ -26,6 +26,8 @@ export const useOAuthRedirectionHandler = () => {
   const messages: Record<string, string> = {
     already_linked: t("integrations.oauth.already_linked", { provider }),
     link_not_requested: t("integrations.oauth.link_not_requested", { provider }),
+    reauthentication_required: t("integrations.oauth.reauthentication_required"),
+    wrong_account: t("integrations.oauth.wrong_account", { provider }),
     too_many_attempts: errors.too_many_attempts(Number(route.query.retry_after) || undefined),
     default_error: t("integrations.oauth.failed", { provider }),
   };
@@ -34,7 +36,12 @@ export const useOAuthRedirectionHandler = () => {
     color: state,
     message:
       state === "success"
-        ? t("integrations.oauth.success", { provider })
+        ? t(
+            route.query.reauthenticated
+              ? "integrations.oauth.reauthenticated"
+              : "integrations.oauth.success",
+            { provider },
+          )
         : (messages[error] ?? messages.default_error),
   };
 
@@ -48,6 +55,7 @@ export const useOAuthRedirectionHandler = () => {
       provider: undefined,
       error: undefined,
       retry_after: undefined,
+      reauthenticated: undefined,
     },
   });
 };

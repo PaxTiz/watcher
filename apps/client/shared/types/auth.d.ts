@@ -16,9 +16,10 @@ declare module "#auth-utils" {
     // Server-side session (`sessions` table): the cookie is only valid while this row exists
     session_id: string;
 
-    // Set when the user asks to link a provider, see `server/utils/oauth.ts`
-    link_intent?: {
+    // Set when the user starts an OAuth flow while signed in, see `server/utils/oauth.ts`
+    oauth_intent?: {
       provider: CredentialsType;
+      purpose: "link" | "reauthenticate";
       expires_at: number;
     };
   }

@@ -4,12 +4,14 @@ import { toast } from "vue-sonner";
 const { t } = useI18n();
 
 useMeta({ title: () => t("nav.settings") });
+useOAuthRedirectionHandler();
 
 const { user, clear } = useUserSession();
 const { integrations } = useIntegrations();
 const { data: subscriptions } = useSubscriptions();
 const themes = useWatcherThemes();
 const locales = useWatcherLocales();
+const { confirm_identity } = useReauthentication();
 
 const preferences = computed(() => [
   {
@@ -39,7 +41,7 @@ const delete_account = async () => {
     confirmLabel: t("common.delete"),
   });
 
-  if (!ok) {
+  if (!ok || !(await confirm_identity())) {
     return;
   }
 

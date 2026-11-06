@@ -4,7 +4,7 @@ import { withHttpErrors } from "#framework";
 import { defineWebAuthnAuthenticateEventHandler } from "#framework/auth";
 import { services } from "#framework/server";
 import { get_client_ip, useRateLimiter } from "#server/lib/rate_limiter";
-import { start_user_session } from "#server/utils/session";
+import { get_user, require_session_id, start_user_session } from "#server/utils/session";
 import { require_user_verification, require_webauthn_rp_id } from "#server/utils/webauthn";
 
 const authenticate_handler = defineWebAuthnAuthenticateEventHandler({
@@ -33,6 +33,16 @@ const authenticate_handler = defineWebAuthnAuthenticateEventHandler({
     require_user_verification(authenticationInfo.userVerified);
 
     await services.passkeys.mark_as_used(credential.id, authenticationInfo.newCounter);
+
+    const session_user = get_user(event);
+    if (session_user) {
+      if (credential.userId !== session_user.id) {
+        throw createError({ status: 403, message: "wrong_account" });
+      }
+
+      await services.sessions.mark_authenticated(require_session_id(event));
+      return;
+    }
 
     const database_user = await services.users.find_by_id(credential.userId);
     if (!database_user) {

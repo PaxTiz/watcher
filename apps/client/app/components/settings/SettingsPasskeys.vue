@@ -7,6 +7,7 @@ import { LazyPasskeyNameModal } from "#components";
 const { t } = useI18n();
 const { user } = useUserSession();
 const { add, loading, is_supported } = usePasskeys();
+const { confirm_identity } = useReauthentication();
 const { dates } = useFormatter();
 const overlay = useWatcherOverlay();
 
@@ -16,6 +17,10 @@ const { data, refresh } = useAppFetch<Array<PasskeyResource>>("/api/passkeys", {
 const passkeys = computed(() => data.value ?? []);
 
 const on_add = async () => {
+  if (!(await confirm_identity())) {
+    return;
+  }
+
   const name = await overlay.create(LazyPasskeyNameModal).open({
     title: t("passkeys.add.title"),
     confirmLabel: t("common.continue"),
@@ -63,7 +68,7 @@ const on_delete = async (passkey: PasskeyResource) => {
     confirmLabel: t("common.delete"),
   });
 
-  if (!ok) {
+  if (!ok || !(await confirm_identity())) {
     return;
   }
 

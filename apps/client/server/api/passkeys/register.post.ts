@@ -4,7 +4,7 @@ import { withHttpErrors } from "#framework";
 import { defineWebAuthnRegisterEventHandler } from "#framework/auth";
 import { services } from "#framework/server";
 import { useRateLimiter } from "#server/lib/rate_limiter";
-import { require_user } from "#server/utils/session";
+import { require_recent_authentication, require_user } from "#server/utils/session";
 import { require_user_verification, require_webauthn_rp_id } from "#server/utils/webauthn";
 import { passkeysValidatorsSchema } from "#shared/validators/passkeys";
 
@@ -59,6 +59,7 @@ const register_handler = defineWebAuthnRegisterEventHandler<{
 
 export default defineEventHandler(async (event) => {
   await useRateLimiter("passkeys_register").consume(event, require_user(event).id);
+  await require_recent_authentication(event);
 
   return register_handler(event);
 });

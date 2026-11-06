@@ -5,7 +5,11 @@ import { useLogger } from "#framework";
 import { defineOAuthGoogleEventHandler } from "#framework/auth";
 import { services } from "#framework/server";
 import { get_client_ip, useRateLimiter } from "#server/lib/rate_limiter";
-import { consume_link_intent, handle_link_intent } from "#server/utils/oauth";
+import {
+  confirm_reauthentication,
+  consume_oauth_intent,
+  handle_oauth_intent,
+} from "#server/utils/oauth";
 import { get_user, start_user_session } from "#server/utils/session";
 
 const oauth_handler = defineOAuthGoogleEventHandler({
@@ -20,14 +24,18 @@ const oauth_handler = defineOAuthGoogleEventHandler({
   async onSuccess(event, { user, tokens }) {
     try {
       const sessionUser = get_user(event);
-      const link_requested = await consume_link_intent(event, "google");
+      const intent = await consume_oauth_intent(event, "google");
 
       const existing_credential = await services.credentials.find_by_service("google", user.sub);
 
       let database_user;
 
       if (sessionUser) {
-        if (!link_requested) {
+        if (intent === "reauthenticate") {
+          return confirm_reauthentication(event, "google", existing_credential);
+        }
+
+        if (!intent) {
           return sendRedirect(
             event,
             "/?provider=google&oauth-state=error&error=link_not_requested",
@@ -100,7 +108,12 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  await handle_link_intent(event, "google");
+  if (!(await handle_oauth_intent(event, "google"))) {
+    return sendRedirect(
+      event,
+      "/settings?provider=google&oauth-state=error&error=reauthentication_required",
+    );
+  }
 
   return oauth_handler(event);
 });

@@ -2,7 +2,7 @@ import { createError } from "nuxt/server";
 
 import { defineRoute } from "#framework";
 import { services } from "#framework/server";
-import { require_user } from "#server/utils/session";
+import { require_recent_authentication, require_user } from "#server/utils/session";
 import { integrationsValidatorsSchema } from "#shared/validators/integrations";
 
 export default defineRoute({
@@ -10,6 +10,8 @@ export default defineRoute({
 
   async handler(event, { params }) {
     const user = require_user(event);
+
+    await require_recent_authentication(event);
 
     const service_id = user.integrations[params.provider];
     if (!service_id) {
