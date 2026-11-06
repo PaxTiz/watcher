@@ -1,12 +1,15 @@
 import type { SessionResource } from "@watcher/common";
 import { sessions } from "@watcher/database";
 import { add } from "date-fns";
+import { useStorage } from "nitropack/runtime";
 
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 
 const LAST_SEEN_THROTTLE = 60 * 5 * 1000; // 5 minutes, in milliseconds
 const RECENT_AUTHENTICATION_WINDOW = 60 * 10 * 1000; // 10 minutes, in milliseconds
+
+const storage = useStorage<User>("sessions");
 
 export default class SessionsService extends AbstractService {
   async create(
@@ -29,6 +32,34 @@ export default class SessionsService extends AbstractService {
   }
 
   async find_user(id: string): Promise<User | null> {
+    const cached = await storage.getItem(id);
+    if (cached) {
+      return cached;
+    }
+
+    const user = await this.load_user(id);
+    if (user) {
+      await storage.setItem(id, user);
+    }
+
+    return user;
+  }
+
+  async forget_user(user_id: string) {
+    const ids = await storage.getKeys();
+
+    await Promise.all(
+      ids.map(async (id) => {
+        const user = await storage.getItem(id);
+
+        if (user?.id === user_id) {
+          await storage.removeItem(id);
+        }
+      }),
+    );
+  }
+
+  private async load_user(id: string): Promise<User | null> {
     const row = await sessions.find_active_with_user({ id });
 
     if (!row) {
@@ -76,11 +107,18 @@ export default class SessionsService extends AbstractService {
   }
 
   async revoke(id: string, user_id?: string) {
-    return sessions.remove({ id, user_id });
+    const removed = await sessions.remove({ id, user_id });
+
+    if (removed) {
+      await storage.removeItem(id);
+    }
+
+    return removed;
   }
 
   async revoke_others(user_id: string, current_id: string) {
     await sessions.remove_all_by_user({ user_id, except_id: current_id });
+    await this.forget_user(user_id);
   }
 
   async revoke_by_login_method(
@@ -94,5 +132,6 @@ export default class SessionsService extends AbstractService {
       login_with_id: login_with.id,
       except_id,
     });
+    await this.forget_user(user_id);
   }
 }

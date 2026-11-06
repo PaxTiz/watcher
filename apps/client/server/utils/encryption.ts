@@ -7,11 +7,24 @@ type TokenType = "access_token" | "refresh_token";
 const ALGORITHM = "aes-256-gcm";
 const CIPHER_SIZE = 12;
 
-export const encrypt = (type: TokenType, raw: string) => {
-  const key = Buffer.from(useRuntimeConfig().encryption.credentials[type], "hex");
+let keys: Record<TokenType, Buffer> | undefined;
 
+const get_key = (type: TokenType) => {
+  if (!keys) {
+    const { access_token, refresh_token } = useRuntimeConfig().encryption.credentials;
+
+    keys = {
+      access_token: Buffer.from(access_token, "hex"),
+      refresh_token: Buffer.from(refresh_token, "hex"),
+    };
+  }
+
+  return keys[type];
+};
+
+export const encrypt = (type: TokenType, raw: string) => {
   const iv = randomBytes(CIPHER_SIZE);
-  const cipher = createCipheriv(ALGORITHM, key, iv);
+  const cipher = createCipheriv(ALGORITHM, get_key(type), iv);
 
   const encrypted = Buffer.concat([cipher.update(raw), cipher.final()]);
   const tag = cipher.getAuthTag();
@@ -20,14 +33,12 @@ export const encrypt = (type: TokenType, raw: string) => {
 };
 
 export const decrypt = (type: TokenType, data: string) => {
-  const key = Buffer.from(useRuntimeConfig().encryption.credentials[type], "hex");
-
   const buffer = Buffer.from(data, "base64");
   const iv = buffer.subarray(0, CIPHER_SIZE);
   const tag = buffer.subarray(CIPHER_SIZE, 28);
   const encrypted = buffer.subarray(28);
 
-  const decipher = createDecipheriv(ALGORITHM, key, iv);
+  const decipher = createDecipheriv(ALGORITHM, get_key(type), iv);
   decipher.setAuthTag(tag);
 
   return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf-8");

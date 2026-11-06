@@ -10,6 +10,11 @@ let _client: Client | null = null;
 
 const storage = useStorage("oauth_tokens");
 
+type StoredTokens = Pick<
+  DatabaseSchema["credentials"],
+  "access_token" | "access_token_expires_at" | "refresh_token" | "refresh_token_expires_at"
+>;
+
 const to_key = (id: string) => `${id}:twitch`;
 
 export const forget_twitch_tokens = (service_id: string) => storage.removeItem(to_key(service_id));
@@ -25,34 +30,32 @@ export const useTwitch = () => {
       onRequest: async (service_id) => {
         const key = to_key(service_id);
 
-        let tokens: DatabaseSchema["credentials"] | null | undefined;
-
-        const isCached = await storage.has(key);
-        if (isCached) {
-          tokens = await storage.get<DatabaseSchema["credentials"]>(key);
-        } else {
-          tokens = await credentials.find_by_service({
-            service: "twitch",
-            service_id,
-          });
+        const cached = await storage.get<StoredTokens>(key);
+        if (cached) {
+          return cached;
         }
 
-        if (!tokens) {
+        const row = await credentials.find_by_service({
+          service: "twitch",
+          service_id,
+        });
+
+        if (!row) {
           return null;
         }
 
-        if (!isCached) {
-          await storage.setItem(key, tokens, {
-            ttl: differenceInSeconds(tokens.access_token_expires_at, new Date()),
-          });
-        }
-
-        return {
-          access_token: decrypt("access_token", tokens.access_token),
-          access_token_expires_at: tokens.access_token_expires_at,
-          refresh_token: decrypt("refresh_token", tokens.refresh_token),
-          refresh_token_expires_at: tokens.refresh_token_expires_at,
+        const tokens: StoredTokens = {
+          access_token: decrypt("access_token", row.access_token),
+          access_token_expires_at: row.access_token_expires_at,
+          refresh_token: decrypt("refresh_token", row.refresh_token),
+          refresh_token_expires_at: row.refresh_token_expires_at,
         };
+
+        await storage.setItem(key, tokens, {
+          ttl: differenceInSeconds(row.access_token_expires_at, new Date()),
+        });
+
+        return tokens;
       },
 
       onRefreshToken: async ({ service_id, tokens }) => {

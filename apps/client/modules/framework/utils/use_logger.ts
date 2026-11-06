@@ -8,37 +8,24 @@ const _localTransporter = () =>
     target: "pino-pretty",
   });
 
-const _fileTransporter = () => {
-  const now = new Date();
-  const directory = join(
-    process.cwd(),
-    ".storage",
-    "logs",
-    now.getFullYear().toString(),
-    (now.getMonth() + 1).toString(),
-    now.getDate().toString(),
-  );
+const _fileTarget = (level: pino.Level) => ({
+  target: "pino-roll",
+  level,
+  options: {
+    file: join(process.cwd(), ".storage", "logs", level),
+    extension: ".log",
+    frequency: "daily",
+    dateFormat: "yyyy-MM-dd",
+    size: "100m",
+    limit: { count: 30 },
+    mkdir: true,
+  },
+});
 
-  return pino.transport({
-    targets: [
-      {
-        target: "pino/file",
-        level: "error",
-        options: { destination: join(directory, "error.log"), mkdir: true },
-      },
-      {
-        target: "pino/file",
-        level: "info",
-        options: { destination: join(directory, "info.log"), mkdir: true },
-      },
-      {
-        target: "pino/file",
-        level: "debug",
-        options: { destination: join(directory, "debug.log"), mkdir: true },
-      },
-    ],
+const _fileTransporter = () =>
+  pino.transport({
+    targets: [_fileTarget("error"), _fileTarget("info"), _fileTarget("debug")],
   });
-};
 
 let _logger: pino.Logger;
 export function useLogger(service: string) {

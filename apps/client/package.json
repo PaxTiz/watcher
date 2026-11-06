@@ -32,6 +32,7 @@
     "nuxt-auth-utils": "^0.6.0",
     "ofetch": "catalog:",
     "pino": "^10.4.0",
+    "pino-roll": "^4.0.0",
     "reka-ui": "catalog:",
     "scule": "^1.3.0",
     "sharp": "^0.35.5",

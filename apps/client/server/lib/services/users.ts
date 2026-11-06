@@ -52,6 +52,7 @@ export default class UsersService extends AbstractService {
 
   async update(id: string, data: repositoryTypes.users.UpdateData) {
     await users.update({ id, data });
+    await services.sessions.forget_user(id);
 
     return (await this.find_by_id(id))!;
   }
@@ -59,6 +60,7 @@ export default class UsersService extends AbstractService {
   async delete(id: string) {
     await services.credentials.revoke_all(id);
     await users.remove({ id });
+    await services.sessions.forget_user(id);
   }
 
   async count_login_methods(user: UserResource): Promise<number> {
@@ -77,6 +79,7 @@ export default class UsersService extends AbstractService {
     }
 
     await users.mark_as_onboarded({ id: user.id });
+    await services.sessions.forget_user(user.id);
 
     user.is_onboarded = true;
 

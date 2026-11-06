@@ -2,6 +2,7 @@ import type { CredentialsType, ServiceCredentials } from "@watcher/common";
 import { credentials, type DatabaseSchema } from "@watcher/database";
 
 import { AbstractService, useLogger } from "#framework";
+import { services } from "#framework/server";
 import { forget_google_tokens, useGoogle } from "#server/lib/google";
 import { forget_twitch_tokens, useTwitch } from "#server/lib/twitch";
 import { decrypt, encrypt } from "#server/utils/encryption";
@@ -35,6 +36,8 @@ export default class CredentialsService extends AbstractService {
       },
     });
 
+    await services.sessions.forget_user(user_id);
+
     return data;
   }
 
@@ -46,6 +49,7 @@ export default class CredentialsService extends AbstractService {
 
     await this.revoke(credential);
     await credentials.remove({ user_id, service });
+    await services.sessions.forget_user(user_id);
   }
 
   async revoke_all(user_id: string) {

@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { join } from "node:path";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -98,6 +99,11 @@ export default defineNuxtConfig({
       imports: [{ name: "useRuntimeConfig", from: "nitropack/runtime" }],
     },
 
+    // Loaded by name in a pino worker: the bundler can't see it
+    externals: {
+      traceInclude: [createRequire(import.meta.url).resolve("pino-roll")],
+    },
+
     experimental: {
       tasks: true,
     },
@@ -108,6 +114,8 @@ export default defineNuxtConfig({
 
     storage: {
       oauth_tokens: { driver: "lru-cache" },
+
+      sessions: { driver: "lru-cache", ttl: 30_000 },
 
       cache: { driver: "lru-cache", max: 500 },
     },
