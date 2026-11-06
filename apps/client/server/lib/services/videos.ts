@@ -1,4 +1,4 @@
-import type { Paginated, SubscriptionType, VideoResource } from "@watcher/common";
+import type { Page, SubscriptionType, VideoResource } from "@watcher/common";
 import { findOrFail, repositoryTypes, videos } from "@watcher/database";
 import { formatISO, startOfDay, sub } from "date-fns";
 import { defineCachedFunction } from "nitropack/runtime";
@@ -60,8 +60,8 @@ export default class VideosService extends AbstractService {
   async find_all(
     user: User,
     params: VideosValidators["list"]["query"],
-  ): Promise<Paginated<VideoResource>> {
-    const { total, items } = await videos.find_all_for_user({
+  ): Promise<Page<VideoResource> & { total?: number }> {
+    const { total, items, has_more } = await videos.find_all_for_user({
       user_id: user.id,
       filters: {
         query: params.query,
@@ -77,12 +77,14 @@ export default class VideosService extends AbstractService {
         page: params.page,
         per_page: params.per_page,
         before: params.before,
+        with_total: params.with_total !== false && !params.before,
       },
     });
 
     return {
       total,
       items: items.map((item) => this.to_resource(item, false)),
+      has_more,
     };
   }
 

@@ -108,11 +108,13 @@ export async function find_all_for_user({
   filters,
   pagination,
 }: FindAllForUserInput): Promise<FindAllForUserOutput> {
-  const total = await select_visible_for_user(user_id, filters)
-    .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
-    .executeTakeFirst();
+  const count_query = pagination.with_total
+    ? select_visible_for_user(user_id, filters)
+        .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
+        .executeTakeFirst()
+    : undefined;
 
-  const items = await select_visible_for_user(user_id, filters)
+  const page_query = select_visible_for_user(user_id, filters)
     .leftJoin("users_videos_progression", (qb) =>
       qb
         .onRef("users_videos_progression.video_id", "=", "videos.id")
@@ -124,7 +126,7 @@ export async function find_all_for_user({
       ),
     )
     .offset(pagination.before ? 0 : (pagination.page - 1) * pagination.per_page)
-    .limit(pagination.per_page)
+    .limit(pagination.per_page + 1) // the extra row tells whether a next page exists
     .$if(filters.in_progress === true, (qb) =>
       qb.orderBy("users_videos_progression.updated_at", "desc"),
     )
@@ -155,7 +157,13 @@ export async function find_all_for_user({
     ])
     .execute();
 
-  return { total: Number(total?.total ?? 0), items };
+  const [count, rows] = await Promise.all([count_query, page_query]);
+
+  return {
+    total: pagination.with_total ? Number(count?.total ?? 0) : undefined,
+    items: rows.slice(0, pagination.per_page),
+    has_more: rows.length > pagination.per_page,
+  };
 }
 
 export async function find_by_id_for_user({

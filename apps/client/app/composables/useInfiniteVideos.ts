@@ -1,6 +1,6 @@
-import type { Paginated, VideoResource } from "@watcher/common";
+import type { Page, VideoResource } from "@watcher/common";
 
-import { useVideos } from "./videos/useVideos";
+import { useVideosPage } from "./videos/useVideos";
 
 export const useInfiniteVideos = (
   filters?: { per_page: number },
@@ -15,7 +15,6 @@ export const useInfiniteVideos = (
   before.value = undefined;
   const items = ref<VideoResource[]>([]);
   const hasMore = ref(true);
-  const total = ref(0);
 
   const query = computed(() => {
     const f = unref(filters);
@@ -24,17 +23,18 @@ export const useInfiniteVideos = (
       page: 1,
       per_page: f?.per_page ?? 30,
       before: before.value,
+      with_total: false,
     };
   });
 
-  const response = useVideos(query, {
+  const response = useVideosPage(query, {
     ...options,
     lazy: true,
     watch: false,
   });
   const { data, status, refresh } = response;
 
-  const syncItems = (newData: Paginated<VideoResource>) => {
+  const syncItems = (newData: Page<VideoResource>) => {
     if (!newData) return;
 
     if (!before.value) {
@@ -43,8 +43,7 @@ export const useInfiniteVideos = (
       items.value.push(...newData.items);
     }
 
-    total.value = newData.total;
-    hasMore.value = newData.items.length === query.value.per_page;
+    hasMore.value = newData.has_more;
   };
 
   const loadMore = async () => {
@@ -109,7 +108,6 @@ export const useInfiniteVideos = (
     hasMore,
     status,
     loadMore,
-    total,
     refresh,
   };
 };

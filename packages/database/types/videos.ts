@@ -45,9 +45,13 @@ export type FindAllForUserFilters = {
 export type FindAllForUserInput = {
   user_id: string;
   filters: FindAllForUserFilters;
-  pagination: { page: number; per_page: number; before?: string };
+  pagination: { page: number; per_page: number; before?: string; with_total: boolean };
 };
-export type FindAllForUserOutput = { total: number; items: Array<VideoRow> };
+export type FindAllForUserOutput = {
+  total: number | undefined;
+  items: Array<VideoRow>;
+  has_more: boolean;
+};
 
 export type FindByIdForUserInput = { id: string; user_id: string };
 export type FindByIdForUserOutput =

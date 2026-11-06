@@ -13,6 +13,7 @@ export default defineRoute({
       page: query.page,
       per_page: query.per_page,
       before: query.before,
+      with_total: query.with_total,
       query: query.query,
       service: query.service,
       duration: query.duration,
