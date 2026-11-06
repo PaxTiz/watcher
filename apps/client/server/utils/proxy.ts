@@ -17,11 +17,17 @@ export const is_allowed_upstream = (url: string) => {
   return protocol === "https:" && ALLOWED_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix));
 };
 
+let key: Buffer | undefined;
+
 // Derived from an existing secret so the proxy doesn't need its own env variable
 const get_key = () => {
-  const secret = Buffer.from(useRuntimeConfig().encryption.credentials.access_token, "hex");
+  if (!key) {
+    const secret = Buffer.from(useRuntimeConfig().encryption.credentials.access_token, "hex");
 
-  return Buffer.from(hkdfSync("sha256", secret, "", "watcher:video-proxy", 32));
+    key = Buffer.from(hkdfSync("sha256", secret, "", "watcher:video-proxy", 32));
+  }
+
+  return key;
 };
 
 type ProxyUrlPayload = {
@@ -48,10 +54,8 @@ export const verify_proxy_url = (payload: ProxyUrlPayload, signature: string) =>
   return expected.length === received.length && timingSafeEqual(expected, received);
 };
 
-export const to_proxy_url = (
+export const proxy_url_builder = (
   { video_id, user_id }: { video_id: string; user_id: string },
-  quality: string,
-  path: string,
   base_url: string,
 ) => {
   if (!is_allowed_upstream(base_url)) {
@@ -65,5 +69,8 @@ export const to_proxy_url = (
     signature: compute_signature({ video_id, user_id, expires, url: base_url }),
   });
 
-  return `/api/videos/${video_id}/segments/${quality}/${path}?${search.toString()}`;
+  const query = search.toString();
+
+  return (quality: string, path: string) =>
+    `/api/videos/${video_id}/segments/${quality}/${path}?${query}`;
 };

@@ -108,6 +108,8 @@ export default defineNuxtConfig({
 
     storage: {
       oauth_tokens: { driver: "lru-cache" },
+
+      cache: { driver: "lru-cache", max: 500 },
     },
   },
 

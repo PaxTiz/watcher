@@ -57,24 +57,25 @@ export class VideosService extends TwitchService {
       const broadcast_type = video.broadcastType.toLowerCase();
       const channel_login = video.owner.login;
 
-      const available_levels: Array<{ key: string; url: string; codec: string }> = [];
+      const levels = await Promise.all(
+        Object.keys(DEFAULT_RESOLUTIONS).map(async (key) => {
+          const url = this.build_playlist_url(
+            domain,
+            video_id,
+            vod_special_id,
+            channel_login,
+            broadcast_type,
+            video.createdAt,
+            key,
+          );
 
-      for (const [resKey] of Object.entries(DEFAULT_RESOLUTIONS)) {
-        const url = this.build_playlist_url(
-          domain,
-          video_id,
-          vod_special_id,
-          channel_login,
-          broadcast_type,
-          video.createdAt,
-          resKey,
-        );
+          return { key, url, codec: await this.check_quality(url) };
+        }),
+      );
 
-        const codec = await this.check_quality(url);
-        if (codec) {
-          available_levels.push({ key: resKey, url, codec });
-        }
-      }
+      const available_levels = levels.filter(
+        (level): level is { key: string; url: string; codec: string } => !!level.codec,
+      );
 
       if (available_levels.length === 0) return null;
 

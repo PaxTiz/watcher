@@ -1,6 +1,7 @@
 import type { Paginated, SubscriptionType, VideoResource } from "@watcher/common";
 import { findOrFail, repositoryTypes, videos } from "@watcher/database";
 import { formatISO, startOfDay, sub } from "date-fns";
+import { defineCachedFunction } from "nitropack/runtime";
 import { useRuntimeConfig } from "nuxt/server";
 
 import type { User } from "#auth-utils";
@@ -10,6 +11,23 @@ import type { VideosValidators } from "#shared/validators/videos";
 
 type VideoRow = repositoryTypes.videos.VideoRow;
 type VideosFilters = repositoryTypes.videos.FindAllForUserFilters;
+
+const MASTER_PLAYLIST_CACHE_TTL = 60 * 5; // 5 minutes, in seconds
+
+const get_twitch_master_playlist = defineCachedFunction(
+  (video_id: string) =>
+    useTwitch().videos.get_master_playlist(
+      video_id,
+      useRuntimeConfig().oauth.twitch.playerClientId,
+    ),
+  {
+    name: "twitch_master_playlist",
+    maxAge: MASTER_PLAYLIST_CACHE_TTL,
+    swr: false,
+    getKey: (video_id: string) => video_id,
+    validate: (entry) => !!entry.value,
+  },
+);
 
 export default class VideosService extends AbstractService {
   async get_by_id(user: User, id: string): Promise<VideoResource> {
@@ -24,18 +42,12 @@ export default class VideosService extends AbstractService {
     user: User,
     id: string,
   ): Promise<{ service: SubscriptionType; url: string | null }> {
-    const twitch = useTwitch();
-    const config = useRuntimeConfig();
-
     const video = await this.find_source_or_fail(user, id);
 
     if (video.service === "twitch") {
       return {
         service: "twitch",
-        url: await twitch.videos.get_master_playlist(
-          video.service_id,
-          config.oauth.twitch.playerClientId,
-        ),
+        url: await get_twitch_master_playlist(video.service_id),
       };
     }
 

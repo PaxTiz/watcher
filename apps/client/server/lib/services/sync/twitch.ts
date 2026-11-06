@@ -11,7 +11,7 @@ import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
 import { useTwitch } from "#server/lib/twitch";
-import { read_image_response } from "#server/utils/images";
+import { conditional_headers, INVALID_ETAG, read_image_response } from "#server/utils/images";
 import { extract_image_palette } from "#server/utils/palette";
 import type { Sync } from "#shared/types/sync";
 import { async_pool } from "#shared/utils/random";
@@ -121,7 +121,7 @@ export default class SyncTwitch extends AbstractService {
 
     const logo = await this.sync_subscription_logo(subscription);
     subscription.channel.logo = logo.logo;
-    subscription.channel.logo_etag = logo.etag ?? "__INVALID_ETAG__";
+    subscription.channel.logo_etag = logo.etag ?? INVALID_ETAG;
 
     await withTransaction(async (tx) => {
       const { logo_local, ...subscription_data } = subscription.channel;
@@ -251,12 +251,12 @@ export default class SyncTwitch extends AbstractService {
   private async sync_video_thumbnail_and_palette(video: Sync["Video"]) {
     const thumbnails = await this.sync_video_thumbnail(video);
     video.video.thumbnail_small = thumbnails.small.url;
-    video.video.thumbnail_small_etag = thumbnails.small.etag ?? "__INVALID_ETAG__";
+    video.video.thumbnail_small_etag = thumbnails.small.etag ?? INVALID_ETAG;
     video.video.thumbnail_large = thumbnails.large.url;
-    video.video.thumbnail_large_etag = thumbnails.large.etag ?? "__INVALID_ETAG__";
+    video.video.thumbnail_large_etag = thumbnails.large.etag ?? INVALID_ETAG;
 
     const palette =
-      thumbnails.large || !video.video.palette
+      thumbnails.large_downloaded || !video.video.palette
         ? await extract_image_palette(video.video.thumbnail_large)
         : video.video.palette;
 
@@ -290,9 +290,10 @@ export default class SyncTwitch extends AbstractService {
       .raw(subscription.channel.logo, {
         ...request_options(),
         responseType: "stream",
-        headers: {
-          "If-None-Match": subscription.channel.logo_etag,
-        },
+        headers: await conditional_headers(
+          subscription.channel.logo_etag,
+          subscription.channel.logo_local,
+        ),
       })
       .catch(() => null);
 
@@ -366,17 +367,20 @@ export default class SyncTwitch extends AbstractService {
         .raw(url, {
           ...request_options(),
           responseType: "stream",
-          headers: { "If-None-Match": video.video[`thumbnail_${key}_etag`] },
+          headers: await conditional_headers(
+            video.video[`thumbnail_${key}_etag`],
+            video.video[`thumbnail_${key}_local`],
+          ),
         })
         .catch(() => null);
 
       if (!response || response.status === 304) {
-        return;
+        return false;
       }
 
       const image = await read_image_response(response);
       if (!image) {
-        return;
+        return false;
       }
 
       const etag = response.headers.get("etag");
@@ -396,11 +400,13 @@ export default class SyncTwitch extends AbstractService {
         url: `/twitch/channels/${video.video.subscription_id}/videos/${video.video.service_id}_${key}.jpg`,
         etag,
       };
+
+      return true;
     };
 
-    await Promise.all([inner("small"), inner("large")]);
+    const [, large_downloaded] = await Promise.all([inner("small"), inner("large")]);
 
-    return paths;
+    return { ...paths, large_downloaded };
   }
 
   private createImageDirectory(...path: Array<string>) {

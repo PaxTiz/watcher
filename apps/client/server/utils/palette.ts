@@ -81,6 +81,11 @@ const weighted_average = (data: Buffer, columns: readonly [number, number]): Rgb
 const boosted_saturation = (s: number) => Math.min(1, Math.max(0.45, s * 1.4));
 
 export const extract_image_palette = async (path: string): Promise<VideoPalette | null> => {
+  // Twitch has no thumbnail yet for a VOD being recorded: the next sync will download it
+  if (!path) {
+    return null;
+  }
+
   try {
     const { data } = await sharp(join(UPLOADS_DIRECTORY, path), {
       limitInputPixels: MAX_IMAGE_PIXELS,

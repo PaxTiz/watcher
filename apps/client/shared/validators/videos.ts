@@ -48,7 +48,7 @@ export const videosValidatorsSchema = defineValidator({
     }),
     params: z.object({
       id: z.uuidv7(),
-      path: z.string().check(z.regex(/^[\w-]+\.(ts|m3u8)$/)),
+      path: z.string().check(z.regex(/^[\w-]+\.(ts|mp4|m3u8)$/)),
       quality: z.string().check(z.regex(/^[\w-]{1,32}$/)),
     }),
   },
