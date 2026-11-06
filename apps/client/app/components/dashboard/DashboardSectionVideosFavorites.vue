@@ -13,7 +13,7 @@ const on_change = async () => {
 </script>
 
 <template>
-  <VideosGridSkeleton v-if="status === 'pending' && videos?.items.length === 0" />
+  <VideosGridSkeleton v-if="status === 'pending' && !videos?.items.length" />
 
   <VideosRow
     v-else-if="videos && videos.items.length > 0"

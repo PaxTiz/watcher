@@ -19,7 +19,7 @@ const on_mark_as_view = async (video: VideoResource) => {
 </script>
 
 <template>
-  <VideosGridSkeleton v-if="status === 'pending' && videos?.items.length === 0" />
+  <VideosGridSkeleton v-if="status === 'pending' && !videos?.items.length" />
 
   <div v-else-if="featured" class="space-y-8">
     <section
