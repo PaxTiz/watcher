@@ -17,9 +17,7 @@ export type VideoRow = {
   subscription_name: string;
   subscription_slug: string;
   subscription_service: SubscriptionType;
-  subscription_url: string;
   subscription_logo: string;
-  subscription_last_synced_at: string;
   subscription_is_favorite: boolean;
 };
 

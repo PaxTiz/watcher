@@ -177,10 +177,8 @@ export default class VideosService extends AbstractService {
         slug: row.subscription_slug,
         is_favorite: row.subscription_is_favorite,
         is_hidden,
-        last_synced_at: row.subscription_last_synced_at,
         channel: {
           service: row.subscription_service,
-          url: row.subscription_url,
           logo: row.subscription_logo,
         },
       },

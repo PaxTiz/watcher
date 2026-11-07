@@ -146,9 +146,7 @@ export async function find_all_for_user({
       "subscriptions.name as subscription_name",
       "subscriptions.slug as subscription_slug",
       "subscriptions.service as subscription_service",
-      "subscriptions.url as subscription_url",
       "subscriptions.logo as subscription_logo",
-      "subscriptions.last_synced_at as subscription_last_synced_at",
       "user_subscriptions.is_favorite as subscription_is_favorite",
       sql<number>`COALESCE(${eb.ref("users_videos_progression.progression")}, 0)`.as(
         "video_viewing_progression",
@@ -203,9 +201,7 @@ export async function find_by_id_for_user({
       "subscriptions.name as subscription_name",
       "subscriptions.slug as subscription_slug",
       "subscriptions.service as subscription_service",
-      "subscriptions.url as subscription_url",
       "subscriptions.logo as subscription_logo",
-      "subscriptions.last_synced_at as subscription_last_synced_at",
       sql<boolean>`COALESCE(${eb.ref("user_subscriptions.is_hidden")}, false)`.as(
         "subscription_is_hidden",
       ),
@@ -256,9 +252,7 @@ export async function find_adjacent({
       "subscriptions.name as subscription_name",
       "subscriptions.slug as subscription_slug",
       "subscriptions.service as subscription_service",
-      "subscriptions.url as subscription_url",
       "subscriptions.logo as subscription_logo",
-      "subscriptions.last_synced_at as subscription_last_synced_at",
       sql<boolean>`COALESCE(${eb.ref("user_subscriptions.is_favorite")}, false)`.as(
         "subscription_is_favorite",
       ),

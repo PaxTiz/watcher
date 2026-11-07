@@ -26,7 +26,7 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const isOpen = ref(false);
+const isOpen = defineModel<boolean>("open", { default: false });
 
 const on_select_item = (item: DropdownItem<K, T>) => {
   emit("select", item.key, item.value as T);

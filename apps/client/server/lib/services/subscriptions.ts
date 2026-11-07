@@ -1,4 +1,4 @@
-import type { SubscriptionResource } from "@watcher/common";
+import type { SubscriptionDetailsResource, SubscriptionResource } from "@watcher/common";
 import { findOrFail, repositoryTypes, subscriptions, userSubscriptions } from "@watcher/database";
 
 import type { User } from "#auth-utils";
@@ -16,7 +16,7 @@ export default class SubscriptionsService extends AbstractService {
     return rows.map((row) => this.to_resource(row));
   }
 
-  async find_one(user: User, id_or_slug: string): Promise<SubscriptionResource> {
+  async find_one(user: User, id_or_slug: string): Promise<SubscriptionDetailsResource> {
     const row = await findOrFail(
       subscriptions.find_one_by_user({
         user_id: user.id,
@@ -25,7 +25,9 @@ export default class SubscriptionsService extends AbstractService {
       { message: "subscription_not_found" },
     );
 
-    return this.to_resource(row);
+    const resource = this.to_resource(row);
+
+    return { ...resource, channel: { ...resource.channel, url: row.url } };
   }
 
   async sync(user: User) {
@@ -66,11 +68,9 @@ export default class SubscriptionsService extends AbstractService {
       slug: row.slug,
       is_favorite: row.is_favorite,
       is_hidden: row.is_hidden,
-      last_synced_at: row.last_synced_at,
       last_video_at: row.last_video_at,
       channel: {
         service: row.service,
-        url: row.url,
         logo: row.logo,
       },
     };

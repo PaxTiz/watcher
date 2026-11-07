@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import type { SubscriptionResource } from "@watcher/common";
+import type { SubscriptionDetailsResource } from "@watcher/common";
 
 import { useVideos } from "~/composables/videos/useVideos";
 import { useVideosFilters } from "~/composables/videos/useVideosFilters";
 
-const { subscription } = defineProps<{ subscription: SubscriptionResource }>();
+const { subscription } = defineProps<{ subscription: SubscriptionDetailsResource }>();
 
 const { t } = useI18n();
 const route = useRoute();

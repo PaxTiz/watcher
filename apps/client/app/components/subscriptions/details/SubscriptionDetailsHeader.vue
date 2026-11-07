@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {
-  type SubscriptionResource,
+  type SubscriptionDetailsResource,
   type VideoCurrentRefreshType,
   type VideoPalette,
   VIDEO_CURRENT_REFRESH_SYMBOL,
@@ -8,7 +8,7 @@ import {
 import { toast } from "vue-sonner";
 
 const { subscription } = defineProps<{
-  subscription: SubscriptionResource;
+  subscription: SubscriptionDetailsResource;
   totalVideos?: number;
   palette?: VideoPalette | null;
 }>();

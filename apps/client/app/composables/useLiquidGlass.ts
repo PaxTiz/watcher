@@ -92,6 +92,7 @@ export const useLiquidGlass = (target: MaybeElementRef<HTMLElement | null | unde
   }
 
   let filter: SVGFilterElement | null = null;
+  let built_size = "";
 
   const build = () => {
     const element = unrefElement(target) as HTMLElement | null | undefined;
@@ -101,9 +102,12 @@ export const useLiquidGlass = (target: MaybeElementRef<HTMLElement | null | unde
 
     const width = Math.round(element.offsetWidth);
     const height = Math.round(element.offsetHeight);
-    if (!width || !height) {
+    const size = `${width}x${height}`;
+    if (!width || !height || size === built_size) {
       return;
     }
+
+    built_size = size;
 
     const radius = parseFloat(getComputedStyle(element).borderTopLeftRadius) || height / 2;
     const bezel = Math.min(height / 2, 16);

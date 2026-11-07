@@ -11,13 +11,16 @@ export type SubscriptionResource = {
 
   is_hidden: boolean;
 
-  last_synced_at: string;
-
   last_video_at?: string | null;
 
   channel: {
     service: SubscriptionType;
-    url: string;
     logo: string;
+  };
+};
+
+export type SubscriptionDetailsResource = SubscriptionResource & {
+  channel: {
+    url: string;
   };
 };

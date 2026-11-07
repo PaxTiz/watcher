@@ -19,6 +19,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   select: [value: T];
+  "update:open": [value: boolean];
 }>();
 
 defineSlots<{
@@ -31,7 +32,7 @@ const onSelect = (value: T) => {
 </script>
 
 <template>
-  <ContextMenuRoot>
+  <ContextMenuRoot @update:open="emit('update:open', $event)">
     <ContextMenuTrigger :disabled="disabled" as-child>
       <slot />
     </ContextMenuTrigger>

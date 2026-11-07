@@ -6,7 +6,7 @@ export type SubscriptionIdentifier = { id: string } | { slug: string };
 
 export type SubscriptionWithUserState = Pick<
   DatabaseSchema["subscriptions"],
-  "id" | "name" | "slug" | "service" | "url" | "logo" | "last_synced_at"
+  "id" | "name" | "slug" | "service" | "url" | "logo"
 > &
   Pick<DatabaseSchema["user_subscriptions"], "is_favorite" | "is_hidden"> & {
     last_video_at: string | null;

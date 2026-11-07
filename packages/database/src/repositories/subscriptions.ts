@@ -22,7 +22,6 @@ function select_with_user_state(user_id: string) {
       "subscriptions.service",
       "subscriptions.url",
       "subscriptions.logo",
-      "subscriptions.last_synced_at",
       "user_subscriptions.is_favorite",
       "user_subscriptions.is_hidden",
     ])

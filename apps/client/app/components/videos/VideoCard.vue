@@ -131,6 +131,9 @@ const dropdown_items = computed(() => {
   return items;
 });
 
+const menu_opened = ref(false);
+const menu_items = computed(() => (menu_opened.value ? dropdown_items.value : []));
+
 const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscription_favorite } =
   useVideo(video);
 
@@ -139,7 +142,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
 </script>
 
 <template>
-  <WatcherContextMenu :items="dropdown_items">
+  <WatcherContextMenu :items="menu_items" @update:open="menu_opened = true">
     <div
       v-if="hidden_reason"
       class="border-ui-border text-ui-text-muted flex aspect-video flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed p-4 text-center"
@@ -269,7 +272,6 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
         </div>
 
         <div
-          v-if="dropdown_items.length > 0"
           class="-mt-1 -mr-2 shrink-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 has-[[data-state=open]]:opacity-100 [@media(hover:hover)]:opacity-0"
         >
           <WatcherDropdownButton
@@ -279,7 +281,8 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
             icon-size="lg"
             icon="lucide:ellipsis-vertical"
             :aria-label="t('videos.actions')"
-            :items="dropdown_items"
+            :items="menu_items"
+            @update:open="menu_opened = true"
           />
         </div>
       </div>

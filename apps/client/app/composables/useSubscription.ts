@@ -1,7 +1,7 @@
-import type { SubscriptionResource } from "@watcher/common";
+import type { SubscriptionDetailsResource } from "@watcher/common";
 
 export const useSubscription = (slug: string) => {
-  return useAppFetch<SubscriptionResource>(`/api/subscriptions/${slug}`, {
+  return useAppFetch<SubscriptionDetailsResource>(`/api/subscriptions/${slug}`, {
     key: `subscription.${slug}`,
   });
 };
