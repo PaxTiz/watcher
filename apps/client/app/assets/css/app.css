@@ -32,6 +32,16 @@ body {
   backdrop-filter: blur(3px) saturate(1.5) brightness(1.05);
 }
 
+/* Skips the rendering of off-screen cards in lists that keep growing */
+@utility offscreen-cards {
+  & > * {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 280px;
+    /* content-visibility clips to the box: leave room for the hover shadow */
+    overflow-clip-margin: 3rem;
+  }
+}
+
 @utility video-tinted {
   --c: var(--tint);
   --c-vivid: var(--tint);

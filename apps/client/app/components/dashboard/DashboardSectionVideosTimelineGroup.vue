@@ -31,7 +31,7 @@ const on_toggle_favorite = async () => {
       {{ formatted_label }}
     </h2>
 
-    <div class="infinite-grid-[300px] gap-x-4 gap-y-8">
+    <div class="infinite-grid-[300px] offscreen-cards gap-x-4 gap-y-8">
       <VideoCard
         v-for="video in videos"
         :key="video.id"
