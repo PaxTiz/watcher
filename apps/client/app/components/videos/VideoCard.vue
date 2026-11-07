@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { VideoResource } from "@watcher/common";
+import type { VideoListResource } from "@watcher/common";
 import type { DropdownItem } from "@watcher/ui";
 
 import { useVideo } from "~/composables/videos/useVideo";
@@ -10,7 +10,7 @@ const {
   allowHideVideo = true,
   allowToggleFavorite = true,
 } = defineProps<{
-  video: VideoResource;
+  video: VideoListResource;
   allowHideVideo?: boolean;
   allowHideChannel?: boolean;
   allowToggleFavorite?: boolean;

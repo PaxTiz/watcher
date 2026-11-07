@@ -1,4 +1,4 @@
-import type { Page, VideoResource } from "@watcher/common";
+import type { Page, VideoListResource } from "@watcher/common";
 
 import { useVideosPage } from "./videos/useVideos";
 
@@ -13,7 +13,7 @@ export const useInfiniteVideos = (
     ? useState<string | undefined>(`${options.key}:before`, () => undefined)
     : ref<string | undefined>();
   before.value = undefined;
-  const items = ref<VideoResource[]>([]);
+  const items = ref<VideoListResource[]>([]);
   const hasMore = ref(true);
 
   const query = computed(() => {
@@ -34,7 +34,7 @@ export const useInfiniteVideos = (
   });
   const { data, status, refresh } = response;
 
-  const syncItems = (newData: Page<VideoResource>) => {
+  const syncItems = (newData: Page<VideoListResource>) => {
     if (!newData) return;
 
     if (!before.value) {

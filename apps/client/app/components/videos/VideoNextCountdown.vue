@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { VideoResource } from "@watcher/common";
+import type { VideoListResource } from "@watcher/common";
 
 const COUNTDOWN_SECONDS = 8;
 
-const { video } = defineProps<{ video: VideoResource }>();
+const { video } = defineProps<{ video: VideoListResource }>();
 const emit = defineEmits<{ play: []; cancel: [] }>();
 
 const { t } = useI18n();

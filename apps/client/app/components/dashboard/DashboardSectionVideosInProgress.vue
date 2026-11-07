@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { VideoResource } from "@watcher/common";
+import type { VideoListResource } from "@watcher/common";
 
 import { useVideo } from "~/composables/videos/useVideo";
 import { useVideosInProgress } from "~/composables/videos/useVideosInProgress";
@@ -11,7 +11,7 @@ const { numbers } = useFormatter();
 const featured = computed(() => videos.value?.items[0]);
 const others = computed(() => videos.value?.items.slice(1) ?? []);
 
-const on_mark_as_view = async (video: VideoResource) => {
+const on_mark_as_view = async (video: VideoListResource) => {
   const { on_mark_as_read } = useVideo(video);
 
   await on_mark_as_read(() => refresh());

@@ -6,7 +6,6 @@ export type VideoRow = {
   video_id: string;
   video_service: SubscriptionType;
   video_title: string;
-  video_description: string;
   video_duration: number;
   video_url: string;
   video_thumbnail_small: string;
@@ -55,7 +54,11 @@ export type FindAllForUserOutput = {
 
 export type FindByIdForUserInput = { id: string; user_id: string };
 export type FindByIdForUserOutput =
-  | (VideoRow & { subscription_is_hidden: boolean; subscription_service_id: string })
+  | (VideoRow & {
+      video_description: string;
+      subscription_is_hidden: boolean;
+      subscription_service_id: string;
+    })
   | undefined;
 
 export type FindAdjacentInput = {

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { VideoResource } from "@watcher/common";
+import type { VideoListResource } from "@watcher/common";
 import { isAfter, isToday, isYesterday, subDays } from "date-fns";
 
 import { useVideosTimeline } from "~/composables/videos/useVideosTimeline";
@@ -12,7 +12,7 @@ const { videos, hasMore, status, loadMoreTrigger } = useVideosTimeline();
 const groupedVideos = computed(() => {
   if (!videos.value) return [];
 
-  const groups: Record<Label, VideoResource[]> = {
+  const groups: Record<Label, VideoListResource[]> = {
     today: [],
     yesterday: [],
     weekly: [],
@@ -40,7 +40,7 @@ const groupedVideos = computed(() => {
   }
 
   return Object.entries(groups).filter(([_, items]) => items.length > 0) as Array<
-    [Label, Array<VideoResource>]
+    [Label, Array<VideoListResource>]
   >;
 });
 </script>

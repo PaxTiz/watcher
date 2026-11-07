@@ -1,4 +1,4 @@
-import type { Page, SubscriptionType, VideoResource } from "@watcher/common";
+import type { Page, SubscriptionType, VideoListResource, VideoResource } from "@watcher/common";
 import { findOrFail, repositoryTypes, videos } from "@watcher/database";
 import { formatISO, startOfDay, sub } from "date-fns";
 import { defineCachedFunction } from "nitropack/runtime";
@@ -35,7 +35,10 @@ export default class VideosService extends AbstractService {
       message: "video_not_found",
     });
 
-    return this.to_resource(video, video.subscription_is_hidden);
+    return {
+      ...this.to_list_resource(video, video.subscription_is_hidden),
+      description: video.video_description,
+    };
   }
 
   async get_url(
@@ -60,7 +63,7 @@ export default class VideosService extends AbstractService {
   async find_all(
     user: User,
     params: VideosValidators["list"]["query"],
-  ): Promise<Page<VideoResource> & { total?: number }> {
+  ): Promise<Page<VideoListResource> & { total?: number }> {
     const { total, items, has_more } = await videos.find_all_for_user({
       user_id: user.id,
       filters: {
@@ -83,7 +86,7 @@ export default class VideosService extends AbstractService {
 
     return {
       total,
-      items: items.map((item) => this.to_resource(item, false)),
+      items: items.map((item) => this.to_list_resource(item, false)),
       has_more,
     };
   }
@@ -99,7 +102,7 @@ export default class VideosService extends AbstractService {
     });
 
     if (newer.length === 10) {
-      return newer.map((video) => this.to_resource(video, false));
+      return newer.map((video) => this.to_list_resource(video, false));
     }
 
     const older = await videos.find_adjacent({
@@ -109,7 +112,7 @@ export default class VideosService extends AbstractService {
       limit: surrounding - newer.length,
     });
 
-    return [...newer, ...older].map((video) => this.to_resource(video, false));
+    return [...newer, ...older].map((video) => this.to_list_resource(video, false));
   }
 
   async hide(user: User, id: string) {
@@ -154,12 +157,11 @@ export default class VideosService extends AbstractService {
     return { created_after: date() };
   }
 
-  private to_resource(row: VideoRow, is_hidden: boolean): VideoResource {
+  private to_list_resource(row: VideoRow, is_hidden: boolean): VideoListResource {
     return {
       id: row.video_id,
       service: row.video_service,
       title: row.video_title,
-      description: row.video_description,
       duration: row.video_duration,
       viewing_progression: row.video_viewing_progression,
       url: row.video_url,

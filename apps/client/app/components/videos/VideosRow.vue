@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import type { VideoResource } from "@watcher/common";
+import type { VideoListResource } from "@watcher/common";
 import type { RouteLocationRaw } from "vue-router";
 
 defineProps<{
   title: string;
   icon: string;
-  videos: Array<VideoResource>;
+  videos: Array<VideoListResource>;
   loading?: boolean;
   to?: RouteLocationRaw;
 }>();

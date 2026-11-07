@@ -2,7 +2,7 @@ import type { VideoPalette } from "../types/palette";
 import type { SubscriptionType } from "../types/subscriptions";
 import type { SubscriptionResource } from "./subscriptions";
 
-export type VideoResource = {
+export type VideoListResource = {
   id: string;
 
   service: SubscriptionType;
@@ -10,8 +10,6 @@ export type VideoResource = {
   author: SubscriptionResource;
 
   title: string;
-
-  description: string;
 
   duration: number;
 
@@ -27,4 +25,8 @@ export type VideoResource = {
   palette: VideoPalette | null;
 
   created_at: string;
+};
+
+export type VideoResource = VideoListResource & {
+  description: string;
 };

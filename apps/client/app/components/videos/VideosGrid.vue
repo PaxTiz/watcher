@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Paginated, VideoResource } from "@watcher/common";
+import type { Paginated, VideoListResource } from "@watcher/common";
 
 const modelValue = defineModel<number>("page", { required: true });
 const {
@@ -10,7 +10,7 @@ const {
   allowToggleFavorite = true,
   httpKey,
 } = defineProps<{
-  videos: Paginated<VideoResource>;
+  videos: Paginated<VideoListResource>;
   perPage: number;
   loading?: boolean;
   allowHideVideo?: boolean;

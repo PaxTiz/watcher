@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { VideoResource } from "@watcher/common";
+import type { VideoListResource } from "@watcher/common";
 
 import { useVideosFavorites } from "~/composables/videos/useVideosFavorites";
 
@@ -7,7 +7,7 @@ export type Label = "today" | "yesterday" | "weekly" | "monthly" | "older";
 
 const props = defineProps<{
   label: Label;
-  videos: Array<VideoResource>;
+  videos: Array<VideoListResource>;
 }>();
 
 const { refresh: refresh_favorites } = await useVideosFavorites();

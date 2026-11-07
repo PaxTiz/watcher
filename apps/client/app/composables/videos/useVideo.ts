@@ -1,7 +1,7 @@
-import type { MaybePromise, VideoResource } from "@watcher/common";
+import type { MaybePromise, VideoListResource } from "@watcher/common";
 import { toast } from "vue-sonner";
 
-export const useVideo = (video: VideoResource) => {
+export const useVideo = (video: VideoListResource) => {
   const { t } = useNuxtApp().$i18n;
 
   const on_hide_video = async (callback?: () => MaybePromise<unknown>) => {

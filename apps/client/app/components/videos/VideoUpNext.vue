@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import type { VideoResource } from "@watcher/common";
+import type { VideoListResource } from "@watcher/common";
 
-defineProps<{ videos: Array<VideoResource>; loading?: boolean; nextId?: string }>();
+defineProps<{ videos: Array<VideoListResource>; loading?: boolean; nextId?: string }>();
 const autoplay = defineModel<boolean>("autoplay", { required: true });
 
 const { t } = useI18n();
