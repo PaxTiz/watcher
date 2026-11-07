@@ -1,7 +1,9 @@
 import type { VideoResource } from "@watcher/common";
 import type { ShallowRef } from "vue";
 
-const RESUME_THRESHOLD = 0.01;
+const RESUME_THRESHOLD = 0.005;
+const SAVE_INTERVAL = 30_000;
+const SEEK_DEBOUNCE = 500;
 
 export const useVideoProgression = (
   video: VideoResource,
@@ -11,46 +13,65 @@ export const useVideoProgression = (
     return;
   }
 
-  useEventListener(media, "ended", () =>
-    callApi(`/api/videos/${video.id}/progress`, {
-      method: "POST",
-      body: { progression: 1 },
-    }),
-  );
+  let is_started = false;
+  let saved_at = 0;
+  let saved_progression: number | null = video.viewing_progression;
 
-  if (video.viewing_progression > RESUME_THRESHOLD) {
-    useEventListener(
-      media,
-      "playing",
-      (event) => {
-        const element = event.currentTarget as HTMLMediaElement;
-        if (element.currentTime < 1) {
-          element.currentTime = video.viewing_progression * element.duration;
-        }
-      },
-      { once: true },
-    );
-  }
-
-  let latest_progress = 0;
-  useEventListener(media, "timeupdate", async (event) => {
-    const element = event.currentTarget as HTMLMediaElement;
-    if (!element.duration) {
+  const save = async (progression: number) => {
+    if (!is_started || progression === saved_progression) {
       return;
     }
 
-    const progression = Number((element.currentTime / element.duration).toFixed(2));
-    if (latest_progress >= progression) {
-      return;
-    }
-
-    latest_progress = progression;
+    saved_at = Date.now();
+    saved_progression = progression;
     const { error } = await callApi(`/api/videos/${video.id}/progress`, {
       method: "POST",
       body: { progression },
+      keepalive: true,
     });
     if (error) {
-      latest_progress = 0;
+      saved_progression = null;
+    }
+  };
+
+  const save_current = async () => {
+    const element = media.value;
+    if (element?.duration) {
+      await save(Number((element.currentTime / element.duration).toFixed(4)));
+    }
+  };
+
+  useEventListener(
+    media,
+    "playing",
+    (event) => {
+      const element = event.currentTarget as HTMLMediaElement;
+      if (video.viewing_progression > RESUME_THRESHOLD && element.currentTime < 1) {
+        element.currentTime = video.viewing_progression * element.duration;
+      }
+
+      is_started = true;
+      saved_at = Date.now();
+    },
+    { once: true },
+  );
+
+  useEventListener(media, "timeupdate", async () => {
+    if (Date.now() - saved_at >= SAVE_INTERVAL) {
+      await save_current();
     }
   });
+
+  useEventListener(media, "pause", save_current);
+  useEventListener(media, "seeked", useDebounceFn(save_current, SEEK_DEBOUNCE));
+  useEventListener(media, "ended", () => save(1));
+
+  useEventListener(window, "pagehide", save_current);
+  useEventListener(document, "visibilitychange", async () => {
+    if (document.visibilityState === "hidden") {
+      await save_current();
+    }
+  });
+
+  onBeforeUnmount(save_current);
 };

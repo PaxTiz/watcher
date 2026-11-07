@@ -435,7 +435,10 @@ export async function upsert_progression({
     .insertInto("users_videos_progression")
     .values({ user_id, video_id, progression })
     .onConflict((oc) =>
-      oc.columns(["user_id", "video_id"]).doUpdateSet({ progression, updated_at: sql`now()` }),
+      oc
+        .columns(["user_id", "video_id"])
+        .doUpdateSet({ progression, updated_at: sql`now()` })
+        .where("users_videos_progression.progression", "is distinct from", progression),
     )
     .execute();
 }
