@@ -1,12 +1,14 @@
 import type { SubscriptionResource } from "@watcher/common";
 
+const KEY = "subscriptions.all";
+
 export const useSubscriptions = () => {
   const { data, error, refresh, status, clear } = useAppFetch<Array<SubscriptionResource>>(
     "/api/subscriptions",
     {
-      key: "subscriptions.all",
+      key: KEY,
       getCachedData(k, nuxtApp, { cause }) {
-        if (cause === "refresh:manual") {
+        if (cause === "refresh:manual" || cause === "refresh:hook") {
           return undefined;
         }
 
@@ -44,4 +46,11 @@ export const useSubscriptions = () => {
     favorites,
     others,
   };
+};
+
+// For components rendered many times, which only need to trigger a refresh
+export const useRefreshSubscriptions = () => {
+  const nuxtApp = useNuxtApp();
+
+  return () => nuxtApp.runWithContext(() => refreshNuxtData(KEY));
 };

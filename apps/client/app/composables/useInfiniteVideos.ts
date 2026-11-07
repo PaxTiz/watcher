@@ -13,7 +13,7 @@ export const useInfiniteVideos = (
     ? useState<string | undefined>(`${options.key}:before`, () => undefined)
     : ref<string | undefined>();
   before.value = undefined;
-  const items = ref<VideoListResource[]>([]);
+  const items = shallowRef<VideoListResource[]>([]);
   const hasMore = ref(true);
 
   const query = computed(() => {
@@ -40,7 +40,7 @@ export const useInfiniteVideos = (
     if (!before.value) {
       items.value = newData.items;
     } else {
-      items.value.push(...newData.items);
+      items.value = [...items.value, ...newData.items];
     }
 
     hasMore.value = newData.has_more;

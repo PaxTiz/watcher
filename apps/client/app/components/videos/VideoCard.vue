@@ -25,7 +25,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { dates, numbers } = useFormatter();
-const { forceRefresh: refresh_subscriptions } = useSubscriptions();
+const refresh_subscriptions = useRefreshSubscriptions();
 const { integration_data } = useIntegrations();
 
 const viewing_progression = ref(video.viewing_progression);
