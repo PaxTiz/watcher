@@ -36,6 +36,7 @@ export default class CredentialsService extends AbstractService {
       },
     });
 
+    await this.forget_tokens(data);
     await services.sessions.forget_user(user_id);
 
     return data;
@@ -73,9 +74,13 @@ export default class CredentialsService extends AbstractService {
         "Failed to revoke the provider tokens",
       );
     } finally {
-      const method = credential.service === "google" ? forget_google_tokens : forget_twitch_tokens;
-      await method(credential.service_id);
+      await this.forget_tokens(credential);
     }
+  }
+
+  private async forget_tokens({ service, service_id }: ServiceCredentials) {
+    const method = service === "google" ? forget_google_tokens : forget_twitch_tokens;
+    await method(service_id);
   }
 
   private to_service_credentials(row: DatabaseSchema["credentials"]): ServiceCredentials {

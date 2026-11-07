@@ -1,6 +1,5 @@
 import { credentials, type DatabaseSchema } from "@watcher/database";
 import { type Client, createClient } from "@watcher/integration-twitch";
-import { differenceInSeconds } from "date-fns";
 import { useStorage } from "nitropack/runtime";
 import { useRuntimeConfig } from "nuxt/server";
 
@@ -51,9 +50,7 @@ export const useTwitch = () => {
           refresh_token_expires_at: row.refresh_token_expires_at,
         };
 
-        await storage.setItem(key, tokens, {
-          ttl: differenceInSeconds(row.access_token_expires_at, new Date()),
-        });
+        await storage.setItem(key, tokens);
 
         return tokens;
       },

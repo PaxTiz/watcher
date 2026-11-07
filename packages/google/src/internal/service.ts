@@ -1,4 +1,4 @@
-import { add, isBefore, sub } from "date-fns";
+import { add, isBefore } from "date-fns";
 
 import type { ClientTokens, GoogleClient } from "./client";
 import { oauth } from "./oauth";
@@ -27,7 +27,7 @@ export class GoogleService {
       throw new Error("User session has expired");
     }
 
-    const thresoldDate = sub(new Date(), { minutes: 1 });
+    const thresoldDate = add(new Date(), { minutes: 1 });
     if (isBefore(thresoldDate, credentials.access_token_expires_at)) {
       return credentials;
     }
