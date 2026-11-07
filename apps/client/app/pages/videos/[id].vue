@@ -82,9 +82,9 @@ useMeta({
         />
 
         <div
-          class="relative overflow-hidden bg-black shadow-[0_0_0_1px_rgb(255_255_255/0.08)] md:rounded-2xl"
+          class="relative aspect-video overflow-hidden bg-black shadow-[0_0_0_1px_rgb(255_255_255/0.08)] md:rounded-2xl"
         >
-          <VideoPlayback
+          <LazyVideoPlayback
             ref="player"
             :video="data"
             :autoplay="route.query.autoplay === '1'"

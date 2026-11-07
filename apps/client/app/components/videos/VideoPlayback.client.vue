@@ -3,8 +3,6 @@ import type { VideoResource } from "@watcher/common";
 import "@videojs/html/i18n";
 import "@videojs/html/video/player";
 import "@videojs/html/video/skin";
-import "@videojs/html/media/hlsjs-video";
-import "@videojs/html/media/youtube-video";
 
 import { useVideoProgression } from "~/composables/videos/useVideoProgression";
 
@@ -37,6 +35,10 @@ defineExpose({
     media.value.play();
   },
 });
+
+await (video.service === "twitch"
+  ? import("@videojs/html/media/hlsjs-video")
+  : import("@videojs/html/media/youtube-video"));
 </script>
 
 <template>
