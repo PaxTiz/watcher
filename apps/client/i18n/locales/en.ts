@@ -335,6 +335,35 @@ export default {
     },
   },
 
+  shortcuts: {
+    title: "Keyboard shortcuts",
+    close: "Close",
+    space: "Space",
+    groups: {
+      general: "General",
+      navigation: "Navigation",
+      video: "Video",
+    },
+    actions: {
+      search: "Search",
+      toggle_sidebar: "Collapse or expand the sidebar",
+      help: "Show keyboard shortcuts",
+      videos: "Go to videos",
+      favorites: "Go to favorites",
+      theater: "Theater mode",
+    },
+    player: {
+      play: "Play / pause",
+      fullscreen: "Fullscreen",
+      mute: "Mute",
+      seek: "Seek back / forward 10s",
+      volume: "Volume down / up",
+      captions: "Captions",
+      pip: "Picture-in-picture",
+      jump: "Jump to 0% – 90% of the video",
+    },
+  },
+
   search: {
     title: "Search",
     placeholder: "Search for a video or a channel…",

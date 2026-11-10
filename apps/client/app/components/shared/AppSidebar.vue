@@ -3,8 +3,7 @@ import type { SubscriptionResource } from "@watcher/common";
 import { differenceInHours } from "date-fns";
 import type { RouteLocationRaw } from "vue-router";
 
-import { ContentSearch } from "#components";
-import { mockSearch } from "~/utils/search";
+import type { ShortcutName } from "~/utils/shortcuts";
 
 const { collapsed = false } = defineProps<{ collapsed?: boolean }>();
 const emit = defineEmits<{ toggle: [] }>();
@@ -12,6 +11,8 @@ const emit = defineEmits<{ toggle: [] }>();
 const { t } = useI18n();
 const route = useRoute();
 const { search, go_to_results, clear_search } = useGlobalSearch();
+const { open_search: on_search } = useSearchPalette();
+const { hint } = useShortcutHints();
 const { favorites, others } = useSubscriptions();
 
 const is_favorites_feed = computed(
@@ -19,19 +20,27 @@ const is_favorites_feed = computed(
 );
 
 const nav_items = computed<
-  Array<{ label: string; to: RouteLocationRaw; icon: string; active: boolean }>
+  Array<{
+    label: string;
+    to: RouteLocationRaw;
+    icon: string;
+    active: boolean;
+    shortcut?: ShortcutName;
+  }>
 >(() => [
   { label: t("nav.home"), to: "/", icon: "lucide:house", active: route.path === "/" },
   {
     label: t("nav.videos"),
     to: "/videos",
     icon: "lucide:clapperboard",
+    shortcut: "videos",
     active: route.path === "/videos" && !is_favorites_feed.value,
   },
   {
     label: t("nav.favorites"),
     to: { path: "/videos", query: { is_favorite: "true" } },
     icon: "lucide:star",
+    shortcut: "favorites",
     active: is_favorites_feed.value,
   },
 ]);
@@ -42,11 +51,6 @@ const rail_subscriptions = computed(() =>
 
 const has_new_video = (sub: SubscriptionResource) => {
   return !!sub.last_video_at && differenceInHours(new Date(), sub.last_video_at) < 24;
-};
-
-const on_search = () => {
-  const overlay = useWatcherOverlay();
-  overlay.create(ContentSearch).open({ searchFn: mockSearch });
 };
 </script>
 
@@ -65,7 +69,7 @@ const on_search = () => {
         class="text-ui-text-muted hover:bg-ui-text/10 hover:text-ui-text flex size-9 items-center justify-center rounded-lg transition-colors"
         :class="{ 'ml-auto': !collapsed }"
         :aria-label="t(collapsed ? 'nav.expand_sidebar' : 'nav.collapse_sidebar')"
-        :title="t(collapsed ? 'nav.expand' : 'nav.collapse')"
+        :title="hint(t(collapsed ? 'nav.expand' : 'nav.collapse'), 'toggle_sidebar')"
         @click="emit('toggle')"
       >
         <Icon
@@ -81,7 +85,7 @@ const on_search = () => {
         type="button"
         class="text-ui-text-muted hover:bg-ui-text/10 hover:text-ui-text mx-auto flex size-10 items-center justify-center rounded-lg transition-colors"
         :aria-label="t('common.search')"
-        :title="t('common.search')"
+        :title="hint(t('common.search'), 'search')"
         @click="on_search"
       >
         <Icon name="lucide:search" class="text-lg" />
@@ -92,10 +96,11 @@ const on_search = () => {
         <Icon name="lucide:search" class="text-ui-text-muted pointer-events-none absolute left-3" />
         <button
           ref="search_input"
-          class="control-field text-ui-text-muted !h-9 w-full cursor-pointer pl-9 text-left"
+          class="control-field text-ui-text-muted flex !h-9 w-full cursor-pointer items-center pl-9 text-left"
           @click="on_search"
         >
           {{ t("common.search") }}
+          <AppShortcut name="search" class="ml-auto" />
         </button>
       </div>
     </div>
@@ -106,8 +111,10 @@ const on_search = () => {
         :key="item.icon"
         :to="item.to"
         :aria-current="item.active ? 'page' : undefined"
-        :title="collapsed ? item.label : undefined"
-        class="flex items-center gap-3 rounded-lg py-2 text-sm transition-colors"
+        :title="
+          collapsed ? (item.shortcut ? hint(item.label, item.shortcut) : item.label) : undefined
+        "
+        class="group/nav flex items-center gap-3 rounded-lg py-2 text-sm transition-colors"
         :class="[
           collapsed ? 'mx-auto size-10 justify-center px-0' : 'px-3',
           item.active
@@ -116,7 +123,14 @@ const on_search = () => {
         ]"
       >
         <Icon :name="item.icon" class="shrink-0 text-lg" />
-        <span v-if="!collapsed">{{ item.label }}</span>
+        <template v-if="!collapsed">
+          <span>{{ item.label }}</span>
+          <AppShortcut
+            v-if="item.shortcut"
+            :name="item.shortcut"
+            class="ml-auto opacity-0 transition-opacity group-hover/nav:opacity-100 group-focus-visible/nav:opacity-100"
+          />
+        </template>
       </NuxtLink>
     </nav>
 

@@ -340,6 +340,35 @@ export default {
     },
   },
 
+  shortcuts: {
+    title: "Atajos de teclado",
+    close: "Cerrar",
+    space: "Espacio",
+    groups: {
+      general: "General",
+      navigation: "Navegación",
+      video: "Vídeo",
+    },
+    actions: {
+      search: "Buscar",
+      toggle_sidebar: "Contraer o expandir la barra lateral",
+      help: "Mostrar los atajos de teclado",
+      videos: "Ir a los vídeos",
+      favorites: "Ir a favoritos",
+      theater: "Modo cine",
+    },
+    player: {
+      play: "Reproducir / pausar",
+      fullscreen: "Pantalla completa",
+      mute: "Silenciar",
+      seek: "Retroceder / avanzar 10 s",
+      volume: "Bajar / subir el volumen",
+      captions: "Subtítulos",
+      pip: "Picture-in-picture",
+      jump: "Ir al 0 % – 90 % del vídeo",
+    },
+  },
+
   search: {
     title: "Búsqueda",
     placeholder: "Busca un vídeo o un canal…",

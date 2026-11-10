@@ -14,6 +14,7 @@ const {
 const emit = defineEmits<{ ended: []; toggle_theater: [] }>();
 
 const { t, locale } = useI18n();
+const { hint } = useShortcutHints();
 
 const url = computed(() => {
   if (video.service === "twitch") {
@@ -31,7 +32,7 @@ useEventListener(media, "ended", () => emit("ended"));
 
 const skin = useTemplateRef<HTMLElement>("skin");
 const theater_slot = shallowRef<HTMLElement>();
-const can_use_theater = useMediaQuery("(min-width: 80rem)");
+const can_use_theater = useMediaQuery("(min-width: 48rem)");
 
 onMounted(() => {
   const root = skin.value?.shadowRoot;
@@ -92,7 +93,7 @@ await (video.service === "twitch"
       type="button"
       class="media-button"
       :aria-label="t(theater ? 'videos.theater.exit' : 'videos.theater.enter')"
-      :title="`${t(theater ? 'videos.theater.exit' : 'videos.theater.enter')} (t)`"
+      :title="hint(t(theater ? 'videos.theater.exit' : 'videos.theater.enter'), 'theater')"
       @click="emit('toggle_theater')"
     >
       <svg
@@ -131,14 +132,8 @@ await (video.service === "twitch"
 }
 
 @media (width >= 48rem) {
-  .video-skin {
+  .video-skin:not(.is-theater) {
     --media-border-radius: var(--radius-2xl, 1rem);
-  }
-}
-
-@media (width >= 80rem) {
-  .video-skin.is-theater {
-    --media-border-radius: 0;
   }
 }
 

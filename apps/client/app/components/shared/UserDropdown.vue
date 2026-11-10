@@ -9,6 +9,8 @@ const { colorMode, options: theme_options, changeTheme } = useWatcherThemes();
 const { locale, options: locale_options, changeLocale } = useWatcherLocales();
 
 const { is_synchronising, synchronise } = useSynchronization();
+const { open_help } = useShortcutsHelp();
+const { hint } = useShortcutHints();
 
 const onSelect = async (key: string, value: string) => {
   if (key === "theme") {
@@ -43,6 +45,13 @@ const items = computed<Array<DropdownItem>>(() => [
     value: "sync",
     icon: "lucide:refresh-cw",
     disabled: is_synchronising.value,
+  },
+  {
+    key: "shortcuts",
+    label: hint(t("shortcuts.title"), "help"),
+    value: "shortcuts",
+    icon: "lucide:keyboard",
+    on_select: async () => open_help(),
   },
   {
     key: "theme",

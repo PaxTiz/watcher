@@ -57,9 +57,6 @@ const modalUi = computed(() => ({
   body: ["max-h-[76vh] max-w-2xl rounded-2xl! p-0! md:p-0!", ui?.body].filter(Boolean).join(" "),
 }));
 
-const kbd =
-  "bg-ui-text/[0.06] ring-ui-text/10 text-ui-text-muted inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1.5 font-sans text-[11px] font-medium ring-1 ring-inset";
-
 let previouslyFocused: HTMLElement | null = null;
 let previousOverflow = "";
 
@@ -137,7 +134,7 @@ function onSelect(item: CommandItem<T>) {
             class="text-ui-text h-full min-w-0 flex-1 bg-transparent text-[15px] outline-none"
           />
 
-          <kbd :class="kbd">{{ t("ui.command_palette.escape") }}</kbd>
+          <WatcherKbd>{{ t("ui.command_palette.escape") }}</WatcherKbd>
         </div>
 
         <slot name="filters" />
@@ -178,12 +175,12 @@ function onSelect(item: CommandItem<T>) {
         >
           <slot name="footer">
             <span class="flex items-center gap-1.5">
-              <kbd :class="kbd"><Icon name="lucide:arrow-up" /></kbd>
-              <kbd :class="kbd"><Icon name="lucide:arrow-down" /></kbd>
+              <WatcherKbd><Icon name="lucide:arrow-up" /></WatcherKbd>
+              <WatcherKbd><Icon name="lucide:arrow-down" /></WatcherKbd>
               {{ t("ui.command_palette.navigate") }}
             </span>
             <span class="flex items-center gap-1.5">
-              <kbd :class="kbd"><Icon name="lucide:corner-down-left" /></kbd>
+              <WatcherKbd><Icon name="lucide:corner-down-left" /></WatcherKbd>
               {{ t("ui.command_palette.select") }}
             </span>
           </slot>

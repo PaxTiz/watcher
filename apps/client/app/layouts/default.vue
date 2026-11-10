@@ -24,6 +24,14 @@ watch(is_video_page, () => {
   unfolded_on_video_page.value = false;
 });
 
+const { open_search } = useSearchPalette();
+const { open_help } = useShortcutsHelp();
+useShortcut("help", open_help);
+useShortcut("search", open_search);
+useShortcut("toggle_sidebar", toggle_sidebar);
+useShortcut("videos", () => navigateTo("/videos"));
+useShortcut("favorites", () => navigateTo({ path: "/videos", query: { is_favorite: "true" } }));
+
 const scroller = useTemplateRef("scroller");
 const { container } = useAppScroll();
 onMounted(() => {

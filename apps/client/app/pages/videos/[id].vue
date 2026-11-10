@@ -26,18 +26,7 @@ const theater = useCookie<boolean>("watcher-theater-mode", {
   maxAge: 3600 * 24 * 365,
 });
 
-onKeyStroke("t", (event) => {
-  const target = event.target as HTMLElement | null;
-  if (
-    event.repeat ||
-    event.ctrlKey ||
-    event.metaKey ||
-    event.altKey ||
-    target?.closest("input, textarea, select, [contenteditable]")
-  ) {
-    return;
-  }
-
+useShortcut("theater", () => {
   theater.value = !theater.value;
 });
 
@@ -97,20 +86,20 @@ useMeta({
     <div
       class="min-w-0 xl:col-start-1 xl:row-start-1"
       :class="{
-        'xl:col-span-2 xl:bg-black xl:shadow-[0_0_0_100vmax_black] xl:[clip-path:inset(0_-100vmax)]':
+        'md:bg-black md:shadow-[0_0_0_100vmax_black] md:[clip-path:inset(0_-100vmax)] xl:col-span-2':
           theater,
       }"
     >
-      <div class="relative" :class="{ 'xl:mx-auto xl:max-w-[calc((100dvh-10rem)*16/9)]': theater }">
+      <div class="relative" :class="{ 'md:mx-auto md:max-w-[calc((100dvh-10rem)*16/9)]': theater }">
         <div
           class="pointer-events-none absolute -inset-x-[7%] -inset-y-[14%] hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent),linear-gradient(to_bottom,transparent,black_11%,black_89%,transparent)] [mask-composite:intersect] md:block"
-          :class="{ 'xl:hidden': theater }"
+          :class="{ 'md:hidden': theater }"
           :style="{ backgroundImage: palette_glow(data.palette, 0.45) }"
         />
 
         <div
           class="relative aspect-video overflow-hidden bg-black shadow-[0_0_0_1px_rgb(255_255_255/0.08)] md:rounded-2xl"
-          :class="{ 'xl:rounded-none xl:shadow-none': theater }"
+          :class="{ 'md:rounded-none md:shadow-none': theater }"
         >
           <LazyVideoPlayback
             ref="player"

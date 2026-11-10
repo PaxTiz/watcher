@@ -341,6 +341,35 @@ export default {
     },
   },
 
+  shortcuts: {
+    title: "Raccourcis clavier",
+    close: "Fermer",
+    space: "Espace",
+    groups: {
+      general: "Général",
+      navigation: "Navigation",
+      video: "Vidéo",
+    },
+    actions: {
+      search: "Rechercher",
+      toggle_sidebar: "Replier ou déplier la barre latérale",
+      help: "Afficher les raccourcis clavier",
+      videos: "Aller aux vidéos",
+      favorites: "Aller aux favoris",
+      theater: "Mode cinéma",
+    },
+    player: {
+      play: "Lecture / pause",
+      fullscreen: "Plein écran",
+      mute: "Couper le son",
+      seek: "Reculer / avancer de 10 s",
+      volume: "Baisser / monter le volume",
+      captions: "Sous-titres",
+      pip: "Picture-in-picture",
+      jump: "Aller à 0 % – 90 % de la vidéo",
+    },
+  },
+
   search: {
     title: "Recherche",
     placeholder: "Rechercher une vidéo ou une chaîne…",
