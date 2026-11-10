@@ -64,7 +64,7 @@ const scroll_by_page = (direction: 1 | -1) => {
 
     <div
       ref="scroller"
-      class="grid snap-x snap-mandatory [scrollbar-width:none] auto-cols-[80%] grid-flow-col gap-4 overflow-x-auto pb-2 sm:auto-cols-[calc((100%-1rem)/2)] lg:auto-cols-[calc((100%-2rem)/3)] 2xl:auto-cols-[calc((100%-3rem)/4)]"
+      class="-mx-2 -mt-2 grid snap-x snap-mandatory scroll-px-2 [scrollbar-width:none] auto-cols-[80%] grid-flow-col gap-4 overflow-x-auto px-2 pt-2 pb-2 sm:auto-cols-[calc((100%-1rem)/2)] lg:auto-cols-[calc((100%-2rem)/3)] 2xl:auto-cols-[calc((100%-3rem)/4)]"
     >
       <template v-if="loading">
         <VideoCardSkeleton v-for="i in 4" :key="i" :index="i" class="snap-start" />

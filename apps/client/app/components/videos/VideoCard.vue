@@ -167,7 +167,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
 
     <article
       v-else
-      class="group video-tinted transition-transform duration-300 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      class="group video-tinted -m-2 rounded-2xl p-2 transition-colors duration-300 hover:bg-[rgb(var(--c)/0.12)] motion-reduce:transition-none dark:hover:bg-[rgb(var(--c)/0.14)]"
       :style="tones_style"
     >
       <NuxtLink
@@ -177,7 +177,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
         aria-hidden="true"
       >
         <div
-          class="bg-ui-border/40 relative aspect-video overflow-hidden rounded-xl shadow-[0_0_0_1px_rgb(255_255_255/0.06)] transition-shadow duration-500 group-hover:shadow-[0_0_0_1px_rgb(255_255_255/0.06),0_18px_44px_-16px_rgb(var(--c)/0.75)] motion-reduce:transition-none"
+          class="bg-ui-border/40 relative aspect-video overflow-hidden rounded-xl shadow-[0_0_0_1px_rgb(255_255_255/0.06)]"
         >
           <NuxtImg
             class="size-full object-cover"
