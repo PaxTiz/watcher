@@ -21,6 +21,26 @@ const show_countdown = ref(false);
 
 const player = useTemplateRef("player");
 
+const theater = useCookie<boolean>("watcher-theater-mode", {
+  default: () => false,
+  maxAge: 3600 * 24 * 365,
+});
+
+onKeyStroke("t", (event) => {
+  const target = event.target as HTMLElement | null;
+  if (
+    event.repeat ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.altKey ||
+    target?.closest("input, textarea, select, [contenteditable]")
+  ) {
+    return;
+  }
+
+  theater.value = !theater.value;
+});
+
 const on_ended = () => {
   if (autoplay.value && next_video.value) {
     show_countdown.value = true;
@@ -71,24 +91,34 @@ useMeta({
 <template>
   <div
     v-if="data"
-    class="video-tinted mx-auto grid max-w-[1800px] gap-6 pb-8 xl:grid-cols-[minmax(0,1fr)_24rem]"
+    class="video-tinted mx-auto grid max-w-[1800px] gap-x-6 gap-y-4 pb-8 xl:grid-cols-[minmax(0,1fr)_24rem] xl:grid-rows-[auto_1fr]"
     :style="video_tones_style(data.palette)"
   >
-    <div class="min-w-0">
-      <div class="relative">
+    <div
+      class="min-w-0 xl:col-start-1 xl:row-start-1"
+      :class="{
+        'xl:col-span-2 xl:bg-black xl:shadow-[0_0_0_100vmax_black] xl:[clip-path:inset(0_-100vmax)]':
+          theater,
+      }"
+    >
+      <div class="relative" :class="{ 'xl:mx-auto xl:max-w-[calc((100dvh-10rem)*16/9)]': theater }">
         <div
           class="pointer-events-none absolute -inset-x-[7%] -inset-y-[14%] hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent),linear-gradient(to_bottom,transparent,black_11%,black_89%,transparent)] [mask-composite:intersect] md:block"
+          :class="{ 'xl:hidden': theater }"
           :style="{ backgroundImage: palette_glow(data.palette, 0.45) }"
         />
 
         <div
           class="relative aspect-video overflow-hidden bg-black shadow-[0_0_0_1px_rgb(255_255_255/0.08)] md:rounded-2xl"
+          :class="{ 'xl:rounded-none xl:shadow-none': theater }"
         >
           <LazyVideoPlayback
             ref="player"
             :video="data"
             :autoplay="route.query.autoplay === '1'"
+            :theater="theater"
             @ended="on_ended"
+            @toggle_theater="theater = !theater"
           />
 
           <VideoNextCountdown
@@ -99,13 +129,18 @@ useMeta({
           />
         </div>
       </div>
-
-      <VideoMeta class="mt-4 px-4 md:px-0" :video="data" @seek="player?.seek($event)" />
     </div>
+
+    <VideoMeta
+      class="min-w-0 px-4 md:px-0 xl:col-start-1 xl:row-start-2"
+      :video="data"
+      @seek="player?.seek($event)"
+    />
 
     <VideoUpNext
       v-model:autoplay="autoplay"
-      class="px-4 md:px-0"
+      class="mt-2 px-4 md:px-0 xl:col-start-2 xl:mt-0"
+      :class="theater ? 'xl:row-start-2' : 'xl:row-span-2 xl:row-start-1'"
       :videos="up_next ?? []"
       :next-id="autoplay ? next_video?.id : undefined"
       :loading="up_status === 'pending'"

@@ -296,6 +296,10 @@ export default {
       added: "The subscription has been added to your favorites",
       removed: "The subscription has been removed from your favorites",
     },
+    theater: {
+      enter: "Theater mode",
+      exit: "Exit theater mode",
+    },
     up_next: {
       title: "Up next",
       autoplay: "Autoplay",

@@ -301,6 +301,10 @@ export default {
       added: "La suscripción se ha añadido a tus favoritos",
       removed: "La suscripción se ha quitado de tus favoritos",
     },
+    theater: {
+      enter: "Modo cine",
+      exit: "Salir del modo cine",
+    },
     up_next: {
       title: "A continuación",
       autoplay: "Reproducción automática",

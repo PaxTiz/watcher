@@ -302,6 +302,10 @@ export default {
       added: "L'abonnement a été ajouté à vos favoris",
       removed: "L'abonnement a été retiré de vos favoris",
     },
+    theater: {
+      enter: "Mode cinéma",
+      exit: "Quitter le mode cinéma",
+    },
     up_next: {
       title: "À suivre",
       autoplay: "Lecture automatique",
