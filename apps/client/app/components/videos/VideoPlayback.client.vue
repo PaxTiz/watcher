@@ -119,6 +119,8 @@ await (video.service === "twitch"
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #000;
+  user-select: none;
+  -webkit-user-select: none;
   border-radius: var(--media-border-radius);
   /* Chrome renders <video> on a hardware overlay that ignores border-radius clipping while loading */
   clip-path: inset(0 round var(--media-border-radius));
