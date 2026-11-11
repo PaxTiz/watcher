@@ -42,3 +42,17 @@ export const palette_glow = (palette: VideoPalette | null | undefined, opacity =
     `radial-gradient(40% 60% at 94% 50%, rgb(${right} / ${opacity}) 0%, transparent 100%)`,
   ].join(", ");
 };
+
+export const palette_sides = (palette: VideoPalette | null | undefined, opacity = 0.18) => {
+  if (!palette) {
+    return null;
+  }
+
+  const [left, , right] = palette.regions;
+  const vignette =
+    "linear-gradient(to bottom, rgb(0 0 0 / 0.35), transparent 35%, transparent 65%, rgb(0 0 0 / 0.35))";
+  const side = (color: string, direction: string) =>
+    `${vignette}, linear-gradient(to ${direction}, rgb(${color} / ${opacity}), transparent 32rem)`;
+
+  return { left: side(left, "left"), right: side(right, "right") };
+};

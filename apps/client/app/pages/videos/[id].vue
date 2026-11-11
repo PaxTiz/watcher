@@ -14,17 +14,21 @@ const { data } = await useAppFetch<VideoResource>(`/api/videos/${route.params.id
 const { data: up_next, status: up_status } = useAppFetch(`/api/videos/${route.params.id}/next`);
 const next_video = computed(() => (up_next.value ?? []).find((v) => v.viewing_progression <= 0.9));
 
-usePageAmbient(() => data.value);
-
 const autoplay = useLocalStorage("watcher:autoplay", true);
 const show_countdown = ref(false);
 
 const player = useTemplateRef("player");
+const sides = computed(() => palette_sides(data.value?.palette));
 
 const theater = useCookie<boolean>("watcher-theater-mode", {
   default: () => false,
   maxAge: 3600 * 24 * 365,
 });
+
+usePageAmbient(
+  () => data.value,
+  () => theater.value,
+);
 
 useShortcut("theater", () => {
   theater.value = !theater.value;
@@ -86,20 +90,31 @@ useMeta({
     <div
       class="min-w-0 xl:col-start-1 xl:row-start-1"
       :class="{
-        'md:bg-black md:shadow-[0_0_0_100vmax_black] md:[clip-path:inset(0_-100vmax)] xl:col-span-2':
+        'bg-black shadow-[0_0_0_100vmax_black] [clip-path:inset(0_-100vmax)] xl:col-span-2':
           theater,
       }"
     >
-      <div class="relative" :class="{ 'md:mx-auto md:max-w-[calc((100dvh-10rem)*16/9)]': theater }">
+      <div class="relative" :class="{ 'mx-auto max-w-[calc((100dvh-10rem)*16/9)]': theater }">
         <div
           class="pointer-events-none absolute -inset-x-[7%] -inset-y-[14%] hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent),linear-gradient(to_bottom,transparent,black_11%,black_89%,transparent)] [mask-composite:intersect] md:block"
           :class="{ 'md:hidden': theater }"
           :style="{ backgroundImage: palette_glow(data.palette, 0.45) }"
         />
 
+        <template v-if="theater && sides">
+          <div
+            class="pointer-events-none absolute inset-y-0 right-full w-screen"
+            :style="{ backgroundImage: sides.left }"
+          />
+          <div
+            class="pointer-events-none absolute inset-y-0 left-full w-screen"
+            :style="{ backgroundImage: sides.right }"
+          />
+        </template>
+
         <div
-          class="relative aspect-video overflow-hidden bg-black shadow-[0_0_0_1px_rgb(255_255_255/0.08)] md:rounded-2xl"
-          :class="{ 'md:rounded-none md:shadow-none': theater }"
+          class="relative aspect-video overflow-hidden bg-black"
+          :class="theater ? [] : ['shadow-[0_0_0_1px_rgb(255_255_255/0.08)]', 'md:rounded-2xl']"
         >
           <LazyVideoPlayback
             ref="player"

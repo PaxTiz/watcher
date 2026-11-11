@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const { palette } = useAmbient();
+const { palette, muted } = useAmbient();
 
 const layers = ref<[string, string]>(["none", "none"]);
 const active_layer = ref<0 | 1>(0);
@@ -28,7 +28,8 @@ watchEffect(() => {
 
 <template>
   <div
-    class="pointer-events-none absolute inset-x-0 top-0 -z-10 hidden h-[80vh] [mask-image:linear-gradient(to_bottom,black_20%,transparent_95%)] dark:block"
+    class="pointer-events-none absolute inset-x-0 top-0 -z-10 hidden h-[80vh] [mask-image:linear-gradient(to_bottom,black_20%,transparent_95%)] transition-opacity duration-500 dark:block"
+    :class="{ 'opacity-0': muted }"
     aria-hidden="true"
   >
     <div

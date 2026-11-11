@@ -32,7 +32,6 @@ useEventListener(media, "ended", () => emit("ended"));
 
 const skin = useTemplateRef<HTMLElement>("skin");
 const theater_slot = shallowRef<HTMLElement>();
-const can_use_theater = useMediaQuery("(min-width: 48rem)");
 
 onMounted(() => {
   const root = skin.value?.shadowRoot;
@@ -88,7 +87,7 @@ await (video.service === "twitch"
     </video-player>
   </media-i18n>
 
-  <Teleport v-if="theater_slot && can_use_theater" :to="theater_slot">
+  <Teleport v-if="theater_slot" :to="theater_slot">
     <button
       type="button"
       class="media-button"
