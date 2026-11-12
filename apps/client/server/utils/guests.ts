@@ -30,6 +30,34 @@ const RELIABLE_MARKER = new RegExp(
 const LIST_END =
   /[()[\]{}|#!?:;"«»“”\n【】「」『』（）［］｜！？：]|\s[-–—]|[-–—]\s|\s\/\/\s|\s(?=@)/u;
 const CONJUNCTIONS = ["et", "and", "y", "e", "und", "en", "i", "и", "ve", "og", "och", "és", "x"];
+const LIST_CLOSERS = new Set([
+  "etc",
+  "ecc",
+  "usw",
+  "co",
+  "cie",
+  "cia",
+  "compagnie",
+  "company",
+  "compania",
+  "companhia",
+  "compagnia",
+  "friends",
+  "amis",
+  "potes",
+  "amigos",
+  "amici",
+  "freunde",
+  "others",
+  "autres",
+  "otros",
+  "altri",
+  "more",
+  "等",
+  "など",
+  "他",
+  "외",
+]);
 const LIST_SEPARATOR = new RegExp(
   `\\s*(?:[,&+/、・，＆×]|\\s(?:${CONJUNCTIONS.join("|")})\\s)\\s*`,
   "iu",
@@ -93,7 +121,7 @@ const is_name = (name: string) =>
   name.length <= MAX_NAME_LENGTH &&
   name.split(/\s+/).length <= MAX_NAME_WORDS &&
   (!/\s/.test(name) || !/^\p{Ll}/u.test(name)) &&
-  !/^(?:etc|\.+|…)$/iu.test(name) &&
+  !LIST_CLOSERS.has(comparable_form(name)) &&
   new RegExp(`[${LETTER}]`, "u").test(name);
 
 export function preferred_name(names: Array<{ name: string; count: number }>) {
