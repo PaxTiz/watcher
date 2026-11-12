@@ -19,7 +19,12 @@ const { filters, filters_debounced } = useVideosFilters(
 );
 
 const http_key = computed(() => `subscription_${subscription.id}_videos`);
-const { data: videos, status } = await useVideos(filters_debounced, { key: http_key });
+const { data: videos, status, refresh } = await useVideos(filters_debounced, { key: http_key });
+
+watch(
+  () => subscription.is_hidden,
+  () => refresh(),
+);
 
 usePageAmbient(() => videos.value?.items[0]);
 
