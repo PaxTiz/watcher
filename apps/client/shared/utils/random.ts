@@ -16,34 +16,58 @@ export const parse_slug_params = (value: string) => {
   return value;
 };
 
+export const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+export type Limiter = <T>(task: () => Promise<T>) => Promise<T>;
+
+export const create_limiter = (max: number, min_interval_ms = 0): Limiter => {
+  let active = 0;
+  let next_start = 0;
+  const waiting: Array<() => void> = [];
+
+  const wait_interval = async () => {
+    if (min_interval_ms === 0) {
+      return;
+    }
+
+    const now = Date.now();
+    const start = Math.max(now, next_start);
+    next_start = start + min_interval_ms;
+
+    if (start > now) {
+      await sleep(start - now);
+    }
+  };
+
+  return async (task) => {
+    if (active < max) {
+      active++;
+    } else {
+      await new Promise<void>((resolve) => waiting.push(resolve));
+    }
+
+    try {
+      await wait_interval();
+      return await task();
+    } finally {
+      const next = waiting.shift();
+      if (next) {
+        next();
+      } else {
+        active--;
+      }
+    }
+  };
+};
+
 export const async_pool = async <T>(
   items: Array<T>,
   count: number,
   callback: (item: T) => Promise<unknown>,
 ) => {
-  for (let i = 0; i < items.length; i += count) {
-    const sub_items = items.slice(i, i + count);
-    const promises = sub_items.map(callback);
-    await Promise.allSettled(promises);
-  }
-};
+  const limit = create_limiter(count);
 
-export const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-export const async_pool_with_delay = async <T>(
-  items: Array<T>,
-  count: number,
-  delay_ms: number,
-  callback: (item: T) => Promise<unknown>,
-) => {
-  for (let i = 0; i < items.length; i += count) {
-    const sub_items = items.slice(i, i + count);
-    await Promise.allSettled(sub_items.map(callback));
-
-    if (i + count < items.length) {
-      await sleep(delay_ms);
-    }
-  }
+  await Promise.allSettled(items.map((item) => limit(() => callback(item))));
 };
 
 export const with_retry = async <T>(

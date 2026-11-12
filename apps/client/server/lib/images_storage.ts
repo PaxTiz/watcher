@@ -12,6 +12,8 @@ import {
 } from "@aws-sdk/client-s3";
 import { useRuntimeConfig } from "nuxt/server";
 
+import { create_limiter } from "#shared/utils/random";
+
 // Where the `filesystem` driver stores images, served by the `/uploads` route
 export const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads");
 
@@ -50,6 +52,8 @@ const filesystem_storage = (): ImagesStorage => ({
   public_url: (key) => `/uploads/${key}`,
 });
 
+const MAX_CONCURRENT_REQUESTS = 16;
+
 const is_not_found = (error: unknown) =>
   error instanceof S3ServiceException && error.$metadata.httpStatusCode === 404;
 
@@ -71,52 +75,58 @@ const s3_storage = (): ImagesStorage => {
     responseChecksumValidation: "WHEN_REQUIRED",
   });
 
+  const limit = create_limiter(MAX_CONCURRENT_REQUESTS);
+
   return {
-    async put(Key, Body, ContentType) {
-      await client.send(
-        new PutObjectCommand({
-          Bucket,
-          Key,
-          Body,
-          ContentType,
-          CacheControl: CACHE_CONTROL,
-          StorageClass,
-        }),
-      );
-    },
+    put: (Key, Body, ContentType) =>
+      limit(async () => {
+        await client.send(
+          new PutObjectCommand({
+            Bucket,
+            Key,
+            Body,
+            ContentType,
+            CacheControl: CACHE_CONTROL,
+            StorageClass,
+          }),
+        );
+      }),
 
-    async get(Key) {
-      try {
-        const object = await client.send(new GetObjectCommand({ Bucket, Key }));
-        const body = await object.Body?.transformToByteArray();
+    get: (Key) =>
+      limit(async () => {
+        try {
+          const object = await client.send(new GetObjectCommand({ Bucket, Key }));
+          const body = await object.Body?.transformToByteArray();
 
-        return body ? Buffer.from(body) : null;
-      } catch (error) {
-        if (is_not_found(error)) {
-          return null;
+          return body ? Buffer.from(body) : null;
+        } catch (error) {
+          if (is_not_found(error)) {
+            return null;
+          }
+
+          throw error;
         }
+      }),
 
-        throw error;
-      }
-    },
+    last_modified: (Key) =>
+      limit(async () => {
+        try {
+          const object = await client.send(new HeadObjectCommand({ Bucket, Key }));
 
-    async last_modified(Key) {
-      try {
-        const object = await client.send(new HeadObjectCommand({ Bucket, Key }));
+          return object.LastModified ?? null;
+        } catch (error) {
+          if (is_not_found(error)) {
+            return null;
+          }
 
-        return object.LastModified ?? null;
-      } catch (error) {
-        if (is_not_found(error)) {
-          return null;
+          throw error;
         }
+      }),
 
-        throw error;
-      }
-    },
-
-    async remove(Key) {
-      await client.send(new DeleteObjectCommand({ Bucket, Key }));
-    },
+    remove: (Key) =>
+      limit(async () => {
+        await client.send(new DeleteObjectCommand({ Bucket, Key }));
+      }),
 
     public_url: (key) => `${publicUrl.replace(/\/$/, "")}/${key}`,
   };

@@ -14,8 +14,10 @@ import {
   sync_video_thumbnail_and_palette,
 } from "#server/utils/sync_images";
 import type { Sync } from "#shared/types/sync";
-import { async_pool, async_pool_with_delay, with_retry } from "#shared/utils/random";
+import { async_pool, create_limiter, with_retry } from "#shared/utils/random";
 import { to_subscription_slug } from "#shared/utils/subscriptions";
+
+const shorts_limiter = create_limiter(10, 25);
 
 export default class SyncYoutube extends AbstractService {
   async sync(user: User) {
@@ -188,14 +190,18 @@ export default class SyncYoutube extends AbstractService {
     );
 
     while (true) {
-      await async_pool_with_delay(all_videos.items, 5, 300, (video) =>
-        with_retry(async () => {
-          const is_known = channel_videos_indexed[video.id];
-          if (!is_known && (await this.is_maybe_a_short(video))) {
-            return;
-          }
+      const new_videos = all_videos.items.filter((video) => !channel_videos_indexed[video.id]);
+      current_videos.push(...all_videos.items.filter((video) => channel_videos_indexed[video.id]));
 
-          current_videos.push(video);
+      await Promise.allSettled(
+        new_videos.map(async (video) => {
+          const is_short = await with_retry(() =>
+            shorts_limiter(() => this.is_maybe_a_short(video)),
+          );
+
+          if (!is_short) {
+            current_videos.push(video);
+          }
         }),
       );
 
