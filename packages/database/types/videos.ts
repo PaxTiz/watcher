@@ -99,6 +99,9 @@ export type RemoveByServiceIdOutput = void;
 export type HideForUserInput = { user_id: string; video_id: string; options?: RepositoryContext };
 export type HideForUserOutput = void;
 
+export type ShowForUserInput = { user_id: string; video_id: string; options?: RepositoryContext };
+export type ShowForUserOutput = void;
+
 export type UpsertProgressionInput = {
   user_id: string;
   video_id: string;

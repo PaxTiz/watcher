@@ -18,6 +18,7 @@ const {
 
 const emit = defineEmits<{
   hideVideo: [];
+  showVideo: [];
   hideSubscription: [];
   markAsView: [];
   toggleFavorite: [];
@@ -31,12 +32,28 @@ const { integration_data } = useIntegrations();
 const viewing_progression = ref(video.viewing_progression);
 const hidden_reason = ref<"video" | "channel" | undefined>();
 
+watch(
+  () => video.is_hidden,
+  () => {
+    hidden_reason.value = undefined;
+  },
+);
+
 const is_watched = computed(() => viewing_progression.value > 0.9);
 const integration = computed(() => integration_data(video.service));
 
 const dropdown_items = computed(() => {
   const video_items = [];
-  if (allowHideVideo) {
+  if (video.is_hidden) {
+    video_items.push({
+      icon: "lucide:eye",
+      key: "show_video",
+      label: t("videos.show.action"),
+      on_select: async () => {
+        await on_show_video(() => emit("showVideo"));
+      },
+    });
+  } else if (allowHideVideo) {
     video_items.push({
       icon: "lucide:video-off",
       key: "hide_video",
@@ -134,8 +151,13 @@ const dropdown_items = computed(() => {
 const menu_opened = ref(false);
 const menu_items = computed(() => (menu_opened.value ? dropdown_items.value : []));
 
-const { on_hide_video, on_hide_subscription, on_mark_as_read, on_toggle_subscription_favorite } =
-  useVideo(video);
+const {
+  on_hide_video,
+  on_show_video,
+  on_hide_subscription,
+  on_mark_as_read,
+  on_toggle_subscription_favorite,
+} = useVideo(video);
 
 const tones_style = computed(() => video_tones_style(video.palette));
 const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() < 24 * 3600 * 1000);

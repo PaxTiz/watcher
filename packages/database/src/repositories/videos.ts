@@ -18,6 +18,8 @@ import type {
   HideForUserOutput,
   RemoveByServiceIdInput,
   RemoveByServiceIdOutput,
+  ShowForUserInput,
+  ShowForUserOutput,
   UpdatePaletteInput,
   UpdatePaletteOutput,
   UpsertInput,
@@ -453,6 +455,20 @@ export async function hide_for_user({
     .insertInto("hidden_users_videos")
     .values({ user_id, video_id })
     .onConflict((oc) => oc.doNothing())
+    .execute();
+}
+
+export async function show_for_user({
+  user_id,
+  video_id,
+  options,
+}: ShowForUserInput): Promise<ShowForUserOutput> {
+  const database = resolveDatabase(options);
+
+  await database
+    .deleteFrom("hidden_users_videos")
+    .where("user_id", "=", user_id)
+    .where("video_id", "=", video_id)
     .execute();
 }
 

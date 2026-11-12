@@ -124,6 +124,12 @@ export default class VideosService extends AbstractService {
     await videos.hide_for_user({ user_id: user.id, video_id: id });
   }
 
+  async show(user: User, id: string) {
+    await this.find_source_or_fail(user, id);
+
+    await videos.show_for_user({ user_id: user.id, video_id: id });
+  }
+
   async update_progress(user: User, id: string, progression: number) {
     await this.find_source_or_fail(user, id);
 

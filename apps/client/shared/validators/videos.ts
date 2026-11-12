@@ -60,6 +60,12 @@ export const videosValidatorsSchema = defineValidator({
       id: z.uuidv7(),
     }),
   },
+
+  show: {
+    params: z.object({
+      id: z.uuidv7(),
+    }),
+  },
 });
 
 export type VideosValidators = InferValidators<typeof videosValidatorsSchema>;

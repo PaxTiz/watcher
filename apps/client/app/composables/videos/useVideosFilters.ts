@@ -10,6 +10,7 @@ export type VideoFilterType =
   | "subscription_id"
   | "is_favorite"
   | "with_watched"
+  | "with_hidden"
   | "query";
 export type VideoFilterEmit = {
   type: VideoFilterType;
@@ -57,6 +58,7 @@ export const useVideosFilters = (
     subscription_id: base?.subscription_id,
     is_favorite: base?.is_favorite,
     with_watched: base?.with_watched,
+    with_hidden: base?.with_hidden,
     query: base?.query,
     page: base?.page ?? 1,
     per_page: base?.per_page ?? 21,

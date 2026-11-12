@@ -289,6 +289,11 @@ export default {
       success: "El vídeo se ha ocultado",
       failed: "No se ha podido ocultar el vídeo, inténtalo más tarde",
     },
+    show: {
+      action: "Volver a mostrar el vídeo",
+      success: "El vídeo vuelve a estar visible",
+      failed: "No se pudo volver a mostrar el vídeo, inténtalo más tarde",
+    },
     hide_channel: {
       action: "Ocultar el canal",
       title: "Ocultar un canal",

@@ -284,6 +284,11 @@ export default {
       success: "The video has been hidden",
       failed: "Hiding the video failed, please try again later",
     },
+    show: {
+      action: "Show the video",
+      success: "The video is visible again",
+      failed: "Showing the video failed, please try again later",
+    },
     hide_channel: {
       action: "Hide channel",
       title: "Hide a channel",

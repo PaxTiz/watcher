@@ -21,7 +21,7 @@ const {
 
 const { t } = useI18n();
 
-const on_hide_video = async () => {
+const on_video_visibility_change = async () => {
   if (httpKey) {
     await refreshNuxtData(httpKey);
   }
@@ -52,7 +52,8 @@ const on_toggle_favorite = async () => {
         :allow-hide-video="allowHideVideo"
         :allow-hide-channel="allowHideChannel"
         :allow-toggle-favorite="allowToggleFavorite"
-        @hide-video="on_hide_video"
+        @hide-video="on_video_visibility_change"
+        @show-video="on_video_visibility_change"
         @hide-subscription="on_hide_subscription"
         @toggle-favorite="on_toggle_favorite"
       />

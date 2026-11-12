@@ -24,6 +24,17 @@ export const useVideo = (video: VideoListResource) => {
     await callback?.();
   };
 
+  const on_show_video = async (callback?: () => MaybePromise<unknown>) => {
+    const { error } = await callApi(`/api/videos/${video.id}/show`, { method: "POST" });
+    if (error) {
+      toast.error(t("videos.show.failed"));
+      return;
+    }
+
+    toast.success(t("videos.show.success"));
+    await callback?.();
+  };
+
   const on_hide_subscription = async (callback?: () => MaybePromise<unknown>) => {
     const ok = await useWatcherConfirm({
       title: t("videos.hide_channel.title"),
@@ -80,6 +91,7 @@ export const useVideo = (video: VideoListResource) => {
 
   return {
     on_hide_video,
+    on_show_video,
     on_hide_subscription,
     on_mark_as_read,
     on_toggle_subscription_favorite,

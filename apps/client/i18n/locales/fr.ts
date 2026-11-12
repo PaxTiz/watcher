@@ -290,6 +290,11 @@ export default {
       success: "La vidéo a été masquée",
       failed: "Le masquage de la vidéo a échoué, réessayez plus tard",
     },
+    show: {
+      action: "Réafficher la vidéo",
+      success: "La vidéo a été réaffichée",
+      failed: "Le réaffichage de la vidéo a échoué, réessayez plus tard",
+    },
     hide_channel: {
       action: "Masquer la chaîne",
       title: "Masquer une chaîne",
