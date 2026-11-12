@@ -107,6 +107,12 @@ export type Google = {
         url: string;
       };
 
+      high: {
+        width: number;
+        height: number;
+        url: string;
+      };
+
       maxres:
         | {
             width: number;

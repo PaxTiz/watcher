@@ -13,7 +13,6 @@ export type Sync = {
     status: "created" | "updated" | "deleted";
     video: Omit<DatabaseSchema["videos"], "id"> & {
       thumbnail_small_local: string;
-      thumbnail_large_local: string;
     };
   };
 

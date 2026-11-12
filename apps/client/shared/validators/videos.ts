@@ -55,6 +55,13 @@ export const videosValidatorsSchema = defineValidator({
     }),
   },
 
+  large_thumbnail: {
+    params: z.object({
+      id: z.uuidv7(),
+      file: z.enum(["large.avif", "large.webp"]),
+    }),
+  },
+
   hide: {
     params: z.object({
       id: z.uuidv7(),

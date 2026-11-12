@@ -1,5 +1,4 @@
 import { createRequire } from "node:module";
-import { join } from "node:path";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -35,7 +34,6 @@ export default defineNuxtConfig({
   },
 
   modules: [
-    "@nuxt/image",
     "@nuxtjs/color-mode",
     "@vueuse/nuxt",
     "nuxt-auth-utils",
@@ -51,17 +49,6 @@ export default defineNuxtConfig({
 
   auth: {
     webAuthn: true,
-  },
-
-  image: {
-    provider: "ipx",
-    ipx: {
-      baseURL: "/uploads",
-      fs: {
-        dir: join(process.cwd(), ".storage", "uploads"),
-        maxAge: 3600 * 12, // 12 hours
-      },
-    },
   },
 
   vite: {

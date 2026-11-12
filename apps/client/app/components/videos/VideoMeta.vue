@@ -95,9 +95,8 @@ const toggle_favorite = async () => {
         :to="`/subscriptions/${video.author.slug}`"
         class="group flex min-w-0 items-center gap-3"
       >
-        <NuxtImg
+        <AppImage
           class="bg-ui-border size-10 shrink-0 rounded-full object-cover"
-          format="avif,webp"
           width="40"
           height="40"
           :src="video.author.channel.logo"

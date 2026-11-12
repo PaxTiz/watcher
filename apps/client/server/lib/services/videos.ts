@@ -7,6 +7,8 @@ import { useRuntimeConfig } from "nuxt/server";
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
+import { type ImageFormat, public_image_url, sync_image } from "#server/utils/images";
+import { video_thumbnail_path } from "#server/utils/sync_images";
 import type { VideosValidators } from "#shared/validators/videos";
 
 type VideoRow = repositoryTypes.videos.VideoRow & { video_is_hidden?: boolean };
@@ -28,6 +30,8 @@ const get_twitch_master_playlist = defineCachedFunction(
     validate: (entry) => !!entry.value,
   },
 );
+
+const pending_large_thumbnails = new Map<string, Promise<string>>();
 
 export default class VideosService extends AbstractService {
   async get_by_id(user: User, id: string): Promise<VideoResource> {
@@ -140,6 +144,51 @@ export default class VideosService extends AbstractService {
     });
   }
 
+  async get_large_thumbnail(user: User, id: string, format: ImageFormat): Promise<string> {
+    await this.find_source_or_fail(user, id);
+
+    const video = await findOrFail(videos.find_thumbnails({ id }), {
+      message: "video_not_found",
+    });
+
+    let path = video.thumbnail_large;
+    if (!path) {
+      let pending = pending_large_thumbnails.get(id);
+      if (!pending) {
+        pending = this.generate_large_thumbnail(id, video).finally(() =>
+          pending_large_thumbnails.delete(id),
+        );
+        pending_large_thumbnails.set(id, pending);
+      }
+
+      path = await pending;
+    }
+
+    return `${public_image_url(path || video.thumbnail_small)}.${format}`;
+  }
+
+  private async generate_large_thumbnail(
+    id: string,
+    video: NonNullable<repositoryTypes.videos.FindThumbnailsOutput>,
+  ) {
+    const path = video_thumbnail_path(video, "large");
+
+    const large = await sync_image({
+      url: video.thumbnail_large_source,
+      path,
+      size: "large",
+      current: { path: "", etag: null },
+    });
+
+    if (!large) {
+      return "";
+    }
+
+    await videos.update_large_thumbnail({ id, thumbnail_large: path });
+
+    return path;
+  }
+
   private find_source_or_fail(user: User, id: string, viewable_only = false) {
     return findOrFail(videos.find_source({ id, user_id: user.id, viewable_only }), {
       message: "video_not_found",
@@ -177,8 +226,10 @@ export default class VideosService extends AbstractService {
       viewing_progression: row.video_viewing_progression,
       url: row.video_url,
       thumbnails: {
-        small: row.video_thumbnail_small,
-        large: row.video_thumbnail_large,
+        small: public_image_url(row.video_thumbnail_small),
+        large: row.video_thumbnail_large
+          ? public_image_url(row.video_thumbnail_large)
+          : `/api/videos/${row.video_id}/thumbnails/large`,
       },
       palette: row.video_palette,
       created_at: row.video_created_at,
@@ -191,7 +242,7 @@ export default class VideosService extends AbstractService {
         is_hidden: false, // videos of hidden subscriptions are never returned
         channel: {
           service: row.subscription_service,
-          logo: row.subscription_logo,
+          logo: public_image_url(row.subscription_logo),
         },
       },
     };

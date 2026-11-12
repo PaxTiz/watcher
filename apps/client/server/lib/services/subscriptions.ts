@@ -4,6 +4,7 @@ import { findOrFail, repositoryTypes, subscriptions, userSubscriptions } from "@
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { services } from "#framework/server";
+import { public_image_url } from "#server/utils/images";
 import { is_uuid, parse_slug_params } from "#shared/utils/random";
 
 type SubscriptionRow = repositoryTypes.subscriptions.SubscriptionWithUserState;
@@ -71,7 +72,7 @@ export default class SubscriptionsService extends AbstractService {
       last_video_at: row.is_hidden ? null : row.last_video_at,
       channel: {
         service: row.service,
-        logo: row.logo,
+        logo: public_image_url(row.logo),
       },
     };
   }

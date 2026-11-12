@@ -146,10 +146,9 @@ const has_new_video = (sub: SubscriptionResource) => {
           class="hover:bg-ui-text/10 relative mx-auto block size-10 rounded-full p-1 transition-colors"
           :class="{ 'bg-ui-text/10': route.path === `/subscriptions/${sub.slug}` }"
         >
-          <NuxtImg
+          <AppImage
             class="size-8 rounded-full object-cover"
             loading="lazy"
-            format="avif,webp"
             width="32"
             height="32"
             :src="sub.channel.logo"

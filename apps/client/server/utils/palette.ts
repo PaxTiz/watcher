@@ -4,9 +4,7 @@ import type { VideoPalette } from "@watcher/common";
 import sharp from "sharp";
 
 import { useLogger } from "#framework";
-import { MAX_IMAGE_PIXELS } from "#server/utils/images";
-
-const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads");
+import { MAX_IMAGE_PIXELS, UPLOADS_DIRECTORY } from "#server/utils/images";
 
 const SAMPLE_WIDTH = 48;
 const SAMPLE_HEIGHT = 27;
@@ -80,14 +78,18 @@ const weighted_average = (data: Buffer, columns: readonly [number, number]): Rgb
 
 const boosted_saturation = (s: number) => Math.min(1, Math.max(0.45, s * 1.4));
 
-export const extract_image_palette = async (path: string): Promise<VideoPalette | null> => {
+export const extract_image_palette = async (
+  image: Buffer | string,
+): Promise<VideoPalette | null> => {
   // Twitch has no thumbnail yet for a VOD being recorded: the next sync will download it
-  if (!path) {
+  if (!image) {
     return null;
   }
 
+  const input = typeof image === "string" ? join(UPLOADS_DIRECTORY, `${image}.webp`) : image;
+
   try {
-    const { data } = await sharp(join(UPLOADS_DIRECTORY, path), {
+    const { data } = await sharp(input, {
       limitInputPixels: MAX_IMAGE_PIXELS,
     })
       .resize(SAMPLE_WIDTH, SAMPLE_HEIGHT, { fit: "fill" })
@@ -119,7 +121,10 @@ export const extract_image_palette = async (path: string): Promise<VideoPalette 
       regions,
     };
   } catch (error) {
-    useLogger("server.utils.palette").warn({ err: error, path }, "Failed to extract image palette");
+    useLogger("server.utils.palette").warn(
+      { err: error, path: typeof image === "string" ? image : null },
+      "Failed to extract image palette",
+    );
     return null;
   }
 };

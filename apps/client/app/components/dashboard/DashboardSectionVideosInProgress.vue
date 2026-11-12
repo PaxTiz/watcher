@@ -35,9 +35,8 @@ const on_mark_as_view = async (video: VideoListResource) => {
         :to="`/videos/${featured.id}`"
         class="focus-visible:outline-alt relative block aspect-video overflow-hidden rounded-2xl"
       >
-        <NuxtImg
+        <AppImage
           class="size-full object-cover"
-          format="avif,webp"
           width="720"
           :src="featured.thumbnails.large"
           alt=""
@@ -69,9 +68,8 @@ const on_mark_as_view = async (video: VideoListResource) => {
           :to="`/subscriptions/${featured.author.slug}`"
           class="text-ui-text/80 hover:text-ui-text mt-3 inline-flex items-center gap-2.5 transition-colors"
         >
-          <NuxtImg
+          <AppImage
             class="size-7 rounded-full object-cover"
-            format="avif,webp"
             width="28"
             height="28"
             :src="featured.author.channel.logo"

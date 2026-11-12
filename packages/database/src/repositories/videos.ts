@@ -14,12 +14,16 @@ import type {
   FindAdjacentOutput,
   FindSourceInput,
   FindSourceOutput,
+  FindThumbnailsInput,
+  FindThumbnailsOutput,
   HideForUserInput,
   HideForUserOutput,
   RemoveByServiceIdInput,
   RemoveByServiceIdOutput,
   ShowForUserInput,
   ShowForUserOutput,
+  UpdateLargeThumbnailInput,
+  UpdateLargeThumbnailOutput,
   UpdatePaletteInput,
   UpdatePaletteOutput,
   UpsertInput,
@@ -346,6 +350,21 @@ export async function find_source({
     .executeTakeFirst();
 }
 
+export async function find_thumbnails({ id }: FindThumbnailsInput): Promise<FindThumbnailsOutput> {
+  return useDatabase()
+    .selectFrom("videos")
+    .select([
+      "service",
+      "service_id",
+      "subscription_id",
+      "thumbnail_small",
+      "thumbnail_large",
+      "thumbnail_large_source",
+    ])
+    .where("id", "=", id)
+    .executeTakeFirst();
+}
+
 export async function find_all_by_subscription({
   service,
   subscription_id,
@@ -364,7 +383,7 @@ export async function find_all_without_palette({
 }: FindAllWithoutPaletteInput): Promise<FindAllWithoutPaletteOutput> {
   return useDatabase()
     .selectFrom("videos")
-    .select(["id", "thumbnail_large"])
+    .select(["id", "thumbnail_small"])
     .where("palette", "is", null)
     .$if(after_id !== null, (qb) => qb.where("id", ">", after_id!))
     .orderBy("id")
@@ -398,18 +417,18 @@ export async function upsert_many({ data, options }: UpsertInput): Promise<Upser
           thumbnail_small: (c) => c.ref("excluded.thumbnail_small"),
           thumbnail_small_etag: (c) => c.ref("excluded.thumbnail_small_etag"),
           thumbnail_large: (c) => c.ref("excluded.thumbnail_large"),
-          thumbnail_large_etag: (c) => c.ref("excluded.thumbnail_large_etag"),
+          thumbnail_large_source: (c) => c.ref("excluded.thumbnail_large_source"),
           palette: (c) => c.ref("excluded.palette"),
         })
         .where(
           sql<boolean>`(
             videos.title, videos.description, videos.url, videos.duration,
             videos.thumbnail_small, videos.thumbnail_small_etag,
-            videos.thumbnail_large, videos.thumbnail_large_etag, videos.palette
+            videos.thumbnail_large, videos.thumbnail_large_source, videos.palette
           ) IS DISTINCT FROM (
             excluded.title, excluded.description, excluded.url, excluded.duration,
             excluded.thumbnail_small, excluded.thumbnail_small_etag,
-            excluded.thumbnail_large, excluded.thumbnail_large_etag, excluded.palette
+            excluded.thumbnail_large, excluded.thumbnail_large_source, excluded.palette
           )`,
         ),
     )
@@ -428,6 +447,16 @@ export async function update_palette({
     .set({ palette: JSON.stringify(palette) })
     .where("id", "=", id)
     .execute();
+}
+
+export async function update_large_thumbnail({
+  id,
+  thumbnail_large,
+  options,
+}: UpdateLargeThumbnailInput): Promise<UpdateLargeThumbnailOutput> {
+  const database = resolveDatabase(options);
+
+  await database.updateTable("videos").set({ thumbnail_large }).where("id", "=", id).execute();
 }
 
 export async function remove_by_service_id({

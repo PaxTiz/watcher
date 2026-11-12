@@ -25,7 +25,7 @@ export default defineTask({
       }
 
       await async_pool(batch, 10, async (video) => {
-        const palette = await extract_image_palette(video.thumbnail_large);
+        const palette = await extract_image_palette(video.thumbnail_small);
         if (!palette) {
           failed++;
           return;

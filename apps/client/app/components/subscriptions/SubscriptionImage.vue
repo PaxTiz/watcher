@@ -7,13 +7,11 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <NuxtImg
+  <AppImage
     class="border-ui-border w-full rounded border"
     loading="lazy"
-    format="avif,webp"
     width="71"
     height="71"
-    densities="x1"
     :src="subscription.channel.logo"
     :alt="t('subscriptions.logo', { name: subscription.name })"
   />

@@ -72,12 +72,25 @@ export type FindSourceOutput =
   | Pick<DatabaseSchema["videos"], "service" | "service_id" | "url">
   | undefined;
 
+export type FindThumbnailsInput = { id: string };
+export type FindThumbnailsOutput =
+  | Pick<
+      DatabaseSchema["videos"],
+      | "service"
+      | "service_id"
+      | "subscription_id"
+      | "thumbnail_small"
+      | "thumbnail_large"
+      | "thumbnail_large_source"
+    >
+  | undefined;
+
 export type FindAllBySubscriptionInput = { service: SubscriptionType; subscription_id: string };
 export type FindAllBySubscriptionOutput = Array<DatabaseSchema["videos"]>;
 
 export type FindAllWithoutPaletteInput = { after_id: string | null; limit: number };
 export type FindAllWithoutPaletteOutput = Array<
-  Pick<DatabaseSchema["videos"], "id" | "thumbnail_large">
+  Pick<DatabaseSchema["videos"], "id" | "thumbnail_small">
 >;
 
 export type UpsertData = Omit<DatabaseSchemaInsert["videos"], "id" | "palette"> & {
@@ -88,6 +101,13 @@ export type UpsertOutput = void;
 
 export type UpdatePaletteInput = { id: string; palette: VideoPalette; options?: RepositoryContext };
 export type UpdatePaletteOutput = void;
+
+export type UpdateLargeThumbnailInput = {
+  id: string;
+  thumbnail_large: string;
+  options?: RepositoryContext;
+};
+export type UpdateLargeThumbnailOutput = void;
 
 export type RemoveByServiceIdInput = {
   service: SubscriptionType;

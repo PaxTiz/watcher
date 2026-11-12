@@ -76,9 +76,10 @@ export type VideoTable = {
 
   thumbnail_small_etag: string;
 
+  // Generated the first time it's displayed: empty until then
   thumbnail_large: string;
 
-  thumbnail_large_etag: string;
+  thumbnail_large_source: string;
 
   // jsonb: parsed on read, written as a JSON string
   palette: ColumnType<VideoPalette | null, string | null, string | null>;

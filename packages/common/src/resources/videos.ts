@@ -17,9 +17,10 @@ export type VideoListResource = {
 
   url: string;
 
+  // Image URLs without extension: append `.avif` or `.webp`
   thumbnails: {
     small: string;
-    large: string;
+    large: string; // generated the first time it's requested
   };
 
   palette: VideoPalette | null;

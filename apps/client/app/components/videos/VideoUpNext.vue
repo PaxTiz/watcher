@@ -62,11 +62,10 @@ const { dates, numbers } = useFormatter();
           <div
             class="bg-ui-border/40 relative aspect-video overflow-hidden rounded-lg shadow-[0_6px_16px_-10px_rgb(var(--c)/0.55)]"
           >
-            <NuxtImg
+            <AppImage
               class="size-full object-cover"
               :class="{ 'opacity-60': video.viewing_progression > 0.9 }"
               loading="lazy"
-              format="avif,webp"
               width="168"
               :src="video.thumbnails.small"
               alt=""

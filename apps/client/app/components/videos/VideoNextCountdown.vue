@@ -37,9 +37,8 @@ const cancel = () => {
       </p>
 
       <div class="mt-3 grid grid-cols-[8rem_1fr] gap-3">
-        <NuxtImg
+        <AppImage
           class="aspect-video w-full rounded-lg object-cover"
-          format="avif,webp"
           width="128"
           :src="video.thumbnails.small"
           alt=""

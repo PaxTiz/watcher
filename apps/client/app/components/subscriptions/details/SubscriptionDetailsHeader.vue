@@ -88,9 +88,8 @@ const toggle_hidden = async () => {
     />
 
     <div class="flex flex-col gap-5 md:flex-row md:items-center">
-      <NuxtImg
+      <AppImage
         class="size-20 shrink-0 rounded-full object-cover shadow-[0_0_0_3px_var(--background),0_0_0_4.5px_rgb(var(--c)/0.7)] md:size-24"
-        format="avif,webp"
         width="96"
         height="96"
         :src="subscription.channel.logo"

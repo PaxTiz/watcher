@@ -102,10 +102,9 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
                 { 'opacity-50 grayscale': sub.is_hidden },
               ]"
             >
-              <NuxtImg
+              <AppImage
                 class="bg-ui-border size-6 shrink-0 rounded-full object-cover"
                 loading="lazy"
-                format="avif,webp"
                 width="24"
                 height="24"
                 :src="sub.channel.logo"
