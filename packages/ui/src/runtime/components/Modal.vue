@@ -13,8 +13,30 @@ const __CLOSE__ = inject<() => void>("__CLOSE__");
 
 const overlay = useTemplateRef("overlay");
 
-onClickOutside(overlay, () => __CLOSE__?.());
-onKeyStroke("Escape", () => __CLOSE__?.());
+const REKA_LAYER = "[data-dismissable-layer]";
+
+let layer_open_on_pointerdown = false;
+useEventListener(
+  "pointerdown",
+  () => (layer_open_on_pointerdown = !!document.querySelector(REKA_LAYER)),
+  { capture: true },
+);
+
+onClickOutside(
+  overlay,
+  () => {
+    if (!layer_open_on_pointerdown) {
+      __CLOSE__?.();
+    }
+  },
+  { ignore: [REKA_LAYER] },
+);
+
+onKeyStroke("Escape", () => {
+  if (!document.querySelector(REKA_LAYER)) {
+    __CLOSE__?.();
+  }
+});
 </script>
 
 <template>

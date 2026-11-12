@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CommandItem } from "@watcher/ui";
+import type { CommandItem, DropdownItem } from "@watcher/ui";
 
 import {
   type SearchFilters,
@@ -42,18 +42,23 @@ const toOptions = <T extends string>(group: string, values: Array<T>) =>
 
 const typeOptions = computed(() => toOptions<SearchType>("types", ["all", "videos", "channels"]));
 
-const durationOptions = computed(() =>
-  toOptions<SearchFilters["duration"]>("durations", [
-    "any",
+const durationItems = computed<Array<DropdownItem>>(() => [
+  { key: "duration", label: t("search.durations.any"), value: "any" },
+  { key: "divider", label: "", type: "divider" },
+  ...toOptions<SearchFilters["duration"]>("durations", [
     "less_than_10_minutes",
     "between_10_30_minutes",
     "between_30_60_minutes",
     "greater_than_1_hour",
-  ]),
-);
+  ]).map(({ value, label }) => ({ key: "duration", label, value })),
+]);
 
-const sortOptions = computed(() =>
-  toOptions<SearchFilters["sort"]>("sorts", ["relevance", "recent"]),
+const sortItems = computed<Array<DropdownItem>>(() =>
+  toOptions<SearchFilters["sort"]>("sorts", ["relevance", "recent"]).map(({ value, label }) => ({
+    key: "sort",
+    label,
+    value,
+  })),
 );
 
 const mentionOptions = computed(() => {
@@ -160,30 +165,15 @@ const emptyMessage = computed(() => {
 
 const { numbers, videos: videosFormatter } = useFormatter();
 
-const filterGroups = computed(() => [
-  {
-    key: "type" as const,
-    label: t("search.filters.type"),
-    options: typeOptions.value,
-    visible: true,
-  },
-  {
-    key: "duration" as const,
-    label: t("search.filters.duration"),
-    options: durationOptions.value,
-    visible: showVideoFilters.value,
-  },
-  {
-    key: "sort" as const,
-    label: t("search.filters.sort"),
-    options: sortOptions.value,
-    visible: showVideoFilters.value,
-  },
-]);
-
-const setFilter = (key: "type" | "duration" | "sort", value: string) => {
-  (filters as Record<typeof key, string>)[key] = value;
+const setFilter = (key: string, value: string) => {
+  (filters as Record<"duration" | "sort", string>)[key as "duration" | "sort"] = value;
 };
+
+const chipUi = (active: boolean) => ({
+  button: {
+    root: active ? "!bg-alt/12 !ring-alt/30 [&_svg]:text-alt" : "",
+  },
+});
 </script>
 
 <template>
@@ -202,30 +192,54 @@ const setFilter = (key: "type" | "duration" | "sort", value: string) => {
         class="border-ui-text/10 flex shrink-0 [scrollbar-width:none] items-center gap-2 overflow-x-auto border-b px-4 py-2.5"
         @mousedown.prevent
       >
-        <template v-for="group in filterGroups" :key="group.key">
-          <div
-            v-if="group.visible"
-            class="bg-ui-text/[0.06] ring-ui-text/10 inline-flex shrink-0 rounded-full p-0.5 ring-1 ring-inset"
-            role="radiogroup"
-            :aria-label="group.label"
+        <div
+          class="bg-ui-text/[0.06] ring-ui-text/10 inline-flex shrink-0 rounded-full p-0.5 ring-1 ring-inset"
+          role="radiogroup"
+          :aria-label="t('search.filters.type')"
+        >
+          <button
+            v-for="option in typeOptions"
+            :key="option.value"
+            type="button"
+            role="radio"
+            :aria-checked="filters.type === option.value"
+            class="focus-visible:outline-alt inline-flex h-7 items-center rounded-full px-3 text-[13px] font-medium whitespace-nowrap transition-colors focus-visible:outline-2"
+            :class="
+              filters.type === option.value
+                ? 'bg-ui-bg text-ui-text shadow-sm'
+                : 'text-ui-text-muted hover:text-ui-text'
+            "
+            @click="filters.type = option.value"
           >
-            <button
-              v-for="option in group.options"
-              :key="option.value"
-              type="button"
-              role="radio"
-              :aria-checked="filters[group.key] === option.value"
-              class="focus-visible:outline-alt inline-flex h-7 items-center rounded-full px-3 text-[13px] font-medium whitespace-nowrap transition-colors focus-visible:outline-2"
-              :class="
-                filters[group.key] === option.value
-                  ? 'bg-ui-bg text-ui-text shadow-sm'
-                  : 'text-ui-text-muted hover:text-ui-text'
-              "
-              @click="setFilter(group.key, option.value)"
-            >
-              {{ option.label }}
-            </button>
-          </div>
+            {{ option.label }}
+          </button>
+        </div>
+
+        <template v-if="showVideoFilters">
+          <WatcherDropdownButton
+            icon="lucide:timer"
+            size="sm"
+            :label="
+              filters.duration === 'any'
+                ? t('search.filters.duration')
+                : t(`search.durations.${filters.duration}`)
+            "
+            :value="filters.duration"
+            :items="durationItems"
+            :ui="chipUi(filters.duration !== 'any')"
+            @select="setFilter"
+          />
+
+          <WatcherDropdownButton
+            icon="lucide:arrow-down-wide-narrow"
+            size="sm"
+            :label="t(`search.sorts.${filters.sort}`)"
+            :aria-label="t('search.filters.sort')"
+            :value="filters.sort"
+            :items="sortItems"
+            :ui="chipUi(filters.sort !== 'relevance')"
+            @select="setFilter"
+          />
         </template>
       </div>
 
