@@ -22,6 +22,7 @@ export default defineRoute({
       is_favorite: query.is_favorite,
       in_progress: query.in_progress,
       with_hidden: query.with_hidden,
+      with_watched: query.with_watched,
     });
   },
 });

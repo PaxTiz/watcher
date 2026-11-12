@@ -29,7 +29,7 @@ import { resolveDatabase, useDatabase } from "../database";
 
 const escape_like = (value: string) => value.replace(/[\\%_]/g, "\\$&");
 
-// Videos visible to the user (followed subscriptions, minus hidden videos) matching `filters`.
+// Videos visible to the user (followed subscriptions, minus hidden and watched videos) matching `filters`.
 // Shared by the count and the page query of `find_all_for_user` so both always agree.
 function select_visible_for_user(user_id: string, filters: FindAllForUserFilters) {
   return useDatabase()
@@ -98,6 +98,19 @@ function select_visible_for_user(user_id: string, filters: FindAllForUserFilters
             .where("progression.user_id", "=", user_id)
             .where("progression.progression", ">", 0)
             .where("progression.progression", "<", 1),
+        ),
+      ),
+    )
+    .$if(filters.with_watched !== true, (qb) =>
+      qb.where((eb) =>
+        eb.not(
+          eb.exists(
+            eb
+              .selectFrom("users_videos_progression as watched")
+              .whereRef("watched.video_id", "=", "videos.id")
+              .where("watched.user_id", "=", user_id)
+              .where("watched.progression", ">=", 1),
+          ),
         ),
       ),
     );

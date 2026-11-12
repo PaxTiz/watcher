@@ -48,7 +48,7 @@ const on_select = (key: string, value: string) => {
   filters.value[filter] = value === "all" ? undefined : (value as never);
 };
 
-const RESETTABLE = ["service", "date", "duration", "is_favorite"] as const;
+const RESETTABLE = ["service", "date", "duration", "is_favorite", "with_watched"] as const;
 
 const has_active_filters = computed(() =>
   RESETTABLE.some((key) => shown(key) && filters.value[key] !== undefined),
@@ -136,6 +136,16 @@ const chip_ui = (active: boolean) => ({
       :aria-pressed="!!filters.is_favorite"
       :ui="chip_ui(!!filters.is_favorite).button"
       @click="filters.is_favorite = filters.is_favorite ? undefined : true"
+    />
+
+    <WatcherButton
+      v-if="shown('with_watched')"
+      icon="lucide:circle-check"
+      :label="t('videos.filters.with_watched')"
+      size="sm"
+      :aria-pressed="!!filters.with_watched"
+      :ui="chip_ui(!!filters.with_watched).button"
+      @click="filters.with_watched = filters.with_watched ? undefined : true"
     />
 
     <WatcherButton

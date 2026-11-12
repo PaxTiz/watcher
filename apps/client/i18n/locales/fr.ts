@@ -325,6 +325,7 @@ export default {
       all_dates: "Toutes les dates",
       all_durations: "Toutes les durées",
       with_hidden: "Contenu masqué",
+      with_watched: "Déjà vues",
       dates: {
         today: "Aujourd'hui",
         weekly: "7 derniers jours",

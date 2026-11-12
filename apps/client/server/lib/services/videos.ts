@@ -73,6 +73,7 @@ export default class VideosService extends AbstractService {
         is_favorite: params.is_favorite,
         in_progress: params.in_progress,
         with_hidden: params.with_hidden,
+        with_watched: params.with_watched,
         duration: params.duration,
         ...this.parse_date_filter(params.date),
       },

@@ -34,6 +34,7 @@ export type FindAllForUserFilters = {
   is_favorite?: boolean;
   in_progress?: boolean;
   with_hidden?: boolean;
+  with_watched?: boolean;
   duration?: VideoDurationFilter;
   created_after?: string;
   created_before?: string;

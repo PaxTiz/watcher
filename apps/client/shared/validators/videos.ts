@@ -22,6 +22,7 @@ export const videosValidatorsSchema = defineValidator({
       is_favorite: z.optional(booleanSchema),
       in_progress: z.optional(booleanSchema),
       with_hidden: z.optional(booleanSchema),
+      with_watched: z.optional(booleanSchema),
       duration: z.optional(
         z.enum([
           "less_than_10_minutes",
