@@ -12,7 +12,7 @@ export type SubscriptionWithUserState = Pick<
     last_video_at: string | null;
   };
 
-export type FindAllByUserInput = { user_id: string };
+export type FindAllByUserInput = { user_id: string; query?: string };
 export type FindAllByUserOutput = Array<SubscriptionWithUserState>;
 
 export type FindOneByUserInput = { user_id: string; identifier: SubscriptionIdentifier };

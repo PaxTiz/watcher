@@ -337,9 +337,11 @@ La recherche n'utilise pas de moteur dédié et ne dépend d'**aucune langue** (
 - **trigram** : `word_similarity` sur le titre (`<%`), qui tolère les fautes de frappe ;
 - **sous-chaîne** : `LIKE '%q%'` sur le titre, pour les langues sans espaces entre les mots (japonais, chinois…).
 
-Les trois passent par des index GIN (`videos_search_idx`, `videos_title_unaccent_trgm_idx`). Le score de pertinence est `ts_rank_cd + word_similarity`, la date départage.
+Les trois passent par des index GIN (`videos_search_idx`, `videos_title_unaccent_trgm_idx`). Le score de pertinence est `ts_rank_cd + word_similarity`, la date départage. Avec `sort=recent`, les résultats d'une recherche sont triés par date comme le reste du fil.
 
-`videos.mentions` (`text[]` généré par `extract_mentions(title)`) contient les `@handle` du titre, en minuscules et sans `@` (« ft. @Amixem » → `amixem`). Le filtre `mentions` garde les vidéos qui les mentionnent **toutes** ; `find_mentions_for_user` liste les mentions des vidéos correspondant aux filtres, les plus fréquentes d'abord.
+Les **chaînes** (`GET /api/subscriptions?query=`) se cherchent sur le nom, sans accents, par sous-chaîne ou par trigram, triées par similarité. La palette de recherche interroge les chaînes et les vidéos en parallèle ; la recherche depuis une chaîne passe `subscription_id` à `GET /api/videos`.
+
+`videos.mentions` (`text[]` généré par `extract_mentions(title)`) contient les `@handle` du titre, en minuscules et sans `@` (« ft. @Amixem » → `amixem`). Le filtre `mentions` garde les vidéos qui les mentionnent **toutes** ; `find_mentions_for_user` (`GET /api/videos/mentions`, mêmes filtres que `GET /api/videos`) liste les mentions des vidéos correspondant aux filtres, les plus fréquentes d'abord.
 
 Ces fonctions SQL (`f_unaccent`, `search_vector`, `search_query`, `extract_mentions`) sont créées par les migrations : une modification de `search_vector` ou `extract_mentions` demande de recréer la colonne générée pour recalculer les lignes existantes.
 

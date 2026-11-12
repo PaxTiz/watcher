@@ -41,9 +41,12 @@ export type FindAllForUserFilters = {
   created_before?: string;
 };
 
+export type VideoSort = "relevance" | "recent";
+
 export type FindAllForUserInput = {
   user_id: string;
   filters: FindAllForUserFilters;
+  sort?: VideoSort; // relevance only applies to a search, defaults to "relevance"
   pagination: { page: number; per_page: number; before?: string; with_total: boolean };
 };
 export type FindAllForUserOutput = {

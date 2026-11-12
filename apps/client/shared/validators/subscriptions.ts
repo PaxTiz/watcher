@@ -7,6 +7,11 @@ const idOrSlugParams = z.object({
 });
 
 export const subscriptionsValidatorsSchema = defineValidator({
+  list: {
+    query: z.object({
+      query: z.optional(z.string().check(z.maxLength(100))),
+    }),
+  },
   find: { params: idOrSlugParams },
   favorite: { params: idOrSlugParams },
   hide: { params: idOrSlugParams },

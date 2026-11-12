@@ -9,6 +9,8 @@ import {
   wrapTransaction,
 } from "./database";
 
+export const escape_like = (value: string) => value.replace(/[\\%_]/g, "\\$&");
+
 export const defaultUUIDV7 = (c: ColumnDefinitionBuilder) => {
   return c.defaultTo(sql`UUIDV7()`);
 };

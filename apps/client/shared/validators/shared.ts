@@ -12,3 +12,11 @@ export const booleanSchema = z.union([
     z.transform((_) => false),
   ),
 ]);
+
+export const queryArraySchema = <T extends z.ZodMiniType<string>>(item: T, max: number) =>
+  z
+    .pipe(
+      z.union([item, z.array(item)]),
+      z.transform((value) => (Array.isArray(value) ? value : [value])),
+    )
+    .check(z.maxLength(max));

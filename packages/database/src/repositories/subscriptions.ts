@@ -1,3 +1,5 @@
+import { sql } from "kysely";
+
 import type {
   FindAllByUserInput,
   FindAllByUserOutput,
@@ -9,7 +11,7 @@ import type {
   UpsertOutput,
 } from "../../types/subscriptions";
 import { resolveDatabase, useDatabase } from "../database";
-import { whereSubscriptionIdentifier } from "../helpers";
+import { escape_like, whereSubscriptionIdentifier } from "../helpers";
 
 function select_with_user_state(user_id: string) {
   return useDatabase()
@@ -38,8 +40,23 @@ function select_with_user_state(user_id: string) {
 
 export async function find_all_by_user({
   user_id,
+  query,
 }: FindAllByUserInput): Promise<FindAllByUserOutput> {
+  query = query?.trim() || undefined;
+
+  const similarity = sql<number>`word_similarity(f_unaccent(lower(${query})), f_unaccent(lower(subscriptions.name)))`;
+
   return select_with_user_state(user_id)
+    .$if(!!query, (qb) =>
+      qb
+        .where(
+          sql<boolean>`(
+            f_unaccent(lower(subscriptions.name)) LIKE '%' || f_unaccent(lower(${escape_like(query!)})) || '%'
+            OR f_unaccent(lower(${query})) <% f_unaccent(lower(subscriptions.name))
+          )`,
+        )
+        .orderBy(similarity, "desc"),
+    )
     .orderBy("user_subscriptions.is_hidden", "asc")
     .orderBy("subscriptions.name", "asc")
     .execute();

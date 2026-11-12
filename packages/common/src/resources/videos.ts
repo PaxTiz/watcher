@@ -32,3 +32,9 @@ export type VideoListResource = {
 export type VideoResource = VideoListResource & {
   description: string;
 };
+
+export type VideoMentionResource = {
+  handle: string; // lowercased, without the @
+
+  videos_count: number;
+};

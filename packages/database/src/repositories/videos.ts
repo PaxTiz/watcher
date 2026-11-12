@@ -34,8 +34,7 @@ import type {
   UpsertProgressionOutput,
 } from "../../types/videos";
 import { type DatabaseInterface, resolveDatabase, useDatabase } from "../database";
-
-const escape_like = (value: string) => value.replace(/[\\%_]/g, "\\$&");
+import { escape_like } from "../helpers";
 
 function matches_search(query: string) {
   return sql<boolean>`(
@@ -158,10 +157,13 @@ function select_visible_for_user(user_id: string, filters: FindAllForUserFilters
 export async function find_all_for_user({
   user_id,
   filters,
+  sort = "relevance",
   pagination,
 }: FindAllForUserInput): Promise<FindAllForUserOutput> {
   const query = filters.query?.trim() || undefined;
   filters = { ...filters, query };
+
+  const by_relevance = sort === "relevance" && !!query;
 
   const count_query = pagination.with_total
     ? select_visible_for_user(user_id, filters)
@@ -175,12 +177,12 @@ export async function find_all_for_user({
         .onRef("users_videos_progression.video_id", "=", "videos.id")
         .on("users_videos_progression.user_id", "=", user_id),
     )
-    .$if(!!pagination.before && !query, (qb) =>
+    .$if(!!pagination.before && !by_relevance, (qb) =>
       qb.where(
         sql<boolean>`(videos.created_at, videos.id) < (SELECT created_at, id FROM videos WHERE id = ${pagination.before!})`,
       ),
     )
-    .$if(!!pagination.before && !!query, (qb) =>
+    .$if(!!pagination.before && by_relevance, (qb) =>
       qb.where(
         sql<boolean>`(${search_score(query!, "videos")}, videos.created_at, videos.id) < (SELECT ${search_score(query!, "cursor_video")}, cursor_video.created_at, cursor_video.id FROM videos AS cursor_video WHERE cursor_video.id = ${pagination.before!})`,
       ),
@@ -190,7 +192,7 @@ export async function find_all_for_user({
     .$if(filters.in_progress === true, (qb) =>
       qb.orderBy("users_videos_progression.updated_at", "desc"),
     )
-    .$if(!!query, (qb) => qb.orderBy(search_score(query!, "videos"), "desc"))
+    .$if(by_relevance, (qb) => qb.orderBy(search_score(query!, "videos"), "desc"))
     .orderBy("videos.created_at", "desc")
     .orderBy("videos.id", "desc")
     .select((eb) => [
