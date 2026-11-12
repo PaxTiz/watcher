@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type {
-  CommandItem,
-  DurationFilter,
-  SearchFilters,
-  SearchResult,
-  SearchResults,
-  SearchType,
-  SortFilter,
-} from "@watcher/ui";
+import type { CommandItem } from "@watcher/ui";
+
+import {
+  type SearchFilters,
+  type SearchResult,
+  type SearchResults,
+  type SearchType,
+  empty_search_results,
+} from "~/utils/search";
 
 const {
   debounce = 250,
@@ -27,10 +27,15 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const query = ref("");
-const results = ref<SearchResults>({ channels: [], videos: [] });
+const results = ref<SearchResults>(empty_search_results());
 const loading = ref(false);
 const error = ref<string | null>(null);
-const filters = reactive<SearchFilters>({ type: "all", duration: "any", sort: "relevance" });
+const filters = reactive<SearchFilters>({
+  type: "all",
+  duration: "any",
+  sort: "relevance",
+  mentions: [],
+});
 
 const toOptions = <T extends string>(group: string, values: Array<T>) =>
   values.map((value) => ({ value, label: t(`search.${group}.${value}`) }));
@@ -38,14 +43,40 @@ const toOptions = <T extends string>(group: string, values: Array<T>) =>
 const typeOptions = computed(() => toOptions<SearchType>("types", ["all", "videos", "channels"]));
 
 const durationOptions = computed(() =>
-  toOptions<DurationFilter>("durations", ["any", "short", "medium", "long"]),
+  toOptions<SearchFilters["duration"]>("durations", [
+    "any",
+    "less_than_10_minutes",
+    "between_10_30_minutes",
+    "between_30_60_minutes",
+    "greater_than_1_hour",
+  ]),
 );
 
 const sortOptions = computed(() =>
-  toOptions<SortFilter>("sorts", ["relevance", "recent", "views"]),
+  toOptions<SearchFilters["sort"]>("sorts", ["relevance", "recent"]),
 );
 
+const mentionOptions = computed(() => {
+  const counts = new Map(results.value.mentions.map((m) => [m.handle, m.videos_count]));
+
+  return [
+    ...filters.mentions.map((handle) => ({ handle, count: counts.get(handle), selected: true })),
+    ...results.value.mentions
+      .filter((m) => !filters.mentions.includes(m.handle))
+      .map((m) => ({ handle: m.handle, count: m.videos_count, selected: false })),
+  ];
+});
+
+const toggleMention = (handle: string) => {
+  filters.mentions = filters.mentions.includes(handle)
+    ? filters.mentions.filter((m) => m !== handle)
+    : [...filters.mentions, handle];
+};
+
+const canSearch = (q: string) => q.length >= minChars || filters.mentions.length > 0;
+
 const showVideoFilters = computed(() => filters.type !== "channels");
+const showMentions = computed(() => showVideoFilters.value && mentionOptions.value.length > 0);
 
 const items = computed<CommandItem<SearchResult>[]>(() => [
   ...results.value.channels.map((channel) => ({
@@ -69,8 +100,8 @@ async function run() {
   controller?.abort();
   const q = query.value.trim();
 
-  if (q.length < minChars) {
-    results.value = { channels: [], videos: [] };
+  if (!canSearch(q)) {
+    results.value = empty_search_results();
     error.value = null;
     loading.value = false;
     return;
@@ -82,27 +113,36 @@ async function run() {
   error.value = null;
 
   try {
-    const data = await searchFn(q, { ...filters }, current.signal);
+    const data = await searchFn(q.length >= minChars ? q : "", { ...filters }, current.signal);
     if (current.signal.aborted) return;
     results.value = data;
   } catch (e) {
     if (current.signal.aborted || (e as Error).name === "AbortError") return;
-    results.value = { channels: [], videos: [] };
+    results.value = empty_search_results();
     error.value = t("search.failed");
   } finally {
     if (!current.signal.aborted) loading.value = false;
   }
 }
 
-watch([query, () => filters.type, () => filters.duration, () => filters.sort], () => {
-  clearTimeout(timer);
-  if (query.value.trim().length < minChars) {
-    run();
-    return;
-  }
-  loading.value = true;
-  timer = setTimeout(run, debounce);
-});
+watch(
+  [
+    query,
+    () => filters.type,
+    () => filters.duration,
+    () => filters.sort,
+    () => filters.mentions.join(),
+  ],
+  () => {
+    clearTimeout(timer);
+    if (!canSearch(query.value.trim())) {
+      run();
+      return;
+    }
+    loading.value = true;
+    timer = setTimeout(run, debounce);
+  },
+);
 
 onBeforeUnmount(() => {
   clearTimeout(timer);
@@ -112,16 +152,13 @@ onBeforeUnmount(() => {
 const emptyMessage = computed(() => {
   const q = query.value.trim();
   if (error.value) return error.value;
-  if (q.length < minChars) return t("search.min_chars", { count: minChars });
-  return t("search.no_results", { query: q });
+  if (!canSearch(q)) return t("search.min_chars", { count: minChars });
+  return t("search.no_results", {
+    query: q.length >= minChars ? q : filters.mentions.map((m) => `@${m}`).join(" "),
+  });
 });
 
-const { numbers } = useFormatter();
-
-const formatViews = (views?: number) =>
-  views == null ? "" : t("search.views", { count: numbers.compact(views) });
-const formatSubscribers = (n?: number) =>
-  n == null ? "" : t("search.subscribers", { count: numbers.compact(n) }, n);
+const { numbers, videos: videosFormatter } = useFormatter();
 
 const filterGroups = computed(() => [
   {
@@ -144,8 +181,8 @@ const filterGroups = computed(() => [
   },
 ]);
 
-const setFilter = (key: keyof SearchFilters, value: string) => {
-  (filters as Record<keyof SearchFilters, string>)[key] = value;
+const setFilter = (key: "type" | "duration" | "sort", value: string) => {
+  (filters as Record<typeof key, string>)[key] = value;
 };
 </script>
 
@@ -191,13 +228,40 @@ const setFilter = (key: keyof SearchFilters, value: string) => {
           </div>
         </template>
       </div>
+
+      <div
+        v-if="showMentions"
+        class="border-ui-text/10 flex shrink-0 [scrollbar-width:none] items-center gap-2 overflow-x-auto border-b px-4 py-2.5"
+        role="group"
+        :aria-label="t('search.filters.mentions')"
+        @mousedown.prevent
+      >
+        <button
+          v-for="mention in mentionOptions"
+          :key="mention.handle"
+          type="button"
+          :aria-pressed="mention.selected"
+          class="focus-visible:outline-alt inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium whitespace-nowrap ring-1 transition-colors ring-inset focus-visible:outline-2"
+          :class="
+            mention.selected
+              ? 'bg-ui-text text-ui-bg ring-transparent'
+              : 'bg-ui-text/[0.06] ring-ui-text/10 text-ui-text-muted hover:text-ui-text'
+          "
+          @click="toggleMention(mention.handle)"
+        >
+          @{{ mention.handle }}
+          <span v-if="mention.count != null" class="tabular-nums opacity-60">{{
+            mention.count
+          }}</span>
+        </button>
+      </div>
     </template>
 
     <template #item="{ item }">
       <template v-if="item.data.kind === 'channel'">
         <div class="flex w-32 shrink-0 justify-center max-sm:w-24">
           <img
-            :src="item.data.channel.avatar"
+            :src="item.data.channel.channel.logo"
             alt=""
             loading="lazy"
             class="bg-ui-border size-12 rounded-full object-cover"
@@ -206,14 +270,8 @@ const setFilter = (key: keyof SearchFilters, value: string) => {
 
         <div class="min-w-0">
           <p class="text-ui-text truncate font-medium">{{ item.data.channel.name }}</p>
-          <p class="text-ui-text-muted mt-0.5 flex items-center gap-1.5 text-[13px]">
-            <span v-if="item.data.channel.handle" class="truncate">
-              {{ item.data.channel.handle }}
-            </span>
-            <template v-if="item.data.channel.subscribers != null">
-              <span v-if="item.data.channel.handle" aria-hidden="true">·</span>
-              <span class="shrink-0">{{ formatSubscribers(item.data.channel.subscribers) }}</span>
-            </template>
+          <p class="text-ui-text-muted mt-0.5 text-[13px]">
+            {{ videosFormatter.filters.service(item.data.channel.channel.service) }}
           </p>
         </div>
       </template>
@@ -223,13 +281,13 @@ const setFilter = (key: keyof SearchFilters, value: string) => {
           class="bg-ui-border/40 relative aspect-video w-32 shrink-0 overflow-hidden rounded-lg shadow-[0_0_0_1px_rgb(255_255_255/0.06)] max-sm:w-24"
         >
           <img
-            :src="item.data.video.thumbnail"
+            :src="item.data.video.thumbnails.small"
             alt=""
             loading="lazy"
             class="size-full object-cover"
           />
           <span
-            v-if="item.data.video.duration != null"
+            v-if="item.data.video.duration"
             class="absolute right-1 bottom-1 rounded-md bg-black/75 px-1 py-px text-[11px] font-semibold text-white tabular-nums"
           >
             {{ numbers.displaySeconds(item.data.video.duration) }}
@@ -240,12 +298,8 @@ const setFilter = (key: keyof SearchFilters, value: string) => {
           <p class="text-ui-text line-clamp-2 leading-snug font-medium">
             {{ item.data.video.title }}
           </p>
-          <p class="text-ui-text-muted mt-1 flex items-center gap-1.5 text-[13px]">
-            <span class="truncate">{{ item.data.video.author }}</span>
-            <template v-if="item.data.video.views != null">
-              <span aria-hidden="true">·</span>
-              <span class="shrink-0">{{ formatViews(item.data.video.views) }}</span>
-            </template>
+          <p class="text-ui-text-muted mt-1 truncate text-[13px]">
+            {{ item.data.video.author.name }}
           </p>
         </div>
       </template>

@@ -378,12 +378,11 @@ export default {
     failed: "The search failed. Please try again in a moment.",
     min_chars: "Type at least {count} characters to start searching.",
     no_results: "No results for “{query}”.",
-    views: "{count} views",
-    subscribers: "{count} subscribers | {count} subscriber | {count} subscribers",
     filters: {
       type: "Result type",
       duration: "Duration",
       sort: "Sort",
+      mentions: "Mentioned",
     },
     types: {
       all: "All",
@@ -392,14 +391,14 @@ export default {
     },
     durations: {
       any: "Any duration",
-      short: "< 4 min",
-      medium: "4–20 min",
-      long: "> 20 min",
+      less_than_10_minutes: "< 10 min",
+      between_10_30_minutes: "10–30 min",
+      between_30_60_minutes: "30–60 min",
+      greater_than_1_hour: "> 1 h",
     },
     sorts: {
       relevance: "Relevance",
       recent: "Recent",
-      views: "Popular",
     },
   },
 };

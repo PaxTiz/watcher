@@ -384,12 +384,11 @@ export default {
     failed: "La recherche a échoué. Réessayez dans un instant.",
     min_chars: "Tapez au moins {count} caractères pour lancer la recherche.",
     no_results: "Aucun résultat pour « {query} ».",
-    views: "{count} vues",
-    subscribers: "{count} abonné | {count} abonné | {count} abonnés",
     filters: {
       type: "Type de résultat",
       duration: "Durée",
       sort: "Tri",
+      mentions: "Personnes mentionnées",
     },
     types: {
       all: "Tout",
@@ -398,14 +397,14 @@ export default {
     },
     durations: {
       any: "Toutes durées",
-      short: "< 4 min",
-      medium: "4–20 min",
-      long: "> 20 min",
+      less_than_10_minutes: "< 10 min",
+      between_10_30_minutes: "10–30 min",
+      between_30_60_minutes: "30–60 min",
+      greater_than_1_hour: "> 1 h",
     },
     sorts: {
       relevance: "Pertinence",
       recent: "Récentes",
-      views: "Populaires",
     },
   },
 } satisfies typeof en;
