@@ -116,6 +116,8 @@ export type VideosGuestsTable = {
 
   // As written in the title
   name: string;
+
+  subscription_id: string | null;
 };
 
 export type UsersVideosProgressionTable = {

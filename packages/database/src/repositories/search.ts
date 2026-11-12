@@ -97,9 +97,22 @@ export async function find_guests({
 }: FindGuestsInput): Promise<FindGuestsOutput> {
   const rows = await select_matching_videos(user_id, query, filters)
     .innerJoin("videos_guests", "videos_guests.video_id", "videos.id")
+    .leftJoin("subscriptions as guest_channel", "guest_channel.id", "videos_guests.subscription_id")
+    .leftJoin("user_subscriptions as guest_follow", (join) =>
+      join
+        .onRef("guest_follow.subscription_id", "=", "guest_channel.id")
+        .on("guest_follow.user_id", "=", user_id)
+        .on("guest_follow.is_hidden", "=", false),
+    )
     .select(({ fn }) => [
       "videos_guests.key",
-      sql<string>`mode() WITHIN GROUP (ORDER BY videos_guests.name)`.as("name"),
+      sql<string>`coalesce(
+        max(guest_channel.name) FILTER (WHERE guest_follow.user_id IS NOT NULL),
+        mode() WITHIN GROUP (ORDER BY videos_guests.name)
+      )`.as("name"),
+      sql<
+        string | null
+      >`max(guest_channel.logo) FILTER (WHERE guest_follow.user_id IS NOT NULL)`.as("logo"),
       fn.countAll<number>().as("videos_count"),
     ])
     .groupBy("videos_guests.key")
@@ -115,13 +128,17 @@ export async function find_known_people(): Promise<FindKnownPeopleOutput> {
   const database = useDatabase();
 
   const [channels, guests] = await Promise.all([
-    database.selectFrom("subscriptions").select("name").execute(),
-    database.selectFrom("videos_guests").select("key").distinct().execute(),
+    database.selectFrom("subscriptions").select(["id", "name"]).execute(),
+    database
+      .selectFrom("videos_guests")
+      .select(({ fn }) => ["key", "name", fn.countAll<number>().as("videos_count")])
+      .groupBy(["key", "name"])
+      .execute(),
   ]);
 
   return {
-    channel_names: channels.map((channel) => channel.name),
-    guest_keys: guests.map((guest) => guest.key),
+    channels,
+    guests: guests.map((guest) => ({ ...guest, videos_count: Number(guest.videos_count) })),
   };
 }
 
@@ -136,7 +153,12 @@ export async function replace_guests({
 
   const service_ids = videos.map((video) => video.service_id);
   const rows = videos.flatMap((video) =>
-    video.guests.map((guest) => ({ service_id: video.service_id, ...guest })),
+    video.guests.map((guest) => ({
+      service_id: video.service_id,
+      key: guest.key,
+      name: guest.name,
+      subscription_id: guest.subscription_id ?? null,
+    })),
   );
 
   await withResolvedTransaction(options, async (database) => {
@@ -156,9 +178,10 @@ export async function replace_guests({
     }
 
     await sql`
-      INSERT INTO videos_guests (video_id, key, name)
-      SELECT videos.id, guests.key, guests.name
-      FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb) AS guests(service_id text, key text, name text)
+      INSERT INTO videos_guests (video_id, key, name, subscription_id)
+      SELECT videos.id, guests.key, guests.name, guests.subscription_id
+      FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb)
+        AS guests(service_id text, key text, name text, subscription_id uuid)
       INNER JOIN videos ON videos.service = ${service} AND videos.service_id = guests.service_id
     `.execute(database);
   });

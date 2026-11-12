@@ -347,13 +347,14 @@ La **recherche globale** (palette, `GET /api/search`) passe par le service et le
 
 La recherche depuis une chaîne et la page vidéos passent `query` (et `subscription_id`) à `GET /api/videos`. Les requêtes partagées entre le fil, les chaînes et la recherche (`select_visible_videos_for_user`, `matches_video_search`…) sont dans `packages/database/src/queries.ts`, interne au package.
 
-Les **invités** (`videos_guests`) sont détectés dans les titres par `extract_guests` (`server/utils/guests.ts`) à chaque synchronisation, pour toutes les vidéos synchronisées :
+Les **invités** (`videos_guests`) sont détectés dans les titres par `extract_channel_guests` (`server/utils/guests.ts`) à chaque synchronisation, pour toutes les vidéos synchronisées. Aucun mot propre à une langue n'est utilisé, hormis les conventions internationales :
 
-- marqueurs **fiables** : `@handle` n'importe où, liste après `feat` / `ft` / `featuring` ;
-- marqueurs **ambigus** (`avec`, `with`, `w/`, `A x B`) : un nom n'est gardé que s'il est déjà connu (nom d'une chaîne en base, invité déjà trouvé) ;
-- la chaîne qui publie la vidéo n'est jamais son propre invité.
+- `@handle` n'importe où, et liste après `feat` / `ft` / `featuring` ;
+- **personnes connues** n'importe où dans le titre, mot entier (ou sous-chaîne pour les écritures sans espaces) : les chaînes en base et les invités trouvés dans au moins 2 vidéos, y compris dans le lot en cours de synchronisation ;
+- un handle proche d'une personne connue lui est rattaché (`@wankilfr` → Wankil) ;
+- les **hôtes** ne sont jamais invités : la chaîne elle-même, un nom contenu dans le sien (« Laink » sur « Wankil Studio - Laink et Terracid »), ou une personne connue reconnue dans au moins 30 % des vidéos de la chaîne (« Laink » sur « Wankil Studio - Les VOD »), sauf si elle est annoncée par `@` ou `feat`.
 
-Une personne est identifiée par une **clé** sans accents, en minuscules et sans ponctuation : `@joueurdugrenier` et « Joueur du Grenier » sont la même. Le nom affiché est la forme la plus fréquente.
+Une personne est identifiée par une **clé** sans accents, en minuscules et sans ponctuation : `@joueurdugrenier` et « Joueur du Grenier » sont la même. Un invité qui est une chaîne en base est lié à elle (`subscription_id`) : la palette affiche alors son nom et son logo si l'utilisateur la suit, sinon la forme la plus fréquente.
 
 Ces fonctions SQL (`f_unaccent`, `search_vector`, `search_query`) sont créées par les migrations : une modification de `search_vector` demande de recréer la colonne générée pour recalculer les lignes existantes.
 

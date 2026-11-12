@@ -6,6 +6,8 @@ export type GuestResource = {
 
   name: string; // as most often written in titles
 
+  logo: string | null; // when the guest is a channel followed by the user
+
   videos_count: number;
 };
 

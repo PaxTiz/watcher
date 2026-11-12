@@ -6,6 +6,9 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("video_id", "uuid", (c) => c.notNull().references("videos.id").onDelete("cascade"))
     .addColumn("key", "varchar", (c) => c.notNull())
     .addColumn("name", "varchar", (c) => c.notNull())
+    .addColumn("subscription_id", "uuid", (c) =>
+      c.references("subscriptions.id").onDelete("set null"),
+    )
     .addPrimaryKeyConstraint("videos_guests_pkey", ["video_id", "key"])
     .execute();
 

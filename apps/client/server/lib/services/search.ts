@@ -4,7 +4,8 @@ import { search } from "@watcher/database";
 import type { User } from "#auth-utils";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
-import { extract_guests, guest_key } from "#server/utils/guests";
+import { build_known_people, extract_channel_guests } from "#server/utils/guests";
+import { public_image_url } from "#server/utils/images";
 import type { SearchValidators } from "#shared/validators/search";
 
 const MAX_CHANNELS = 5;
@@ -40,7 +41,10 @@ export default class SearchService extends AbstractService {
     return {
       channels: channels.map((channel) => services.subscriptions.to_resource(channel)),
       videos: videos.map((video) => services.videos.to_list_resource(video)),
-      guests,
+      guests: guests.map((guest) => ({
+        ...guest,
+        logo: guest.logo ? public_image_url(guest.logo) : null,
+      })),
     };
   }
 
@@ -54,22 +58,29 @@ export default class SearchService extends AbstractService {
     videos: Array<{ service_id: string; title: string }>;
   }) {
     const known = await search.find_known_people();
-    const known_keys = new Set([...known.channel_names.map(guest_key), ...known.guest_keys]);
+    const titles = videos.map((video) => video.title);
 
-    const no_known_keys = new Set<string>();
-    for (const video of videos) {
-      for (const guest of extract_guests(video.title, {
-        known_keys: no_known_keys,
-        channel_name,
-      })) {
-        known_keys.add(guest.key);
+    const known_keys = new Set(known.guests.map((guest) => guest.key));
+    const batch_guests = new Map<string, { key: string; name: string; videos_count: number }>();
+    const first_pass = extract_channel_guests(titles, {
+      people: build_known_people(known),
+      channel_name,
+    });
+    for (const guest of first_pass.flat()) {
+      if (!known_keys.has(guest.key)) {
+        const id = `${guest.key}\n${guest.name}`;
+        const entry = batch_guests.get(id) ?? { key: guest.key, name: guest.name, videos_count: 0 };
+        batch_guests.set(id, { ...entry, videos_count: entry.videos_count + 1 });
       }
     }
 
-    const with_guests = videos.map((video) => ({
-      service_id: video.service_id,
-      guests: extract_guests(video.title, { known_keys, channel_name }),
-    }));
+    const people = build_known_people({
+      channels: known.channels,
+      guests: [...known.guests, ...batch_guests.values()],
+    });
+    const with_guests = extract_channel_guests(titles, { people, channel_name }).map(
+      (guests, index) => ({ service_id: videos[index]!.service_id, guests }),
+    );
 
     await search.replace_guests({ service, videos: with_guests });
 

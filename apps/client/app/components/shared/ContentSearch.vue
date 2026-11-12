@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { GuestResource } from "@watcher/common";
 import type { CommandItem, DropdownItem } from "@watcher/ui";
 
 import {
@@ -72,16 +73,17 @@ const guestOptions = computed(() => {
       .map((guest) => ({
         key: guest.key,
         name: guest.name,
+        logo: guest.logo,
         count: guest.videos_count,
         selected: false,
       })),
   ];
 });
 
-const toggleGuest = (guest: { key: string; name: string }) => {
+const toggleGuest = (guest: Pick<GuestResource, "key" | "name" | "logo">) => {
   filters.guests = filters.guests.some((selected) => selected.key === guest.key)
     ? filters.guests.filter((selected) => selected.key !== guest.key)
-    : [...filters.guests, { key: guest.key, name: guest.name }];
+    : [...filters.guests, { key: guest.key, name: guest.name, logo: guest.logo }];
 };
 
 const canSearch = (q: string) => q.length >= minChars || filters.guests.length > 0;
@@ -269,6 +271,13 @@ const chipUi = (active: boolean) => ({
           "
           @click="toggleGuest(guest)"
         >
+          <img
+            v-if="guest.logo"
+            :src="guest.logo"
+            alt=""
+            class="-ml-1.5 size-5 rounded-full object-cover"
+            loading="lazy"
+          />
           {{ guest.name }}
           <span v-if="guest.count != null" class="tabular-nums opacity-60">{{ guest.count }}</span>
         </button>

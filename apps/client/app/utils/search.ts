@@ -15,7 +15,7 @@ export type SearchFilters = {
   type: SearchType;
   duration: NonNullable<SearchQuery["duration"]> | "any";
   sort: SearchQuery["sort"];
-  guests: Array<Pick<GuestResource, "key" | "name">>; // the name is kept to display it
+  guests: Array<Pick<GuestResource, "key" | "name" | "logo">>; // kept to display them
 };
 
 export type SearchResults = SearchResource;
