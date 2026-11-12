@@ -28,6 +28,7 @@ export type FindGuestsInput = {
   user_id: string;
   query?: string;
   filters: SearchVideosFilters;
+  excluded_keys: Array<string>;
   limit: number;
 };
 export type FindGuestsOutput = Array<{

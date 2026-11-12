@@ -4,7 +4,7 @@ import { search } from "@watcher/database";
 import type { User } from "#auth-utils";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
-import { build_known_people, extract_channel_guests } from "#server/utils/guests";
+import { build_known_people, extract_channel_guests, keys_in_query } from "#server/utils/guests";
 import { public_image_url } from "#server/utils/images";
 import type { SearchValidators } from "#shared/validators/search";
 
@@ -34,7 +34,13 @@ export default class SearchService extends AbstractService {
           })
         : [],
       with_videos
-        ? search.find_guests({ user_id: user.id, query, filters, limit: MAX_GUESTS })
+        ? search.find_guests({
+            user_id: user.id,
+            query,
+            filters,
+            excluded_keys: query ? keys_in_query(query) : [],
+            limit: MAX_GUESTS,
+          })
         : [],
     ]);
 

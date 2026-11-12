@@ -93,10 +93,12 @@ export async function find_guests({
   user_id,
   query,
   filters,
+  excluded_keys,
   limit,
 }: FindGuestsInput): Promise<FindGuestsOutput> {
   const rows = await select_matching_videos(user_id, query, filters)
     .innerJoin("videos_guests", "videos_guests.video_id", "videos.id")
+    .$if(excluded_keys.length > 0, (qb) => qb.where("videos_guests.key", "not in", excluded_keys))
     .leftJoin("subscriptions as guest_channel", "guest_channel.id", "videos_guests.subscription_id")
     .leftJoin("user_subscriptions as guest_follow", (join) =>
       join

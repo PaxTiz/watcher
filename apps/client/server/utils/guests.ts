@@ -62,6 +62,19 @@ export const comparable_form = (text: string) =>
 
 export const guest_key = (name: string) => comparable_form(name).replaceAll(" ", "");
 
+export function keys_in_query(query: string) {
+  const words = comparable_form(query).split(" ").filter(Boolean);
+  const keys = new Set<string>();
+
+  for (let start = 0; start < words.length; start++) {
+    for (let end = start + 1; end <= Math.min(words.length, start + MAX_NAME_WORDS); end++) {
+      keys.add(words.slice(start, end).join(""));
+    }
+  }
+
+  return [...keys];
+}
+
 const has_mixed_case = (name: string) => name !== name.toLowerCase() && name !== name.toUpperCase();
 
 // "AMEL BENT" → "Amel Bent", acronyms ("JDG") kept. No-op for scripts without case.
