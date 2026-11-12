@@ -2,7 +2,7 @@ import { type CredentialsType, ForbiddenError, type UserResource } from "@watche
 import { credentials, repositoryTypes, users } from "@watcher/database";
 
 import type { User } from "#auth-utils";
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 
 export default class UsersService extends AbstractService {
@@ -47,6 +47,8 @@ export default class UsersService extends AbstractService {
   async create(data: repositoryTypes.users.CreateData): Promise<UserResource> {
     const user = await users.create({ data });
 
+    useLogger("services.users").info({ created_user_id: user.id }, "User created");
+
     return (await this.find_by_id(user.id))!;
   }
 
@@ -54,13 +56,22 @@ export default class UsersService extends AbstractService {
     await users.update({ id, data });
     await services.sessions.forget_user(id);
 
+    useLogger("services.users").debug(
+      { updated_user_id: id, fields: Object.keys(data) },
+      "User updated",
+    );
+
     return (await this.find_by_id(id))!;
   }
 
   async delete(id: string) {
+    useLogger("services.users").info({ deleted_user_id: id }, "Deleting user");
+
     await services.credentials.revoke_all(id);
     await users.remove({ id });
     await services.sessions.forget_user(id);
+
+    useLogger("services.users").info({ deleted_user_id: id }, "User deleted");
   }
 
   async count_login_methods(user: UserResource): Promise<number> {
@@ -71,6 +82,7 @@ export default class UsersService extends AbstractService {
 
   async onboard(user: User, sync: boolean) {
     if (user.is_onboarded) {
+      useLogger("services.users").warn("Onboarding refused: the user is already onboarded");
       throw new ForbiddenError({ message: "user_is_already_onboarded" });
     }
 
@@ -82,6 +94,8 @@ export default class UsersService extends AbstractService {
     await services.sessions.forget_user(user.id);
 
     user.is_onboarded = true;
+
+    useLogger("services.users").info({ sync }, "User onboarded");
 
     return { user };
   }

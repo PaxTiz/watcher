@@ -45,7 +45,13 @@ const conditional_headers = async (
 
   const last_modified = await useImagesStorage()
     .last_modified(key_of(local_path))
-    .catch(() => null);
+    .catch((error: unknown) => {
+      useLogger("server.utils.images").warn(
+        { err: error, path: local_path },
+        "Failed to read the last modification date of an image",
+      );
+      return null;
+    });
 
   return last_modified ? { "If-Modified-Since": last_modified.toUTCString() } : {};
 };
@@ -86,9 +92,13 @@ export const remove_image = async (path: string) => {
     return;
   }
 
-  await useImagesStorage()
-    .remove(key_of(path))
-    .catch(() => {});
+  try {
+    await useImagesStorage().remove(key_of(path));
+
+    useLogger("server.utils.images").trace({ path }, "Image removed");
+  } catch (error) {
+    useLogger("server.utils.images").warn({ err: error, path }, "Failed to remove image");
+  }
 };
 
 type SyncImageInput = {
@@ -110,22 +120,48 @@ export const sync_image = async ({
     return null;
   }
 
+  const logger = useLogger("server.utils.images");
+
   const response = await ofetch
     .raw(url, {
       ...request_options(),
       responseType: "stream",
       headers: await conditional_headers(current.etag, current.path),
     })
-    .catch(() => null);
+    .catch((error: unknown) => {
+      logger.warn({ err: error, url, path }, "Failed to download image");
+      return null;
+    });
 
-  if (!response || response.status === 304) {
+  if (!response) {
+    return null;
+  }
+
+  if (response.status === 304) {
+    logger.trace({ url, path }, "Image not modified");
     return null;
   }
 
   const image = await read_image_response(response);
-  if (!image || !(await write_image(image, path, size))) {
+  if (!image) {
+    logger.warn(
+      {
+        url,
+        path,
+        status: response.status,
+        content_type: content_type_of(response),
+        content_length: response.headers.get("content-length"),
+      },
+      "Image rejected (error status, unexpected type, or too large)",
+    );
     return null;
   }
+
+  if (!(await write_image(image, path, size))) {
+    return null;
+  }
+
+  logger.debug({ url, path, size, bytes: image.byteLength }, "Image downloaded");
 
   return { image, etag: response.headers.get("etag") ?? INVALID_ETAG };
 };

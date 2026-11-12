@@ -1,6 +1,6 @@
 import { createError, defineEventHandler } from "nuxt/server";
 
-import { withHttpErrors } from "#framework";
+import { useLogger, withHttpErrors } from "#framework";
 import { defineWebAuthnAuthenticateEventHandler } from "#framework/auth";
 import { services } from "#framework/server";
 import { get_client_ip, useRateLimiter } from "#server/lib/rate_limiter";
@@ -23,6 +23,7 @@ const authenticate_handler = defineWebAuthnAuthenticateEventHandler({
   async getCredential(_event, credential_id) {
     const credential = await services.passkeys.find_by_id(credential_id);
     if (!credential) {
+      useLogger("passkeys.authenticate").warn({ passkey_id: credential_id }, "Unknown passkey");
       throw createError({ status: 401, message: "unknown_passkey" });
     }
 
@@ -37,6 +38,10 @@ const authenticate_handler = defineWebAuthnAuthenticateEventHandler({
     const session_user = get_user(event);
     if (session_user) {
       if (credential.userId !== session_user.id) {
+        useLogger("passkeys.authenticate").warn(
+          { passkey_id: credential.id, passkey_user_id: credential.userId },
+          "Reauthentication refused: the passkey belongs to another user",
+        );
         throw createError({ status: 403, message: "wrong_account" });
       }
 
@@ -46,6 +51,10 @@ const authenticate_handler = defineWebAuthnAuthenticateEventHandler({
 
     const database_user = await services.users.find_by_id(credential.userId);
     if (!database_user) {
+      useLogger("passkeys.authenticate").warn(
+        { passkey_id: credential.id, passkey_user_id: credential.userId },
+        "Passkey of a deleted user",
+      );
       throw createError({ status: 401, message: "unknown_passkey" });
     }
 
@@ -53,6 +62,11 @@ const authenticate_handler = defineWebAuthnAuthenticateEventHandler({
       integration: "passkey",
       id: credential.id,
     });
+
+    useLogger("passkeys.authenticate").info(
+      { passkey_id: credential.id, target_user_id: database_user.id },
+      "Logged in with a passkey",
+    );
   },
 });
 

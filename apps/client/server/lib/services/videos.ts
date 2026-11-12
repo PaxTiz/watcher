@@ -5,7 +5,7 @@ import { defineCachedFunction } from "nitropack/runtime";
 import { useRuntimeConfig } from "nuxt/server";
 
 import type { User } from "#auth-utils";
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
 import { public_image_url, sync_image } from "#server/utils/images";
 import { video_thumbnail_path } from "#server/utils/sync_images";
@@ -16,12 +16,23 @@ type VideosFilters = repositoryTypes.videos.FindAllForUserFilters;
 
 const MASTER_PLAYLIST_CACHE_TTL = 60 * 5; // 5 minutes, in seconds
 
+const logger = () => useLogger("services.videos");
+
 const get_twitch_master_playlist = defineCachedFunction(
-  (video_id: string) =>
-    useTwitch().videos.get_master_playlist(
+  async (video_id: string) => {
+    logger().debug({ twitch_video_id: video_id }, "Fetching the Twitch master playlist");
+
+    const playlist = await useTwitch().videos.get_master_playlist(
       video_id,
       useRuntimeConfig().oauth.twitch.playerClientId,
-    ),
+    );
+
+    if (!playlist) {
+      logger().warn({ twitch_video_id: video_id }, "No Twitch master playlist for this video");
+    }
+
+    return playlist;
+  },
   {
     name: "twitch_master_playlist",
     maxAge: MASTER_PLAYLIST_CACHE_TTL,
@@ -126,12 +137,16 @@ export default class VideosService extends AbstractService {
     await this.find_source_or_fail(user, id);
 
     await videos.hide_for_user({ user_id: user.id, video_id: id });
+
+    logger().debug({ video_id: id }, "Video hidden");
   }
 
   async show(user: User, id: string) {
     await this.find_source_or_fail(user, id);
 
     await videos.show_for_user({ user_id: user.id, video_id: id });
+
+    logger().debug({ video_id: id }, "Video shown");
   }
 
   async update_progress(user: User, id: string, progression: number) {
@@ -142,6 +157,8 @@ export default class VideosService extends AbstractService {
       video_id: id,
       progression: Math.max(0, progression > 0.9 ? 1 : progression),
     });
+
+    logger().trace({ video_id: id, progression }, "Video progression updated");
   }
 
   async get_large_thumbnail(user: User, id: string): Promise<string> {
@@ -172,6 +189,7 @@ export default class VideosService extends AbstractService {
     video: NonNullable<repositoryTypes.videos.FindThumbnailsOutput>,
   ) {
     const path = video_thumbnail_path(video, "large");
+    const started_at = Date.now();
 
     const large = await sync_image({
       url: video.thumbnail_large_source,
@@ -181,10 +199,19 @@ export default class VideosService extends AbstractService {
     });
 
     if (!large) {
+      logger().warn(
+        { video_id: id, source: video.thumbnail_large_source },
+        "Failed to generate the large thumbnail: the small one is used",
+      );
       return "";
     }
 
     await videos.update_large_thumbnail({ id, thumbnail_large: path });
+
+    logger().debug(
+      { video_id: id, path, duration_ms: Date.now() - started_at },
+      "Large thumbnail generated",
+    );
 
     return path;
   }

@@ -4,6 +4,7 @@ import { basename, extname, join } from "node:path";
 import { defineTask } from "nitropack/runtime";
 import { useRuntimeConfig } from "nuxt/server";
 
+import { useLogger } from "#framework";
 import { UPLOADS_DIRECTORY, useImagesStorage } from "#server/lib/images_storage";
 import { type ImageSize, sync_image, write_image } from "#server/utils/images";
 import { async_pool } from "#shared/utils/random";
@@ -61,6 +62,7 @@ const migrate_jpeg_images = async (files: Array<string>) => {
     } else if (await write_image(await readFile(source), path, size)) {
       result.converted++;
     } else {
+      useLogger("tasks.images.migrate").warn({ file }, "Failed to convert JPEG image");
       result.failed++;
       return;
     }
@@ -85,7 +87,8 @@ const upload_local_images = async (files: Array<string>) => {
       const body = await readFile(join(UPLOADS_DIRECTORY, file));
       await useImagesStorage().put(file, body, "image/avif");
       result.uploaded++;
-    } catch {
+    } catch (error) {
+      useLogger("tasks.images.migrate").warn({ err: error, file }, "Failed to upload image");
       result.failed++;
     }
   });
@@ -103,7 +106,8 @@ const remove_webp_images = async (files: Array<string>) => {
       await useImagesStorage().remove(file);
       await unlink(join(UPLOADS_DIRECTORY, file)).catch(() => {});
       result.removed++;
-    } catch {
+    } catch (error) {
+      useLogger("tasks.images.migrate").warn({ err: error, file }, "Failed to remove WebP image");
       result.failed++;
     }
   });
@@ -119,11 +123,22 @@ export default defineTask({
   },
 
   async run() {
+    const logger = useLogger("tasks.images.migrate");
+    const started_at = Date.now();
+
     const files = await readdir(UPLOADS_DIRECTORY, { recursive: true }).catch(() => []);
+    logger.info({ files: files.length, directory: UPLOADS_DIRECTORY }, "Images migration started");
 
     const uploaded = await upload_local_images(files);
+    logger.info(uploaded, "Local images uploaded");
+
     const webp = await remove_webp_images(files);
+    logger.info(webp, "WebP images removed");
+
     const jpeg = await migrate_jpeg_images(files);
+    logger.info(jpeg, "JPEG images migrated");
+
+    logger.info({ duration_ms: Date.now() - started_at }, "Images migration finished");
 
     return { result: { ...uploaded, webp, jpeg } };
   },

@@ -5,7 +5,7 @@ import { defineCachedFunction } from "nitropack/runtime";
 import { createError } from "nuxt/server";
 import { ofetch } from "ofetch";
 
-import { defineRoute } from "#framework";
+import { defineRoute, useLogger } from "#framework";
 import { content_type_of, read_body_with_limit, stream_body_with_limit } from "#server/utils/http";
 import { is_allowed_upstream, proxy_url_builder, verify_proxy_url } from "#server/utils/proxy";
 import { require_user } from "#server/utils/session";
@@ -19,14 +19,20 @@ const SEGMENT_CACHE_TTL = 3600 * 24; // one day (the lifetime of a proxy URL), i
 // Media lines, and the init segment of fMP4 playlists (`#EXT-X-MAP:URI="init-0.mp4"`)
 const SEGMENT_PATTERN = /^[\w-]+\.(?:ts|mp4)$|(?<=URI=")[\w-]+\.mp4(?=")/gm;
 
+const logger = () => useLogger("videos.segments");
+
 const fetch_upstream = async (url: string) => {
   if (!is_allowed_upstream(url)) {
+    logger().warn({ host: new URL(url).host }, "Upstream refused: unexpected host");
     throw createError({ status: 403 });
   }
 
   const response = await ofetch
     .raw(url, { ...request_options({ retry: 0 }), responseType: "stream", redirect: "error" })
-    .catch(() => null);
+    .catch((error: unknown) => {
+      logger().warn({ err: error, url }, "Upstream request failed");
+      return null;
+    });
 
   if (!response) {
     throw createError({ status: 502 });
@@ -40,6 +46,10 @@ const get_upstream_playlist = defineCachedFunction(
     const response = await fetch_upstream(url);
     const playlist = await read_body_with_limit(response, MAX_PLAYLIST_SIZE);
     if (!playlist) {
+      logger().warn(
+        { url, content_length: response.headers.get("content-length") },
+        "Upstream playlist missing, or too large",
+      );
       throw createError({ status: 502 });
     }
 
@@ -69,6 +79,10 @@ export default defineRoute({
     };
 
     if (!verify_proxy_url(payload, query.signature)) {
+      logger().warn(
+        { video_id: params.id, expired: query.expires < Math.floor(Date.now() / 1000) },
+        "Proxy URL refused: invalid signature, or expired",
+      );
       throw createError({ status: 403 });
     }
 
@@ -79,6 +93,14 @@ export default defineRoute({
 
       const body = stream_body_with_limit(response, MAX_SEGMENT_SIZE);
       if (!body) {
+        logger().warn(
+          {
+            video_id: params.id,
+            path: params.path,
+            content_length: response.headers.get("content-length"),
+          },
+          "Upstream segment missing, or too large",
+        );
         throw createError({ status: 502 });
       }
 

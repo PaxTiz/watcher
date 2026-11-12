@@ -39,18 +39,38 @@ export default class CredentialsService extends AbstractService {
     await this.forget_tokens(data);
     await services.sessions.forget_user(user_id);
 
+    useLogger("services.credentials").info(
+      {
+        credentials_user_id: user_id,
+        provider: data.service,
+        service_id: data.service_id,
+        access_token_expires_at: data.access_token_expires_at,
+        refresh_token_expires_at: data.refresh_token_expires_at,
+      },
+      "Credentials stored",
+    );
+
     return data;
   }
 
   async delete(user_id: string, service: CredentialsType) {
     const credential = await this.get(user_id, service);
     if (!credential) {
+      useLogger("services.credentials").debug(
+        { credentials_user_id: user_id, provider: service },
+        "No credentials to delete",
+      );
       return;
     }
 
     await this.revoke(credential);
     await credentials.remove({ user_id, service });
     await services.sessions.forget_user(user_id);
+
+    useLogger("services.credentials").info(
+      { credentials_user_id: user_id, provider: service, service_id: credential.service_id },
+      "Credentials deleted",
+    );
   }
 
   async revoke_all(user_id: string) {
@@ -68,9 +88,14 @@ export default class CredentialsService extends AbstractService {
     try {
       const client = credential.service === "google" ? useGoogle() : useTwitch();
       await client.revoke(credential);
+
+      useLogger("services.credentials.revoke").debug(
+        { provider: credential.service, service_id: credential.service_id },
+        "Provider tokens revoked",
+      );
     } catch (error) {
       useLogger("services.credentials.revoke").warn(
-        { service: credential.service, message: (error as Error).message },
+        { err: error, provider: credential.service, service_id: credential.service_id },
         "Failed to revoke the provider tokens",
       );
     } finally {

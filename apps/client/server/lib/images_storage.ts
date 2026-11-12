@@ -12,6 +12,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { useRuntimeConfig } from "nuxt/server";
 
+import { useLogger } from "#framework";
 import { create_limiter } from "#shared/utils/random";
 
 // Where the `filesystem` driver stores images, served by the `/uploads` route
@@ -77,25 +78,57 @@ const s3_storage = (): ImagesStorage => {
 
   const limit = create_limiter(MAX_CONCURRENT_REQUESTS);
 
+  // Logs the failures of the S3 requests, with what the provider answered
+  const send = async <T>(operation: string, Key: string, request: () => Promise<T>) => {
+    try {
+      return await request();
+    } catch (error) {
+      if (!is_not_found(error)) {
+        useLogger("server.lib.images_storage").error(
+          {
+            err: error,
+            operation,
+            key: Key,
+            bucket: Bucket,
+            status:
+              error instanceof S3ServiceException ? error.$metadata.httpStatusCode : undefined,
+          },
+          "S3 request failed",
+        );
+      }
+
+      throw error;
+    }
+  };
+
+  useLogger("server.lib.images_storage").info(
+    { endpoint: s3.endpoint, region: s3.region, bucket: Bucket, storage_class: StorageClass },
+    "S3 images storage initialized",
+  );
+
   return {
     put: (Key, Body, ContentType) =>
       limit(async () => {
-        await client.send(
-          new PutObjectCommand({
-            Bucket,
-            Key,
-            Body,
-            ContentType,
-            CacheControl: CACHE_CONTROL,
-            StorageClass,
-          }),
+        await send("put", Key, () =>
+          client.send(
+            new PutObjectCommand({
+              Bucket,
+              Key,
+              Body,
+              ContentType,
+              CacheControl: CACHE_CONTROL,
+              StorageClass,
+            }),
+          ),
         );
       }),
 
     get: (Key) =>
       limit(async () => {
         try {
-          const object = await client.send(new GetObjectCommand({ Bucket, Key }));
+          const object = await send("get", Key, () =>
+            client.send(new GetObjectCommand({ Bucket, Key })),
+          );
           const body = await object.Body?.transformToByteArray();
 
           return body ? Buffer.from(body) : null;
@@ -111,7 +144,9 @@ const s3_storage = (): ImagesStorage => {
     last_modified: (Key) =>
       limit(async () => {
         try {
-          const object = await client.send(new HeadObjectCommand({ Bucket, Key }));
+          const object = await send("head", Key, () =>
+            client.send(new HeadObjectCommand({ Bucket, Key })),
+          );
 
           return object.LastModified ?? null;
         } catch (error) {
@@ -125,7 +160,7 @@ const s3_storage = (): ImagesStorage => {
 
     remove: (Key) =>
       limit(async () => {
-        await client.send(new DeleteObjectCommand({ Bucket, Key }));
+        await send("delete", Key, () => client.send(new DeleteObjectCommand({ Bucket, Key })));
       }),
 
     public_url: (key) => `${publicUrl.replace(/\/$/, "")}/${key}`,

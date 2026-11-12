@@ -1,5 +1,6 @@
 import { defineEventHandler } from "nuxt/server";
 
+import { useLogger } from "#framework";
 import { clearUserSession, getUserSession } from "#framework/auth";
 import { services } from "#framework/server";
 
@@ -20,6 +21,19 @@ export default defineEventHandler(async (event) => {
   const database_user = session_id ? await services.sessions.find_user(session_id) : null;
 
   if (!session_id || !database_user || database_user.id !== user.id) {
+    useLogger("server.middleware.session").info(
+      {
+        session_id,
+        cookie_user_id: user.id,
+        reason: !session_id
+          ? "missing_session_id"
+          : !database_user
+            ? "revoked_or_expired"
+            : "user_mismatch",
+      },
+      "Invalid session cleared",
+    );
+
     await clearUserSession(event);
     return;
   }

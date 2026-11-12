@@ -1,59 +1,83 @@
+import { randomUUID } from "node:crypto";
+
 import { getRequestURL, getResponseStatus, type H3Event } from "h3";
 import { defineNitroPlugin } from "nitropack/runtime";
-import { useRuntimeConfig } from "nuxt/server";
 
-// https://github.com/honojs/hono/blob/fe689eceb7834db653a64ecae5f8d203d9c23b9a/src/middleware/logger/index.ts
+import { useLogger } from "#framework";
 
-const humanize = (times: string[]) => {
-  const [delimiter, separator] = [",", "."];
+declare module "nuxt/schema" {
+  interface RequestEventContext {
+    request_id?: string;
+    request_started_at?: number;
+  }
+}
 
-  const orderTimes = times.map((v) => v.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1" + delimiter));
+const IGNORED_PREFIXES = ["/_nuxt/", "/__nuxt", "/api/_nuxt_icon", "/uploads/", "/images/"];
 
-  return orderTimes.join(separator);
+const is_ignored = (path: string) =>
+  IGNORED_PREFIXES.some((prefix) => path.startsWith(prefix)) || path === "/favicon.ico";
+
+const level_of = (path: string, status: number) => {
+  if (status >= 500) {
+    return "error";
+  }
+
+  if (status >= 400 && status !== 404) {
+    return "warn";
+  }
+
+  return path.startsWith("/api/") ? "info" : "debug";
 };
 
-const time = (start: Date) => {
-  const delta = Date.now() - start.getTime();
-  return humanize([delta < 1000 ? delta + "ms" : Math.round(delta / 1000) + "s"]);
-};
-
-const canLog = (event: H3Event) => {
-  if (event.path.startsWith("/__nuxt_island")) {
-    return false;
-  }
-  if (event.path.startsWith("/api/_nuxt_icon")) {
-    return false;
-  }
-  if (event.path.startsWith("/uploads")) {
-    return false;
-  }
-  if (!event.path.startsWith("/api")) {
-    return false;
-  }
-
-  return true;
-};
+const duration_of = (event: H3Event) =>
+  event.context.request_started_at ? Date.now() - event.context.request_started_at : undefined;
 
 export default defineNitroPlugin((app) => {
-  const config = useRuntimeConfig();
-  if (config.public.environment !== "local") {
-    return;
-  }
+  const logger = useLogger("http");
 
   app.hooks.hook("request", (event) => {
-    event.context.__time = new Date();
+    event.context.request_id = randomUUID();
+    event.context.request_started_at = Date.now();
+
+    event.node.res.setHeader("X-Request-Id", event.context.request_id);
   });
 
   app.hooks.hook("afterResponse", (event) => {
-    const startDate = event.context.__time as Date;
-
-    if (canLog(event)) {
-      const date = startDate.toISOString();
-      const path = getRequestURL(event).pathname;
-      const status = getResponseStatus(event);
-      const timer = time(startDate);
-
-      console.log(`${date} ${event.method} ${path} ${status} ${timer}`);
+    const path = getRequestURL(event).pathname;
+    if (is_ignored(path)) {
+      return;
     }
+
+    const status = getResponseStatus(event);
+
+    logger[level_of(path, status)](
+      {
+        request_id: event.context.request_id,
+        user_id: event.context.user?.id,
+        method: event.method,
+        path,
+        status,
+        duration_ms: duration_of(event),
+      },
+      `${event.method} ${path} ${status}`,
+    );
+  });
+
+  app.hooks.hook("error", (error, { event }) => {
+    const status = (error as { statusCode?: number }).statusCode ?? 500;
+
+    const level = status >= 500 ? "error" : "debug";
+
+    logger[level](
+      {
+        err: error,
+        request_id: event?.context.request_id,
+        user_id: event?.context.user?.id,
+        method: event?.method,
+        path: event ? getRequestURL(event).pathname : undefined,
+        status,
+      },
+      status >= 500 ? "Unhandled error" : "Request failed",
+    );
   });
 });

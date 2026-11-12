@@ -3,6 +3,7 @@ import { type Client, createClient } from "@watcher/integration-google";
 import { useStorage } from "nitropack/runtime";
 import { useRuntimeConfig } from "nuxt/server";
 
+import { useLogger } from "#framework";
 import { decrypt, encrypt } from "#server/utils/encryption";
 
 let _client: Client | null = null;
@@ -40,6 +41,10 @@ export const useGoogle = () => {
         });
 
         if (!row) {
+          useLogger("server.lib.google").warn(
+            { service_id },
+            "No stored credentials for this account",
+          );
           return null;
         }
 
@@ -56,6 +61,15 @@ export const useGoogle = () => {
       },
 
       onRefreshToken: async ({ service_id, tokens }) => {
+        useLogger("server.lib.google").info(
+          {
+            service_id,
+            access_token_expires_at: tokens.access_token_expires_at,
+            refresh_token_expires_at: tokens.refresh_token_expires_at,
+          },
+          "Access token refreshed",
+        );
+
         const key = to_key(service_id);
 
         await storage.removeItem(key);

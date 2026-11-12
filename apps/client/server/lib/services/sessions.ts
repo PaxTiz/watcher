@@ -4,7 +4,7 @@ import { add } from "date-fns";
 import { useStorage } from "nitropack/runtime";
 
 import type { User } from "#auth-utils";
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
 
 const LAST_SEEN_THROTTLE = 60 * 5 * 1000; // 5 minutes, in milliseconds
 const RECENT_AUTHENTICATION_WINDOW = 60 * 10 * 1000; // 10 minutes, in milliseconds
@@ -27,6 +27,11 @@ export default class SessionsService extends AbstractService {
         expires_at: add(new Date(), { seconds: duration }).toISOString(),
       },
     });
+
+    useLogger("services.sessions").info(
+      { session_user_id: user_id, session_id: id, login_with: login_with.integration },
+      "Session created",
+    );
 
     return id;
   }
@@ -63,6 +68,7 @@ export default class SessionsService extends AbstractService {
     const row = await sessions.find_active_with_user({ id });
 
     if (!row) {
+      useLogger("services.sessions").debug({ session_id: id }, "Session not found, or expired");
       return null;
     }
 
@@ -98,6 +104,8 @@ export default class SessionsService extends AbstractService {
 
   async mark_authenticated(id: string) {
     await sessions.mark_authenticated({ id });
+
+    useLogger("services.sessions").info({ session_id: id }, "Session reauthenticated");
   }
 
   async list(user_id: string, current_id: string): Promise<Array<SessionResource>> {
@@ -113,12 +121,16 @@ export default class SessionsService extends AbstractService {
       await storage.removeItem(id);
     }
 
+    useLogger("services.sessions").info({ session_id: id, removed: !!removed }, "Session revoked");
+
     return removed;
   }
 
   async revoke_others(user_id: string, current_id: string) {
     await sessions.remove_all_by_user({ user_id, except_id: current_id });
     await this.forget_user(user_id);
+
+    useLogger("services.sessions").info({ kept_session_id: current_id }, "Other sessions revoked");
   }
 
   async revoke_by_login_method(
@@ -133,5 +145,10 @@ export default class SessionsService extends AbstractService {
       except_id,
     });
     await this.forget_user(user_id);
+
+    useLogger("services.sessions").info(
+      { login_with: login_with.integration, kept_session_id: except_id },
+      "Sessions of a login method revoked",
+    );
   }
 }

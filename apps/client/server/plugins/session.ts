@@ -1,5 +1,6 @@
 import { defineNitroPlugin } from "nitropack/runtime";
 
+import { useLogger } from "#framework";
 import { sessionHooks } from "#framework/auth";
 import { services } from "#framework/server";
 
@@ -12,6 +13,11 @@ export default defineNitroPlugin(() => {
 
   sessionHooks.hook("clear", async (session) => {
     if (session.secure?.session_id) {
+      useLogger("server.plugins.session").debug(
+        { session_id: session.secure.session_id },
+        "Session cookie cleared",
+      );
+
       await services.sessions.revoke(session.secure.session_id);
     }
   });

@@ -1,6 +1,8 @@
 import { rateLimits } from "@watcher/database";
 import { createError, getRequestIP, type RequestEvent } from "nuxt/server";
 
+import { useLogger } from "#framework";
+
 const RATE_LIMITS = {
   subscriptions_sync: { attempts: 2, ttl: 3600 },
 
@@ -32,6 +34,15 @@ export const useRateLimiter = (type: RateLimitType) => {
 
   const increment = async (key: string): Promise<RateLimitState> => {
     const { attempts, expires_at } = await rateLimits.increment({ type, key, ttl });
+
+    if (attempts > limit) {
+      useLogger("server.lib.rate_limiter").warn(
+        { type, key, attempts, limit, expires_at },
+        "Rate limit exceeded",
+      );
+    } else {
+      useLogger("server.lib.rate_limiter").trace({ type, key, attempts, limit }, "Rate limit hit");
+    }
 
     return {
       is_valid: attempts <= limit,

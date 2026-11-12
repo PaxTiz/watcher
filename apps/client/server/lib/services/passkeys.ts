@@ -2,7 +2,7 @@ import { BadRequestError, type PasskeyResource } from "@watcher/common";
 import { passkeys, webauthnChallenges } from "@watcher/database";
 
 import type { WebAuthnCredential } from "#auth-utils";
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
 
 const CHALLENGE_TTL = 60 * 5; // 5 minutes, in seconds
 
@@ -48,18 +48,33 @@ export default class PasskeysService extends AbstractService {
         aaguid: credential.aaguid ?? null,
       },
     });
+
+    useLogger("services.passkeys").info(
+      { passkey_id: credential.id, backed_up: credential.backedUp, aaguid: credential.aaguid },
+      "Passkey registered",
+    );
   }
 
   async mark_as_used(id: string, counter: number) {
     await passkeys.mark_as_used({ id, counter });
+
+    useLogger("services.passkeys").debug({ passkey_id: id, counter }, "Passkey used");
   }
 
   async rename(user_id: string, id: string, name: string) {
-    return passkeys.rename({ id, user_id, name });
+    const renamed = await passkeys.rename({ id, user_id, name });
+
+    useLogger("services.passkeys").debug({ passkey_id: id, renamed: !!renamed }, "Passkey renamed");
+
+    return renamed;
   }
 
   async delete(user_id: string, id: string) {
-    return passkeys.remove({ id, user_id });
+    const deleted = await passkeys.remove({ id, user_id });
+
+    useLogger("services.passkeys").info({ passkey_id: id, deleted: !!deleted }, "Passkey deleted");
+
+    return deleted;
   }
 
   async store_challenge(attempt_id: string, challenge: string) {
@@ -75,6 +90,7 @@ export default class PasskeysService extends AbstractService {
   async consume_challenge(attempt_id: string) {
     const challenge = await webauthnChallenges.consume({ id: attempt_id });
     if (!challenge) {
+      useLogger("services.passkeys").warn("WebAuthn challenge expired, or already used");
       throw new BadRequestError({ message: "challenge_expired" });
     }
 

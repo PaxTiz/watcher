@@ -2,10 +2,11 @@ import { subscriptions, userSubscriptions, videos, withTransaction } from "@watc
 import { formatISO } from "date-fns";
 
 import type { User } from "#auth-utils";
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useTwitch } from "#server/lib/twitch";
 import { IMAGE_SIZES } from "#server/utils/images";
+import { count_by_status } from "#server/utils/sync";
 import {
   remove_video_thumbnails,
   sync_subscription_logo,
@@ -15,17 +16,45 @@ import type { Sync } from "#shared/types/sync";
 import { async_pool } from "#shared/utils/random";
 import { to_subscription_slug } from "#shared/utils/subscriptions";
 
+const logger = () => useLogger("services.sync.twitch");
+
 export default class SyncTwitch extends AbstractService {
   async sync(user: User) {
     this.assert_twitch(user);
 
     const token = await services.credentials.get(user.id, "twitch");
     if (!token) {
+      logger().warn("No Twitch credentials: the Twitch sync is skipped");
       return;
     }
 
+    const started_at = Date.now();
+    logger().info("Twitch sync started");
+
     const subscriptions = await this.get_subscriptions(user, token.service_id);
-    await async_pool(subscriptions, 10, (sub) => this.sync_subscription(user, sub));
+    logger().info(
+      {
+        total: subscriptions.length,
+        ...count_by_status(subscriptions),
+      },
+      "Twitch subscriptions fetched",
+    );
+
+    let failed = 0;
+    await async_pool(subscriptions, 10, (sub) =>
+      this.sync_subscription(user, sub).catch((error: unknown) => {
+        failed++;
+        logger().error(
+          { err: error, channel_id: sub.channel.service_id, channel: sub.channel.name },
+          "Failed to sync a Twitch subscription",
+        );
+      }),
+    );
+
+    logger().info(
+      { total: subscriptions.length, failed, duration_ms: Date.now() - started_at },
+      "Twitch sync finished",
+    );
   }
 
   private async get_subscriptions(user: User, service_id: string) {
@@ -56,6 +85,7 @@ export default class SyncTwitch extends AbstractService {
       },
       { service_id: twitch_id },
     );
+    let pages = 1;
 
     while (true) {
       for (const subscription of response.data) {
@@ -95,6 +125,9 @@ export default class SyncTwitch extends AbstractService {
       }
 
       if (response.pagination.cursor) {
+        pages++;
+        logger().debug({ page: pages }, "Fetching the next page of Twitch follows");
+
         response = await services.external.twitch.helpers.get_followers(
           {
             user_id: service_id,
@@ -118,8 +151,23 @@ export default class SyncTwitch extends AbstractService {
         service_id: subscription.channel.service_id,
       });
 
+      logger().info(
+        { channel_id: subscription.channel.service_id, channel: subscription.channel.name },
+        "Twitch subscription detached (no longer followed)",
+      );
+
       return;
     }
+
+    const started_at = Date.now();
+    logger().debug(
+      {
+        channel_id: subscription.channel.service_id,
+        channel: subscription.channel.name,
+        status: subscription.status,
+      },
+      "Syncing Twitch subscription",
+    );
 
     const logo = await sync_subscription_logo(subscription);
     subscription.channel.logo = logo.path;
@@ -144,7 +192,17 @@ export default class SyncTwitch extends AbstractService {
       subscription.channel.service_id,
     );
 
-    await this.sync_videos(channel_videos);
+    const counts = await this.sync_videos(channel_videos);
+
+    logger().debug(
+      {
+        channel_id: subscription.channel.service_id,
+        channel: subscription.channel.name,
+        ...counts,
+        duration_ms: Date.now() - started_at,
+      },
+      "Twitch subscription synced",
+    );
   }
 
   private async get_videos_by_channel_id(user: User, channel_id: string) {
@@ -235,6 +293,8 @@ export default class SyncTwitch extends AbstractService {
       }
 
       if (response.pagination.cursor) {
+        logger().trace({ channel_id }, "Fetching the next page of Twitch videos");
+
         response = await twitch.videos.list(
           { user_id: channel_id, cursor: response.pagination.cursor },
           { service_id: twitch_id },
@@ -248,6 +308,8 @@ export default class SyncTwitch extends AbstractService {
   }
 
   private async sync_videos(channel_videos: Array<Sync["Video"]>) {
+    const counts = count_by_status(channel_videos);
+
     const deleted = channel_videos.filter((video) => video.status === "deleted");
     await Promise.all(deleted.map((video) => this.delete_video(video)));
 
@@ -262,6 +324,8 @@ export default class SyncTwitch extends AbstractService {
     const patched_videos = await Promise.all(with_thumbnail_and_palette);
 
     await videos.upsert_many({ data: patched_videos });
+
+    return counts;
   }
 
   private async delete_video(video: Sync["Video"]) {

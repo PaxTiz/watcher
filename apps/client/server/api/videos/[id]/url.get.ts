@@ -1,6 +1,6 @@
 import { createError } from "nuxt/server";
 
-import { defineRoute } from "#framework";
+import { defineRoute, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useRateLimiter } from "#server/lib/rate_limiter";
 import { proxy_url_builder } from "#server/utils/proxy";
@@ -17,6 +17,10 @@ export default defineRoute({
 
     const response = await services.videos.get_url(user, params.id);
     if (!response.url) {
+      useLogger("videos.url").warn(
+        { video_id: params.id, service: response.service },
+        "No playable URL for this video",
+      );
       throw createError({ status: 404 });
     }
 

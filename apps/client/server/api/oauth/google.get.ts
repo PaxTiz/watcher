@@ -22,11 +22,24 @@ const oauth_handler = defineOAuthGoogleEventHandler({
   },
 
   async onSuccess(event, { user, tokens }) {
+    const logger = useLogger("oauth.google.onSuccess");
+
     try {
       const sessionUser = get_user(event);
       const intent = await consume_oauth_intent(event, "google");
 
       const existing_credential = await services.credentials.find_by_service("google", user.sub);
+
+      logger.info(
+        {
+          service_id: user.sub,
+          intent,
+          is_logged_in: !!sessionUser,
+          existing_credential_user_id: existing_credential?.userId,
+          scope: tokens.scope,
+        },
+        "OAuth flow succeeded",
+      );
 
       let database_user;
 
@@ -36,6 +49,7 @@ const oauth_handler = defineOAuthGoogleEventHandler({
         }
 
         if (!intent) {
+          logger.warn("Account link refused: it was not requested from the settings");
           return sendRedirect(
             event,
             "/?provider=google&oauth-state=error&error=link_not_requested",
@@ -43,6 +57,10 @@ const oauth_handler = defineOAuthGoogleEventHandler({
         }
 
         if (existing_credential && existing_credential.userId !== sessionUser.id) {
+          logger.warn(
+            { existing_credential_user_id: existing_credential.userId },
+            "Account link refused: already linked to another user",
+          );
           return sendRedirect(event, "/?provider=google&oauth-state=error&error=already_linked");
         }
 
@@ -52,6 +70,7 @@ const oauth_handler = defineOAuthGoogleEventHandler({
       }
 
       if (!database_user) {
+        logger.info("No user for this account: creating one");
         database_user = await services.users.create({ name: user.name });
       }
 
@@ -77,9 +96,14 @@ const oauth_handler = defineOAuthGoogleEventHandler({
         });
       }
 
+      logger.info(
+        { target_user_id: database_user.id, action: sessionUser ? "link" : "login" },
+        "OAuth flow completed",
+      );
+
       return sendRedirect(event, "/?provider=google&oauth-state=success");
     } catch (error) {
-      useLogger("oauth.google.onSuccess").error(error);
+      logger.error({ err: error }, "Failed to complete the OAuth flow");
       return sendRedirect(event, "/?provider=google&oauth-state=error");
     }
   },
@@ -101,6 +125,7 @@ export default defineEventHandler(async (event) => {
     limiter.set_headers(event, state);
 
     if (!state.is_valid) {
+      useLogger("oauth.google").warn({ ip }, "OAuth flow refused: too many attempts");
       return sendRedirect(
         event,
         `/?provider=google&oauth-state=error&error=too_many_attempts&retry_after=${state.reset_in}`,
@@ -109,6 +134,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!(await handle_oauth_intent(event, "google"))) {
+    useLogger("oauth.google").warn("Account link refused: reauthentication required");
     return sendRedirect(
       event,
       "/settings?provider=google&oauth-state=error&error=reauthentication_required",

@@ -2,7 +2,7 @@ import type { SubscriptionDetailsResource, SubscriptionResource } from "@watcher
 import { findOrFail, repositoryTypes, subscriptions, userSubscriptions } from "@watcher/database";
 
 import type { User } from "#auth-utils";
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { public_image_url } from "#server/utils/images";
 import { is_uuid, parse_slug_params } from "#shared/utils/random";
@@ -32,6 +32,11 @@ export default class SubscriptionsService extends AbstractService {
   }
 
   async sync(user: User) {
+    useLogger("services.subscriptions").info(
+      { google: !!user.integrations.google, twitch: !!user.integrations.twitch },
+      "Subscriptions sync requested",
+    );
+
     const sync = [];
     if (user.integrations.google) {
       sync.push(services.sync.youtube.sync(user));
@@ -48,14 +53,20 @@ export default class SubscriptionsService extends AbstractService {
       user_id: user.id,
       identifier: this.to_identifier(id_or_slug),
     });
+
+    useLogger("services.subscriptions").debug({ id_or_slug }, "Subscription favorite toggled");
   }
 
   async hide(user: User, id_or_slug: string) {
     await userSubscriptions.hide({ user_id: user.id, identifier: this.to_identifier(id_or_slug) });
+
+    useLogger("services.subscriptions").debug({ id_or_slug }, "Subscription hidden");
   }
 
   async show(user: User, id_or_slug: string) {
     await userSubscriptions.show({ user_id: user.id, identifier: this.to_identifier(id_or_slug) });
+
+    useLogger("services.subscriptions").debug({ id_or_slug }, "Subscription shown");
   }
 
   private to_identifier(id_or_slug: string): SubscriptionIdentifier {

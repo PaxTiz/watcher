@@ -93,6 +93,7 @@ export default defineNuxtConfig({
 
     experimental: {
       tasks: true,
+      asyncContext: true,
     },
 
     scheduledTasks: {
@@ -114,6 +115,8 @@ export default defineNuxtConfig({
     },
 
     siteUrl: "",
+
+    logLevel: "", // 'trace' | 'debug' | 'info' | 'warn' | 'error' (empty: `debug` locally, `info` otherwise)
 
     images: {
       driver: "filesystem", // 'filesystem' | 's3'

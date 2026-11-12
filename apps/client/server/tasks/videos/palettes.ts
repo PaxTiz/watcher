@@ -1,6 +1,7 @@
 import { videos } from "@watcher/database";
 import { defineTask } from "nitropack/runtime";
 
+import { useLogger } from "#framework";
 import { extract_image_palette } from "#server/utils/palette";
 import { async_pool } from "#shared/utils/random";
 
@@ -13,6 +14,10 @@ export default defineTask({
   },
 
   async run() {
+    const logger = useLogger("tasks.videos.palettes");
+    const started_at = Date.now();
+    logger.info("Palettes computation started");
+
     let updated = 0;
     let failed = 0;
     let last_id: string | null = null;
@@ -36,7 +41,10 @@ export default defineTask({
       });
 
       last_id = batch.at(-1)!.id;
+      logger.debug({ batch: batch.length, updated, failed }, "Batch of palettes computed");
     }
+
+    logger.info({ updated, failed, duration_ms: Date.now() - started_at }, "Palettes computed");
 
     return { result: { updated, failed } };
   },

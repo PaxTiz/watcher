@@ -2,6 +2,7 @@ import type { CredentialsType, ServiceCredentials } from "@watcher/common";
 import { getQuery, type RequestEvent, sendRedirect } from "nuxt/server";
 
 import type { SecureSessionData } from "#auth-utils";
+import { useLogger } from "#framework";
 import { getUserSession, replaceUserSession } from "#framework/auth";
 import { services } from "#framework/server";
 import { require_session_id, require_user } from "#server/utils/session";
@@ -35,10 +36,12 @@ const requested_purpose = (event: RequestEvent): OAuthIntent["purpose"] | undefi
 
 export const handle_oauth_intent = async (event: RequestEvent, provider: CredentialsType) => {
   if (getQuery(event).code) {
+    useLogger("server.utils.oauth").debug({ provider }, "OAuth callback received");
     return true;
   }
 
   const purpose = requested_purpose(event);
+  useLogger("server.utils.oauth").debug({ provider, purpose }, "OAuth flow started");
 
   if (
     purpose === "link" &&
@@ -65,9 +68,20 @@ export const consume_oauth_intent = async (event: RequestEvent, provider: Creden
 
   await write_oauth_intent(event, undefined);
 
-  return oauth_intent.provider === provider && oauth_intent.expires_at > Date.now()
-    ? oauth_intent.purpose
-    : null;
+  if (oauth_intent.provider !== provider || oauth_intent.expires_at <= Date.now()) {
+    useLogger("server.utils.oauth").warn(
+      {
+        provider,
+        intent_provider: oauth_intent.provider,
+        purpose: oauth_intent.purpose,
+        expired: oauth_intent.expires_at <= Date.now(),
+      },
+      "OAuth intent ignored: another provider, or expired",
+    );
+    return null;
+  }
+
+  return oauth_intent.purpose;
 };
 
 export const confirm_reauthentication = async (
@@ -76,6 +90,10 @@ export const confirm_reauthentication = async (
   credential: ServiceCredentials | null,
 ) => {
   if (credential?.userId !== require_user(event).id) {
+    useLogger("server.utils.oauth").warn(
+      { provider, credential_user_id: credential?.userId },
+      "Reauthentication refused: another account was used",
+    );
     return sendRedirect(
       event,
       `/settings?provider=${provider}&oauth-state=error&error=wrong_account`,

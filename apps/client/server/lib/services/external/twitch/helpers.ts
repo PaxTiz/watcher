@@ -1,6 +1,6 @@
 import type { Twitch } from "@watcher/common";
 
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
 
 export default class TwitcHelpersService extends AbstractService {
@@ -30,12 +30,23 @@ export default class TwitcHelpersService extends AbstractService {
       );
 
       for (const follower of followers.data) {
-        const user = users.data.find((e) => e.id === follower.broadcaster_id)!;
-        follower.logo = user.profile_image_url;
+        const user = users.data.find((e) => e.id === follower.broadcaster_id);
+        if (!user) {
+          useLogger("services.external.twitch.helpers").warn(
+            { broadcaster_id: follower.broadcaster_id },
+            "Followed broadcaster missing from the Twitch users response",
+          );
+        }
+
+        follower.logo = user!.profile_image_url;
       }
 
       return followers;
     } catch (e) {
+      useLogger("services.external.twitch.helpers").error(
+        { err: e, user_id: params.user_id, cursor: params.cursor },
+        "Failed to fetch the Twitch follows",
+      );
       throw new Error("Failed to fetch user follows", { cause: e });
     }
   }

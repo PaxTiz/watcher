@@ -5,9 +5,10 @@ import { parse, toSeconds } from "iso8601-duration";
 import { ofetch } from "ofetch";
 
 import type { User } from "#auth-utils";
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useGoogle } from "#server/lib/google";
+import { count_by_status } from "#server/utils/sync";
 import {
   remove_video_thumbnails,
   sync_subscription_logo,
@@ -19,17 +20,45 @@ import { to_subscription_slug } from "#shared/utils/subscriptions";
 
 const shorts_limiter = create_limiter(10, 25);
 
+const logger = () => useLogger("services.sync.youtube");
+
 export default class SyncYoutube extends AbstractService {
   async sync(user: User) {
     this.assert_google(user);
 
     const token = await services.credentials.get(user.id, "google");
     if (!token) {
+      logger().warn("No Google credentials: the YouTube sync is skipped");
       return;
     }
 
+    const started_at = Date.now();
+    logger().info("YouTube sync started");
+
     const subscriptions = await this.get_subscriptions(user);
-    await async_pool(subscriptions, 10, (sub) => this.sync_subscription(user, sub));
+    logger().info(
+      {
+        total: subscriptions.length,
+        ...count_by_status(subscriptions),
+      },
+      "YouTube subscriptions fetched",
+    );
+
+    let failed = 0;
+    await async_pool(subscriptions, 10, (sub) =>
+      this.sync_subscription(user, sub).catch((error: unknown) => {
+        failed++;
+        logger().error(
+          { err: error, channel_id: sub.channel.service_id, channel: sub.channel.name },
+          "Failed to sync a YouTube subscription",
+        );
+      }),
+    );
+
+    logger().info(
+      { total: subscriptions.length, failed, duration_ms: Date.now() - started_at },
+      "YouTube sync finished",
+    );
   }
 
   private async get_subscriptions(user: User) {
@@ -57,6 +86,7 @@ export default class SyncYoutube extends AbstractService {
       );
 
     let response = await google.youtube.subscriptions.list({}, { service_id: google_id });
+    let pages = 1;
     while (true) {
       for (const subscription of response.items ?? []) {
         const existing_subscription = user_subscriptions.find(
@@ -95,6 +125,9 @@ export default class SyncYoutube extends AbstractService {
       }
 
       if (response.nextPageToken) {
+        pages++;
+        logger().debug({ page: pages }, "Fetching the next page of YouTube subscriptions");
+
         response = await google.youtube.subscriptions.list(
           { cursor: response.nextPageToken },
           { service_id: google_id },
@@ -115,8 +148,23 @@ export default class SyncYoutube extends AbstractService {
         service_id: subscription.channel.service_id,
       });
 
+      logger().info(
+        { channel_id: subscription.channel.service_id, channel: subscription.channel.name },
+        "YouTube subscription detached (no longer followed)",
+      );
+
       return;
     }
+
+    const started_at = Date.now();
+    logger().debug(
+      {
+        channel_id: subscription.channel.service_id,
+        channel: subscription.channel.name,
+        status: subscription.status,
+      },
+      "Syncing YouTube subscription",
+    );
 
     const logo = await sync_subscription_logo(subscription);
     subscription.channel.logo = logo.path;
@@ -141,7 +189,17 @@ export default class SyncYoutube extends AbstractService {
       subscription.channel.service_id,
     );
 
-    await this.sync_videos(channel_videos);
+    const counts = await this.sync_videos(channel_videos);
+
+    logger().debug(
+      {
+        channel_id: subscription.channel.service_id,
+        channel: subscription.channel.name,
+        ...counts,
+        duration_ms: Date.now() - started_at,
+      },
+      "YouTube subscription synced",
+    );
   }
 
   private async get_videos_by_channel_id(user: User, channel_id: string) {
@@ -193,7 +251,7 @@ export default class SyncYoutube extends AbstractService {
       const new_videos = all_videos.items.filter((video) => !channel_videos_indexed[video.id]);
       current_videos.push(...all_videos.items.filter((video) => channel_videos_indexed[video.id]));
 
-      await Promise.allSettled(
+      const shorts_checks = await Promise.allSettled(
         new_videos.map(async (video) => {
           const is_short = await with_retry(() =>
             shorts_limiter(() => this.is_maybe_a_short(video)),
@@ -202,7 +260,30 @@ export default class SyncYoutube extends AbstractService {
           if (!is_short) {
             current_videos.push(video);
           }
+
+          return is_short;
         }),
+      );
+
+      // A video whose check failed is skipped: the next sync checks it again
+      for (const [index, check] of shorts_checks.entries()) {
+        if (check.status === "rejected") {
+          logger().warn(
+            { err: check.reason, channel_id, video_id: new_videos[index]?.id },
+            "Failed to check if a YouTube video is a short: skipped",
+          );
+        }
+      }
+
+      logger().trace(
+        {
+          channel_id,
+          fetched: all_videos.items.length,
+          new: new_videos.length,
+          shorts: shorts_checks.filter((c) => c.status === "fulfilled" && c.value).length,
+          kept: current_videos.length,
+        },
+        "YouTube videos page processed",
       );
 
       if (current_videos.length >= 50) {
@@ -271,6 +352,8 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_videos(channel_videos: Array<Sync["Video"]>) {
+    const counts = count_by_status(channel_videos);
+
     const deleted = channel_videos.filter((video) => video.status === "deleted");
     await Promise.all(deleted.map((video) => this.delete_video(video)));
 
@@ -285,6 +368,8 @@ export default class SyncYoutube extends AbstractService {
     const patched_videos = await Promise.all(with_thumbnail_and_palette);
 
     await videos.upsert_many({ data: patched_videos });
+
+    return counts;
   }
 
   private async delete_video(video: Sync["Video"]) {

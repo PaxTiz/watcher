@@ -1,6 +1,8 @@
 import { rateLimits, sessions, webauthnChallenges } from "@watcher/database";
 import { defineTask } from "nitropack/runtime";
 
+import { useLogger } from "#framework";
+
 export default defineTask({
   meta: {
     name: "database:purge",
@@ -14,6 +16,9 @@ export default defineTask({
       webauthnChallenges.remove_expired(),
     ]);
 
-    return { result: { sessions: expired_sessions, rate_limits, webauthn_challenges } };
+    const result = { sessions: expired_sessions, rate_limits, webauthn_challenges };
+    useLogger("tasks.database.purge").info(result, "Expired rows purged");
+
+    return { result };
   },
 });

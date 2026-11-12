@@ -1,6 +1,8 @@
 import { HttpError } from "@watcher/common";
 import { createError } from "nuxt/server";
 
+import { useLogger } from "../utils/use_logger";
+
 /**
  * Converts the domain errors thrown by services (`HttpError` from @watcher/common) into HTTP
  * errors, so their status code and message reach the client. Already wraps every `defineRoute`
@@ -11,6 +13,11 @@ export async function withHttpErrors<T>(callback: () => Promise<T>): Promise<T> 
     return await callback();
   } catch (error) {
     if (error instanceof HttpError) {
+      useLogger("framework.http_errors").debug(
+        { status: error.status, message: error.message, error: error.constructor.name },
+        "Domain error converted to an HTTP error",
+      );
+
       throw createError({ status: error.status, message: error.message });
     }
 
