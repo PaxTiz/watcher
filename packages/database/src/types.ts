@@ -87,9 +87,6 @@ export type VideoTable = {
   // Generated from the title and the description: tsvector, used through search_query()
   search: ColumnType<string, never, never>;
 
-  // Generated from the title: handles mentioned with an @, lowercased and without the @
-  mentions: ColumnType<Array<string>, never, never>;
-
   created_at: string;
 
   last_synced_at: string;
@@ -109,6 +106,16 @@ export type HiddenUsersVideosTable = {
   user_id: string;
 
   video_id: string;
+};
+
+export type VideosGuestsTable = {
+  video_id: string;
+
+  // Identifies a person whatever the way it's written ("@SuperYoutuber", "Super Youtuber")
+  key: string;
+
+  // As written in the title
+  name: string;
 };
 
 export type UsersVideosProgressionTable = {
@@ -191,6 +198,7 @@ export type DatabaseInterface = {
   credentials: CredentialTable;
   videos: VideoTable;
   hidden_users_videos: HiddenUsersVideosTable;
+  videos_guests: VideosGuestsTable;
   users_videos_progression: UsersVideosProgressionTable;
   rate_limits: RateLimitTable;
   webauthn_challenges: WebauthnChallengeTable;

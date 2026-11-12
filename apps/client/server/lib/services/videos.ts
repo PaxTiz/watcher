@@ -1,10 +1,4 @@
-import type {
-  Page,
-  SubscriptionType,
-  VideoListResource,
-  VideoMentionResource,
-  VideoResource,
-} from "@watcher/common";
+import type { Page, SubscriptionType, VideoListResource, VideoResource } from "@watcher/common";
 import { findOrFail, repositoryTypes, videos } from "@watcher/database";
 import { formatISO, startOfDay, sub } from "date-fns";
 import { defineCachedFunction } from "nitropack/runtime";
@@ -88,7 +82,6 @@ export default class VideosService extends AbstractService {
     const { total, items, has_more } = await videos.find_all_for_user({
       user_id: user.id,
       filters: this.to_filters(params),
-      sort: params.sort,
       pagination: {
         page: params.page,
         per_page: params.per_page,
@@ -102,22 +95,6 @@ export default class VideosService extends AbstractService {
       items: items.map((item) => this.to_list_resource(item)),
       has_more,
     };
-  }
-
-  async find_mentions(
-    user: User,
-    params: VideosValidators["mentions"]["query"],
-  ): Promise<Array<VideoMentionResource>> {
-    const rows = await videos.find_mentions_for_user({
-      user_id: user.id,
-      filters: this.to_filters(params),
-      limit: params.limit,
-    });
-
-    return rows.map((row) => ({
-      handle: row.mention,
-      videos_count: row.videos_count,
-    }));
   }
 
   async find_next_recommandetions(user: User, id: string) {
@@ -235,12 +212,11 @@ export default class VideosService extends AbstractService {
     });
   }
 
-  private to_filters(params: Omit<VideosValidators["mentions"]["query"], "limit">): VideosFilters {
+  private to_filters(params: VideosValidators["list"]["query"]): VideosFilters {
     return {
       query: params.query,
       service: params.service,
       subscription_id: params.subscription_id,
-      mentions: params.mentions,
       is_favorite: params.is_favorite,
       in_progress: params.in_progress,
       with_hidden: params.with_hidden,
@@ -272,7 +248,7 @@ export default class VideosService extends AbstractService {
     return { created_after: date() };
   }
 
-  private to_list_resource(row: VideoRow): VideoListResource {
+  to_list_resource(row: VideoRow): VideoListResource {
     return {
       id: row.video_id,
       service: row.video_service,

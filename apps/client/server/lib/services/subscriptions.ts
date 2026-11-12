@@ -6,20 +6,13 @@ import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { public_image_url } from "#server/utils/images";
 import { is_uuid, parse_slug_params } from "#shared/utils/random";
-import type { SubscriptionsValidators } from "#shared/validators/subscriptions";
 
 type SubscriptionRow = repositoryTypes.subscriptions.SubscriptionWithUserState;
 type SubscriptionIdentifier = repositoryTypes.subscriptions.SubscriptionIdentifier;
 
 export default class SubscriptionsService extends AbstractService {
-  async find_all(
-    user: User,
-    params: SubscriptionsValidators["list"]["query"],
-  ): Promise<Array<SubscriptionResource>> {
-    const rows = await subscriptions.find_all_by_user({
-      user_id: user.id,
-      query: params.query,
-    });
+  async find_all(user: User): Promise<Array<SubscriptionResource>> {
+    const rows = await subscriptions.find_all_by_user({ user_id: user.id });
 
     return rows.map((row) => this.to_resource(row));
   }
@@ -80,7 +73,7 @@ export default class SubscriptionsService extends AbstractService {
     return is_uuid(id_or_slug) ? { id: id_or_slug } : { slug: parse_slug_params(id_or_slug) };
   }
 
-  private to_resource(row: SubscriptionRow): SubscriptionResource {
+  to_resource(row: SubscriptionRow): SubscriptionResource {
     return {
       id: row.id,
       name: row.name,

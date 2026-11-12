@@ -387,7 +387,7 @@ export default {
       type: "Tipo de resultado",
       duration: "Duración",
       sort: "Orden",
-      mentions: "Personas mencionadas",
+      guests: "Invitados",
     },
     types: {
       all: "Todo",

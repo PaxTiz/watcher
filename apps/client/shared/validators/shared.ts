@@ -20,3 +20,10 @@ export const queryArraySchema = <T extends z.ZodMiniType<string>>(item: T, max: 
       z.transform((value) => (Array.isArray(value) ? value : [value])),
     )
     .check(z.maxLength(max));
+
+export const videoDurationSchema = z.enum([
+  "less_than_10_minutes",
+  "between_10_30_minutes",
+  "between_30_60_minutes",
+  "greater_than_1_hour",
+]);

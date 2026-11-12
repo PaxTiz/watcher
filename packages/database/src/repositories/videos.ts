@@ -3,13 +3,10 @@ import { type ExpressionBuilder, sql } from "kysely";
 import type {
   FindAllBySubscriptionInput,
   FindAllBySubscriptionOutput,
-  FindAllForUserFilters,
   FindAllForUserInput,
   FindAllForUserOutput,
   FindAllWithoutPaletteInput,
   FindAllWithoutPaletteOutput,
-  FindMentionsForUserInput,
-  FindMentionsForUserOutput,
   FindByIdForUserInput,
   FindByIdForUserOutput,
   FindAdjacentInput,
@@ -34,24 +31,7 @@ import type {
   UpsertProgressionOutput,
 } from "../../types/videos";
 import { type DatabaseInterface, resolveDatabase, useDatabase } from "../database";
-import { escape_like } from "../helpers";
-
-function matches_search(query: string) {
-  return sql<boolean>`(
-    videos.search @@ search_query(${query})
-    OR f_unaccent(lower(${query})) <% f_unaccent(lower(videos.title))
-    OR f_unaccent(lower(videos.title)) LIKE '%' || f_unaccent(lower(${escape_like(query)})) || '%'
-  )`;
-}
-
-function search_score(query: string, table: "videos" | "cursor_video") {
-  return sql<number>`(
-    coalesce(ts_rank_cd(${sql.ref(`${table}.search`)}, search_query(${query})), 0)
-    + word_similarity(f_unaccent(lower(${query})), f_unaccent(lower(${sql.ref(`${table}.title`)})))
-  )`;
-}
-
-const normalize_mention = (mention: string) => mention.trim().replace(/^@/, "").toLowerCase();
+import { select_video_row, select_visible_videos_for_user, video_search_score } from "../queries";
 
 function where_viewable_by(user_id: string) {
   return (eb: ExpressionBuilder<DatabaseInterface, "videos" | "user_subscriptions">) =>
@@ -68,123 +48,34 @@ function where_viewable_by(user_id: string) {
     ]);
 }
 
-// Videos visible to the user (followed and not hidden subscriptions, minus hidden and watched
-// videos) matching `filters`.
-// Shared by the count and the page query of `find_all_for_user` so both always agree.
-function select_visible_for_user(user_id: string, filters: FindAllForUserFilters) {
-  return useDatabase()
-    .selectFrom("videos")
-    .innerJoin("subscriptions", (qb) =>
-      qb
-        .onRef("subscriptions.service_id", "=", "videos.subscription_id")
-        .onRef("subscriptions.service", "=", "videos.service"),
-    )
-    .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
-    .$if(filters.with_hidden !== true, (qb) =>
-      qb.where((eb) =>
-        eb.not(
-          eb.exists(
-            eb
-              .selectFrom("hidden_users_videos")
-              .where("hidden_users_videos.video_id", "=", eb.ref("videos.id"))
-              .where("hidden_users_videos.user_id", "=", eb.ref("user_subscriptions.user_id")),
-          ),
-        ),
-      ),
-    )
-    .where("user_subscriptions.is_hidden", "=", false)
-    .where("user_subscriptions.user_id", "=", user_id)
-    .$if(!!filters.service, (qb) => qb.where("videos.service", "=", filters.service!))
-    .$if(filters.is_favorite === true, (qb) =>
-      qb.where("user_subscriptions.is_favorite", "=", true),
-    )
-    .$if(filters.duration === "less_than_10_minutes", (qb) =>
-      qb.where("videos.duration", "<=", 60 * 10),
-    )
-    .$if(filters.duration === "between_10_30_minutes", (qb) =>
-      qb.where("videos.duration", ">", 60 * 10).where("videos.duration", "<=", 60 * 30),
-    )
-    .$if(filters.duration === "between_30_60_minutes", (qb) =>
-      qb.where("videos.duration", ">", 60 * 30).where("videos.duration", "<=", 60 * 60),
-    )
-    .$if(filters.duration === "greater_than_1_hour", (qb) =>
-      qb.where("videos.duration", ">=", 60 * 60),
-    )
-    .$if(!!filters.created_after, (qb) =>
-      qb.where("videos.created_at", ">=", filters.created_after!),
-    )
-    .$if(!!filters.created_before, (qb) =>
-      qb.where("videos.created_at", "<=", filters.created_before!),
-    )
-    .$if(!!filters.subscription_id, (qb) =>
-      qb.where("subscriptions.id", "=", filters.subscription_id!),
-    )
-    .$if(!!filters.query, (qb) => qb.where(matches_search(filters.query!)))
-    .$if(!!filters.mentions?.length, (qb) =>
-      qb.where(
-        "videos.mentions",
-        "@>",
-        sql<string[]>`${filters.mentions!.map(normalize_mention)}::text[]`,
-      ),
-    )
-    .$if(filters.in_progress === true, (qb) =>
-      qb.where((eb) =>
-        eb.exists(
-          eb
-            .selectFrom("users_videos_progression as progression")
-            .whereRef("progression.video_id", "=", "videos.id")
-            .where("progression.user_id", "=", user_id)
-            .where("progression.progression", ">", 0)
-            .where("progression.progression", "<", 1),
-        ),
-      ),
-    )
-    .$if(filters.with_watched !== true, (qb) =>
-      qb.where((eb) =>
-        eb.not(
-          eb.exists(
-            eb
-              .selectFrom("users_videos_progression as watched")
-              .whereRef("watched.video_id", "=", "videos.id")
-              .where("watched.user_id", "=", user_id)
-              .where("watched.progression", ">=", 1),
-          ),
-        ),
-      ),
-    );
-}
-
 export async function find_all_for_user({
   user_id,
   filters,
-  sort = "relevance",
   pagination,
 }: FindAllForUserInput): Promise<FindAllForUserOutput> {
   const query = filters.query?.trim() || undefined;
   filters = { ...filters, query };
 
-  const by_relevance = sort === "relevance" && !!query;
-
   const count_query = pagination.with_total
-    ? select_visible_for_user(user_id, filters)
+    ? select_visible_videos_for_user(user_id, filters)
         .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
         .executeTakeFirst()
     : undefined;
 
-  const page_query = select_visible_for_user(user_id, filters)
+  const page_query = select_visible_videos_for_user(user_id, filters)
     .leftJoin("users_videos_progression", (qb) =>
       qb
         .onRef("users_videos_progression.video_id", "=", "videos.id")
         .on("users_videos_progression.user_id", "=", user_id),
     )
-    .$if(!!pagination.before && !by_relevance, (qb) =>
+    .$if(!!pagination.before && !query, (qb) =>
       qb.where(
         sql<boolean>`(videos.created_at, videos.id) < (SELECT created_at, id FROM videos WHERE id = ${pagination.before!})`,
       ),
     )
-    .$if(!!pagination.before && by_relevance, (qb) =>
+    .$if(!!pagination.before && !!query, (qb) =>
       qb.where(
-        sql<boolean>`(${search_score(query!, "videos")}, videos.created_at, videos.id) < (SELECT ${search_score(query!, "cursor_video")}, cursor_video.created_at, cursor_video.id FROM videos AS cursor_video WHERE cursor_video.id = ${pagination.before!})`,
+        sql<boolean>`(${video_search_score(query!)}, videos.created_at, videos.id) < (SELECT ${video_search_score(query!, "cursor_video")}, cursor_video.created_at, cursor_video.id FROM videos AS cursor_video WHERE cursor_video.id = ${pagination.before!})`,
       ),
     )
     .offset(pagination.before ? 0 : (pagination.page - 1) * pagination.per_page)
@@ -192,38 +83,10 @@ export async function find_all_for_user({
     .$if(filters.in_progress === true, (qb) =>
       qb.orderBy("users_videos_progression.updated_at", "desc"),
     )
-    .$if(by_relevance, (qb) => qb.orderBy(search_score(query!, "videos"), "desc"))
+    .$if(!!query, (qb) => qb.orderBy(video_search_score(query!), "desc"))
     .orderBy("videos.created_at", "desc")
     .orderBy("videos.id", "desc")
-    .select((eb) => [
-      "videos.id as video_id",
-      "videos.service as video_service",
-      "videos.title as video_title",
-      "videos.duration as video_duration",
-      "videos.url as video_url",
-      "videos.thumbnail_small as video_thumbnail_small",
-      "videos.thumbnail_large as video_thumbnail_large",
-      "videos.palette as video_palette",
-      "videos.created_at as video_created_at",
-      "subscriptions.id as subscription_id",
-      "subscriptions.name as subscription_name",
-      "subscriptions.slug as subscription_slug",
-      "subscriptions.service as subscription_service",
-      "subscriptions.logo as subscription_logo",
-      "user_subscriptions.is_favorite as subscription_is_favorite",
-      sql<number>`COALESCE(${eb.ref("users_videos_progression.progression")}, 0)`.as(
-        "video_viewing_progression",
-      ),
-      eb
-        .exists(
-          eb
-            .selectFrom("hidden_users_videos")
-            .whereRef("hidden_users_videos.video_id", "=", "videos.id")
-            .where("hidden_users_videos.user_id", "=", user_id),
-        )
-        .$castTo<boolean>()
-        .as("video_is_hidden"),
-    ])
+    .select(select_video_row(user_id))
     .execute();
 
   const [count, rows] = await Promise.all([count_query, page_query]);
@@ -233,32 +96,6 @@ export async function find_all_for_user({
     items: rows.slice(0, pagination.per_page),
     has_more: rows.length > pagination.per_page,
   };
-}
-
-export async function find_mentions_for_user({
-  user_id,
-  filters,
-  limit,
-}: FindMentionsForUserInput): Promise<FindMentionsForUserOutput> {
-  const query = filters.query?.trim() || undefined;
-
-  const rows = await useDatabase()
-    .selectFrom(
-      select_visible_for_user(user_id, { ...filters, query })
-        .select(sql<string>`unnest(videos.mentions)`.as("mention"))
-        .as("mentions"),
-    )
-    .select(({ fn }) => ["mentions.mention", fn.countAll<number>().as("videos_count")])
-    .groupBy("mentions.mention")
-    .orderBy("videos_count", "desc")
-    .orderBy("mentions.mention")
-    .limit(limit)
-    .execute();
-
-  return rows.map((row) => ({
-    mention: row.mention,
-    videos_count: Number(row.videos_count),
-  }));
 }
 
 export async function find_by_id_for_user({

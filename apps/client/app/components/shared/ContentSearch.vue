@@ -34,7 +34,7 @@ const filters = reactive<SearchFilters>({
   type: "all",
   duration: "any",
   sort: "relevance",
-  mentions: [],
+  guests: [],
 });
 
 const toOptions = <T extends string>(group: string, values: Array<T>) =>
@@ -61,27 +61,33 @@ const sortItems = computed<Array<DropdownItem>>(() =>
   })),
 );
 
-const mentionOptions = computed(() => {
-  const counts = new Map(results.value.mentions.map((m) => [m.handle, m.videos_count]));
+const guestOptions = computed(() => {
+  const counts = new Map(results.value.guests.map((guest) => [guest.key, guest.videos_count]));
+  const selected = new Set(filters.guests.map((guest) => guest.key));
 
   return [
-    ...filters.mentions.map((handle) => ({ handle, count: counts.get(handle), selected: true })),
-    ...results.value.mentions
-      .filter((m) => !filters.mentions.includes(m.handle))
-      .map((m) => ({ handle: m.handle, count: m.videos_count, selected: false })),
+    ...filters.guests.map((guest) => ({ ...guest, count: counts.get(guest.key), selected: true })),
+    ...results.value.guests
+      .filter((guest) => !selected.has(guest.key))
+      .map((guest) => ({
+        key: guest.key,
+        name: guest.name,
+        count: guest.videos_count,
+        selected: false,
+      })),
   ];
 });
 
-const toggleMention = (handle: string) => {
-  filters.mentions = filters.mentions.includes(handle)
-    ? filters.mentions.filter((m) => m !== handle)
-    : [...filters.mentions, handle];
+const toggleGuest = (guest: { key: string; name: string }) => {
+  filters.guests = filters.guests.some((selected) => selected.key === guest.key)
+    ? filters.guests.filter((selected) => selected.key !== guest.key)
+    : [...filters.guests, { key: guest.key, name: guest.name }];
 };
 
-const canSearch = (q: string) => q.length >= minChars || filters.mentions.length > 0;
+const canSearch = (q: string) => q.length >= minChars || filters.guests.length > 0;
 
 const showVideoFilters = computed(() => filters.type !== "channels");
-const showMentions = computed(() => showVideoFilters.value && mentionOptions.value.length > 0);
+const showGuests = computed(() => showVideoFilters.value && guestOptions.value.length > 0);
 
 const items = computed<CommandItem<SearchResult>[]>(() => [
   ...results.value.channels.map((channel) => ({
@@ -136,7 +142,7 @@ watch(
     () => filters.type,
     () => filters.duration,
     () => filters.sort,
-    () => filters.mentions.join(),
+    () => filters.guests.map((guest) => guest.key).join(),
   ],
   () => {
     clearTimeout(timer);
@@ -159,7 +165,7 @@ const emptyMessage = computed(() => {
   if (error.value) return error.value;
   if (!canSearch(q)) return t("search.min_chars", { count: minChars });
   return t("search.no_results", {
-    query: q.length >= minChars ? q : filters.mentions.map((m) => `@${m}`).join(" "),
+    query: q.length >= minChars ? q : filters.guests.map((guest) => guest.name).join(", "),
   });
 });
 
@@ -244,29 +250,27 @@ const chipUi = (active: boolean) => ({
       </div>
 
       <div
-        v-if="showMentions"
+        v-if="showGuests"
         class="border-ui-text/10 flex shrink-0 [scrollbar-width:none] items-center gap-2 overflow-x-auto border-b px-4 py-2.5"
         role="group"
-        :aria-label="t('search.filters.mentions')"
+        :aria-label="t('search.filters.guests')"
         @mousedown.prevent
       >
         <button
-          v-for="mention in mentionOptions"
-          :key="mention.handle"
+          v-for="guest in guestOptions"
+          :key="guest.key"
           type="button"
-          :aria-pressed="mention.selected"
+          :aria-pressed="guest.selected"
           class="focus-visible:outline-alt inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium whitespace-nowrap ring-1 transition-colors ring-inset focus-visible:outline-2"
           :class="
-            mention.selected
+            guest.selected
               ? 'bg-ui-text text-ui-bg ring-transparent'
               : 'bg-ui-text/[0.06] ring-ui-text/10 text-ui-text-muted hover:text-ui-text'
           "
-          @click="toggleMention(mention.handle)"
+          @click="toggleGuest(guest)"
         >
-          @{{ mention.handle }}
-          <span v-if="mention.count != null" class="tabular-nums opacity-60">{{
-            mention.count
-          }}</span>
+          {{ guest.name }}
+          <span v-if="guest.count != null" class="tabular-nums opacity-60">{{ guest.count }}</span>
         </button>
       </div>
     </template>

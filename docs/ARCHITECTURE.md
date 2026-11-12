@@ -301,16 +301,16 @@ users ──┬──< credentials        (service, service_id) unique ; tokens 
 rate_limits, webauthn_challenges   (tables techniques, purgées toutes les heures)
 ```
 
-| Table                      | Rôle                                                                                        |
-| -------------------------- | ------------------------------------------------------------------------------------------- |
-| `users`                    | Nom, `is_onboarded`, dates                                                                  |
-| `credentials`              | Un compte Google ou Twitch lié à un utilisateur                                             |
-| `subscriptions`            | Une **chaîne** (YouTube ou Twitch), **partagée entre utilisateurs** ; `slug` unique         |
-| `user_subscriptions`       | Lien utilisateur ↔ chaîne, avec `is_favorite` et `is_hidden`                                |
-| `videos`                   | Une vidéo ou VOD, partagée ; miniatures, `palette` (jsonb), `search`, `mentions` (générées) |
-| `hidden_users_videos`      | Vidéos masquées par un utilisateur                                                          |
-| `users_videos_progression` | Progression de lecture (0 → 1), `updated_at` pour trier « en cours »                        |
-| `sessions`                 | Sessions actives (voir §6)                                                                  |
+| Table                      | Rôle                                                                                |
+| -------------------------- | ----------------------------------------------------------------------------------- |
+| `users`                    | Nom, `is_onboarded`, dates                                                          |
+| `credentials`              | Un compte Google ou Twitch lié à un utilisateur                                     |
+| `subscriptions`            | Une **chaîne** (YouTube ou Twitch), **partagée entre utilisateurs** ; `slug` unique |
+| `user_subscriptions`       | Lien utilisateur ↔ chaîne, avec `is_favorite` et `is_hidden`                        |
+| `videos`                   | Une vidéo ou VOD, partagée ; miniatures, `palette` (jsonb), `search` (générée)      |
+| `hidden_users_videos`      | Vidéos masquées par un utilisateur                                                  |
+| `users_videos_progression` | Progression de lecture (0 → 1), `updated_at` pour trier « en cours »                |
+| `sessions`                 | Sessions actives (voir §6)                                                          |
 
 Points à connaître :
 
@@ -325,11 +325,11 @@ Points à connaître :
 
 - vidéos des chaînes suivies et **non masquées** ;
 - sans les vidéos masquées (sauf `with_hidden`) ni les vidéos vues entièrement (sauf `with_watched`) ;
-- filtres : service, favoris, durée, date, chaîne, « en cours », mentions, recherche (voir §7.4).
+- filtres : service, favoris, durée, date, chaîne, « en cours », recherche (voir §7.4).
 
 Pagination : `page`/`per_page` classique, ou **par curseur** avec `before=<video_id>` (comparaison `(created_at, id) <`), utilisée par le défilement infini. On lit `per_page + 1` lignes pour savoir s'il y a une page suivante (`has_more`) sans `COUNT`. Avec une recherche, les résultats sont triés par pertinence : le curseur compare `(score, created_at, id)`, en recalculant le score de la vidéo `before`.
 
-### 7.4 Recherche et mentions
+### 7.4 Recherche et invités
 
 La recherche n'utilise pas de moteur dédié et ne dépend d'**aucune langue** (les titres peuvent être en français, en japonais…) : pas de stemming, les accents sont ignorés (`unaccent`). Une vidéo correspond si l'un de ces critères est vrai :
 
@@ -337,13 +337,25 @@ La recherche n'utilise pas de moteur dédié et ne dépend d'**aucune langue** (
 - **trigram** : `word_similarity` sur le titre (`<%`), qui tolère les fautes de frappe ;
 - **sous-chaîne** : `LIKE '%q%'` sur le titre, pour les langues sans espaces entre les mots (japonais, chinois…).
 
-Les trois passent par des index GIN (`videos_search_idx`, `videos_title_unaccent_trgm_idx`). Le score de pertinence est `ts_rank_cd + word_similarity`, la date départage. Avec `sort=recent`, les résultats d'une recherche sont triés par date comme le reste du fil.
+Les trois passent par des index GIN (`videos_search_idx`, `videos_title_unaccent_trgm_idx`). Le score de pertinence est `ts_rank_cd + word_similarity`, la date départage.
 
-Les **chaînes** (`GET /api/subscriptions?query=`) se cherchent sur le nom, sans accents, par sous-chaîne ou par trigram, triées par similarité. La palette de recherche interroge les chaînes et les vidéos en parallèle ; la recherche depuis une chaîne passe `subscription_id` à `GET /api/videos`.
+La **recherche globale** (palette, `GET /api/search`) passe par le service et le repository `search` et renvoie en une fois les chaînes suivies, les vidéos et leurs invités :
 
-`videos.mentions` (`text[]` généré par `extract_mentions(title)`) contient les `@handle` du titre, en minuscules et sans `@` (« ft. @Amixem » → `amixem`). Le filtre `mentions` garde les vidéos qui les mentionnent **toutes** ; `find_mentions_for_user` (`GET /api/videos/mentions`, mêmes filtres que `GET /api/videos`) liste les mentions des vidéos correspondant aux filtres, les plus fréquentes d'abord.
+- **chaînes** : sur le nom, sans accents, par sous-chaîne ou par trigram, triées par similarité ;
+- **vidéos** : mêmes critères que ci-dessus, triées par pertinence ou par date (`sort`), filtrables par durée et par invités ;
+- **invités** des vidéos correspondantes, les plus fréquents d'abord : en sélectionner restreint les vidéos à celles qui les reçoivent **tous**, et suffit à lancer une recherche sans texte.
 
-Ces fonctions SQL (`f_unaccent`, `search_vector`, `search_query`, `extract_mentions`) sont créées par les migrations : une modification de `search_vector` ou `extract_mentions` demande de recréer la colonne générée pour recalculer les lignes existantes.
+La recherche depuis une chaîne et la page vidéos passent `query` (et `subscription_id`) à `GET /api/videos`. Les requêtes partagées entre le fil, les chaînes et la recherche (`select_visible_videos_for_user`, `matches_video_search`…) sont dans `packages/database/src/queries.ts`, interne au package.
+
+Les **invités** (`videos_guests`) sont détectés dans les titres par `extract_guests` (`server/utils/guests.ts`) à chaque synchronisation, pour toutes les vidéos synchronisées :
+
+- marqueurs **fiables** : `@handle` n'importe où, liste après `feat` / `ft` / `featuring` ;
+- marqueurs **ambigus** (`avec`, `with`, `w/`, `A x B`) : un nom n'est gardé que s'il est déjà connu (nom d'une chaîne en base, invité déjà trouvé) ;
+- la chaîne qui publie la vidéo n'est jamais son propre invité.
+
+Une personne est identifiée par une **clé** sans accents, en minuscules et sans ponctuation : `@joueurdugrenier` et « Joueur du Grenier » sont la même. Le nom affiché est la forme la plus fréquente.
+
+Ces fonctions SQL (`f_unaccent`, `search_vector`, `search_query`) sont créées par les migrations : une modification de `search_vector` demande de recréer la colonne générée pour recalculer les lignes existantes.
 
 ## 8. Intégrations YouTube et Twitch
 

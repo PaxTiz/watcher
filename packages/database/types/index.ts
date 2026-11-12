@@ -5,5 +5,6 @@ export * as sessions from "./sessions";
 export * as subscriptions from "./subscriptions";
 export * as userSubscriptions from "./user_subscriptions";
 export * as videos from "./videos";
+export * as search from "./search";
 export * as rateLimits from "./rate_limits";
 export * as webauthnChallenges from "./webauthn_challenges";

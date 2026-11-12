@@ -382,7 +382,7 @@ export default {
       type: "Result type",
       duration: "Duration",
       sort: "Sort",
-      mentions: "Mentioned",
+      guests: "Guests",
     },
     types: {
       all: "All",

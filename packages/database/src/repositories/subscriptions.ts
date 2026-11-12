@@ -1,5 +1,3 @@
-import { sql } from "kysely";
-
 import type {
   FindAllByUserInput,
   FindAllByUserOutput,
@@ -11,52 +9,13 @@ import type {
   UpsertOutput,
 } from "../../types/subscriptions";
 import { resolveDatabase, useDatabase } from "../database";
-import { escape_like, whereSubscriptionIdentifier } from "../helpers";
-
-function select_with_user_state(user_id: string) {
-  return useDatabase()
-    .selectFrom("subscriptions")
-    .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
-    .select([
-      "subscriptions.id",
-      "subscriptions.name",
-      "subscriptions.slug",
-      "subscriptions.service",
-      "subscriptions.url",
-      "subscriptions.logo",
-      "user_subscriptions.is_favorite",
-      "user_subscriptions.is_hidden",
-    ])
-    .select((eb) =>
-      eb
-        .selectFrom("videos")
-        .whereRef("videos.service", "=", "subscriptions.service")
-        .whereRef("videos.subscription_id", "=", "subscriptions.service_id")
-        .select((eb) => eb.fn.max("videos.created_at").as("created_at"))
-        .as("last_video_at"),
-    )
-    .where("user_subscriptions.user_id", "=", user_id);
-}
+import { whereSubscriptionIdentifier } from "../helpers";
+import { select_subscriptions_with_user_state } from "../queries";
 
 export async function find_all_by_user({
   user_id,
-  query,
 }: FindAllByUserInput): Promise<FindAllByUserOutput> {
-  query = query?.trim() || undefined;
-
-  const similarity = sql<number>`word_similarity(f_unaccent(lower(${query})), f_unaccent(lower(subscriptions.name)))`;
-
-  return select_with_user_state(user_id)
-    .$if(!!query, (qb) =>
-      qb
-        .where(
-          sql<boolean>`(
-            f_unaccent(lower(subscriptions.name)) LIKE '%' || f_unaccent(lower(${escape_like(query!)})) || '%'
-            OR f_unaccent(lower(${query})) <% f_unaccent(lower(subscriptions.name))
-          )`,
-        )
-        .orderBy(similarity, "desc"),
-    )
+  return select_subscriptions_with_user_state(user_id)
     .orderBy("user_subscriptions.is_hidden", "asc")
     .orderBy("subscriptions.name", "asc")
     .execute();
@@ -66,7 +25,7 @@ export async function find_one_by_user({
   user_id,
   identifier,
 }: FindOneByUserInput): Promise<FindOneByUserOutput> {
-  return select_with_user_state(user_id)
+  return select_subscriptions_with_user_state(user_id)
     .where(whereSubscriptionIdentifier(identifier))
     .executeTakeFirst();
 }

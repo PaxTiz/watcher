@@ -9,6 +9,7 @@ export * from "./types/sessions";
 export * from "./resources/subscriptions";
 export * from "./resources/users";
 export * from "./resources/videos";
+export * from "./resources/search";
 
 export * from "./integrations/google";
 export * from "./integrations/twitch";

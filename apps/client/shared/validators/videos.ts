@@ -2,27 +2,7 @@ import { z } from "zod/mini";
 
 import { type InferValidators, defineValidator } from "#framework/client";
 
-import { booleanSchema, queryArraySchema } from "./shared";
-
-const filtersQuery = {
-  query: z.optional(z.string().check(z.maxLength(100))),
-  service: z.optional(z.enum(["youtube", "twitch"])),
-  is_favorite: z.optional(booleanSchema),
-  in_progress: z.optional(booleanSchema),
-  with_hidden: z.optional(booleanSchema),
-  with_watched: z.optional(booleanSchema),
-  duration: z.optional(
-    z.enum([
-      "less_than_10_minutes",
-      "between_10_30_minutes",
-      "between_30_60_minutes",
-      "greater_than_1_hour",
-    ]),
-  ),
-  date: z.optional(z.enum(["today", "weekly", "monthly", "yearly", "older"])),
-  subscription_id: z.optional(z.uuidv7()),
-  mentions: z.optional(queryArraySchema(z.string().check(z.minLength(1), z.maxLength(100)), 10)),
-};
+import { booleanSchema, videoDurationSchema } from "./shared";
 
 export const videosValidatorsSchema = defineValidator({
   find: {
@@ -33,19 +13,19 @@ export const videosValidatorsSchema = defineValidator({
 
   list: {
     query: z.object({
-      ...filtersQuery,
       page: z.coerce.number().check(z.int(), z.gte(1), z.lte(1000)),
       per_page: z._default(z.coerce.number().check(z.int(), z.gte(1), z.lte(50)), 21),
       before: z.optional(z.uuidv7()),
       with_total: z.optional(booleanSchema),
-      sort: z.optional(z.enum(["relevance", "recent"])),
-    }),
-  },
-
-  mentions: {
-    query: z.object({
-      ...filtersQuery,
-      limit: z._default(z.coerce.number().check(z.int(), z.gte(1), z.lte(100)), 20),
+      query: z.optional(z.string().check(z.maxLength(100))),
+      service: z.optional(z.enum(["youtube", "twitch"])),
+      is_favorite: z.optional(booleanSchema),
+      in_progress: z.optional(booleanSchema),
+      with_hidden: z.optional(booleanSchema),
+      with_watched: z.optional(booleanSchema),
+      duration: z.optional(videoDurationSchema),
+      date: z.optional(z.enum(["today", "weekly", "monthly", "yearly", "older"])),
+      subscription_id: z.optional(z.uuidv7()),
     }),
   },
 

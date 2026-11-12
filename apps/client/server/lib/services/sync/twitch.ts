@@ -192,7 +192,7 @@ export default class SyncTwitch extends AbstractService {
       subscription.channel.service_id,
     );
 
-    const counts = await this.sync_videos(channel_videos);
+    const counts = await this.sync_videos(channel_videos, subscription.channel.name);
 
     logger().debug(
       {
@@ -307,7 +307,7 @@ export default class SyncTwitch extends AbstractService {
     return channel_videos;
   }
 
-  private async sync_videos(channel_videos: Array<Sync["Video"]>) {
+  private async sync_videos(channel_videos: Array<Sync["Video"]>, channel_name: string) {
     const counts = count_by_status(channel_videos);
 
     const deleted = channel_videos.filter((video) => video.status === "deleted");
@@ -324,6 +324,12 @@ export default class SyncTwitch extends AbstractService {
     const patched_videos = await Promise.all(with_thumbnail_and_palette);
 
     await videos.upsert_many({ data: patched_videos });
+
+    await services.search.index_guests({
+      service: "twitch",
+      channel_name,
+      videos: patched_videos.map((video) => ({ service_id: video.service_id, title: video.title })),
+    });
 
     return counts;
   }

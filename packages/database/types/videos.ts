@@ -31,7 +31,6 @@ export type FindAllForUserFilters = {
   query?: string;
   service?: SubscriptionType;
   subscription_id?: string;
-  mentions?: Array<string>; // videos mentioning all of them, with or without the @
   is_favorite?: boolean;
   in_progress?: boolean;
   with_hidden?: boolean; // hidden videos only: videos of hidden subscriptions are never listed
@@ -41,12 +40,9 @@ export type FindAllForUserFilters = {
   created_before?: string;
 };
 
-export type VideoSort = "relevance" | "recent";
-
 export type FindAllForUserInput = {
   user_id: string;
   filters: FindAllForUserFilters;
-  sort?: VideoSort; // relevance only applies to a search, defaults to "relevance"
   pagination: { page: number; per_page: number; before?: string; with_total: boolean };
 };
 export type FindAllForUserOutput = {
@@ -54,13 +50,6 @@ export type FindAllForUserOutput = {
   items: Array<VideoRow & { video_is_hidden: boolean }>;
   has_more: boolean;
 };
-
-export type FindMentionsForUserInput = {
-  user_id: string;
-  filters: FindAllForUserFilters;
-  limit: number;
-};
-export type FindMentionsForUserOutput = Array<{ mention: string; videos_count: number }>;
 
 export type FindByIdForUserInput = { id: string; user_id: string };
 export type FindByIdForUserOutput =
@@ -97,9 +86,7 @@ export type FindThumbnailsOutput =
   | undefined;
 
 export type FindAllBySubscriptionInput = { service: SubscriptionType; subscription_id: string };
-export type FindAllBySubscriptionOutput = Array<
-  Omit<DatabaseSchema["videos"], "search" | "mentions">
->;
+export type FindAllBySubscriptionOutput = Array<Omit<DatabaseSchema["videos"], "search">>;
 
 export type FindAllWithoutPaletteInput = { after_id: string | null; limit: number };
 export type FindAllWithoutPaletteOutput = Array<
