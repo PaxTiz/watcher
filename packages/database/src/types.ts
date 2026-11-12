@@ -84,6 +84,12 @@ export type VideoTable = {
   // jsonb: parsed on read, written as a JSON string
   palette: ColumnType<VideoPalette | null, string | null, string | null>;
 
+  // Generated from the title and the description: tsvector, used through search_query()
+  search: ColumnType<string, never, never>;
+
+  // Generated from the title: handles mentioned with an @, lowercased and without the @
+  mentions: ColumnType<Array<string>, never, never>;
+
   created_at: string;
 
   last_synced_at: string;

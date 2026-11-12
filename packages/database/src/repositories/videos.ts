@@ -8,6 +8,8 @@ import type {
   FindAllForUserOutput,
   FindAllWithoutPaletteInput,
   FindAllWithoutPaletteOutput,
+  FindMentionsForUserInput,
+  FindMentionsForUserOutput,
   FindByIdForUserInput,
   FindByIdForUserOutput,
   FindAdjacentInput,
@@ -34,6 +36,23 @@ import type {
 import { type DatabaseInterface, resolveDatabase, useDatabase } from "../database";
 
 const escape_like = (value: string) => value.replace(/[\\%_]/g, "\\$&");
+
+function matches_search(query: string) {
+  return sql<boolean>`(
+    videos.search @@ search_query(${query})
+    OR f_unaccent(lower(${query})) <% f_unaccent(lower(videos.title))
+    OR f_unaccent(lower(videos.title)) LIKE '%' || f_unaccent(lower(${escape_like(query)})) || '%'
+  )`;
+}
+
+function search_score(query: string, table: "videos" | "cursor_video") {
+  return sql<number>`(
+    coalesce(ts_rank_cd(${sql.ref(`${table}.search`)}, search_query(${query})), 0)
+    + word_similarity(f_unaccent(lower(${query})), f_unaccent(lower(${sql.ref(`${table}.title`)})))
+  )`;
+}
+
+const normalize_mention = (mention: string) => mention.trim().replace(/^@/, "").toLowerCase();
 
 function where_viewable_by(user_id: string) {
   return (eb: ExpressionBuilder<DatabaseInterface, "videos" | "user_subscriptions">) =>
@@ -101,12 +120,12 @@ function select_visible_for_user(user_id: string, filters: FindAllForUserFilters
     .$if(!!filters.subscription_id, (qb) =>
       qb.where("subscriptions.id", "=", filters.subscription_id!),
     )
-    .$if(!!filters.query, (qb) =>
-      qb.where((eb) =>
-        eb.or([
-          sql<boolean>`videos.title_search @@ websearch_to_tsquery('french', ${filters.query!})`,
-          eb("videos.title", "ilike", `%${escape_like(filters.query!)}%`),
-        ]),
+    .$if(!!filters.query, (qb) => qb.where(matches_search(filters.query!)))
+    .$if(!!filters.mentions?.length, (qb) =>
+      qb.where(
+        "videos.mentions",
+        "@>",
+        sql<string[]>`${filters.mentions!.map(normalize_mention)}::text[]`,
       ),
     )
     .$if(filters.in_progress === true, (qb) =>
@@ -141,6 +160,9 @@ export async function find_all_for_user({
   filters,
   pagination,
 }: FindAllForUserInput): Promise<FindAllForUserOutput> {
+  const query = filters.query?.trim() || undefined;
+  filters = { ...filters, query };
+
   const count_query = pagination.with_total
     ? select_visible_for_user(user_id, filters)
         .select(({ fn }) => [fn.count<number>("videos.id").as("total")])
@@ -153,9 +175,14 @@ export async function find_all_for_user({
         .onRef("users_videos_progression.video_id", "=", "videos.id")
         .on("users_videos_progression.user_id", "=", user_id),
     )
-    .$if(!!pagination.before, (qb) =>
+    .$if(!!pagination.before && !query, (qb) =>
       qb.where(
         sql<boolean>`(videos.created_at, videos.id) < (SELECT created_at, id FROM videos WHERE id = ${pagination.before!})`,
+      ),
+    )
+    .$if(!!pagination.before && !!query, (qb) =>
+      qb.where(
+        sql<boolean>`(${search_score(query!, "videos")}, videos.created_at, videos.id) < (SELECT ${search_score(query!, "cursor_video")}, cursor_video.created_at, cursor_video.id FROM videos AS cursor_video WHERE cursor_video.id = ${pagination.before!})`,
       ),
     )
     .offset(pagination.before ? 0 : (pagination.page - 1) * pagination.per_page)
@@ -163,6 +190,7 @@ export async function find_all_for_user({
     .$if(filters.in_progress === true, (qb) =>
       qb.orderBy("users_videos_progression.updated_at", "desc"),
     )
+    .$if(!!query, (qb) => qb.orderBy(search_score(query!, "videos"), "desc"))
     .orderBy("videos.created_at", "desc")
     .orderBy("videos.id", "desc")
     .select((eb) => [
@@ -203,6 +231,32 @@ export async function find_all_for_user({
     items: rows.slice(0, pagination.per_page),
     has_more: rows.length > pagination.per_page,
   };
+}
+
+export async function find_mentions_for_user({
+  user_id,
+  filters,
+  limit,
+}: FindMentionsForUserInput): Promise<FindMentionsForUserOutput> {
+  const query = filters.query?.trim() || undefined;
+
+  const rows = await useDatabase()
+    .selectFrom(
+      select_visible_for_user(user_id, { ...filters, query })
+        .select(sql<string>`unnest(videos.mentions)`.as("mention"))
+        .as("mentions"),
+    )
+    .select(({ fn }) => ["mentions.mention", fn.countAll<number>().as("videos_count")])
+    .groupBy("mentions.mention")
+    .orderBy("videos_count", "desc")
+    .orderBy("mentions.mention")
+    .limit(limit)
+    .execute();
+
+  return rows.map((row) => ({
+    mention: row.mention,
+    videos_count: Number(row.videos_count),
+  }));
 }
 
 export async function find_by_id_for_user({
@@ -371,7 +425,23 @@ export async function find_all_by_subscription({
 }: FindAllBySubscriptionInput): Promise<FindAllBySubscriptionOutput> {
   return useDatabase()
     .selectFrom("videos")
-    .selectAll()
+    .select([
+      "id",
+      "service",
+      "service_id",
+      "subscription_id",
+      "title",
+      "description",
+      "duration",
+      "url",
+      "thumbnail_small",
+      "thumbnail_small_etag",
+      "thumbnail_large",
+      "thumbnail_large_source",
+      "palette",
+      "created_at",
+      "last_synced_at",
+    ])
     .where("service", "=", service)
     .where("subscription_id", "=", subscription_id)
     .execute();

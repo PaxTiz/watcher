@@ -301,16 +301,16 @@ users ──┬──< credentials        (service, service_id) unique ; tokens 
 rate_limits, webauthn_challenges   (tables techniques, purgées toutes les heures)
 ```
 
-| Table                      | Rôle                                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------------- |
-| `users`                    | Nom, `is_onboarded`, dates                                                            |
-| `credentials`              | Un compte Google ou Twitch lié à un utilisateur                                       |
-| `subscriptions`            | Une **chaîne** (YouTube ou Twitch), **partagée entre utilisateurs** ; `slug` unique   |
-| `user_subscriptions`       | Lien utilisateur ↔ chaîne, avec `is_favorite` et `is_hidden`                          |
-| `videos`                   | Une vidéo ou VOD, partagée ; miniatures, `palette` (jsonb), `title_search` (tsvector) |
-| `hidden_users_videos`      | Vidéos masquées par un utilisateur                                                    |
-| `users_videos_progression` | Progression de lecture (0 → 1), `updated_at` pour trier « en cours »                  |
-| `sessions`                 | Sessions actives (voir §6)                                                            |
+| Table                      | Rôle                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| `users`                    | Nom, `is_onboarded`, dates                                                                  |
+| `credentials`              | Un compte Google ou Twitch lié à un utilisateur                                             |
+| `subscriptions`            | Une **chaîne** (YouTube ou Twitch), **partagée entre utilisateurs** ; `slug` unique         |
+| `user_subscriptions`       | Lien utilisateur ↔ chaîne, avec `is_favorite` et `is_hidden`                                |
+| `videos`                   | Une vidéo ou VOD, partagée ; miniatures, `palette` (jsonb), `search`, `mentions` (générées) |
+| `hidden_users_videos`      | Vidéos masquées par un utilisateur                                                          |
+| `users_videos_progression` | Progression de lecture (0 → 1), `updated_at` pour trier « en cours »                        |
+| `sessions`                 | Sessions actives (voir §6)                                                                  |
 
 Points à connaître :
 
@@ -325,9 +325,23 @@ Points à connaître :
 
 - vidéos des chaînes suivies et **non masquées** ;
 - sans les vidéos masquées (sauf `with_hidden`) ni les vidéos vues entièrement (sauf `with_watched`) ;
-- filtres : service, favoris, durée, date, chaîne, « en cours », recherche (`websearch_to_tsquery('french')` sur `title_search`, ou `ILIKE` en repli).
+- filtres : service, favoris, durée, date, chaîne, « en cours », mentions, recherche (voir §7.4).
 
-Pagination : `page`/`per_page` classique, ou **par curseur** avec `before=<video_id>` (comparaison `(created_at, id) <`), utilisée par le défilement infini. On lit `per_page + 1` lignes pour savoir s'il y a une page suivante (`has_more`) sans `COUNT`.
+Pagination : `page`/`per_page` classique, ou **par curseur** avec `before=<video_id>` (comparaison `(created_at, id) <`), utilisée par le défilement infini. On lit `per_page + 1` lignes pour savoir s'il y a une page suivante (`has_more`) sans `COUNT`. Avec une recherche, les résultats sont triés par pertinence : le curseur compare `(score, created_at, id)`, en recalculant le score de la vidéo `before`.
+
+### 7.4 Recherche et mentions
+
+La recherche n'utilise pas de moteur dédié et ne dépend d'**aucune langue** (les titres peuvent être en français, en japonais…) : pas de stemming, les accents sont ignorés (`unaccent`). Une vidéo correspond si l'un de ces critères est vrai :
+
+- **full-text** : `videos.search @@ search_query(q)`. `search` est un `tsvector` généré (titre en poids A, 500 premiers caractères de la description en poids B) avec la configuration `simple_unaccent` ; `search_query()` cherche chaque mot comme un **préfixe** (`deve` → « Développer », « Developer »), tous les mots sont requis ;
+- **trigram** : `word_similarity` sur le titre (`<%`), qui tolère les fautes de frappe ;
+- **sous-chaîne** : `LIKE '%q%'` sur le titre, pour les langues sans espaces entre les mots (japonais, chinois…).
+
+Les trois passent par des index GIN (`videos_search_idx`, `videos_title_unaccent_trgm_idx`). Le score de pertinence est `ts_rank_cd + word_similarity`, la date départage.
+
+`videos.mentions` (`text[]` généré par `extract_mentions(title)`) contient les `@handle` du titre, en minuscules et sans `@` (« ft. @Amixem » → `amixem`). Le filtre `mentions` garde les vidéos qui les mentionnent **toutes** ; `find_mentions_for_user` liste les mentions des vidéos correspondant aux filtres, les plus fréquentes d'abord.
+
+Ces fonctions SQL (`f_unaccent`, `search_vector`, `search_query`, `extract_mentions`) sont créées par les migrations : une modification de `search_vector` ou `extract_mentions` demande de recréer la colonne générée pour recalculer les lignes existantes.
 
 ## 8. Intégrations YouTube et Twitch
 
