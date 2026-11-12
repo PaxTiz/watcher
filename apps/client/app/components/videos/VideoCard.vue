@@ -204,6 +204,14 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
           </span>
 
           <span
+            v-if="video.is_hidden"
+            class="absolute top-2 right-2 flex items-center gap-1 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-semibold text-white"
+          >
+            <Icon name="lucide:eye-off" />
+            {{ t(video.author.is_hidden ? "videos.hide_channel.hidden" : "videos.hidden") }}
+          </span>
+
+          <span
             class="absolute right-2 bottom-2 rounded-lg bg-[rgb(var(--c-dark)/0.8)] px-1.5 py-0.5 text-xs font-semibold text-white tabular-nums shadow-[inset_1px_1px_0_-0.5px_rgb(255_255_255/0.5),inset_-1px_-1px_0_-0.5px_rgb(255_255_255/0.15)]"
             :class="{ 'bottom-3': viewing_progression > 0 }"
           >

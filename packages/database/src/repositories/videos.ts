@@ -1,4 +1,4 @@
-import { sql } from "kysely";
+import { type ExpressionBuilder, sql } from "kysely";
 
 import type {
   FindAllBySubscriptionInput,
@@ -25,9 +25,24 @@ import type {
   UpsertProgressionInput,
   UpsertProgressionOutput,
 } from "../../types/videos";
-import { resolveDatabase, useDatabase } from "../database";
+import { type DatabaseInterface, resolveDatabase, useDatabase } from "../database";
 
 const escape_like = (value: string) => value.replace(/[\\%_]/g, "\\$&");
+
+function where_viewable_by(user_id: string) {
+  return (eb: ExpressionBuilder<DatabaseInterface, "videos" | "user_subscriptions">) =>
+    eb.and([
+      eb("user_subscriptions.is_hidden", "=", false),
+      eb.not(
+        eb.exists(
+          eb
+            .selectFrom("hidden_users_videos")
+            .whereRef("hidden_users_videos.video_id", "=", "videos.id")
+            .where("hidden_users_videos.user_id", "=", user_id),
+        ),
+      ),
+    ]);
+}
 
 // Videos visible to the user (followed subscriptions, minus hidden and watched videos) matching `filters`.
 // Shared by the count and the page query of `find_all_for_user` so both always agree.
@@ -161,9 +176,19 @@ export async function find_all_for_user({
       "subscriptions.service as subscription_service",
       "subscriptions.logo as subscription_logo",
       "user_subscriptions.is_favorite as subscription_is_favorite",
+      "user_subscriptions.is_hidden as subscription_is_hidden",
       sql<number>`COALESCE(${eb.ref("users_videos_progression.progression")}, 0)`.as(
         "video_viewing_progression",
       ),
+      eb
+        .exists(
+          eb
+            .selectFrom("hidden_users_videos")
+            .whereRef("hidden_users_videos.video_id", "=", "videos.id")
+            .where("hidden_users_videos.user_id", "=", user_id),
+        )
+        .$castTo<boolean>()
+        .as("video_is_hidden"),
     ])
     .execute();
 
@@ -193,6 +218,7 @@ export async function find_by_id_for_user({
         .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
         .on("user_subscriptions.user_id", "=", user_id),
     )
+    .where(where_viewable_by(user_id))
     .leftJoin("users_videos_progression", (qb) =>
       qb
         .onRef("users_videos_progression.video_id", "=", "videos.id")
@@ -215,9 +241,6 @@ export async function find_by_id_for_user({
       "subscriptions.slug as subscription_slug",
       "subscriptions.service as subscription_service",
       "subscriptions.logo as subscription_logo",
-      sql<boolean>`COALESCE(${eb.ref("user_subscriptions.is_hidden")}, false)`.as(
-        "subscription_is_hidden",
-      ),
       sql<boolean>`COALESCE(${eb.ref("user_subscriptions.is_favorite")}, false)`.as(
         "subscription_is_favorite",
       ),
@@ -300,7 +323,11 @@ export async function find_adjacent({
     .execute();
 }
 
-export async function find_source({ id, user_id }: FindSourceInput): Promise<FindSourceOutput> {
+export async function find_source({
+  id,
+  user_id,
+  viewable_only,
+}: FindSourceInput): Promise<FindSourceOutput> {
   return useDatabase()
     .selectFrom("videos")
     .innerJoin("subscriptions", (qb) =>
@@ -315,6 +342,7 @@ export async function find_source({ id, user_id }: FindSourceInput): Promise<Fin
     )
     .select(["videos.service", "videos.service_id", "videos.url"])
     .where("videos.id", "=", id)
+    .$if(viewable_only === true, (qb) => qb.where(where_viewable_by(user_id)))
     .executeTakeFirst();
 }
 

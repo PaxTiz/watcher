@@ -263,6 +263,7 @@ export default {
     no_results: "Sorry, no results were found for your search.",
     watched: "Watched",
     new: "New",
+    hidden: "Hidden",
     actions: "Video actions",
     video: "Video",
     subscription: "Subscription",

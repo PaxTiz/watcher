@@ -268,6 +268,7 @@ export default {
     no_results: "Lo sentimos, no se ha encontrado ningún resultado para tu búsqueda.",
     watched: "Visto",
     new: "Nuevo",
+    hidden: "Oculto",
     actions: "Acciones del vídeo",
     video: "Vídeo",
     subscription: "Suscripción",

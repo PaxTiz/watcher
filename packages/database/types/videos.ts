@@ -47,7 +47,7 @@ export type FindAllForUserInput = {
 };
 export type FindAllForUserOutput = {
   total: number | undefined;
-  items: Array<VideoRow>;
+  items: Array<VideoRow & { video_is_hidden: boolean; subscription_is_hidden: boolean }>;
   has_more: boolean;
 };
 
@@ -55,7 +55,6 @@ export type FindByIdForUserInput = { id: string; user_id: string };
 export type FindByIdForUserOutput =
   | (VideoRow & {
       video_description: string;
-      subscription_is_hidden: boolean;
       subscription_service_id: string;
     })
   | undefined;
@@ -68,7 +67,7 @@ export type FindAdjacentInput = {
 };
 export type FindAdjacentOutput = Array<VideoRow>;
 
-export type FindSourceInput = { id: string; user_id: string };
+export type FindSourceInput = { id: string; user_id: string; viewable_only?: boolean };
 export type FindSourceOutput =
   | Pick<DatabaseSchema["videos"], "service" | "service_id" | "url">
   | undefined;

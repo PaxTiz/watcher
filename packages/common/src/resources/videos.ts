@@ -25,6 +25,8 @@ export type VideoListResource = {
   palette: VideoPalette | null;
 
   created_at: string;
+
+  is_hidden: boolean; // hidden by the user, either directly or through its channel (`author.is_hidden`)
 };
 
 export type VideoResource = VideoListResource & {

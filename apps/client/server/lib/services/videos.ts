@@ -9,7 +9,10 @@ import { AbstractService } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
 import type { VideosValidators } from "#shared/validators/videos";
 
-type VideoRow = repositoryTypes.videos.VideoRow;
+type VideoRow = repositoryTypes.videos.VideoRow & {
+  video_is_hidden?: boolean;
+  subscription_is_hidden?: boolean;
+};
 type VideosFilters = repositoryTypes.videos.FindAllForUserFilters;
 
 const MASTER_PLAYLIST_CACHE_TTL = 60 * 5; // 5 minutes, in seconds
@@ -36,7 +39,7 @@ export default class VideosService extends AbstractService {
     });
 
     return {
-      ...this.to_list_resource(video, video.subscription_is_hidden),
+      ...this.to_list_resource(video),
       description: video.video_description,
     };
   }
@@ -45,7 +48,7 @@ export default class VideosService extends AbstractService {
     user: User,
     id: string,
   ): Promise<{ service: SubscriptionType; url: string | null }> {
-    const video = await this.find_source_or_fail(user, id);
+    const video = await this.find_source_or_fail(user, id, true);
 
     if (video.service === "twitch") {
       return {
@@ -87,12 +90,14 @@ export default class VideosService extends AbstractService {
 
     return {
       total,
-      items: items.map((item) => this.to_list_resource(item, false)),
+      items: items.map((item) => this.to_list_resource(item)),
       has_more,
     };
   }
 
   async find_next_recommandetions(user: User, id: string) {
+    await this.find_source_or_fail(user, id, true);
+
     const surrounding = 10;
 
     const newer = await videos.find_adjacent({
@@ -103,7 +108,7 @@ export default class VideosService extends AbstractService {
     });
 
     if (newer.length === 10) {
-      return newer.map((video) => this.to_list_resource(video, false));
+      return newer.map((video) => this.to_list_resource(video));
     }
 
     const older = await videos.find_adjacent({
@@ -113,7 +118,7 @@ export default class VideosService extends AbstractService {
       limit: surrounding - newer.length,
     });
 
-    return [...newer, ...older].map((video) => this.to_list_resource(video, false));
+    return [...newer, ...older].map((video) => this.to_list_resource(video));
   }
 
   async hide(user: User, id: string) {
@@ -132,8 +137,10 @@ export default class VideosService extends AbstractService {
     });
   }
 
-  private find_source_or_fail(user: User, id: string) {
-    return findOrFail(videos.find_source({ id, user_id: user.id }), { message: "video_not_found" });
+  private find_source_or_fail(user: User, id: string, viewable_only = false) {
+    return findOrFail(videos.find_source({ id, user_id: user.id, viewable_only }), {
+      message: "video_not_found",
+    });
   }
 
   private parse_date_filter(
@@ -158,7 +165,9 @@ export default class VideosService extends AbstractService {
     return { created_after: date() };
   }
 
-  private to_list_resource(row: VideoRow, is_hidden: boolean): VideoListResource {
+  private to_list_resource(row: VideoRow): VideoListResource {
+    const is_channel_hidden = row.subscription_is_hidden ?? false;
+
     return {
       id: row.video_id,
       service: row.video_service,
@@ -172,12 +181,13 @@ export default class VideosService extends AbstractService {
       },
       palette: row.video_palette,
       created_at: row.video_created_at,
+      is_hidden: (row.video_is_hidden ?? false) || is_channel_hidden,
       author: {
         id: row.subscription_id,
         name: row.subscription_name,
         slug: row.subscription_slug,
         is_favorite: row.subscription_is_favorite,
-        is_hidden,
+        is_hidden: is_channel_hidden,
         channel: {
           service: row.subscription_service,
           logo: row.subscription_logo,
