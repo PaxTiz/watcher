@@ -146,7 +146,7 @@ const has_new_video = (sub: SubscriptionResource) => {
           class="hover:bg-ui-text/10 relative mx-auto block size-10 rounded-full p-1 transition-colors"
           :class="{ 'bg-ui-text/10': route.path === `/subscriptions/${sub.slug}` }"
         >
-          <AppImage
+          <img
             class="size-8 rounded-full object-cover"
             loading="lazy"
             width="32"

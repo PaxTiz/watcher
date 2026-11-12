@@ -95,7 +95,7 @@ const toggle_favorite = async () => {
         :to="`/subscriptions/${video.author.slug}`"
         class="group flex min-w-0 items-center gap-3"
       >
-        <AppImage
+        <img
           class="bg-ui-border size-10 shrink-0 rounded-full object-cover"
           width="40"
           height="40"

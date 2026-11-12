@@ -7,7 +7,7 @@ import { useRuntimeConfig } from "nuxt/server";
 import type { User } from "#auth-utils";
 import { AbstractService } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
-import { type ImageFormat, public_image_url, sync_image } from "#server/utils/images";
+import { public_image_url, sync_image } from "#server/utils/images";
 import { video_thumbnail_path } from "#server/utils/sync_images";
 import type { VideosValidators } from "#shared/validators/videos";
 
@@ -144,7 +144,7 @@ export default class VideosService extends AbstractService {
     });
   }
 
-  async get_large_thumbnail(user: User, id: string, format: ImageFormat): Promise<string> {
+  async get_large_thumbnail(user: User, id: string): Promise<string> {
     await this.find_source_or_fail(user, id);
 
     const video = await findOrFail(videos.find_thumbnails({ id }), {
@@ -164,7 +164,7 @@ export default class VideosService extends AbstractService {
       path = await pending;
     }
 
-    return `${public_image_url(path || video.thumbnail_small)}.${format}`;
+    return public_image_url(path || video.thumbnail_small);
   }
 
   private async generate_large_thumbnail(
@@ -229,7 +229,7 @@ export default class VideosService extends AbstractService {
         small: public_image_url(row.video_thumbnail_small),
         large: row.video_thumbnail_large
           ? public_image_url(row.video_thumbnail_large)
-          : `/api/videos/${row.video_id}/thumbnails/large`,
+          : `/api/videos/${row.video_id}/thumbnails/large`, // generates it, and redirects to it
       },
       palette: row.video_palette,
       created_at: row.video_created_at,

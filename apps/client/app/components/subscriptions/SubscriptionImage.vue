@@ -7,7 +7,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <AppImage
+  <img
     class="border-ui-border w-full rounded border"
     loading="lazy"
     width="71"

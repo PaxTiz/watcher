@@ -201,7 +201,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
         <div
           class="bg-ui-border/40 relative aspect-video overflow-hidden rounded-xl shadow-[0_0_0_1px_rgb(255_255_255/0.06)]"
         >
-          <AppImage
+          <img
             class="size-full object-cover"
             :class="{ 'opacity-60': is_watched }"
             loading="lazy"
@@ -254,7 +254,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
             tabindex="-1"
             aria-hidden="true"
           >
-            <AppImage
+            <img
               class="bg-ui-border size-9 rounded-full object-cover"
               loading="lazy"
               width="36"

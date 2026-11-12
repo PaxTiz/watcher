@@ -115,6 +115,23 @@ export default defineNuxtConfig({
 
     siteUrl: "",
 
+    images: {
+      driver: "filesystem", // 'filesystem' | 's3'
+
+      // Public URL of the bucket, for the `s3` driver (e.g. `https://<bucket>.s3.fr-par.scw.cloud`)
+      publicUrl: "",
+
+      s3: {
+        endpoint: "", // e.g. `https://s3.fr-par.scw.cloud`
+        region: "",
+        bucket: "",
+        accessKeyId: "",
+        secretAccessKey: "",
+        forcePathStyle: false, // `<endpoint>/<bucket>` instead of `<bucket>.<endpoint>`
+        storageClass: "", // e.g. `ONEZONE_IA` for Scaleway One Zone (empty: the default of the provider)
+      },
+    },
+
     encryption: {
       credentials: {
         access_token: "",

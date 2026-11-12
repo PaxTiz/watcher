@@ -37,7 +37,7 @@ const cancel = () => {
       </p>
 
       <div class="mt-3 grid grid-cols-[8rem_1fr] gap-3">
-        <AppImage
+        <img
           class="aspect-video w-full rounded-lg object-cover"
           width="128"
           :src="video.thumbnails.small"

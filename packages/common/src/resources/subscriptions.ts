@@ -15,7 +15,7 @@ export type SubscriptionResource = {
 
   channel: {
     service: SubscriptionType;
-    logo: string; // without extension: append `.avif` or `.webp`
+    logo: string;
   };
 };
 

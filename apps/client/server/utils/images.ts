@@ -1,14 +1,10 @@
-import { mkdir, stat, unlink } from "node:fs/promises";
-import { dirname, join } from "node:path";
-
 import { request_options } from "@watcher/common";
 import { ofetch } from "ofetch";
-import sharp, { type AvifOptions, type WebpOptions } from "sharp";
+import sharp, { type AvifOptions } from "sharp";
 
 import { useLogger } from "#framework";
+import { useImagesStorage } from "#server/lib/images_storage";
 import { content_type_of, read_body_with_limit } from "#server/utils/http";
-
-export const UPLOADS_DIRECTORY = join(process.cwd(), ".storage", "uploads");
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB, in bytes
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -19,13 +15,7 @@ export const INVALID_ETAG = "__INVALID_ETAG__";
 // Maximum number of pixels sharp accepts to decode (the default is 268 million)
 export const MAX_IMAGE_PIXELS = 4096 * 4096;
 
-export const IMAGE_FORMATS = ["avif", "webp"] as const;
-export type ImageFormat = (typeof IMAGE_FORMATS)[number];
-
-const IMAGE_ENCODERS = {
-  avif: { quality: 55, effort: 4 },
-  webp: { quality: 80 },
-} satisfies Record<ImageFormat, AvifOptions | WebpOptions>;
+const IMAGE_ENCODER: AvifOptions = { quality: 55, effort: 4 };
 
 export const IMAGE_SIZES = {
   logo: { width: 192, height: 192 },
@@ -34,7 +24,12 @@ export const IMAGE_SIZES = {
 } as const;
 export type ImageSize = keyof typeof IMAGE_SIZES;
 
-export const public_image_url = (path: string) => (path ? `/uploads${path}` : "");
+const key_of = (path: string) => `${path.slice(1)}.avif`;
+
+export const public_image_url = (path: string) =>
+  path ? useImagesStorage().public_url(key_of(path)) : "";
+
+export const read_image = (path: string) => useImagesStorage().get(key_of(path));
 
 const conditional_headers = async (
   etag: string | null,
@@ -48,9 +43,11 @@ const conditional_headers = async (
     return {};
   }
 
-  const file = await stat(join(UPLOADS_DIRECTORY, `${local_path}.webp`)).catch(() => null);
+  const last_modified = await useImagesStorage()
+    .last_modified(key_of(local_path))
+    .catch(() => null);
 
-  return file ? { "If-Modified-Since": file.mtime.toUTCString() } : {};
+  return last_modified ? { "If-Modified-Since": last_modified.toUTCString() } : {};
 };
 
 // Reads a downloaded logo or thumbnail, before it reaches sharp.
@@ -66,24 +63,16 @@ const read_image_response = async (response: Response): Promise<Buffer | null> =
   return read_body_with_limit(response, MAX_IMAGE_SIZE);
 };
 
-// Resizes `image` to `size`, and writes it at `path` in every format. Returns `false` if sharp can't decode it.
+// Resizes `image` to `size`, and stores it at `path`.
+// Returns `false` if sharp can't decode it, or if the storage fails.
 export const write_image = async (image: Buffer, path: string, size: ImageSize) => {
-  const target = join(UPLOADS_DIRECTORY, path);
-
   try {
-    await mkdir(dirname(target), { recursive: true });
+    const resized = await sharp(image, { limitInputPixels: MAX_IMAGE_PIXELS })
+      .resize({ ...IMAGE_SIZES[size], fit: "cover", withoutEnlargement: true })
+      .avif(IMAGE_ENCODER)
+      .toBuffer();
 
-    const resized = sharp(image, { limitInputPixels: MAX_IMAGE_PIXELS }).resize({
-      ...IMAGE_SIZES[size],
-      fit: "cover",
-      withoutEnlargement: true,
-    });
-
-    await Promise.all(
-      IMAGE_FORMATS.map((format) =>
-        resized.clone().toFormat(format, IMAGE_ENCODERS[format]).toFile(`${target}.${format}`),
-      ),
-    );
+    await useImagesStorage().put(key_of(path), resized, "image/avif");
 
     return true;
   } catch (error) {
@@ -97,9 +86,9 @@ export const remove_image = async (path: string) => {
     return;
   }
 
-  await Promise.allSettled(
-    IMAGE_FORMATS.map((format) => unlink(join(UPLOADS_DIRECTORY, `${path}.${format}`))),
-  );
+  await useImagesStorage()
+    .remove(key_of(path))
+    .catch(() => {});
 };
 
 type SyncImageInput = {

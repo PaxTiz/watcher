@@ -1,18 +1,21 @@
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 
-import { createError, defineEventHandler, getRouterParam } from "nuxt/server";
+import { createError, defineEventHandler, getRouterParam, useRuntimeConfig } from "nuxt/server";
 
-import { UPLOADS_DIRECTORY } from "#server/utils/images";
+import { UPLOADS_DIRECTORY } from "#server/lib/images_storage";
 
 const CACHE_MAX_AGE = 3600 * 12; // 12 hours, in seconds
 
 const CONTENT_TYPES: Record<string, string> = {
   ".avif": "image/avif",
-  ".webp": "image/webp",
 };
 
 export default defineEventHandler(async (event) => {
+  if (useRuntimeConfig().images.driver !== "filesystem") {
+    throw createError({ status: 404 });
+  }
+
   const path = normalize(`/${getRouterParam(event, "path") ?? ""}`);
   const content_type = CONTENT_TYPES[extname(path)];
 

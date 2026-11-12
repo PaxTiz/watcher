@@ -1,10 +1,8 @@
-import { join } from "node:path";
-
 import type { VideoPalette } from "@watcher/common";
 import sharp from "sharp";
 
 import { useLogger } from "#framework";
-import { MAX_IMAGE_PIXELS, UPLOADS_DIRECTORY } from "#server/utils/images";
+import { MAX_IMAGE_PIXELS, read_image } from "#server/utils/images";
 
 const SAMPLE_WIDTH = 48;
 const SAMPLE_HEIGHT = 27;
@@ -86,9 +84,12 @@ export const extract_image_palette = async (
     return null;
   }
 
-  const input = typeof image === "string" ? join(UPLOADS_DIRECTORY, `${image}.webp`) : image;
-
   try {
+    const input = typeof image === "string" ? await read_image(image) : image;
+    if (!input) {
+      return null;
+    }
+
     const { data } = await sharp(input, {
       limitInputPixels: MAX_IMAGE_PIXELS,
     })

@@ -35,12 +35,7 @@ const on_mark_as_view = async (video: VideoListResource) => {
         :to="`/videos/${featured.id}`"
         class="focus-visible:outline-alt relative block aspect-video overflow-hidden rounded-2xl"
       >
-        <AppImage
-          class="size-full object-cover"
-          width="720"
-          :src="featured.thumbnails.large"
-          alt=""
-        />
+        <img class="size-full object-cover" width="720" :src="featured.thumbnails.large" alt="" />
         <span
           class="absolute right-3 bottom-4 rounded-lg bg-[rgb(var(--c-dark)/0.8)] px-1.5 py-0.5 text-xs font-semibold text-white tabular-nums"
         >
@@ -68,7 +63,7 @@ const on_mark_as_view = async (video: VideoListResource) => {
           :to="`/subscriptions/${featured.author.slug}`"
           class="text-ui-text/80 hover:text-ui-text mt-3 inline-flex items-center gap-2.5 transition-colors"
         >
-          <AppImage
+          <img
             class="size-7 rounded-full object-cover"
             width="28"
             height="28"

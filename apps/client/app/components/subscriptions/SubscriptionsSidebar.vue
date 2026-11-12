@@ -102,7 +102,7 @@ const is_active = (sub: SubscriptionResource) => route.path === `/subscriptions/
                 { 'opacity-50 grayscale': sub.is_hidden },
               ]"
             >
-              <AppImage
+              <img
                 class="bg-ui-border size-6 shrink-0 rounded-full object-cover"
                 loading="lazy"
                 width="24"

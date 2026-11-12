@@ -25,7 +25,7 @@ const imageSize = computed(() => (size === "md" ? 48 : 38));
     }"
   >
     <nuxt-link :to="`/subscriptions/${slug}`" class="shrink-0" :style="{ width: `${imageSize}px` }">
-      <AppImage
+      <img
         class="aspect-square w-full rounded object-cover"
         loading="lazy"
         :width="imageSize"
