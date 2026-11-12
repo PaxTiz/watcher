@@ -4,6 +4,8 @@ import type { SubscriptionIdentifier } from "../../types/subscriptions";
 import type {
   AttachInput,
   AttachOutput,
+  DetachInput,
+  DetachOutput,
   HideInput,
   HideOutput,
   ShowInput,
@@ -25,6 +27,27 @@ export async function attach({
     .insertInto("user_subscriptions")
     .values({ user_id, subscription_id })
     .onConflict((oc) => oc.doNothing())
+    .execute();
+}
+
+export async function detach({
+  user_id,
+  service,
+  service_id,
+  options,
+}: DetachInput): Promise<DetachOutput> {
+  const database = resolveDatabase(options);
+
+  await database
+    .deleteFrom("user_subscriptions")
+    .where("user_id", "=", user_id)
+    .where("subscription_id", "in", (eb) =>
+      eb
+        .selectFrom("subscriptions")
+        .select("id")
+        .where("service", "=", service)
+        .where("service_id", "=", service_id),
+    )
     .execute();
 }
 

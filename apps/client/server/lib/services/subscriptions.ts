@@ -68,7 +68,7 @@ export default class SubscriptionsService extends AbstractService {
       slug: row.slug,
       is_favorite: row.is_favorite,
       is_hidden: row.is_hidden,
-      last_video_at: row.last_video_at,
+      last_video_at: row.is_hidden ? null : row.last_video_at,
       channel: {
         service: row.service,
         logo: row.logo,

@@ -116,6 +116,12 @@ export default class SyncTwitch extends AbstractService {
 
   private async sync_subscription(user: User, subscription: Sync["Subscription"]) {
     if (subscription.status === "deleted") {
+      await userSubscriptions.detach({
+        user_id: user.id,
+        service: subscription.channel.service,
+        service_id: subscription.channel.service_id,
+      });
+
       return;
     }
 

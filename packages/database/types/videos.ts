@@ -33,7 +33,7 @@ export type FindAllForUserFilters = {
   subscription_id?: string;
   is_favorite?: boolean;
   in_progress?: boolean;
-  with_hidden?: boolean;
+  with_hidden?: boolean; // hidden videos only: videos of hidden subscriptions are never listed
   with_watched?: boolean;
   duration?: VideoDurationFilter;
   created_after?: string;
@@ -47,7 +47,7 @@ export type FindAllForUserInput = {
 };
 export type FindAllForUserOutput = {
   total: number | undefined;
-  items: Array<VideoRow & { video_is_hidden: boolean; subscription_is_hidden: boolean }>;
+  items: Array<VideoRow & { video_is_hidden: boolean }>;
   has_more: boolean;
 };
 

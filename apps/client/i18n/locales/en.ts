@@ -250,7 +250,8 @@ export default {
       title: "Hide channel",
       description:
         "Videos from {name} will no longer appear in your feed. You can show it again from this page.",
-      notice: "This channel is hidden: its videos don't appear in your feed.",
+      notice:
+        "This channel is hidden: its videos are no longer accessible. Show it again to get them back.",
       failed: "Updating the channel failed, please try again later",
     },
   },

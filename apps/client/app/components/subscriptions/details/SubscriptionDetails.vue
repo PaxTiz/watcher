@@ -37,11 +37,11 @@ onUnmounted(() => {
   <div class="space-y-10">
     <SubscriptionDetailsHeader
       :subscription="subscription"
-      :total-videos="videos?.total"
+      :total-videos="subscription.is_hidden ? undefined : videos?.total"
       :palette="videos?.items[0]?.palette"
     />
 
-    <section>
+    <section v-if="!subscription.is_hidden">
       <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h2 class="font-display text-ui-text text-base font-medium">{{ t("nav.videos") }}</h2>
 

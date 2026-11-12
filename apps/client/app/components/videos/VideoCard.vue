@@ -207,8 +207,7 @@ const is_new = computed(() => Date.now() - new Date(video.created_at).getTime() 
             v-if="video.is_hidden"
             class="absolute top-2 right-2 flex items-center gap-1 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-semibold text-white"
           >
-            <Icon name="lucide:eye-off" />
-            {{ t(video.author.is_hidden ? "videos.hide_channel.hidden" : "videos.hidden") }}
+            <Icon name="lucide:eye-off" /> {{ t("videos.hidden") }}
           </span>
 
           <span

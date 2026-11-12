@@ -9,10 +9,7 @@ import { AbstractService } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
 import type { VideosValidators } from "#shared/validators/videos";
 
-type VideoRow = repositoryTypes.videos.VideoRow & {
-  video_is_hidden?: boolean;
-  subscription_is_hidden?: boolean;
-};
+type VideoRow = repositoryTypes.videos.VideoRow & { video_is_hidden?: boolean };
 type VideosFilters = repositoryTypes.videos.FindAllForUserFilters;
 
 const MASTER_PLAYLIST_CACHE_TTL = 60 * 5; // 5 minutes, in seconds
@@ -166,8 +163,6 @@ export default class VideosService extends AbstractService {
   }
 
   private to_list_resource(row: VideoRow): VideoListResource {
-    const is_channel_hidden = row.subscription_is_hidden ?? false;
-
     return {
       id: row.video_id,
       service: row.video_service,
@@ -181,13 +176,13 @@ export default class VideosService extends AbstractService {
       },
       palette: row.video_palette,
       created_at: row.video_created_at,
-      is_hidden: (row.video_is_hidden ?? false) || is_channel_hidden,
+      is_hidden: row.video_is_hidden ?? false,
       author: {
         id: row.subscription_id,
         name: row.subscription_name,
         slug: row.subscription_slug,
         is_favorite: row.subscription_is_favorite,
-        is_hidden: is_channel_hidden,
+        is_hidden: false, // videos of hidden subscriptions are never returned
         channel: {
           service: row.subscription_service,
           logo: row.subscription_logo,

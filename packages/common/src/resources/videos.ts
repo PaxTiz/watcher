@@ -26,7 +26,7 @@ export type VideoListResource = {
 
   created_at: string;
 
-  is_hidden: boolean; // hidden by the user, either directly or through its channel (`author.is_hidden`)
+  is_hidden: boolean; // hidden by the user (videos of hidden channels are never returned)
 };
 
 export type VideoResource = VideoListResource & {

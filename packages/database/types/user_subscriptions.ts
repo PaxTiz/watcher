@@ -1,8 +1,18 @@
+import type { SubscriptionType } from "@watcher/common";
+
 import type { RepositoryContext } from "../src/database";
 import type { SubscriptionIdentifier } from "./subscriptions";
 
 export type AttachInput = { user_id: string; subscription_id: string; options?: RepositoryContext };
 export type AttachOutput = void;
+
+export type DetachInput = {
+  user_id: string;
+  service: SubscriptionType;
+  service_id: string;
+  options?: RepositoryContext;
+};
+export type DetachOutput = void;
 
 export type ToggleFavoriteInput = { user_id: string; identifier: SubscriptionIdentifier };
 export type ToggleFavoriteOutput = void;

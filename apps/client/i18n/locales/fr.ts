@@ -255,7 +255,8 @@ export default {
       title: "Masquer la chaîne",
       description:
         "Les vidéos de {name} n'apparaîtront plus dans votre flux. Vous pourrez la réafficher depuis cette page.",
-      notice: "Cette chaîne est masquée : ses vidéos n'apparaissent pas dans votre flux.",
+      notice:
+        "Cette chaîne est masquée : ses vidéos ne sont plus accessibles. Réaffichez-la pour les retrouver.",
       failed: "La modification de la chaîne a échoué, réessayez plus tard",
     },
   },

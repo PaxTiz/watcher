@@ -255,7 +255,8 @@ export default {
       title: "Ocultar el canal",
       description:
         "Los vídeos de {name} dejarán de aparecer en tu feed. Podrás volver a mostrarlo desde esta página.",
-      notice: "Este canal está oculto: sus vídeos no aparecen en tu feed.",
+      notice:
+        "Este canal está oculto: sus vídeos ya no son accesibles. Vuelve a mostrarlo para recuperarlos.",
       failed: "No se ha podido modificar el canal, inténtalo más tarde",
     },
   },

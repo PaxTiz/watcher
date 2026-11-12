@@ -44,7 +44,8 @@ function where_viewable_by(user_id: string) {
     ]);
 }
 
-// Videos visible to the user (followed subscriptions, minus hidden and watched videos) matching `filters`.
+// Videos visible to the user (followed and not hidden subscriptions, minus hidden and watched
+// videos) matching `filters`.
 // Shared by the count and the page query of `find_all_for_user` so both always agree.
 function select_visible_for_user(user_id: string, filters: FindAllForUserFilters) {
   return useDatabase()
@@ -67,9 +68,7 @@ function select_visible_for_user(user_id: string, filters: FindAllForUserFilters
         ),
       ),
     )
-    .$if(!filters.subscription_id && filters.with_hidden !== true, (qb) =>
-      qb.where("user_subscriptions.is_hidden", "=", false),
-    )
+    .where("user_subscriptions.is_hidden", "=", false)
     .where("user_subscriptions.user_id", "=", user_id)
     .$if(!!filters.service, (qb) => qb.where("videos.service", "=", filters.service!))
     .$if(filters.is_favorite === true, (qb) =>
@@ -176,7 +175,6 @@ export async function find_all_for_user({
       "subscriptions.service as subscription_service",
       "subscriptions.logo as subscription_logo",
       "user_subscriptions.is_favorite as subscription_is_favorite",
-      "user_subscriptions.is_hidden as subscription_is_hidden",
       sql<number>`COALESCE(${eb.ref("users_videos_progression.progression")}, 0)`.as(
         "video_viewing_progression",
       ),
