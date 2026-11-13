@@ -26,6 +26,41 @@ const REDACTED_PATHS = REDACTED_KEYS.flatMap((key) => [
   `*.*.*.${key}`,
 ]);
 
+const MAX_RESPONSE_BODY_LENGTH = 4096;
+
+type FetchErrorLike = Error & { status?: number; data?: unknown };
+
+const _responseBody = (data: unknown) => {
+  if (typeof data === "string") {
+    return data.length > MAX_RESPONSE_BODY_LENGTH
+      ? `${data.slice(0, MAX_RESPONSE_BODY_LENGTH)}… [truncated]`
+      : data;
+  }
+
+  if (Array.isArray(data) || data?.constructor === Object) {
+    return data;
+  }
+
+  return undefined;
+};
+
+const _serializeError = (error: unknown) => {
+  const serialized: Record<string, unknown> = pino.stdSerializers.err(error as Error);
+
+  let current: unknown = error;
+  while (current instanceof Error) {
+    if (current.name === "FetchError") {
+      const { status, data } = current as FetchErrorLike;
+      serialized.response = { status, body: _responseBody(data) };
+      break;
+    }
+
+    current = current.cause;
+  }
+
+  return serialized;
+};
+
 const _localTransporter = () =>
   pino.transport({
     target: "pino-pretty",
@@ -82,6 +117,7 @@ export function useLogger(service: string) {
         level,
         redact: { paths: REDACTED_PATHS, censor: "[redacted]" },
         mixin: _requestContext,
+        serializers: { err: _serializeError },
       },
       config.public.environment === "local" ? _localTransporter() : _fileTransporter(),
     );
