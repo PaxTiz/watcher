@@ -16,6 +16,8 @@ export type ClientSettings = {
 
   client_secret: string;
 
+  api_key: string;
+
   onRequest: (service_id: string) => Promise<ClientTokens | null>;
 
   onRefreshToken: (params: { service_id: string; tokens: ClientTokens }) => Promise<ClientTokens>;

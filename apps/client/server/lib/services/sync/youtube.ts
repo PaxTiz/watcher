@@ -183,10 +183,7 @@ export default class SyncYoutube extends AbstractService {
       });
     });
 
-    const channel_videos = await this.get_videos_by_channel_id(
-      user,
-      subscription.channel.service_id,
-    );
+    const channel_videos = await this.get_videos_by_channel_id(subscription.channel.service_id);
 
     const counts = await this.sync_videos(channel_videos, subscription.channel.name);
 
@@ -201,9 +198,7 @@ export default class SyncYoutube extends AbstractService {
     );
   }
 
-  private async get_videos_by_channel_id(user: User, channel_id: string) {
-    const google_id = this.assert_google(user);
-
+  private async get_videos_by_channel_id(channel_id: string) {
     const google = useGoogle();
 
     const channel_videos: Sync["VideosList"] = await videos
@@ -241,63 +236,42 @@ export default class SyncYoutube extends AbstractService {
 
     const current_videos: Array<Google["Youtube"]["Videos"]["Item"]> = [];
 
-    let all_videos = await google.youtube.videos.get_latests(
-      { channel_id },
-      { service_id: google_id },
+    const latest_videos = await google.youtube.videos.get_latests({ channel_id });
+
+    const new_videos = latest_videos.filter((video) => !channel_videos_indexed[video.id]);
+    current_videos.push(...latest_videos.filter((video) => channel_videos_indexed[video.id]));
+
+    const shorts_checks = await Promise.allSettled(
+      new_videos.map(async (video) => {
+        const is_short = await with_retry(() => shorts_limiter(() => this.is_maybe_a_short(video)));
+
+        if (!is_short) {
+          current_videos.push(video);
+        }
+
+        return is_short;
+      }),
     );
 
-    while (true) {
-      const new_videos = all_videos.items.filter((video) => !channel_videos_indexed[video.id]);
-      current_videos.push(...all_videos.items.filter((video) => channel_videos_indexed[video.id]));
-
-      const shorts_checks = await Promise.allSettled(
-        new_videos.map(async (video) => {
-          const is_short = await with_retry(() =>
-            shorts_limiter(() => this.is_maybe_a_short(video)),
-          );
-
-          if (!is_short) {
-            current_videos.push(video);
-          }
-
-          return is_short;
-        }),
-      );
-
-      // A video whose check failed is skipped: the next sync checks it again
-      for (const [index, check] of shorts_checks.entries()) {
-        if (check.status === "rejected") {
-          logger().warn(
-            { err: check.reason, channel_id, video_id: new_videos[index]?.id },
-            "Failed to check if a YouTube video is a short: skipped",
-          );
-        }
-      }
-
-      logger().trace(
-        {
-          channel_id,
-          fetched: all_videos.items.length,
-          new: new_videos.length,
-          shorts: shorts_checks.filter((c) => c.status === "fulfilled" && c.value).length,
-          kept: current_videos.length,
-        },
-        "YouTube videos page processed",
-      );
-
-      if (current_videos.length >= 50) {
-        break;
-      }
-
-      if (all_videos.nextPageToken) {
-        all_videos = await google.youtube.videos.get_latests(
-          { channel_id, cursor: all_videos.nextPageToken },
-          { service_id: google_id },
+    for (const [index, check] of shorts_checks.entries()) {
+      if (check.status === "rejected") {
+        logger().warn(
+          { err: check.reason, channel_id, video_id: new_videos[index]?.id },
+          "Failed to check if a YouTube video is a short: skipped",
         );
-      } else {
-        break;
       }
     }
+
+    logger().trace(
+      {
+        channel_id,
+        fetched: latest_videos.length,
+        new: new_videos.length,
+        shorts: shorts_checks.filter((c) => c.status === "fulfilled" && c.value).length,
+        kept: current_videos.length,
+      },
+      "YouTube latest videos processed",
+    );
 
     for (const video of current_videos) {
       const existingVid = channel_videos_indexed[video.id];

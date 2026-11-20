@@ -31,7 +31,6 @@ export type Google = {
       };
 
       List: {
-        nextPageToken?: string;
         items: Array<Google["Youtube"]["Videos"]["Item"]>;
         pageInfo: Google["Youtube"]["__PageInfo"];
       };
@@ -46,21 +45,6 @@ export type Google = {
 
       List: {
         items: Array<Google["Youtube"]["PlaylistItems"]["Item"]>;
-        pageInfo: Google["Youtube"]["__PageInfo"];
-      };
-    };
-
-    Channels: {
-      Item: {
-        contentDetails: {
-          relatedPlaylists: {
-            uploads: string;
-          };
-        };
-      };
-
-      List: {
-        items: Array<Google["Youtube"]["Channels"]["Item"]>;
         pageInfo: Google["Youtube"]["__PageInfo"];
       };
     };

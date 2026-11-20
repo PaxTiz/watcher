@@ -142,6 +142,10 @@ export default defineNuxtConfig({
       },
     },
 
+    google: {
+      apiKey: "",
+    },
+
     oauth: {
       google: {
         clientId: "",

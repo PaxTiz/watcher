@@ -2,37 +2,34 @@ import { request_options, type Google } from "@watcher/common";
 import { ofetch } from "ofetch";
 
 import type { GoogleClient } from "../internal/client";
-import { GoogleService, type GoogleServiceRequest } from "../internal/service";
+import { GoogleService } from "../internal/service";
+
+const playlist_prefixes = {
+  uploads: "UU",
+  videos: "UULF",
+  lives: "UULV",
+} as const;
+
+export const to_playlist_id = (channel_id: string, kind: keyof typeof playlist_prefixes) =>
+  playlist_prefixes[kind] + channel_id.slice(2);
 
 export class YoutubePlaylistItemsService extends GoogleService {
   constructor(client: GoogleClient) {
     super(client);
   }
 
-  async get_uploads_id(data: { channel_id: string }, config: GoogleServiceRequest) {
-    return await this.perform_request(config.service_id, async (token) => {
-      const channel = await this.client.youtube.channels.get_by_id(
-        { channel_id: data.channel_id },
-        { service_id: config.service_id },
-      );
+  async list(data: { playlist_id: string }) {
+    const url = new URL("https://www.googleapis.com/youtube/v3/playlistItems");
+    url.searchParams.set("part", "contentDetails");
+    url.searchParams.set("maxResults", "50");
+    url.searchParams.set("playlistId", data.playlist_id);
+    url.searchParams.set("key", this.client.settings.api_key);
 
-      if (!channel) {
-        throw new Error(`Youtube channel '${data.channel_id}' not found`);
-      }
+    const response = await ofetch<Google["Youtube"]["PlaylistItems"]["List"]>(
+      url.toString(),
+      request_options(),
+    );
 
-      const url = new URL("https://www.googleapis.com/youtube/v3/playlistItems");
-      url.searchParams.set("part", "contentDetails");
-      url.searchParams.set("maxResults", "50");
-      url.searchParams.set("playlistId", channel.contentDetails.relatedPlaylists.uploads);
-
-      const response = await ofetch<Google["Youtube"]["PlaylistItems"]["List"]>(url.toString(), {
-        ...request_options(),
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      return response.items;
-    });
+    return response.items;
   }
 }

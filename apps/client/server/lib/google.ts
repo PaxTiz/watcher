@@ -26,6 +26,7 @@ export const useGoogle = () => {
     _client = createClient({
       client_id: config.oauth.google.clientId,
       client_secret: config.oauth.google.clientSecret,
+      api_key: config.google.apiKey,
 
       onRequest: async (service_id) => {
         const key = to_key(service_id);
