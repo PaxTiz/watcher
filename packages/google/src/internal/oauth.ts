@@ -1,5 +1,5 @@
 import { request_options, type Google } from "@watcher/common";
-import { ofetch } from "ofetch";
+import { FetchError, ofetch } from "ofetch";
 
 import type { ClientSettings } from "./client";
 import type { GoogleServiceRequest } from "./service";
@@ -31,6 +31,8 @@ function get_access_token(settings: ClientSettings, config: GoogleServiceRequest
   return settings.onRequest(config.service_id);
 }
 
+export class GoogleInvalidGrantError extends Error {}
+
 async function refresh_access_token(settings: ClientSettings, refresh_token: string) {
   try {
     const response = await ofetch<{
@@ -54,6 +56,10 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
 
     return response;
   } catch (err) {
+    if (err instanceof FetchError && err.data?.error === "invalid_grant") {
+      throw new GoogleInvalidGrantError("Google refresh token rejected", { cause: err });
+    }
+
     throw new Error("Failed to refresh Google access token", { cause: err });
   }
 }

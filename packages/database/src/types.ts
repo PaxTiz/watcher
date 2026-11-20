@@ -56,6 +56,8 @@ export type CredentialTable = {
   user_id: string;
 
   invalid_at: ColumnType<Date | null, Date | null | undefined, Date | null>;
+
+  next_sync_at: ColumnType<string | null, string | null | undefined, string | null>;
 };
 
 export type VideoTable = {

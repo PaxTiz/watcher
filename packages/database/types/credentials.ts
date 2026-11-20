@@ -19,7 +19,7 @@ export type FindAllByUserOutput = Array<
   Pick<DatabaseSchema["credentials"], "service" | "service_id">
 >;
 
-export type UpsertData = Omit<DatabaseSchema["credentials"], "invalid_at">;
+export type UpsertData = Omit<DatabaseSchema["credentials"], "invalid_at" | "next_sync_at">;
 export type UpsertInput = { data: UpsertData; options?: RepositoryContext };
 export type UpsertOutput = void;
 
@@ -30,6 +30,19 @@ export type UpdateTokensInput = {
   options?: RepositoryContext;
 };
 export type UpdateTokensOutput = void;
+
+export type ClaimDueSyncInput = { service: CredentialsType; limit: number; lease_seconds: number };
+export type ClaimDueSyncOutput = Array<Pick<DatabaseSchema["credentials"], "user_id">>;
+
+export type RescheduleSyncInput = {
+  service: CredentialsType;
+  user_id: string;
+  next_sync_at: string;
+};
+export type RescheduleSyncOutput = void;
+
+export type MarkInvalidInput = { service: CredentialsType; user_id: string };
+export type MarkInvalidOutput = void;
 
 export type RemoveInput = {
   user_id: string;

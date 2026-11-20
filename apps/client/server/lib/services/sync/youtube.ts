@@ -1,12 +1,14 @@
+import type { UserResource } from "@watcher/common";
 import {
+  credentials,
   subscriptions,
   subscriptionsSync,
   userSubscriptions,
   withTransaction,
 } from "@watcher/database";
+import { GoogleInvalidGrantError } from "@watcher/integration-google";
 import { formatISO } from "date-fns";
 
-import type { User } from "#auth-utils";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useGoogle } from "#server/lib/google";
@@ -18,20 +20,49 @@ import { to_subscription_slug } from "#shared/utils/subscriptions";
 
 const logger = () => useLogger("services.sync.youtube");
 
+type User = Pick<UserResource, "id" | "integrations">;
+
 export default class SyncYoutube extends AbstractService {
   async sync(user: User) {
+    const started_at = Date.now();
+    logger().info("YouTube sync started");
+
+    const synced = await this.sync_subscriptions(user);
+    if (!synced) {
+      return;
+    }
+
+    const channels = await subscriptionsSync.find_all_for_user({
+      user_id: user.id,
+      service: "youtube",
+    });
+    const feeds = await services.feeds.youtube.check_channels(channels);
+    const enriched = await services.feeds.youtube.enrich_pending();
+    const images = await services.feeds.images.process_pending();
+
+    logger().info(
+      { ...synced, feeds, enriched, images, duration_ms: Date.now() - started_at },
+      "YouTube sync finished",
+    );
+  }
+
+  async sync_subscriptions(user: User) {
     this.assert_google(user);
 
     const token = await services.credentials.get(user.id, "google");
     if (!token) {
       logger().warn("No Google credentials: the YouTube sync is skipped");
-      return;
+      return null;
     }
 
-    const started_at = Date.now();
-    logger().info("YouTube sync started");
+    const subscriptions = await this.get_subscriptions(user).catch(async (error: unknown) => {
+      if (error instanceof GoogleInvalidGrantError) {
+        await credentials.mark_invalid({ service: "google", user_id: user.id });
+        logger().warn("Google refresh token rejected: the integration must be reconnected");
+      }
 
-    const subscriptions = await this.get_subscriptions(user);
+      throw error;
+    });
     logger().info(
       {
         total: subscriptions.length,
@@ -51,25 +82,7 @@ export default class SyncYoutube extends AbstractService {
       }),
     );
 
-    const channels = await subscriptionsSync.find_all_for_user({
-      user_id: user.id,
-      service: "youtube",
-    });
-    const feeds = await services.feeds.youtube.check_channels(channels);
-    const enriched = await services.feeds.youtube.enrich_pending();
-    const images = await services.feeds.images.process_pending();
-
-    logger().info(
-      {
-        total: subscriptions.length,
-        failed,
-        feeds,
-        enriched,
-        images,
-        duration_ms: Date.now() - started_at,
-      },
-      "YouTube sync finished",
-    );
+    return { total: subscriptions.length, failed };
   }
 
   private async get_subscriptions(user: User) {

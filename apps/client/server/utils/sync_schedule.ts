@@ -24,6 +24,8 @@ export const next_check_at = (last_video_at: string | null) => {
   return in_minutes(with_jitter(24 * 60));
 };
 
+export const next_subscriptions_sync_at = () => in_minutes(with_jitter(24 * 60));
+
 export const retry_at = (failures: number) => in_minutes(Math.min(15 * 2 ** failures, 24 * 60));
 
 export const latest_date = (dates: Array<string | null>) =>
