@@ -10,7 +10,6 @@ import { services } from "#framework/server";
 import { useGoogle } from "#server/lib/google";
 import { count_by_status } from "#server/utils/sync";
 import {
-  remove_video_thumbnails,
   sync_subscription_logo,
   sync_video_thumbnail_and_palette,
 } from "#server/utils/sync_images";
@@ -352,15 +351,8 @@ export default class SyncYoutube extends AbstractService {
   }
 
   private async sync_videos(channel_videos: Array<Sync["Video"]>, channel_name: string) {
-    const counts = count_by_status(channel_videos);
-
-    const deleted = channel_videos.filter((video) => video.status === "deleted");
-    await Promise.all(deleted.map((video) => this.delete_video(video)));
-
-    const deleted_ids = deleted.map((video) => video.video.service_id);
-    const active_videos = channel_videos.filter(
-      (video) => !deleted_ids.includes(video.video.service_id),
-    );
+    const active_videos = channel_videos.filter((video) => video.status !== "deleted");
+    const { created, updated } = count_by_status(active_videos);
 
     const with_thumbnail_and_palette = active_videos.map((video) =>
       sync_video_thumbnail_and_palette(video),
@@ -375,12 +367,7 @@ export default class SyncYoutube extends AbstractService {
       videos: patched_videos.map((video) => ({ service_id: video.service_id, title: video.title })),
     });
 
-    return counts;
-  }
-
-  private async delete_video(video: Sync["Video"]) {
-    await videos.remove_by_service_id({ service: "youtube", service_id: video.video.service_id });
-    await remove_video_thumbnails(video);
+    return { created, updated };
   }
 
   private async is_maybe_a_short(video: Google["Youtube"]["Videos"]["Item"]): Promise<boolean> {
