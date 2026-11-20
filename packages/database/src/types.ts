@@ -3,6 +3,7 @@ import type {
   PasskeyTransport,
   SessionLoginWith,
   SubscriptionType,
+  VideoContentType,
   VideoPalette,
 } from "@watcher/common";
 import type { ColumnType, Generated, Insertable, Selectable, Updateable } from "kysely";
@@ -53,6 +54,8 @@ export type CredentialTable = {
   refresh_token_expires_at: Date | null;
 
   user_id: string;
+
+  invalid_at: ColumnType<Date | null, Date | null | undefined, Date | null>;
 };
 
 export type VideoTable = {
@@ -90,6 +93,50 @@ export type VideoTable = {
   created_at: string;
 
   last_synced_at: string;
+
+  ready_at: ColumnType<string | null, string | null | undefined, string | null>;
+
+  content_type: ColumnType<VideoContentType, VideoContentType | undefined, VideoContentType>;
+
+  checked_at: string | null;
+};
+
+export type SubscriptionSyncTable = {
+  subscription_id: string;
+
+  service: SubscriptionType;
+
+  next_check_at: string | null;
+
+  checked_at: string | null;
+
+  last_video_at: string | null;
+
+  failures: ColumnType<number, number | undefined, number>;
+};
+
+export type PendingVideoTable = {
+  service: SubscriptionType;
+
+  service_id: string;
+
+  subscription_id: string;
+
+  content_type: VideoContentType;
+
+  discovered_at: ColumnType<string, string | undefined, never>;
+
+  next_attempt_at: ColumnType<string, string | undefined, string>;
+
+  attempts: ColumnType<number, number | undefined, number>;
+};
+
+export type PendingVideoImageTable = {
+  video_id: string;
+
+  next_attempt_at: ColumnType<string, string | undefined, string>;
+
+  attempts: ColumnType<number, number | undefined, number>;
 };
 
 export type UserSubscriptionTable = {
@@ -199,6 +246,9 @@ export type DatabaseInterface = {
   user_subscriptions: UserSubscriptionTable;
   credentials: CredentialTable;
   videos: VideoTable;
+  subscriptions_sync: SubscriptionSyncTable;
+  pending_videos: PendingVideoTable;
+  pending_video_images: PendingVideoImageTable;
   hidden_users_videos: HiddenUsersVideosTable;
   videos_guests: VideosGuestsTable;
   users_videos_progression: UsersVideosProgressionTable;

@@ -19,7 +19,7 @@ export type FindAllByUserOutput = Array<
   Pick<DatabaseSchema["credentials"], "service" | "service_id">
 >;
 
-export type UpsertData = DatabaseSchema["credentials"];
+export type UpsertData = Omit<DatabaseSchema["credentials"], "invalid_at">;
 export type UpsertInput = { data: UpsertData; options?: RepositoryContext };
 export type UpsertOutput = void;
 

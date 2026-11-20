@@ -11,7 +11,10 @@ export type Sync = {
 
   Video: {
     status: "created" | "updated" | "deleted";
-    video: Omit<DatabaseSchema["videos"], "id" | "search"> & {
+    video: Omit<
+      DatabaseSchema["videos"],
+      "id" | "search" | "ready_at" | "content_type" | "checked_at"
+    > & {
       thumbnail_small_local: string;
     };
   };
