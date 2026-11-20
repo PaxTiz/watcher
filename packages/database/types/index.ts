@@ -4,6 +4,7 @@ export * as passkeys from "./passkeys";
 export * as sessions from "./sessions";
 export * as subscriptions from "./subscriptions";
 export * as userSubscriptions from "./user_subscriptions";
+export * as userSyncs from "./user_syncs";
 export * as videos from "./videos";
 export * as subscriptionsSync from "./subscriptions_sync";
 export * as pendingVideos from "./pending_videos";

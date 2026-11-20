@@ -35,6 +35,8 @@ export default {
     done: "Sincronización completada",
     failed: "La sincronización ha fallado, inténtalo de nuevo en unos minutos",
     in_progress: "Ya hay una sincronización en curso",
+    reconnect:
+      "Tu cuenta de Google ha caducado, vuelve a conectarte para sincronizar tus suscripciones",
   },
 
   errors: {

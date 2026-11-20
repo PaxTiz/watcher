@@ -3,7 +3,7 @@ import { toast } from "vue-sonner";
 
 const { t } = useI18n();
 const { fetch: refresh_session } = useUserSession();
-const { error_message } = useSynchronization();
+const { error_message, wait_for_sync } = useSynchronization();
 
 const is_syncing = ref(false);
 const abort_controller = new AbortController();
@@ -24,16 +24,22 @@ const onboard = async (sync: boolean) => {
     signal: abort_controller.signal,
   });
 
-  is_syncing.value = false;
-
   if (error) {
+    is_syncing.value = false;
     toast.error(sync ? error_message(error) : t("errors.generic"), { id: toast_id });
     return;
   }
 
   if (sync) {
-    toast.success(t("sync.done"), { id: toast_id });
+    const failure = await wait_for_sync(abort_controller.signal);
+    if (failure) {
+      toast.error(failure, { id: toast_id });
+    } else {
+      toast.success(t("sync.done"), { id: toast_id });
+    }
   }
+
+  is_syncing.value = false;
 
   await refresh_session();
   await navigateTo("/");

@@ -1,10 +1,21 @@
-import type { SubscriptionDetailsResource, SubscriptionResource } from "@watcher/common";
-import { findOrFail, repositoryTypes, subscriptions, userSubscriptions } from "@watcher/database";
+import type {
+  SubscriptionDetailsResource,
+  SubscriptionResource,
+  SubscriptionsSyncResource,
+} from "@watcher/common";
+import {
+  findOrFail,
+  repositoryTypes,
+  subscriptions,
+  userSubscriptions,
+  userSyncs,
+} from "@watcher/database";
 
 import type { User } from "#auth-utils";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { public_image_url } from "#server/utils/images";
+import { is_sync_running } from "#server/utils/sync";
 import { is_uuid, parse_slug_params } from "#shared/utils/random";
 
 type SubscriptionRow = repositoryTypes.subscriptions.SubscriptionWithUserState;
@@ -46,6 +57,24 @@ export default class SubscriptionsService extends AbstractService {
     }
 
     await Promise.all(sync);
+  }
+
+  async sync_state(user: User): Promise<SubscriptionsSyncResource> {
+    const state = await userSyncs.find({ user_id: user.id });
+
+    if (!state) {
+      return { status: "idle", error: null };
+    }
+
+    if (is_sync_running(state)) {
+      return { status: "running", error: null };
+    }
+
+    if (!state.finished_at) {
+      return { status: "failed", error: "sync_failed" };
+    }
+
+    return state.error ? { status: "failed", error: state.error } : { status: "done", error: null };
   }
 
   async toggle_favorite(user: User, id_or_slug: string) {

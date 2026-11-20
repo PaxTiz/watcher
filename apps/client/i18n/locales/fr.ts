@@ -35,6 +35,7 @@ export default {
     done: "Synchronisation terminée",
     failed: "La synchronisation a échoué, réessayez dans quelques minutes",
     in_progress: "Une synchronisation est déjà en cours",
+    reconnect: "Votre compte Google a expiré, reconnectez-vous pour synchroniser vos abonnements",
   },
 
   errors: {

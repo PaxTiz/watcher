@@ -80,14 +80,10 @@ export default class UsersService extends AbstractService {
     return integrations + (await services.passkeys.count(user.id));
   }
 
-  async onboard(user: User, sync: boolean) {
+  async onboard(user: User) {
     if (user.is_onboarded) {
       useLogger("services.users").warn("Onboarding refused: the user is already onboarded");
       throw new ForbiddenError({ message: "user_is_already_onboarded" });
-    }
-
-    if (sync) {
-      await services.subscriptions.sync(user);
     }
 
     await users.mark_as_onboarded({ id: user.id });
@@ -95,7 +91,7 @@ export default class UsersService extends AbstractService {
 
     user.is_onboarded = true;
 
-    useLogger("services.users").info({ sync }, "User onboarded");
+    useLogger("services.users").info("User onboarded");
 
     return { user };
   }

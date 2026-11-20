@@ -6,8 +6,6 @@ import { useLogger } from "#framework";
 const RATE_LIMITS = {
   subscriptions_sync: { attempts: 2, ttl: 3600 },
 
-  subscriptions_sync_lock: { attempts: 1, ttl: 3600 },
-
   passkeys_authenticate: { attempts: 20, ttl: 60 },
 
   passkeys_register: { attempts: 10, ttl: 3600 },

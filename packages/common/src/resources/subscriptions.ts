@@ -24,3 +24,9 @@ export type SubscriptionDetailsResource = SubscriptionResource & {
     url: string;
   };
 };
+
+export type SubscriptionsSyncResource = {
+  status: "idle" | "running" | "done" | "failed";
+
+  error: string | null;
+};

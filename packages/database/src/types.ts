@@ -151,6 +151,16 @@ export type UserSubscriptionTable = {
   is_hidden: ColumnType<boolean, boolean | undefined, boolean | undefined>;
 };
 
+export type UserSyncTable = {
+  user_id: string;
+
+  started_at: ColumnType<string, string, string>;
+
+  finished_at: string | null;
+
+  error: string | null;
+};
+
 export type HiddenUsersVideosTable = {
   user_id: string;
 
@@ -246,6 +256,7 @@ export type DatabaseInterface = {
   passkeys: PasskeyTable;
   subscriptions: SubscriptionTable;
   user_subscriptions: UserSubscriptionTable;
+  user_syncs: UserSyncTable;
   credentials: CredentialTable;
   videos: VideoTable;
   subscriptions_sync: SubscriptionSyncTable;

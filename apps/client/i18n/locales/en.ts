@@ -33,6 +33,7 @@ export default {
     done: "Sync complete",
     failed: "Sync failed, please try again in a few minutes",
     in_progress: "A sync is already running",
+    reconnect: "Your Google account has expired, sign in again to sync your subscriptions",
   },
 
   errors: {
