@@ -18,6 +18,7 @@ export * as userSubscriptions from "./repositories/user_subscriptions";
 export * as videos from "./repositories/videos";
 export * as subscriptionsSync from "./repositories/subscriptions_sync";
 export * as pendingVideos from "./repositories/pending_videos";
+export * as pendingVideoImages from "./repositories/pending_video_images";
 export * as search from "./repositories/search";
 export * as rateLimits from "./repositories/rate_limits";
 export * as webauthnChallenges from "./repositories/webauthn_challenges";

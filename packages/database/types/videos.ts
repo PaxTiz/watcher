@@ -101,6 +101,21 @@ export type UpsertData = Omit<DatabaseSchemaInsert["videos"], "id" | "palette"> 
 export type UpsertInput = { data: Array<UpsertData>; options?: RepositoryContext };
 export type UpsertOutput = void;
 
+export type InsertNewData = Omit<DatabaseSchemaInsert["videos"], "id" | "palette">;
+export type InsertNewInput = { data: Array<InsertNewData>; options?: RepositoryContext };
+export type InsertNewOutput = Array<
+  Pick<DatabaseSchema["videos"], "id" | "service_id" | "subscription_id" | "title">
+>;
+
+export type MarkReadyInput = {
+  id: string;
+  thumbnail_small: string;
+  thumbnail_small_etag: string;
+  palette: VideoPalette | null;
+  options?: RepositoryContext;
+};
+export type MarkReadyOutput = void;
+
 export type UpdatePaletteInput = { id: string; palette: VideoPalette; options?: RepositoryContext };
 export type UpdatePaletteOutput = void;
 

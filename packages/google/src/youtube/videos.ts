@@ -24,12 +24,11 @@ export class YoutubeVideosService extends GoogleService {
     const url = new URL("https://www.googleapis.com/youtube/v3/videos");
     url.searchParams.set("part", "contentDetails,snippet");
     url.searchParams.set("id", data.video_ids.join(","));
-    url.searchParams.set("key", this.client.settings.api_key);
 
-    const response = await ofetch<Google["Youtube"]["Videos"]["List"]>(
-      url.toString(),
-      request_options(),
-    );
+    const response = await ofetch<Google["Youtube"]["Videos"]["List"]>(url.toString(), {
+      ...request_options(),
+      headers: { "X-Goog-Api-Key": this.client.settings.api_key },
+    });
 
     return response.items;
   }

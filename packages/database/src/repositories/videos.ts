@@ -17,6 +17,10 @@ import type {
   FindThumbnailsOutput,
   HideForUserInput,
   HideForUserOutput,
+  InsertNewInput,
+  InsertNewOutput,
+  MarkReadyInput,
+  MarkReadyOutput,
   RemoveByServiceIdInput,
   RemoveByServiceIdOutput,
   ShowForUserInput,
@@ -105,6 +109,7 @@ export async function find_by_id_for_user({
   return useDatabase()
     .selectFrom("videos")
     .where("videos.id", "=", id)
+    .where("videos.ready_at", "is not", null)
     .innerJoin("subscriptions", (qb) =>
       qb
         .onRef("subscriptions.service_id", "=", "videos.subscription_id")
@@ -194,6 +199,7 @@ export async function find_adjacent({
       ),
     ])
     .where("videos.id", "!=", id)
+    .where("videos.ready_at", "is not", null)
     .where("videos.service", "=", (eb) =>
       eb.selectFrom("videos").select("service").where("id", "=", id),
     )
@@ -328,6 +334,8 @@ export async function upsert_many({ data, options }: UpsertInput): Promise<Upser
           thumbnail_large: (c) => c.ref("excluded.thumbnail_large"),
           thumbnail_large_source: (c) => c.ref("excluded.thumbnail_large_source"),
           palette: (c) => c.ref("excluded.palette"),
+          // This sync processes the thumbnails itself
+          ready_at: sql<string>`coalesce(videos.ready_at, now())`,
         })
         .where(
           sql<boolean>`(
@@ -341,6 +349,42 @@ export async function upsert_many({ data, options }: UpsertInput): Promise<Upser
           )`,
         ),
     )
+    .execute();
+}
+
+export async function insert_new({ data, options }: InsertNewInput): Promise<InsertNewOutput> {
+  const database = resolveDatabase(options);
+
+  if (data.length === 0) {
+    return [];
+  }
+
+  return database
+    .insertInto("videos")
+    .values(data)
+    .onConflict((oc) => oc.columns(["service", "service_id"]).doNothing())
+    .returning(["id", "service_id", "subscription_id", "title"])
+    .execute();
+}
+
+export async function mark_ready({
+  id,
+  thumbnail_small,
+  thumbnail_small_etag,
+  palette,
+  options,
+}: MarkReadyInput): Promise<MarkReadyOutput> {
+  const database = resolveDatabase(options);
+
+  await database
+    .updateTable("videos")
+    .set({
+      thumbnail_small,
+      thumbnail_small_etag,
+      palette: palette ? JSON.stringify(palette) : null,
+      ready_at: sql<string>`now()`,
+    })
+    .where("id", "=", id)
     .execute();
 }
 

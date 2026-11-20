@@ -1,6 +1,6 @@
 import type { SubscriptionType } from "@watcher/common";
 
-import type { DatabaseSchemaInsert, RepositoryContext } from "../src/database";
+import type { DatabaseSchema, DatabaseSchemaInsert, RepositoryContext } from "../src/database";
 
 export type FindKnownInput = { service: SubscriptionType; service_ids: Array<string> };
 export type FindKnownOutput = Array<string>;
@@ -11,3 +11,26 @@ export type AddManyData = Pick<
 >;
 export type AddManyInput = { data: Array<AddManyData>; options?: RepositoryContext };
 export type AddManyOutput = void;
+
+export type ClaimInput = { service: SubscriptionType; limit: number; lease_seconds: number };
+export type ClaimOutput = Array<
+  Pick<DatabaseSchema["pending_videos"], "service_id" | "content_type" | "attempts"> & {
+    channel_id: string;
+    channel_name: string;
+  }
+>;
+
+export type RemoveManyInput = {
+  service: SubscriptionType;
+  service_ids: Array<string>;
+  options?: RepositoryContext;
+};
+export type RemoveManyOutput = void;
+
+export type PostponeInput = {
+  service: SubscriptionType;
+  service_ids: Array<string>;
+  next_attempt_at: string;
+  failed: boolean;
+};
+export type PostponeOutput = void;

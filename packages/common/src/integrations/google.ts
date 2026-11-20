@@ -27,6 +27,7 @@ export type Google = {
           description: string;
           publishedAt: string;
           thumbnails: Google["Youtube"]["__Thumbnails"];
+          liveBroadcastContent: "none" | "live" | "upcoming";
         };
       };
 

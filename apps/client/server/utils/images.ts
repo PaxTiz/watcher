@@ -26,8 +26,13 @@ export type ImageSize = keyof typeof IMAGE_SIZES;
 
 const key_of = (path: string) => `${path.slice(1)}.avif`;
 
-export const public_image_url = (path: string) =>
-  path ? useImagesStorage().public_url(key_of(path)) : "";
+export const public_image_url = (path: string) => {
+  if (!path || path.startsWith("https://")) {
+    return path;
+  }
+
+  return useImagesStorage().public_url(key_of(path));
+};
 
 export const read_image = (path: string) => useImagesStorage().get(key_of(path));
 

@@ -23,12 +23,11 @@ export class YoutubePlaylistItemsService extends GoogleService {
     url.searchParams.set("part", "contentDetails");
     url.searchParams.set("maxResults", "50");
     url.searchParams.set("playlistId", data.playlist_id);
-    url.searchParams.set("key", this.client.settings.api_key);
 
-    const response = await ofetch<Google["Youtube"]["PlaylistItems"]["List"]>(
-      url.toString(),
-      request_options(),
-    );
+    const response = await ofetch<Google["Youtube"]["PlaylistItems"]["List"]>(url.toString(), {
+      ...request_options(),
+      headers: { "X-Goog-Api-Key": this.client.settings.api_key },
+    });
 
     return response.items;
   }

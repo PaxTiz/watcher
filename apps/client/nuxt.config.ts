@@ -98,7 +98,7 @@ export default defineNuxtConfig({
 
     scheduledTasks: {
       "0 * * * *": ["database:purge"],
-      "* * * * *": ["youtube:feeds"],
+      "* * * * *": ["youtube:feeds", "youtube:enrich", "videos:images"],
     },
 
     storage: {
