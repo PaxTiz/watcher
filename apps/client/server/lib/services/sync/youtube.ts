@@ -1,23 +1,20 @@
-import { type Google, request_options } from "@watcher/common";
-import { subscriptions, userSubscriptions, videos, withTransaction } from "@watcher/database";
+import {
+  subscriptions,
+  subscriptionsSync,
+  userSubscriptions,
+  withTransaction,
+} from "@watcher/database";
 import { formatISO } from "date-fns";
-import { parse, toSeconds } from "iso8601-duration";
-import { ofetch } from "ofetch";
 
 import type { User } from "#auth-utils";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useGoogle } from "#server/lib/google";
 import { count_by_status } from "#server/utils/sync";
-import {
-  sync_subscription_logo,
-  sync_video_thumbnail_and_palette,
-} from "#server/utils/sync_images";
+import { sync_subscription_logo } from "#server/utils/sync_images";
 import type { Sync } from "#shared/types/sync";
-import { async_pool, create_limiter, with_retry } from "#shared/utils/random";
+import { async_pool } from "#shared/utils/random";
 import { to_subscription_slug } from "#shared/utils/subscriptions";
-
-const shorts_limiter = create_limiter(10, 25);
 
 const logger = () => useLogger("services.sync.youtube");
 
@@ -54,8 +51,23 @@ export default class SyncYoutube extends AbstractService {
       }),
     );
 
+    const channels = await subscriptionsSync.find_all_for_user({
+      user_id: user.id,
+      service: "youtube",
+    });
+    const feeds = await services.feeds.youtube.check_channels(channels);
+    const enriched = await services.feeds.youtube.enrich_pending();
+    const images = await services.feeds.images.process_pending();
+
     logger().info(
-      { total: subscriptions.length, failed, duration_ms: Date.now() - started_at },
+      {
+        total: subscriptions.length,
+        failed,
+        feeds,
+        enriched,
+        images,
+        duration_ms: Date.now() - started_at,
+      },
       "YouTube sync finished",
     );
   }
@@ -183,201 +195,14 @@ export default class SyncYoutube extends AbstractService {
       });
     });
 
-    const channel_videos = await this.get_videos_by_channel_id(subscription.channel.service_id);
-
-    const counts = await this.sync_videos(channel_videos, subscription.channel.name);
-
     logger().debug(
       {
         channel_id: subscription.channel.service_id,
         channel: subscription.channel.name,
-        ...counts,
         duration_ms: Date.now() - started_at,
       },
       "YouTube subscription synced",
     );
-  }
-
-  private async get_videos_by_channel_id(channel_id: string) {
-    const google = useGoogle();
-
-    const channel_videos: Sync["VideosList"] = await videos
-      .find_all_by_subscription({ service: "youtube", subscription_id: channel_id })
-      .then((rows) =>
-        rows.map((vid) => ({
-          status: "deleted",
-          video: {
-            service: vid.service,
-            service_id: vid.service_id,
-            subscription_id: channel_id,
-            title: vid.title,
-            description: vid.description,
-            created_at: vid.created_at,
-            url: vid.url,
-            duration: vid.duration,
-            thumbnail_small: vid.thumbnail_small,
-            thumbnail_small_local: vid.thumbnail_small,
-            thumbnail_small_etag: vid.thumbnail_small_etag,
-            thumbnail_large: vid.thumbnail_large,
-            thumbnail_large_source: vid.thumbnail_large_source,
-            last_synced_at: vid.last_synced_at,
-            palette: vid.palette,
-          },
-        })),
-      );
-
-    const channel_videos_indexed = channel_videos.reduce(
-      (acc, video) => {
-        acc[video.video.service_id] = video;
-        return acc;
-      },
-      {} as Record<string, Sync["VideosList"][number]>,
-    );
-
-    const current_videos: Array<Google["Youtube"]["Videos"]["Item"]> = [];
-
-    const latest_videos = await google.youtube.videos.get_latests({ channel_id });
-
-    const new_videos = latest_videos.filter((video) => !channel_videos_indexed[video.id]);
-    current_videos.push(...latest_videos.filter((video) => channel_videos_indexed[video.id]));
-
-    const shorts_checks = await Promise.allSettled(
-      new_videos.map(async (video) => {
-        const is_short = await with_retry(() => shorts_limiter(() => this.is_maybe_a_short(video)));
-
-        if (!is_short) {
-          current_videos.push(video);
-        }
-
-        return is_short;
-      }),
-    );
-
-    for (const [index, check] of shorts_checks.entries()) {
-      if (check.status === "rejected") {
-        logger().warn(
-          { err: check.reason, channel_id, video_id: new_videos[index]?.id },
-          "Failed to check if a YouTube video is a short: skipped",
-        );
-      }
-    }
-
-    logger().trace(
-      {
-        channel_id,
-        fetched: latest_videos.length,
-        new: new_videos.length,
-        shorts: shorts_checks.filter((c) => c.status === "fulfilled" && c.value).length,
-        kept: current_videos.length,
-      },
-      "YouTube latest videos processed",
-    );
-
-    for (const video of current_videos) {
-      const existingVid = channel_videos_indexed[video.id];
-
-      if (existingVid) {
-        existingVid.status = "updated";
-        existingVid.video = {
-          service: "youtube",
-          service_id: video.id,
-          subscription_id: channel_id,
-          title: video.snippet.title,
-          description: video.snippet.description,
-          created_at: video.snippet.publishedAt,
-          url: `https://www.youtube.com/watch?v=${video.id}`,
-          duration: this.parse_duration(video.contentDetails.duration),
-          thumbnail_small: video.snippet.thumbnails.high.url,
-          thumbnail_small_local: existingVid.video.thumbnail_small,
-          thumbnail_small_etag: existingVid.video.thumbnail_small_etag,
-          thumbnail_large: existingVid.video.thumbnail_large,
-          thumbnail_large_source:
-            video.snippet.thumbnails.maxres?.url ?? video.snippet.thumbnails.high.url,
-          last_synced_at: formatISO(new Date()),
-          palette: existingVid.video.palette,
-        };
-      } else {
-        channel_videos.push({
-          status: "created",
-          video: {
-            service: "youtube",
-            service_id: video.id,
-            subscription_id: channel_id,
-            title: video.snippet.title,
-            description: video.snippet.description,
-            created_at: video.snippet.publishedAt,
-            url: `https://www.youtube.com/watch?v=${video.id}`,
-            duration: this.parse_duration(video.contentDetails.duration),
-            thumbnail_small: video.snippet.thumbnails.high.url,
-            thumbnail_small_local: "",
-            thumbnail_small_etag: "",
-            thumbnail_large: "",
-            thumbnail_large_source:
-              video.snippet.thumbnails.maxres?.url ?? video.snippet.thumbnails.high.url,
-            last_synced_at: formatISO(new Date()),
-            palette: null,
-          },
-        });
-      }
-    }
-
-    return channel_videos;
-  }
-
-  private async sync_videos(channel_videos: Array<Sync["Video"]>, channel_name: string) {
-    const active_videos = channel_videos.filter((video) => video.status !== "deleted");
-    const { created, updated } = count_by_status(active_videos);
-
-    const with_thumbnail_and_palette = active_videos.map((video) =>
-      sync_video_thumbnail_and_palette(video),
-    );
-    const patched_videos = await Promise.all(with_thumbnail_and_palette);
-
-    await videos.upsert_many({ data: patched_videos });
-
-    await services.search.index_guests({
-      service: "youtube",
-      channel_name,
-      videos: patched_videos.map((video) => ({ service_id: video.service_id, title: video.title })),
-    });
-
-    return { created, updated };
-  }
-
-  private async is_maybe_a_short(video: Google["Youtube"]["Videos"]["Item"]): Promise<boolean> {
-    const url = `https://www.youtube.com/shorts/${video.id}`;
-
-    const response = await ofetch.raw(url, {
-      ...request_options({ retry: 0 }),
-      method: "HEAD",
-      redirect: "manual",
-      headers: {
-        Cookie: "SOCS=CAI; CONSENT=YES+1",
-      },
-    });
-
-    if (response.status === 200) {
-      return true;
-    }
-
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get("location") ?? "";
-      if (location.includes("/watch")) {
-        return false;
-      }
-    }
-
-    throw new Error(
-      `Unexpected status ${response.status} for video ${video.id}, location: ${response.headers.get("location")}`,
-    );
-  }
-
-  private parse_duration(duration?: string) {
-    if (!duration) {
-      return 0;
-    }
-
-    return toSeconds(parse(duration));
   }
 
   private assert_google(user: User): string {

@@ -3,8 +3,6 @@ import { defineTask } from "nitropack/runtime";
 
 import { useLogger } from "#framework";
 import { services } from "#framework/server";
-import { latest_date, next_check_at, retry_at } from "#server/utils/sync_schedule";
-import { async_pool } from "#shared/utils/random";
 
 const BATCH_SIZE = 200;
 const LEASE_SECONDS = 10 * 60;
@@ -17,7 +15,6 @@ export default defineTask({
   },
 
   async run() {
-    const logger = useLogger("tasks.youtube.feeds");
     const started_at = Date.now();
 
     const channels = await subscriptionsSync.claim_due({
@@ -26,50 +23,15 @@ export default defineTask({
       lease_seconds: LEASE_SECONDS,
     });
 
-    if (channels.length === 0) {
-      return { result: { checked: 0, discovered: 0, failed: 0 } };
+    const totals = await services.feeds.youtube.check_channels(channels);
+
+    if (channels.length > 0) {
+      useLogger("tasks.youtube.feeds").info(
+        { ...totals, duration_ms: Date.now() - started_at },
+        "YouTube feeds checked",
+      );
     }
 
-    let discovered = 0;
-    let failed = 0;
-
-    await async_pool(channels, 10, async (channel) => {
-      try {
-        const result = await services.feeds.youtube.sync_channel({
-          subscription_id: channel.subscription_id,
-          channel_id: channel.service_id,
-        });
-        discovered += result.discovered.videos + result.discovered.lives;
-
-        await subscriptionsSync.reschedule({
-          subscription_id: channel.subscription_id,
-          next_check_at: next_check_at(latest_date([channel.last_video_at, result.last_video_at])),
-          last_video_at: result.last_video_at,
-        });
-      } catch (error) {
-        failed++;
-        logger.error(
-          {
-            err: error,
-            channel_id: channel.service_id,
-            channel: channel.name,
-            failures: channel.failures + 1,
-          },
-          "Failed to check the YouTube feeds of a channel",
-        );
-
-        await subscriptionsSync.record_failure({
-          subscription_id: channel.subscription_id,
-          next_check_at: retry_at(channel.failures),
-        });
-      }
-    });
-
-    logger.info(
-      { checked: channels.length, discovered, failed, duration_ms: Date.now() - started_at },
-      "YouTube feeds checked",
-    );
-
-    return { result: { checked: channels.length, discovered, failed } };
+    return { result: totals };
   },
 });

@@ -3,6 +3,8 @@ import { sql } from "kysely";
 import type {
   ClaimDueInput,
   ClaimDueOutput,
+  FindAllForUserInput,
+  FindAllForUserOutput,
   RecordFailureInput,
   RecordFailureOutput,
   RescheduleInput,
@@ -19,7 +21,15 @@ export async function claim_due({
     .with("claimed", (db) =>
       db
         .updateTable("subscriptions_sync")
-        .set({ next_check_at: sql<string>`now() + make_interval(secs => ${lease_seconds})` })
+        .set({
+          next_check_at: sql<string | null>`CASE
+            WHEN EXISTS (
+              SELECT 1 FROM user_subscriptions
+              WHERE user_subscriptions.subscription_id = subscriptions_sync.subscription_id
+            )
+            THEN now() + make_interval(secs => ${lease_seconds})
+          END`,
+        })
         .where("subscription_id", "in", (eb) =>
           eb
             .selectFrom("subscriptions_sync")
@@ -31,10 +41,11 @@ export async function claim_due({
             .forUpdate()
             .skipLocked(),
         )
-        .returning(["subscription_id", "last_video_at", "failures"]),
+        .returning(["subscription_id", "next_check_at", "last_video_at", "failures"]),
     )
     .selectFrom("claimed")
     .innerJoin("subscriptions", "subscriptions.id", "claimed.subscription_id")
+    .where("claimed.next_check_at", "is not", null)
     .select([
       "claimed.subscription_id",
       "claimed.last_video_at",
@@ -42,6 +53,30 @@ export async function claim_due({
       "subscriptions.service_id",
       "subscriptions.name",
     ])
+    .execute();
+}
+
+export async function find_all_for_user({
+  user_id,
+  service,
+}: FindAllForUserInput): Promise<FindAllForUserOutput> {
+  return useDatabase()
+    .selectFrom("subscriptions_sync")
+    .innerJoin("subscriptions", "subscriptions.id", "subscriptions_sync.subscription_id")
+    .innerJoin(
+      "user_subscriptions",
+      "user_subscriptions.subscription_id",
+      "subscriptions_sync.subscription_id",
+    )
+    .select([
+      "subscriptions_sync.subscription_id",
+      "subscriptions_sync.last_video_at",
+      "subscriptions_sync.failures",
+      "subscriptions.service_id",
+      "subscriptions.name",
+    ])
+    .where("user_subscriptions.user_id", "=", user_id)
+    .where("subscriptions_sync.service", "=", service)
     .execute();
 }
 

@@ -1,4 +1,4 @@
-import type { UpdateObject } from "kysely";
+import { sql, type UpdateObject } from "kysely";
 
 import type { SubscriptionIdentifier } from "../../types/subscriptions";
 import type {
@@ -27,6 +27,22 @@ export async function attach({
     .insertInto("user_subscriptions")
     .values({ user_id, subscription_id })
     .onConflict((oc) => oc.doNothing())
+    .execute();
+
+  await database
+    .insertInto("subscriptions_sync")
+    .columns(["subscription_id", "service", "next_check_at"])
+    .expression((eb) =>
+      eb
+        .selectFrom("subscriptions")
+        .select(["id", "service", sql<string>`now()`.as("next_check_at")])
+        .where("id", "=", subscription_id),
+    )
+    .onConflict((oc) =>
+      oc.column("subscription_id").doUpdateSet({
+        next_check_at: sql<string>`coalesce(subscriptions_sync.next_check_at, now())`,
+      }),
+    )
     .execute();
 }
 

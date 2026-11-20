@@ -1,17 +1,53 @@
 import type { repositoryTypes } from "@watcher/database";
 import { pendingVideoImages, videos, withTransaction } from "@watcher/database";
 
-import { AbstractService } from "#framework";
+import { AbstractService, useLogger } from "#framework";
 import { sync_image } from "#server/utils/images";
 import { extract_image_palette } from "#server/utils/palette";
 import { video_thumbnail_path } from "#server/utils/sync_images";
 import { retry_at } from "#server/utils/sync_schedule";
+import { async_pool } from "#shared/utils/random";
 
 const MAX_ATTEMPTS = 5;
+const BATCH_SIZE = 50;
+const LEASE_SECONDS = 10 * 60;
 
 type PendingImage = repositoryTypes.pendingVideoImages.ClaimOutput[number];
 
 export default class FeedsImages extends AbstractService {
+  async process_pending(max_batches = Infinity) {
+    const totals = { processed: 0, skipped: 0, fallback: 0, failed: 0 };
+
+    for (let batch = 0; batch < max_batches; batch++) {
+      const pending = await pendingVideoImages.claim({
+        limit: BATCH_SIZE,
+        lease_seconds: LEASE_SECONDS,
+      });
+
+      if (pending.length === 0) {
+        break;
+      }
+
+      await async_pool(pending, 10, async (video) => {
+        try {
+          totals[await this.process(video)]++;
+        } catch (error) {
+          totals.failed++;
+          useLogger("services.feeds.images").error(
+            { err: error, video_id: video.id },
+            "Failed to process a video thumbnail",
+          );
+        }
+      });
+
+      if (pending.length < BATCH_SIZE) {
+        break;
+      }
+    }
+
+    return totals;
+  }
+
   async process(video: PendingImage) {
     if (video.ready_at) {
       await pendingVideoImages.remove({ video_id: video.id });

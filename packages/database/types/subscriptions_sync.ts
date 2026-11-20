@@ -8,6 +8,9 @@ export type ClaimDueOutput = Array<
     Pick<DatabaseSchema["subscriptions"], "service_id" | "name">
 >;
 
+export type FindAllForUserInput = { user_id: string; service: SubscriptionType };
+export type FindAllForUserOutput = ClaimDueOutput;
+
 export type RescheduleInput = {
   subscription_id: string;
   next_check_at: string;

@@ -3,6 +3,7 @@ import {
   pendingVideoImages,
   pendingVideos,
   type repositoryTypes,
+  subscriptionsSync,
   videos,
   withTransaction,
 } from "@watcher/database";
@@ -12,7 +13,8 @@ import { parse, toSeconds } from "iso8601-duration";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useGoogle } from "#server/lib/google";
-import { latest_date } from "#server/utils/sync_schedule";
+import { latest_date, next_check_at, retry_at } from "#server/utils/sync_schedule";
+import { async_pool } from "#shared/utils/random";
 
 const NOT_OVER_DELAY = 60 * 60 * 1000;
 
@@ -28,7 +30,89 @@ type FeedEntries = NonNullable<
 
 type PendingVideo = repositoryTypes.pendingVideos.ClaimOutput[number];
 
+type ScheduledChannel = repositoryTypes.subscriptionsSync.ClaimDueOutput[number];
+
+const ENRICH_BATCH_SIZE = 50;
+const LEASE_SECONDS = 10 * 60;
+
 export default class FeedsYoutube extends AbstractService {
+  async check_channels(channels: Array<ScheduledChannel>) {
+    const totals = { checked: channels.length, discovered: 0, failed: 0 };
+
+    await async_pool(channels, 10, async (channel) => {
+      try {
+        const result = await this.sync_channel({
+          subscription_id: channel.subscription_id,
+          channel_id: channel.service_id,
+        });
+        totals.discovered += result.discovered.videos + result.discovered.lives;
+
+        await subscriptionsSync.reschedule({
+          subscription_id: channel.subscription_id,
+          next_check_at: next_check_at(latest_date([channel.last_video_at, result.last_video_at])),
+          last_video_at: result.last_video_at,
+        });
+      } catch (error) {
+        totals.failed++;
+        logger().error(
+          {
+            err: error,
+            channel_id: channel.service_id,
+            channel: channel.name,
+            failures: channel.failures + 1,
+          },
+          "Failed to check the YouTube feeds of a channel",
+        );
+
+        await subscriptionsSync.record_failure({
+          subscription_id: channel.subscription_id,
+          next_check_at: retry_at(channel.failures),
+        });
+      }
+    });
+
+    return totals;
+  }
+
+  async enrich_pending(max_batches = Infinity) {
+    const totals = { stored: 0, missing: 0, not_over: 0, failed: 0 };
+
+    for (let batch = 0; batch < max_batches; batch++) {
+      const pending = await pendingVideos.claim({
+        service: "youtube",
+        limit: ENRICH_BATCH_SIZE,
+        lease_seconds: LEASE_SECONDS,
+      });
+
+      if (pending.length === 0) {
+        break;
+      }
+
+      try {
+        const result = await this.enrich(pending);
+        totals.stored += result.stored;
+        totals.missing += result.missing;
+        totals.not_over += result.not_over;
+      } catch (error) {
+        totals.failed += pending.length;
+        logger().error({ err: error, videos: pending.length }, "Failed to enrich YouTube videos");
+
+        await pendingVideos.postpone({
+          service: "youtube",
+          service_ids: pending.map((video) => video.service_id),
+          next_attempt_at: retry_at(Math.max(...pending.map((video) => video.attempts))),
+          failed: true,
+        });
+      }
+
+      if (pending.length < ENRICH_BATCH_SIZE) {
+        break;
+      }
+    }
+
+    return totals;
+  }
+
   async enrich(pending: Array<PendingVideo>) {
     const items = await useGoogle().youtube.videos.get_by_ids({
       video_ids: pending.map((video) => video.service_id),
