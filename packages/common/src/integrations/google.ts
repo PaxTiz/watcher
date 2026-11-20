@@ -36,6 +36,16 @@ export type Google = {
       };
     };
 
+    Feeds: {
+      Entry: {
+        video_id: string;
+        title: string;
+        description: string;
+        published_at: string;
+        updated_at: string;
+      };
+    };
+
     PlaylistItems: {
       Item: {
         contentDetails: {

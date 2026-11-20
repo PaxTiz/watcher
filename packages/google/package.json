@@ -8,6 +8,7 @@
     ]
   },
   "dependencies": {
+    "@rgrove/parse-xml": "catalog:",
     "date-fns": "catalog:",
     "ofetch": "catalog:"
   },

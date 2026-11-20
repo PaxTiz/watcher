@@ -30,6 +30,9 @@ catalogs:
     '@oxlint/plugins':
       specifier: ^1.88.0
       version: 1.88.0
+    '@rgrove/parse-xml':
+      specifier: ^5.2.0
+      version: 5.2.0
     '@tailwindcss/vite':
       specifier: ^4.3.3
       version: 4.3.3
@@ -328,6 +331,9 @@ importers:
 
   packages/google:
     dependencies:
+      '@rgrove/parse-xml':
+        specifier: 'catalog:'
+        version: 5.2.0
       date-fns:
         specifier: 'catalog:'
         version: 4.4.0
@@ -2488,6 +2494,10 @@ packages:
   '@poppinss/utils@6.10.1':
     resolution: {integrity: sha512-da+MMyeXhBaKtxQiWPfy7+056wk3lVIhioJnXHXkJ2/OHDaZfFcyKHNl1R06sdYO8lIRXcXdoZ6LO2ARmkAREA==}
     engines: {node: '>=18.16.0'}
+
+  '@rgrove/parse-xml@5.2.0':
+    resolution: {integrity: sha512-UDu4Ha/ZAEI0O/Vw869KWwMM0gksSO6GY217cPO9MsEeAq9Nkj3ISB5gVZZimoUAy0NOPurf4zTMNJg4njEz2w==}
+    engines: {node: '>=22.12.0'}
 
   '@rolldown/binding-android-arm-eabi@1.2.14':
     resolution: {integrity: sha512-aWR+XKH9+rW7m5fWq/5360J3mHycrx/o6xZM2DQFdJnTMdyP7/WzxPjhtLbVWdKo2y612/4U1bWqb3HQhiF7vg==}
@@ -9165,6 +9175,8 @@ snapshots:
       flattie: 1.1.1
       safe-stable-stringify: 2.5.0
       secure-json-parse: 4.1.1
+
+  '@rgrove/parse-xml@5.2.0': {}
 
   '@rolldown/binding-android-arm-eabi@1.2.14':
     optional: true
