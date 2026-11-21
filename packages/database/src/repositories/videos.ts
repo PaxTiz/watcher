@@ -31,6 +31,8 @@ import type {
   UpdateMetadataManyOutput,
   ClaimToCheckInput,
   ClaimToCheckOutput,
+  CountUncheckedInput,
+  CountUncheckedOutput,
   ShowForUserInput,
   ShowForUserOutput,
   UpdateLargeThumbnailInput,
@@ -503,4 +505,20 @@ export async function claim_to_check({
     )
     .returning(["id", "service_id", "thumbnail_small", "thumbnail_large"])
     .execute();
+}
+
+export async function count_unchecked({
+  service,
+  created_before,
+  checked_before,
+}: CountUncheckedInput): Promise<CountUncheckedOutput> {
+  const row = await useDatabase()
+    .selectFrom("videos")
+    .select(sql<number>`count(*)::int`.as("count"))
+    .where("service", "=", service)
+    .where("created_at", "<", created_before)
+    .where((eb) => eb.or([eb("checked_at", "is", null), eb("checked_at", "<", checked_before)]))
+    .executeTakeFirstOrThrow();
+
+  return row.count;
 }

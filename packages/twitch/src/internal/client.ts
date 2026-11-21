@@ -33,6 +33,8 @@ export class TwitchClient {
 
   public rate_limit: RateLimit | null = null;
 
+  private lowest_remaining: number | null = null;
+
   private app_token: Promise<{ access_token: string; expires_at: Date }> | null = null;
 
   public followers: FollowersService;
@@ -73,7 +75,15 @@ export class TwitchClient {
 
     if (headers.has("ratelimit-remaining") && Number.isFinite(remaining)) {
       this.rate_limit = { limit, remaining, reset_at: new Date(reset * 1000) };
+      this.lowest_remaining = Math.min(this.lowest_remaining ?? remaining, remaining);
     }
+  }
+
+  take_lowest_remaining() {
+    const lowest = this.lowest_remaining;
+    this.lowest_remaining = null;
+
+    return lowest;
   }
 
   async revoke(tokens: ClientTokens) {

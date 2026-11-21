@@ -36,6 +36,8 @@ export type StatsOutput = {
   failing: number;
   websub_active: number;
   lag_seconds: number;
+  vods_due: number;
+  vods_lag_seconds: number;
 };
 
 export type ClaimWebsubDueInput = {

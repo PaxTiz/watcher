@@ -155,6 +155,10 @@ export async function stats({ service }: StatsInput): Promise<StatsOutput> {
       sql<number>`COALESCE(extract(epoch FROM now() - min(next_check_at) FILTER (WHERE next_check_at <= now())), 0)::int`.as(
         "lag_seconds",
       ),
+      sql<number>`(count(*) FILTER (WHERE vods_due_at <= now()))::int`.as("vods_due"),
+      sql<number>`COALESCE(extract(epoch FROM now() - min(vods_due_at) FILTER (WHERE vods_due_at <= now())), 0)::int`.as(
+        "vods_lag_seconds",
+      ),
     ])
     .executeTakeFirstOrThrow();
 }

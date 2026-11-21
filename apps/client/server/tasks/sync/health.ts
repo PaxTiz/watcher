@@ -1,39 +1,73 @@
-import { pendingVideoImages, pendingVideos, subscriptionsSync } from "@watcher/database";
+import { pendingVideoImages, pendingVideos, subscriptionsSync, videos } from "@watcher/database";
 import { defineTask } from "nitropack/runtime";
 
 import { useLogger } from "#framework";
+import { useTwitch } from "#server/lib/twitch";
+
+const DAY = 24 * 60 * 60 * 1000;
 
 const MAX_LAG_SECONDS = 60 * 60;
 const MAX_FAILING_RATIO = 0.05;
+const MIN_RATE_LIMIT_RATIO = 0.1;
+
+const days_ago = (days: number) => new Date(Date.now() - days * DAY).toISOString();
 
 export default defineTask({
   meta: {
     name: "sync:health",
-    description: "Log the lag and size of the YouTube sync queues, warn when they fall behind",
+    description: "Log the lag and size of the sync queues, warn when they fall behind",
   },
 
   async run() {
-    const [feeds, enrich, images] = await Promise.all([
+    const [feeds, enrich, lives, unchecked_vods, images] = await Promise.all([
       subscriptionsSync.stats({ service: "youtube" }),
       pendingVideos.stats({ service: "youtube" }),
+      subscriptionsSync.stats({ service: "twitch" }),
+      videos.count_unchecked({
+        service: "twitch",
+        created_before: days_ago(6),
+        checked_before: days_ago(2),
+      }),
       pendingVideoImages.stats(),
     ]);
 
-    const failing_ratio = feeds.scheduled > 0 ? feeds.failing / feeds.scheduled : 0;
+    const twitch = useTwitch();
+    const rate_limit = {
+      limit: twitch.rate_limit?.limit ?? null,
+      lowest_remaining: twitch.take_lowest_remaining(),
+    };
+
+    const ratio = (count: number, total: number) => (total > 0 ? count / total : 0);
+    const feeds_failing = ratio(feeds.failing, feeds.scheduled);
+    const lives_failing = ratio(lives.failing, lives.scheduled);
+
     const alerts = [
-      feeds.lag_seconds > MAX_LAG_SECONDS && "feeds_lagging",
-      failing_ratio > MAX_FAILING_RATIO && "feeds_failing",
-      enrich.lag_seconds > MAX_LAG_SECONDS && "enrich_lagging",
+      feeds.lag_seconds > MAX_LAG_SECONDS && "youtube_feeds_lagging",
+      feeds_failing > MAX_FAILING_RATIO && "youtube_feeds_failing",
+      enrich.lag_seconds > MAX_LAG_SECONDS && "youtube_enrich_lagging",
+      lives.lag_seconds > MAX_LAG_SECONDS && "twitch_lives_lagging",
+      lives_failing > MAX_FAILING_RATIO && "twitch_lives_failing",
+      lives.vods_lag_seconds > MAX_LAG_SECONDS && "twitch_vods_lagging",
+      unchecked_vods > 0 && "twitch_expire_lagging",
+      rate_limit.limit !== null &&
+        rate_limit.lowest_remaining !== null &&
+        rate_limit.lowest_remaining < rate_limit.limit * MIN_RATE_LIMIT_RATIO &&
+        "twitch_rate_limited",
       images.lag_seconds > MAX_LAG_SECONDS && "images_lagging",
     ].filter(Boolean);
 
-    const result = { feeds: { ...feeds, failing_ratio }, enrich, images, alerts };
+    const result = {
+      youtube: { feeds: { ...feeds, failing_ratio: feeds_failing }, enrich },
+      twitch: { lives: { ...lives, failing_ratio: lives_failing }, unchecked_vods, rate_limit },
+      images,
+      alerts,
+    };
     const logger = useLogger("tasks.sync.health");
 
     if (alerts.length > 0) {
-      logger.warn(result, "YouTube sync falling behind");
+      logger.warn(result, "Sync falling behind");
     } else {
-      logger.info(result, "YouTube sync healthy");
+      logger.info(result, "Sync healthy");
     }
 
     return { result };

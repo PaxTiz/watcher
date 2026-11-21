@@ -170,3 +170,10 @@ export type ClaimToCheckInput = {
 export type ClaimToCheckOutput = Array<
   Pick<DatabaseSchema["videos"], "id" | "service_id" | "thumbnail_small" | "thumbnail_large">
 >;
+
+export type CountUncheckedInput = {
+  service: SubscriptionType;
+  created_before: string;
+  checked_before: string;
+};
+export type CountUncheckedOutput = number;
