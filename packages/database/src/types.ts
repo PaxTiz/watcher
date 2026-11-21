@@ -192,7 +192,7 @@ export type UsersVideosProgressionTable = {
 
   video_id: string;
 
-  progression: number;
+  position: number; // seconds, equals the video duration once watched
 
   updated_at: ColumnType<string, string | undefined, string>;
 };

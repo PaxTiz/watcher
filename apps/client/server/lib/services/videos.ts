@@ -184,16 +184,17 @@ export default class VideosService extends AbstractService {
     logger().debug({ video_id: id }, "Video shown");
   }
 
-  async update_progress(user: User, id: string, progression: number) {
-    await this.find_source_or_fail(user, id);
+  async update_progress(user: User, id: string, position: number) {
+    const { duration } = await this.find_source_or_fail(user, id);
 
     await videos.upsert_progression({
       user_id: user.id,
       video_id: id,
-      progression: Math.max(0, progression > 0.9 ? 1 : progression),
+      position: position > duration * 0.9 ? duration : Math.round(position),
+      duration,
     });
 
-    logger().trace({ video_id: id, progression }, "Video progression updated");
+    logger().trace({ video_id: id, position }, "Video progression updated");
   }
 
   async get_large_thumbnail(user: User, id: string): Promise<string> {
@@ -299,6 +300,7 @@ export default class VideosService extends AbstractService {
       service: row.video_service,
       title: row.video_title,
       duration: row.video_duration,
+      viewing_position: row.video_viewing_position,
       viewing_progression: row.video_viewing_progression,
       url: row.video_url,
       thumbnails: {

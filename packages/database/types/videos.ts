@@ -12,6 +12,7 @@ export type VideoRow = {
   video_thumbnail_large: string;
   video_palette: VideoPalette | null;
   video_created_at: string;
+  video_viewing_position: number;
   video_viewing_progression: number;
   subscription_id: string;
   subscription_name: string;
@@ -71,7 +72,7 @@ export type FindAdjacentOutput = Array<VideoRow>;
 
 export type FindSourceInput = { id: string; user_id: string; viewable_only?: boolean };
 export type FindSourceOutput =
-  | Pick<DatabaseSchema["videos"], "service" | "service_id" | "url">
+  | Pick<DatabaseSchema["videos"], "service" | "service_id" | "url" | "duration">
   | undefined;
 
 export type FindThumbnailsInput = { id: string };
@@ -147,7 +148,8 @@ export type ShowForUserOutput = void;
 export type UpsertProgressionInput = {
   user_id: string;
   video_id: string;
-  progression: number;
+  position: number;
+  duration: number;
   options?: RepositoryContext;
 };
 export type UpsertProgressionOutput = void;

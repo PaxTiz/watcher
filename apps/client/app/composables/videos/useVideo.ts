@@ -60,7 +60,7 @@ export const useVideo = (video: VideoListResource) => {
   const on_mark_as_read = async (on_success?: () => MaybePromise<unknown>) => {
     const { error } = await callApi(`/api/videos/${video.id}/progress`, {
       method: "POST",
-      body: { progression: 1 },
+      body: { position: video.duration },
     });
     if (error) {
       toast.error(t("videos.mark_as_watched.failed"));

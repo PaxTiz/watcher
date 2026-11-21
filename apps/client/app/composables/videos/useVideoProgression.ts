@@ -1,7 +1,7 @@
 import type { VideoResource } from "@watcher/common";
 import type { ShallowRef } from "vue";
 
-const RESUME_THRESHOLD = 0.005;
+const RESUME_THRESHOLD = 5;
 const SAVE_INTERVAL = 30_000;
 const SEEK_DEBOUNCE = 500;
 
@@ -15,29 +15,29 @@ export const useVideoProgression = (
 
   let is_started = false;
   let saved_at = 0;
-  let saved_progression: number | null = video.viewing_progression;
+  let saved_position: number | null = video.viewing_position;
 
-  const save = async (progression: number) => {
-    if (!is_started || progression === saved_progression) {
+  const save = async (position: number) => {
+    if (!is_started || position === saved_position) {
       return;
     }
 
     saved_at = Date.now();
-    saved_progression = progression;
+    saved_position = position;
     const { error } = await callApi(`/api/videos/${video.id}/progress`, {
       method: "POST",
-      body: { progression },
+      body: { position },
       keepalive: true,
     });
     if (error) {
-      saved_progression = null;
+      saved_position = null;
     }
   };
 
   const save_current = async () => {
     const element = media.value;
-    if (element?.duration) {
-      await save(Number((element.currentTime / element.duration).toFixed(4)));
+    if (element) {
+      await save(Math.round(element.currentTime));
     }
   };
 
@@ -46,8 +46,8 @@ export const useVideoProgression = (
     "playing",
     (event) => {
       const element = event.currentTarget as HTMLMediaElement;
-      if (video.viewing_progression > RESUME_THRESHOLD && element.currentTime < 1) {
-        element.currentTime = video.viewing_progression * element.duration;
+      if (video.viewing_position > RESUME_THRESHOLD && element.currentTime < 1) {
+        element.currentTime = video.viewing_position;
       }
 
       is_started = true;
@@ -64,7 +64,7 @@ export const useVideoProgression = (
 
   useEventListener(media, "pause", save_current);
   useEventListener(media, "seeked", useDebounceFn(save_current, SEEK_DEBOUNCE));
-  useEventListener(media, "ended", () => save(1));
+  useEventListener(media, "ended", () => save(video.duration));
 
   useEventListener(window, "pagehide", save_current);
   useEventListener(document, "visibilitychange", async () => {

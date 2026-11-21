@@ -43,7 +43,12 @@ import type {
   UpsertProgressionOutput,
 } from "../../types/videos";
 import { type DatabaseInterface, resolveDatabase, useDatabase } from "../database";
-import { select_video_row, select_visible_videos_for_user, video_search_score } from "../queries";
+import {
+  select_video_row,
+  select_viewing_progression,
+  select_visible_videos_for_user,
+  video_search_score,
+} from "../queries";
 
 function where_viewable_by(user_id: string) {
   return (eb: ExpressionBuilder<DatabaseInterface, "videos" | "user_subscriptions">) =>
@@ -156,9 +161,7 @@ export async function find_by_id_for_user({
       sql<boolean>`COALESCE(${eb.ref("user_subscriptions.is_favorite")}, false)`.as(
         "subscription_is_favorite",
       ),
-      sql<number>`COALESCE(${eb.ref("users_videos_progression.progression")}, 0)`.as(
-        "video_viewing_progression",
-      ),
+      ...select_viewing_progression(eb),
     ])
     .executeTakeFirst();
 }
@@ -204,9 +207,7 @@ export async function find_adjacent({
       sql<boolean>`COALESCE(${eb.ref("user_subscriptions.is_favorite")}, false)`.as(
         "subscription_is_favorite",
       ),
-      sql<number>`COALESCE(${eb.ref("users_videos_progression.progression")}, 0)`.as(
-        "video_viewing_progression",
-      ),
+      ...select_viewing_progression(eb),
     ])
     .where("videos.id", "!=", id)
     .where("videos.ready_at", "is not", null)
@@ -219,7 +220,12 @@ export async function find_adjacent({
     .where("videos.created_at", order === "asc" ? ">" : "<", (eb) =>
       eb.selectFrom("videos").select("created_at").where("id", "=", id),
     )
-    .where("users_videos_progression.progression", "is distinct from", 1)
+    .where((eb) =>
+      eb.or([
+        eb("users_videos_progression.position", "is", null),
+        eb("users_videos_progression.position", "<", eb.ref("videos.duration")),
+      ]),
+    )
     .where((eb) =>
       eb.not(
         eb.exists(
@@ -253,7 +259,7 @@ export async function find_source({
         .onRef("user_subscriptions.subscription_id", "=", "subscriptions.id")
         .on("user_subscriptions.user_id", "=", user_id),
     )
-    .select(["videos.service", "videos.service_id", "videos.url"])
+    .select(["videos.service", "videos.service_id", "videos.url", "videos.duration"])
     .where("videos.id", "=", id)
     .$if(viewable_only === true, (qb) => qb.where(where_viewable_by(user_id)))
     .executeTakeFirst();
@@ -445,19 +451,21 @@ export async function show_for_user({
 export async function upsert_progression({
   user_id,
   video_id,
-  progression,
+  position,
+  duration,
   options,
 }: UpsertProgressionInput): Promise<UpsertProgressionOutput> {
   const database = resolveDatabase(options);
 
   await database
     .insertInto("users_videos_progression")
-    .values({ user_id, video_id, progression })
+    .values({ user_id, video_id, position })
     .onConflict((oc) =>
       oc
         .columns(["user_id", "video_id"])
-        .doUpdateSet({ progression, updated_at: sql`now()` })
-        .where("users_videos_progression.progression", "is distinct from", progression),
+        .doUpdateSet({ position, updated_at: sql`now()` })
+        .where("users_videos_progression.position", "<", duration)
+        .where("users_videos_progression.position", "is distinct from", position),
     )
     .execute();
 }

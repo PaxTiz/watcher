@@ -13,6 +13,8 @@ export type VideoListResource = {
 
   duration: number;
 
+  viewing_position: number; // seconds
+
   viewing_progression: number; // percentage of view between 0 and 1
 
   url: string;

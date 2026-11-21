@@ -86,8 +86,8 @@ export function select_visible_videos_for_user(user_id: string, filters: FindAll
             .selectFrom("users_videos_progression as progression")
             .whereRef("progression.video_id", "=", "videos.id")
             .where("progression.user_id", "=", user_id)
-            .where("progression.progression", ">", 0)
-            .where("progression.progression", "<", 1),
+            .where("progression.position", ">", 0)
+            .whereRef("progression.position", "<", "videos.duration"),
         ),
       ),
     )
@@ -99,11 +99,25 @@ export function select_visible_videos_for_user(user_id: string, filters: FindAll
               .selectFrom("users_videos_progression as watched")
               .whereRef("watched.video_id", "=", "videos.id")
               .where("watched.user_id", "=", user_id)
-              .where("watched.progression", ">=", 1),
+              .where("watched.position", ">", 0)
+              .whereRef("watched.position", ">=", "videos.duration"),
           ),
         ),
       ),
     );
+}
+
+export function select_viewing_progression(
+  eb: ExpressionBuilder<DatabaseInterface, "videos" | "users_videos_progression">,
+) {
+  const position = eb.ref("users_videos_progression.position");
+
+  return [
+    sql<number>`COALESCE(${position}, 0)`.as("video_viewing_position"),
+    sql<number>`LEAST(COALESCE(${position}::float4 / NULLIF(${eb.ref("videos.duration")}, 0), 0), 1)`.as(
+      "video_viewing_progression",
+    ),
+  ] as const;
 }
 
 // Columns of a `VideoRow`, for a query on `select_visible_videos_for_user` left joined with the
@@ -130,9 +144,7 @@ export function select_video_row(user_id: string) {
     eb.ref("subscriptions.service").as("subscription_service"),
     eb.ref("subscriptions.logo").as("subscription_logo"),
     eb.ref("user_subscriptions.is_favorite").as("subscription_is_favorite"),
-    sql<number>`COALESCE(${eb.ref("users_videos_progression.progression")}, 0)`.as(
-      "video_viewing_progression",
-    ),
+    ...select_viewing_progression(eb),
     eb
       .exists(
         eb

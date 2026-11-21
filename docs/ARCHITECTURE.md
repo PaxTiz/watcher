@@ -301,16 +301,16 @@ users ──┬──< credentials        (service, service_id) unique ; tokens 
 rate_limits, webauthn_challenges   (tables techniques, purgées toutes les heures)
 ```
 
-| Table                      | Rôle                                                                                |
-| -------------------------- | ----------------------------------------------------------------------------------- |
-| `users`                    | Nom, `is_onboarded`, dates                                                          |
-| `credentials`              | Un compte Google ou Twitch lié à un utilisateur                                     |
-| `subscriptions`            | Une **chaîne** (YouTube ou Twitch), **partagée entre utilisateurs** ; `slug` unique |
-| `user_subscriptions`       | Lien utilisateur ↔ chaîne, avec `is_favorite` et `is_hidden`                        |
-| `videos`                   | Une vidéo ou VOD, partagée ; miniatures, `palette` (jsonb), `search` (générée)      |
-| `hidden_users_videos`      | Vidéos masquées par un utilisateur                                                  |
-| `users_videos_progression` | Progression de lecture (0 → 1), `updated_at` pour trier « en cours »                |
-| `sessions`                 | Sessions actives (voir §6)                                                          |
+| Table                      | Rôle                                                                                         |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| `users`                    | Nom, `is_onboarded`, dates                                                                   |
+| `credentials`              | Un compte Google ou Twitch lié à un utilisateur                                              |
+| `subscriptions`            | Une **chaîne** (YouTube ou Twitch), **partagée entre utilisateurs** ; `slug` unique          |
+| `user_subscriptions`       | Lien utilisateur ↔ chaîne, avec `is_favorite` et `is_hidden`                                 |
+| `videos`                   | Une vidéo ou VOD, partagée ; miniatures, `palette` (jsonb), `search` (générée)               |
+| `hidden_users_videos`      | Vidéos masquées par un utilisateur                                                           |
+| `users_videos_progression` | Position de lecture en secondes (= durée une fois vue), `updated_at` pour trier « en cours » |
+| `sessions`                 | Sessions actives (voir §6)                                                                   |
 
 Points à connaître :
 
@@ -464,7 +464,7 @@ Les clés suivent l'arborescence `<service>/channels/<channel_id>/logo.avif` et 
 
 Seuls les hôtes Twitch (`*.cloudfront.net`, `*.twitch.tv`, `*.ttvnw.net`) en HTTPS peuvent être proxifiés. La clé HMAC est dérivée (HKDF) de la clé de chiffrement des access tokens.
 
-**Progression.** `useVideoProgression` reprend la lecture à la dernière position, puis l'enregistre (`POST /api/videos/:id/progress`, avec `keepalive`) toutes les 30 s, à la pause, après un seek, en fin de vidéo, et quand l'onglet est masqué ou la page quittée. Côté serveur, au-delà de 90 %, la vidéo est considérée comme vue (`progression = 1`) et disparaît du fil. `GET /api/videos/:id/next` propose la suite (les vidéos voisines dans le fil).
+**Progression.** `useVideoProgression` reprend la lecture à la dernière position, puis l'enregistre (`POST /api/videos/:id/progress`, avec `keepalive`) toutes les 30 s, à la pause, après un seek, en fin de vidéo, et quand l'onglet est masqué ou la page quittée. Côté serveur, la position est stockée en secondes ; au-delà de 90 % elle est ramenée à la durée de la vidéo, qui est alors considérée comme vue et disparaît du fil. Une vidéo vue n'est plus mise à jour. Le pourcentage (`viewing_progression`) est calculé à la lecture. `GET /api/videos/:id/next` propose la suite (les vidéos voisines dans le fil).
 
 ## 12. Front-end
 
