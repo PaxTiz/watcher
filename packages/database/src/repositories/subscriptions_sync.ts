@@ -10,6 +10,10 @@ import type {
   ClaimWebsubDueOutput,
   ConfirmWebsubInput,
   ConfirmWebsubOutput,
+  EndLiveInput,
+  EndLiveOutput,
+  FindMostFollowedInput,
+  FindMostFollowedOutput,
   FindAllForUserInput,
   FindAllForUserOutput,
   RecordFailureInput,
@@ -320,4 +324,50 @@ export async function reschedule_vods({
     .where("subscription_id", "=", subscription_id)
     .where("vods_due_at", "is not", null)
     .execute();
+}
+
+export async function find_most_followed({
+  service,
+  limit,
+}: FindMostFollowedInput): Promise<FindMostFollowedOutput> {
+  const rows = await useDatabase()
+    .selectFrom("subscriptions_sync")
+    .innerJoin("subscriptions", "subscriptions.id", "subscriptions_sync.subscription_id")
+    .select("subscriptions.service_id")
+    .where("subscriptions_sync.service", "=", service)
+    .where("subscriptions_sync.next_check_at", "is not", null)
+    .orderBy(
+      (eb) =>
+        eb
+          .selectFrom("user_subscriptions")
+          .select(sql<number>`count(*)`.as("followers"))
+          .whereRef(
+            "user_subscriptions.subscription_id",
+            "=",
+            "subscriptions_sync.subscription_id",
+          ),
+      "desc",
+    )
+    .limit(limit)
+    .execute();
+
+  return rows.map((row) => row.service_id);
+}
+
+export async function end_live({
+  service,
+  channel_id,
+  vods_delay_seconds,
+}: EndLiveInput): Promise<EndLiveOutput> {
+  const result = await useDatabase()
+    .updateTable("subscriptions_sync")
+    .set({
+      live_stream_id: null,
+      vods_due_at: sql<string>`least(vods_due_at, now() + make_interval(secs => ${vods_delay_seconds}))`,
+    })
+    .where("subscription_id", "=", subscription_by_channel(service, channel_id))
+    .where("next_check_at", "is not", null)
+    .executeTakeFirst();
+
+  return result.numUpdatedRows > 0n;
 }

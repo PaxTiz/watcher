@@ -101,6 +101,7 @@ export default defineNuxtConfig({
         "database:purge",
         "youtube:subscriptions",
         "twitch:subscriptions",
+        "twitch:eventsub",
         "sync:health",
       ],
       "*/10 * * * *": ["youtube:websub", "twitch:expire"],
@@ -158,6 +159,10 @@ export default defineNuxtConfig({
     google: {
       apiKey: "",
       websubSecret: "", // empty: no WebSub, the feeds are only polled
+    },
+
+    twitch: {
+      eventsubSecret: "", // empty: no EventSub, the lives are only polled
     },
 
     oauth: {

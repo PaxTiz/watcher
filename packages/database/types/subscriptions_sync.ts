@@ -83,3 +83,13 @@ export type RescheduleVodsInput = {
   last_video_at: string | null;
 };
 export type RescheduleVodsOutput = void;
+
+export type FindMostFollowedInput = { service: SubscriptionType; limit: number };
+export type FindMostFollowedOutput = Array<string>;
+
+export type EndLiveInput = {
+  service: SubscriptionType;
+  channel_id: string;
+  vods_delay_seconds: number;
+};
+export type EndLiveOutput = boolean;

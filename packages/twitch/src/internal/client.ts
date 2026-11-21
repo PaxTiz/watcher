@@ -1,5 +1,6 @@
 import { add, isBefore } from "date-fns";
 
+import { EventsubService } from "../eventsub";
 import { FollowersService } from "../followers";
 import { StreamsService } from "../streams";
 import { UsersService } from "../users";
@@ -37,6 +38,7 @@ export class TwitchClient {
 
   private app_token: Promise<{ access_token: string; expires_at: Date }> | null = null;
 
+  public eventsub: EventsubService;
   public followers: FollowersService;
   public streams: StreamsService;
   public users: UsersService;
@@ -44,6 +46,7 @@ export class TwitchClient {
 
   constructor(options: ClientSettings) {
     this.settings = options;
+    this.eventsub = new EventsubService(this);
     this.followers = new FollowersService(this);
     this.streams = new StreamsService(this);
     this.users = new UsersService(this);

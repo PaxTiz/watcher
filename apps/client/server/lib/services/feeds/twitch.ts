@@ -11,6 +11,7 @@ import { MAX_STREAMS_PER_REQUEST, MAX_VIDEOS_PER_REQUEST } from "@watcher/integr
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useTwitch } from "#server/lib/twitch";
+import { eventsub_callback, eventsub_secret } from "#server/utils/eventsub";
 import { remove_image } from "#server/utils/images";
 import {
   latest_date,
@@ -52,6 +53,11 @@ const MIN_BATCH_FOR_EMPTY_ANSWER = 10;
 
 const EXPIRY_MIN_AGE = 6 * 24 * 60 * 60 * 1000;
 const EXPIRY_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
+
+const EVENTSUB_TYPE = "stream.offline";
+const EVENTSUB_DEFAULT_MAX_COST = 10_000;
+const EVENTSUB_MAX_CHANGES = 300;
+const EVENTSUB_HEALTHY = ["enabled", "webhook_callback_verification_pending"];
 
 const in_minutes = (minutes: number) => new Date(Date.now() + minutes * 60_000).toISOString();
 
@@ -336,5 +342,70 @@ export default class FeedsTwitch extends AbstractService {
       ready_at: null,
       content_type: "live",
     };
+  }
+
+  async reconcile_eventsub() {
+    const twitch = useTwitch();
+    const callback = eventsub_callback();
+
+    const existing: Array<Twitch["Eventsub"]["Subscription"]> = [];
+    let max_total_cost = EVENTSUB_DEFAULT_MAX_COST;
+    let cursor: string | undefined;
+    do {
+      const page = await twitch.eventsub.list({ type: EVENTSUB_TYPE, cursor });
+      existing.push(...page.data);
+      max_total_cost = page.max_total_cost || max_total_cost;
+      cursor = page.pagination.cursor;
+    } while (cursor);
+
+    const wanted = new Set(
+      await subscriptionsSync.find_most_followed({ service: "twitch", limit: max_total_cost }),
+    );
+
+    const healthy = existing.filter(
+      (sub) =>
+        EVENTSUB_HEALTHY.includes(sub.status) &&
+        sub.transport.callback === callback &&
+        wanted.has(sub.condition.broadcaster_user_id ?? ""),
+    );
+    const covered = new Set(healthy.map((sub) => sub.condition.broadcaster_user_id));
+    const obsolete = existing
+      .filter((sub) => !healthy.includes(sub))
+      .slice(0, EVENTSUB_MAX_CHANGES);
+    const missing = [...wanted]
+      .filter((channel_id) => !covered.has(channel_id))
+      .slice(0, EVENTSUB_MAX_CHANGES);
+
+    const totals = { active: healthy.length, removed: 0, created: 0, failed: 0 };
+
+    await async_pool(obsolete, 5, async (sub) => {
+      try {
+        await twitch.eventsub.remove({ id: sub.id });
+        totals.removed++;
+      } catch (error) {
+        totals.failed++;
+        logger().error(
+          { err: error, subscription_id: sub.id },
+          "Failed to remove an EventSub subscription",
+        );
+      }
+    });
+
+    await async_pool(missing, 5, async (channel_id) => {
+      try {
+        await twitch.eventsub.create({
+          type: EVENTSUB_TYPE,
+          broadcaster_user_id: channel_id,
+          callback,
+          secret: eventsub_secret(),
+        });
+        totals.created++;
+      } catch (error) {
+        totals.failed++;
+        logger().error({ err: error, channel_id }, "Failed to create an EventSub subscription");
+      }
+    });
+
+    return totals;
   }
 }

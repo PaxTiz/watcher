@@ -64,11 +64,7 @@ export const next_vods_read_at = (last_video_at: string | null) => {
     return in_minutes(with_jitter(3 * 24 * 60));
   }
 
-  if (age < 182 * DAY) {
-    return in_minutes(with_jitter(7 * 24 * 60));
-  }
-
-  return in_minutes(with_jitter(30 * 24 * 60));
+  return in_minutes(with_jitter(5 * 24 * 60));
 };
 
 export const next_subscriptions_sync_at = () => in_minutes(with_jitter(24 * 60));
