@@ -59,7 +59,7 @@ export default class VideosService extends AbstractService {
       message: "video_not_found",
     });
 
-    if (await this.deleted_on_youtube(video)) {
+    if (await this.deleted_at_source(video)) {
       throw new NotFoundError({ message: "video_not_found" });
     }
 
@@ -69,27 +69,33 @@ export default class VideosService extends AbstractService {
     };
   }
 
-  private async deleted_on_youtube(
+  private async deleted_at_source(
     video: NonNullable<repositoryTypes.videos.FindByIdForUserOutput>,
   ) {
     const checked_at = video.video_checked_at ? new Date(video.video_checked_at).getTime() : 0;
-    if (video.video_service !== "youtube" || Date.now() - checked_at < CHECK_ON_OPEN_AFTER) {
+    if (Date.now() - checked_at < CHECK_ON_OPEN_AFTER) {
       return false;
     }
 
+    const to_check = {
+      id: video.video_id,
+      service_id: video.video_service_id,
+      thumbnail_small: video.video_thumbnail_small,
+      thumbnail_large: video.video_thumbnail_large,
+    };
+
     try {
-      const { deleted } = await services.feeds.youtube.check([
-        {
-          id: video.video_id,
-          service_id: video.video_service_id,
-          thumbnail_small: video.video_thumbnail_small,
-          thumbnail_large: video.video_thumbnail_large,
-        },
-      ]);
+      const { deleted } =
+        video.video_service === "youtube"
+          ? await services.feeds.youtube.check([to_check])
+          : await services.feeds.twitch.check([to_check]);
 
       return deleted.length > 0;
     } catch (error) {
-      logger().warn({ err: error, video_id: video.video_id }, "Failed to check a YouTube video");
+      logger().warn(
+        { err: error, video_id: video.video_id, service: video.video_service },
+        "Failed to check a video at its source",
+      );
 
       return false;
     }

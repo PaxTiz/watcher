@@ -29,6 +29,8 @@ import type {
   MarkCheckedOutput,
   UpdateMetadataManyInput,
   UpdateMetadataManyOutput,
+  ClaimToCheckInput,
+  ClaimToCheckOutput,
   ShowForUserInput,
   ShowForUserOutput,
   UpdateLargeThumbnailInput,
@@ -524,4 +526,29 @@ export async function update_metadata_many({
     )
     WHERE v.id = d.id
   `.execute(useDatabase());
+}
+
+export async function claim_to_check({
+  service,
+  created_before,
+  checked_before,
+  limit,
+}: ClaimToCheckInput): Promise<ClaimToCheckOutput> {
+  return useDatabase()
+    .updateTable("videos")
+    .set({ checked_at: sql<string>`now()` })
+    .where("id", "in", (eb) =>
+      eb
+        .selectFrom("videos")
+        .select("id")
+        .where("service", "=", service)
+        .where("created_at", "<", created_before)
+        .where((eb) => eb.or([eb("checked_at", "is", null), eb("checked_at", "<", checked_before)]))
+        .orderBy(sql`checked_at NULLS FIRST`)
+        .limit(limit)
+        .forUpdate()
+        .skipLocked(),
+    )
+    .returning(["id", "service_id", "thumbnail_small", "thumbnail_large"])
+    .execute();
 }

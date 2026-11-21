@@ -166,3 +166,13 @@ export type UpdateMetadataManyData = {
 };
 export type UpdateMetadataManyInput = { data: Array<UpdateMetadataManyData> };
 export type UpdateMetadataManyOutput = void;
+
+export type ClaimToCheckInput = {
+  service: SubscriptionType;
+  created_before: string;
+  checked_before: string;
+  limit: number;
+};
+export type ClaimToCheckOutput = Array<
+  Pick<DatabaseSchema["videos"], "id" | "service_id" | "thumbnail_small" | "thumbnail_large">
+>;

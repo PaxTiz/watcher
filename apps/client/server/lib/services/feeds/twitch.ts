@@ -33,6 +33,8 @@ type VodsChannel = repositoryTypes.subscriptionsSync.ClaimVodsDueOutput[number];
 
 type Vod = Twitch["Videos"]["List"]["data"][number];
 
+type CheckedVod = repositoryTypes.videos.ClaimToCheckOutput[number];
+
 const chunk = <T>(items: Array<T>, size: number) =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, (index + 1) * size),
@@ -47,6 +49,9 @@ const PLACEHOLDER_RETRY_MINUTES = 30;
 const FAILURE_RETRY_MINUTES = 60;
 
 const MIN_BATCH_FOR_EMPTY_ANSWER = 10;
+
+const EXPIRY_MIN_AGE = 6 * 24 * 60 * 60 * 1000;
+const EXPIRY_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
 
 const in_minutes = (minutes: number) => new Date(Date.now() + minutes * 60_000).toISOString();
 
@@ -222,6 +227,71 @@ export default class FeedsTwitch extends AbstractService {
     return { stored: inserted.length, updated: known.length, deleted };
   }
 
+  async expire_due(max_batches = Infinity) {
+    const totals = { checked: 0, deleted: 0, failed: 0 };
+
+    for (let batch = 0; batch < max_batches; batch++) {
+      const to_check = await videos.claim_to_check({
+        service: "twitch",
+        created_before: new Date(Date.now() - EXPIRY_MIN_AGE).toISOString(),
+        checked_before: new Date(Date.now() - EXPIRY_CHECK_INTERVAL).toISOString(),
+        limit: MAX_VIDEOS_PER_REQUEST,
+      });
+
+      if (to_check.length === 0) {
+        break;
+      }
+
+      try {
+        const result = await this.check(to_check);
+        totals.checked += to_check.length;
+        totals.deleted += result.deleted.length;
+      } catch (error) {
+        totals.failed += to_check.length;
+        logger().error({ err: error, videos: to_check.length }, "Failed to check Twitch VODs");
+      }
+
+      if (to_check.length < MAX_VIDEOS_PER_REQUEST) {
+        break;
+      }
+    }
+
+    return totals;
+  }
+
+  async check(to_check: Array<CheckedVod>) {
+    const found = await useTwitch().videos.list_by_ids({
+      ids: to_check.map((video) => video.service_id),
+    });
+
+    if (found.length === 0 && to_check.length >= MIN_BATCH_FOR_EMPTY_ANSWER) {
+      throw new Error(`Twitch returned none of the ${to_check.length} checked VODs`);
+    }
+
+    const found_ids = new Set(found.map((vod) => vod.id));
+    const kept = to_check.filter((video) => found_ids.has(video.service_id));
+    const gone = to_check.filter((video) => !found_ids.has(video.service_id));
+
+    await videos.mark_checked({ ids: kept.map((video) => video.id) });
+
+    if (gone.length > 0) {
+      await videos.remove_many({ ids: gone.map((video) => video.id) });
+      await Promise.all(
+        gone.flatMap((video) => [
+          remove_image(video.thumbnail_small),
+          remove_image(video.thumbnail_large),
+        ]),
+      );
+
+      logger().info(
+        { videos: gone.map((video) => video.service_id) },
+        "Expired or deleted Twitch VODs removed",
+      );
+    }
+
+    return { kept: kept.length, deleted: gone.map((video) => video.id) };
+  }
+
   private async remove_missing(
     stored: repositoryTypes.videos.FindAllBySubscriptionOutput,
     listed: Array<Vod>,
@@ -242,36 +312,7 @@ export default class FeedsTwitch extends AbstractService {
 
     let deleted = 0;
     for (const batch of chunk(missing, MAX_VIDEOS_PER_REQUEST)) {
-      const found = await useTwitch().videos.list_by_ids({
-        ids: batch.map((video) => video.service_id),
-      });
-
-      if (found.length === 0 && batch.length >= MIN_BATCH_FOR_EMPTY_ANSWER) {
-        throw new Error(`Twitch returned none of the ${batch.length} checked VODs`);
-      }
-
-      const found_ids = new Set(found.map((vod) => vod.id));
-      const gone = batch.filter((video) => !found_ids.has(video.service_id));
-
-      await videos.mark_checked({
-        ids: batch.filter((video) => found_ids.has(video.service_id)).map((video) => video.id),
-      });
-
-      if (gone.length > 0) {
-        await videos.remove_many({ ids: gone.map((video) => video.id) });
-        await Promise.all(
-          gone.flatMap((video) => [
-            remove_image(video.thumbnail_small),
-            remove_image(video.thumbnail_large),
-          ]),
-        );
-
-        logger().info(
-          { videos: gone.map((video) => video.service_id) },
-          "Deleted Twitch VODs removed",
-        );
-        deleted += gone.length;
-      }
+      deleted += (await this.check(batch)).deleted.length;
     }
 
     return deleted;
