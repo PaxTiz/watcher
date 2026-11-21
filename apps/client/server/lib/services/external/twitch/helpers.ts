@@ -1,4 +1,5 @@
 import type { Twitch } from "@watcher/common";
+import { TwitchInvalidGrantError } from "@watcher/integration-twitch";
 
 import { AbstractService, useLogger } from "#framework";
 import { useTwitch } from "#server/lib/twitch";
@@ -43,6 +44,10 @@ export default class TwitcHelpersService extends AbstractService {
 
       return followers;
     } catch (e) {
+      if (e instanceof TwitchInvalidGrantError) {
+        throw e;
+      }
+
       useLogger("services.external.twitch.helpers").error(
         { err: e, user_id: params.user_id, cursor: params.cursor },
         "Failed to fetch the Twitch follows",

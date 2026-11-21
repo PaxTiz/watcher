@@ -97,12 +97,6 @@ export type FindAllWithoutPaletteOutput = Array<
   Pick<DatabaseSchema["videos"], "id" | "thumbnail_small">
 >;
 
-export type UpsertData = Omit<DatabaseSchemaInsert["videos"], "id" | "palette"> & {
-  palette: VideoPalette | null;
-};
-export type UpsertInput = { data: Array<UpsertData>; options?: RepositoryContext };
-export type UpsertOutput = void;
-
 export type InsertNewData = Omit<DatabaseSchemaInsert["videos"], "id" | "palette">;
 export type InsertNewInput = { data: Array<InsertNewData>; options?: RepositoryContext };
 export type InsertNewOutput = Array<

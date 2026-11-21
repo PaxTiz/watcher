@@ -37,8 +37,6 @@ import type {
   UpdateLargeThumbnailOutput,
   UpdatePaletteInput,
   UpdatePaletteOutput,
-  UpsertInput,
-  UpsertOutput,
   UpsertProgressionInput,
   UpsertProgressionOutput,
 } from "../../types/videos";
@@ -313,52 +311,6 @@ export async function find_all_without_palette({
     .$if(after_id !== null, (qb) => qb.where("id", ">", after_id!))
     .orderBy("id")
     .limit(limit)
-    .execute();
-}
-
-export async function upsert_many({ data, options }: UpsertInput): Promise<UpsertOutput> {
-  const database = resolveDatabase(options);
-
-  if (data.length === 0) {
-    return;
-  }
-
-  await database
-    .insertInto("videos")
-    .values(
-      data.map((video) => ({
-        ...video,
-        palette: video.palette ? JSON.stringify(video.palette) : null,
-      })),
-    )
-    .onConflict((row) =>
-      row
-        .columns(["service", "service_id"])
-        .doUpdateSet({
-          title: (c) => c.ref("excluded.title"),
-          description: (c) => c.ref("excluded.description"),
-          url: (c) => c.ref("excluded.url"),
-          duration: (c) => c.ref("excluded.duration"),
-          thumbnail_small: (c) => c.ref("excluded.thumbnail_small"),
-          thumbnail_small_etag: (c) => c.ref("excluded.thumbnail_small_etag"),
-          thumbnail_large: (c) => c.ref("excluded.thumbnail_large"),
-          thumbnail_large_source: (c) => c.ref("excluded.thumbnail_large_source"),
-          palette: (c) => c.ref("excluded.palette"),
-          // This sync processes the thumbnails itself
-          ready_at: sql<string>`coalesce(videos.ready_at, now())`,
-        })
-        .where(
-          sql<boolean>`(
-            videos.title, videos.description, videos.url, videos.duration,
-            videos.thumbnail_small, videos.thumbnail_small_etag,
-            videos.thumbnail_large, videos.thumbnail_large_source, videos.palette
-          ) IS DISTINCT FROM (
-            excluded.title, excluded.description, excluded.url, excluded.duration,
-            excluded.thumbnail_small, excluded.thumbnail_small_etag,
-            excluded.thumbnail_large, excluded.thumbnail_large_source, excluded.palette
-          )`,
-        ),
-    )
     .execute();
 }
 

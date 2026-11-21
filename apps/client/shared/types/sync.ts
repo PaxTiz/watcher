@@ -18,6 +18,4 @@ export type Sync = {
       thumbnail_small_local: string;
     };
   };
-
-  VideosList: Array<Sync["Video"]>;
 };

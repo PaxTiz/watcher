@@ -4,7 +4,7 @@ import { FetchError, ofetch } from "ofetch";
 
 import type { TwitchClient } from "./internal/client";
 import { helix_options } from "./internal/helix";
-import { type TwitchServiceRequest, TwitchService } from "./internal/service";
+import { TwitchService } from "./internal/service";
 
 export const MAX_VIDEOS_PER_REQUEST = 100;
 
@@ -23,11 +23,12 @@ export class VideosService extends TwitchService {
     super(client);
   }
 
-  public async list(
-    data: { user_id: string; first?: number; cursor?: string },
-    config?: TwitchServiceRequest,
-  ): Promise<Twitch["Videos"]["List"]> {
-    const request = async (token: string) => {
+  public async list(data: {
+    user_id: string;
+    first?: number;
+    cursor?: string;
+  }): Promise<Twitch["Videos"]["List"]> {
+    return await this.perform_app_request(async (token) => {
       const url = new URL("https://api.twitch.tv/helix/videos");
       url.searchParams.set("first", String(data.first ?? 20));
       url.searchParams.set("type", "archive");
@@ -40,13 +41,9 @@ export class VideosService extends TwitchService {
 
       return await ofetch<Twitch["Videos"]["List"]>(
         url.toString(),
-        helix_options(this.client, token, { app: !config }),
+        helix_options(this.client, token, { app: true }),
       );
-    };
-
-    return config
-      ? await this.perform_request(config.service_id, request)
-      : await this.perform_app_request(request);
+    });
   }
 
   public async list_by_ids(data: {

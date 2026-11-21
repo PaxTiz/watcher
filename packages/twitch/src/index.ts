@@ -1,5 +1,7 @@
 import { type ClientSettings, TwitchClient } from "./internal/client";
 
+export { TwitchInvalidGrantError } from "./internal/oauth";
+
 export const createClient = (options: ClientSettings) => {
   return new TwitchClient(options);
 };

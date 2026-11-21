@@ -1,5 +1,5 @@
 import { request_options, type Twitch } from "@watcher/common";
-import { ofetch } from "ofetch";
+import { FetchError, ofetch } from "ofetch";
 
 import type { ClientSettings } from "./client";
 import type { TwitchServiceRequest } from "./service";
@@ -29,6 +29,8 @@ function get_access_token(settings: ClientSettings, config: TwitchServiceRequest
   return settings.onRequest(config.service_id);
 }
 
+export class TwitchInvalidGrantError extends Error {}
+
 async function refresh_access_token(settings: ClientSettings, refresh_token: string) {
   try {
     const response = await ofetch<{
@@ -53,6 +55,14 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
 
     return response;
   } catch (err) {
+    if (
+      err instanceof FetchError &&
+      err.statusCode === 400 &&
+      /invalid refresh token/i.test(String(err.data?.message))
+    ) {
+      throw new TwitchInvalidGrantError("Twitch refresh token rejected", { cause: err });
+    }
+
     throw new Error("Failed to refresh Twitch access token", { cause: err });
   }
 }
