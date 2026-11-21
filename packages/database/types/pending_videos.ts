@@ -34,3 +34,6 @@ export type PostponeInput = {
   failed: boolean;
 };
 export type PostponeOutput = void;
+
+export type StatsInput = { service: SubscriptionType };
+export type StatsOutput = { size: number; max_attempts: number; lag_seconds: number };

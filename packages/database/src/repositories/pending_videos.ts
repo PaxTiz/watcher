@@ -11,6 +11,8 @@ import type {
   PostponeOutput,
   RemoveManyInput,
   RemoveManyOutput,
+  StatsInput,
+  StatsOutput,
 } from "../../types/pending_videos";
 import { resolveDatabase, useDatabase } from "../database";
 
@@ -122,4 +124,18 @@ export async function postpone({
     .where("service", "=", service)
     .where("service_id", "in", service_ids)
     .execute();
+}
+
+export async function stats({ service }: StatsInput): Promise<StatsOutput> {
+  return useDatabase()
+    .selectFrom("pending_videos")
+    .where("service", "=", service)
+    .select([
+      sql<number>`count(*)::int`.as("size"),
+      sql<number>`COALESCE(max(attempts), 0)::int`.as("max_attempts"),
+      sql<number>`COALESCE(extract(epoch FROM now() - min(next_attempt_at) FILTER (WHERE next_attempt_at <= now())), 0)::int`.as(
+        "lag_seconds",
+      ),
+    ])
+    .executeTakeFirstOrThrow();
 }

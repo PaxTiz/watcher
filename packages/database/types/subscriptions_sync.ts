@@ -25,3 +25,6 @@ export type RecordFailureInput = {
   options?: RepositoryContext;
 };
 export type RecordFailureOutput = void;
+
+export type StatsInput = { service: SubscriptionType };
+export type StatsOutput = { scheduled: number; due: number; failing: number; lag_seconds: number };

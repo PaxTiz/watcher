@@ -9,6 +9,8 @@ import type {
   RecordFailureOutput,
   RescheduleInput,
   RescheduleOutput,
+  StatsInput,
+  StatsOutput,
 } from "../../types/subscriptions_sync";
 import { resolveDatabase, useDatabase } from "../database";
 
@@ -114,4 +116,20 @@ export async function record_failure({
     .where("subscription_id", "=", subscription_id)
     .where("next_check_at", "is not", null)
     .execute();
+}
+
+export async function stats({ service }: StatsInput): Promise<StatsOutput> {
+  return useDatabase()
+    .selectFrom("subscriptions_sync")
+    .where("service", "=", service)
+    .where("next_check_at", "is not", null)
+    .select([
+      sql<number>`count(*)::int`.as("scheduled"),
+      sql<number>`(count(*) FILTER (WHERE next_check_at <= now()))::int`.as("due"),
+      sql<number>`(count(*) FILTER (WHERE failures > 0))::int`.as("failing"),
+      sql<number>`COALESCE(extract(epoch FROM now() - min(next_check_at) FILTER (WHERE next_check_at <= now())), 0)::int`.as(
+        "lag_seconds",
+      ),
+    ])
+    .executeTakeFirstOrThrow();
 }

@@ -17,3 +17,5 @@ export type RemoveOutput = void;
 
 export type RecordFailureInput = { video_id: string; next_attempt_at: string };
 export type RecordFailureOutput = void;
+
+export type StatsOutput = { size: number; max_attempts: number; lag_seconds: number };

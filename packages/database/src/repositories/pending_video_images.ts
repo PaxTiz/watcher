@@ -9,6 +9,7 @@ import type {
   RecordFailureOutput,
   RemoveInput,
   RemoveOutput,
+  StatsOutput,
 } from "../../types/pending_video_images";
 import { resolveDatabase, useDatabase } from "../database";
 
@@ -73,4 +74,17 @@ export async function record_failure({
     .set((eb) => ({ next_attempt_at, attempts: eb("attempts", "+", 1) }))
     .where("video_id", "=", video_id)
     .execute();
+}
+
+export async function stats(): Promise<StatsOutput> {
+  return useDatabase()
+    .selectFrom("pending_video_images")
+    .select([
+      sql<number>`count(*)::int`.as("size"),
+      sql<number>`COALESCE(max(attempts), 0)::int`.as("max_attempts"),
+      sql<number>`COALESCE(extract(epoch FROM now() - min(next_attempt_at) FILTER (WHERE next_attempt_at <= now())), 0)::int`.as(
+        "lag_seconds",
+      ),
+    ])
+    .executeTakeFirstOrThrow();
 }
