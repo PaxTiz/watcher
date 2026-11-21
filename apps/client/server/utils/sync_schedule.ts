@@ -31,6 +31,28 @@ export const next_check_at = (last_video_at: string | null, websub_expires_at: s
   return in_minutes(websub_active ? Math.max(interval, with_jitter(3 * 60)) : interval);
 };
 
+export const next_live_check_at = (last_video_at: string | null, live: boolean) => {
+  if (live) {
+    return in_minutes(with_jitter(5));
+  }
+
+  const age = last_video_at ? Date.now() - new Date(last_video_at).getTime() : Infinity;
+
+  if (age < 2 * DAY) {
+    return in_minutes(with_jitter(10));
+  }
+
+  if (age < 30 * DAY) {
+    return in_minutes(with_jitter(30));
+  }
+
+  if (age < 182 * DAY) {
+    return in_minutes(with_jitter(6 * 60));
+  }
+
+  return in_minutes(with_jitter(24 * 60));
+};
+
 export const next_subscriptions_sync_at = () => in_minutes(with_jitter(24 * 60));
 
 export const retry_at = (failures: number) => in_minutes(Math.min(15 * 2 ** failures, 24 * 60));

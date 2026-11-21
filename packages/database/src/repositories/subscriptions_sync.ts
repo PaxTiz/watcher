@@ -12,6 +12,8 @@ import type {
   FindAllForUserOutput,
   RecordFailureInput,
   RecordFailureOutput,
+  RecordLiveChecksInput,
+  RecordLiveChecksOutput,
   RescheduleInput,
   RescheduleOutput,
   StatsInput,
@@ -56,6 +58,7 @@ export async function claim_due({
           "last_video_at",
           "failures",
           "websub_expires_at",
+          "live_stream_id",
         ]),
     )
     .selectFrom("claimed")
@@ -66,6 +69,7 @@ export async function claim_due({
       "claimed.last_video_at",
       "claimed.failures",
       "claimed.websub_expires_at",
+      "claimed.live_stream_id",
       "subscriptions.service_id",
       "subscriptions.name",
     ])
@@ -89,6 +93,7 @@ export async function find_all_for_user({
       "subscriptions_sync.last_video_at",
       "subscriptions_sync.failures",
       "subscriptions_sync.websub_expires_at",
+      "subscriptions_sync.live_stream_id",
       "subscriptions.service_id",
       "subscriptions.name",
     ])
@@ -216,4 +221,36 @@ export async function wake({ service, channel_id }: WakeInput): Promise<WakeOutp
     .executeTakeFirst();
 
   return result.numUpdatedRows > 0n;
+}
+
+export async function record_live_checks({
+  data,
+  vods_delay_seconds,
+}: RecordLiveChecksInput): Promise<RecordLiveChecksOutput> {
+  if (data.length === 0) {
+    return;
+  }
+
+  await sql`
+    UPDATE subscriptions_sync ss
+    SET
+      next_check_at = c.next_check_at,
+      checked_at = now(),
+      failures = 0,
+      live_stream_id = c.live_stream_id,
+      last_video_at = greatest(ss.last_video_at, c.live_started_at),
+      vods_due_at = CASE
+        WHEN c.live_ended
+        THEN least(ss.vods_due_at, now() + make_interval(secs => ${vods_delay_seconds}))
+        ELSE ss.vods_due_at
+      END
+    FROM jsonb_to_recordset(${JSON.stringify(data)}::jsonb) AS c(
+      subscription_id uuid,
+      next_check_at timestamptz,
+      live_stream_id varchar,
+      live_started_at timestamptz,
+      live_ended boolean
+    )
+    WHERE ss.subscription_id = c.subscription_id AND ss.next_check_at IS NOT NULL
+  `.execute(useDatabase());
 }
