@@ -12,7 +12,7 @@ import { formatISO } from "date-fns";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useGoogle } from "#server/lib/google";
-import { count_by_status } from "#server/utils/sync";
+import { count_by_status, type SyncOptions } from "#server/utils/sync";
 import { sync_subscription_logo } from "#server/utils/sync_images";
 import type { Sync } from "#shared/types/sync";
 import { async_pool } from "#shared/utils/random";
@@ -23,7 +23,7 @@ const logger = () => useLogger("services.sync.youtube");
 type User = Pick<UserResource, "id" | "integrations">;
 
 export default class SyncYoutube extends AbstractService {
-  async sync(user: User) {
+  async sync(user: User, options: SyncOptions) {
     const started_at = Date.now();
     logger().info("YouTube sync started");
 
@@ -36,7 +36,7 @@ export default class SyncYoutube extends AbstractService {
       user_id: user.id,
       service: "youtube",
     });
-    const feeds = await services.feeds.youtube.check_channels(channels);
+    const feeds = await services.feeds.youtube.check_channels(channels, options);
     const enriched = await services.feeds.youtube.enrich_pending();
     const images = await services.feeds.images.process_pending();
 

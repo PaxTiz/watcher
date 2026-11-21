@@ -7,6 +7,8 @@ export default defineRoute({
   async handler(event) {
     const user = require_user(event);
 
-    await start_subscriptions_sync(event, user, () => services.subscriptions.sync(user));
+    await start_subscriptions_sync(event, user, () =>
+      services.subscriptions.sync(user, { full: true }),
+    );
   },
 });

@@ -13,6 +13,7 @@ import { services } from "#framework/server";
 import { useTwitch } from "#server/lib/twitch";
 import { eventsub_callback, eventsub_secret } from "#server/utils/eventsub";
 import { remove_image } from "#server/utils/images";
+import type { SyncOptions } from "#server/utils/sync";
 import {
   latest_date,
   next_live_check_at,
@@ -141,7 +142,7 @@ export default class FeedsTwitch extends AbstractService {
     return totals;
   }
 
-  async read_vods(channel: VodsChannel) {
+  async read_vods(channel: VodsChannel, options: SyncOptions = { full: false }) {
     const stored = await videos.find_all_by_subscription({
       service: "twitch",
       subscription_id: channel.service_id,
@@ -150,7 +151,7 @@ export default class FeedsTwitch extends AbstractService {
 
     const response = await useTwitch().videos.list({
       user_id: channel.service_id,
-      first: stored.length === 0 ? FIRST_READ_SIZE : NEXT_READS_SIZE,
+      first: options.full || stored.length === 0 ? FIRST_READ_SIZE : NEXT_READS_SIZE,
     });
 
     const finished = response.data.filter(

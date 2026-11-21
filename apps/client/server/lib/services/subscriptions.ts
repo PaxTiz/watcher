@@ -15,7 +15,7 @@ import type { User } from "#auth-utils";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { public_image_url } from "#server/utils/images";
-import { is_sync_running } from "#server/utils/sync";
+import { is_sync_running, type SyncOptions } from "#server/utils/sync";
 import { is_uuid, parse_slug_params } from "#shared/utils/random";
 
 type SubscriptionRow = repositoryTypes.subscriptions.SubscriptionWithUserState;
@@ -42,18 +42,18 @@ export default class SubscriptionsService extends AbstractService {
     return { ...resource, channel: { ...resource.channel, url: row.url } };
   }
 
-  async sync(user: User) {
+  async sync(user: User, options: SyncOptions = { full: false }) {
     useLogger("services.subscriptions").info(
-      { google: !!user.integrations.google, twitch: !!user.integrations.twitch },
+      { google: !!user.integrations.google, twitch: !!user.integrations.twitch, ...options },
       "Subscriptions sync requested",
     );
 
     const sync = [];
     if (user.integrations.google) {
-      sync.push(services.sync.youtube.sync(user));
+      sync.push(services.sync.youtube.sync(user, options));
     }
     if (user.integrations.twitch) {
-      sync.push(services.sync.twitch.sync(user));
+      sync.push(services.sync.twitch.sync(user, options));
     }
 
     await Promise.all(sync);

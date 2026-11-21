@@ -8,6 +8,8 @@ import { useRateLimiter } from "#server/lib/rate_limiter";
 
 export const SYNC_STALE_AFTER_SECONDS = 30 * 60;
 
+export type SyncOptions = { full: boolean };
+
 export const is_sync_running = (state: { started_at: string; finished_at: string | null }) =>
   !state.finished_at &&
   Date.now() - new Date(state.started_at).getTime() < SYNC_STALE_AFTER_SECONDS * 1000;

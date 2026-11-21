@@ -14,6 +14,7 @@ import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useGoogle } from "#server/lib/google";
 import { remove_image } from "#server/utils/images";
+import type { SyncOptions } from "#server/utils/sync";
 import { latest_date, next_check_at, retry_at } from "#server/utils/sync_schedule";
 import { async_pool } from "#shared/utils/random";
 
@@ -41,15 +42,15 @@ const LEASE_SECONDS = 10 * 60;
 const MIN_BATCH_FOR_EMPTY_ANSWER = 10;
 
 export default class FeedsYoutube extends AbstractService {
-  async check_channels(channels: Array<ScheduledChannel>) {
+  async check_channels(channels: Array<ScheduledChannel>, options: SyncOptions = { full: false }) {
     const totals = { checked: channels.length, discovered: 0, failed: 0 };
 
     await async_pool(channels, 10, async (channel) => {
       try {
-        const result = await this.sync_channel({
-          subscription_id: channel.subscription_id,
-          channel_id: channel.service_id,
-        });
+        const result = await this.sync_channel(
+          { subscription_id: channel.subscription_id, channel_id: channel.service_id },
+          options,
+        );
         totals.discovered += result.discovered.videos + result.discovered.lives;
 
         await subscriptionsSync.reschedule({
@@ -249,7 +250,7 @@ export default class FeedsYoutube extends AbstractService {
     }
   }
 
-  async sync_channel(channel: Channel) {
+  async sync_channel(channel: Channel, options: SyncOptions) {
     const google = useGoogle();
 
     const videos = await google.youtube.feeds.list({
@@ -265,8 +266,8 @@ export default class FeedsYoutube extends AbstractService {
       })) ?? [];
 
     const discovered = {
-      videos: await this.sync_playlist(channel, "video", videos),
-      lives: await this.sync_playlist(channel, "live", lives),
+      videos: await this.sync_playlist(channel, "video", videos, options),
+      lives: await this.sync_playlist(channel, "live", lives, options),
     };
 
     const last_video_at = latest_date([...videos, ...lives].map((entry) => entry.published_at));
@@ -280,13 +281,14 @@ export default class FeedsYoutube extends AbstractService {
     channel: Channel,
     content_type: VideoContentType,
     entries: FeedEntries,
+    options: SyncOptions,
   ) {
     await this.check_missing_from_feed(channel, content_type, entries);
 
     let video_ids = entries.map((entry) => entry.video_id);
     let known = await pendingVideos.find_known({ service: "youtube", service_ids: video_ids });
 
-    if (known.length === 0 && entries.length >= FEED_SIZE) {
+    if ((options.full || known.length === 0) && entries.length >= FEED_SIZE) {
       const playlist_id = to_playlist_id(
         channel.channel_id,
         content_type === "live" ? "lives" : "videos",

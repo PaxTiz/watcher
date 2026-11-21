@@ -11,7 +11,7 @@ import { formatISO } from "date-fns";
 
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
-import { count_by_status } from "#server/utils/sync";
+import { count_by_status, type SyncOptions } from "#server/utils/sync";
 import { sync_subscription_logo } from "#server/utils/sync_images";
 import type { Sync } from "#shared/types/sync";
 import { async_pool } from "#shared/utils/random";
@@ -22,7 +22,7 @@ const logger = () => useLogger("services.sync.twitch");
 type User = Pick<UserResource, "id" | "integrations">;
 
 export default class SyncTwitch extends AbstractService {
-  async sync(user: User) {
+  async sync(user: User, options: SyncOptions) {
     const started_at = Date.now();
     logger().info("Twitch sync started");
 
@@ -44,7 +44,7 @@ export default class SyncTwitch extends AbstractService {
     const vods = { read: channels.length, stored: 0, deleted: 0, failed: 0 };
     await async_pool(channels, 5, async (channel) => {
       try {
-        const result = await services.feeds.twitch.read_vods(channel);
+        const result = await services.feeds.twitch.read_vods(channel, options);
         vods.stored += result.stored;
         vods.deleted += result.deleted;
       } catch (error) {
