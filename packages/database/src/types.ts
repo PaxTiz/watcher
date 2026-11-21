@@ -119,6 +119,10 @@ export type SubscriptionSyncTable = {
   websub_renew_at: string | null;
 
   websub_expires_at: string | null;
+
+  live_stream_id: string | null;
+
+  vods_due_at: string | null;
 };
 
 export type PendingVideoTable = {

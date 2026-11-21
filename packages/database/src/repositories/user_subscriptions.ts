@@ -31,7 +31,7 @@ export async function attach({
 
   await database
     .insertInto("subscriptions_sync")
-    .columns(["subscription_id", "service", "next_check_at", "websub_renew_at"])
+    .columns(["subscription_id", "service", "next_check_at", "websub_renew_at", "vods_due_at"])
     .expression((eb) =>
       eb
         .selectFrom("subscriptions")
@@ -39,14 +39,20 @@ export async function attach({
           "id",
           "service",
           sql<string>`now()`.as("next_check_at"),
-          sql<string>`now()`.as("websub_renew_at"),
+          sql<string | null>`CASE WHEN service = 'youtube' THEN now() END`.as("websub_renew_at"),
+          sql<string | null>`CASE WHEN service = 'twitch' THEN now() END`.as("vods_due_at"),
         ])
         .where("id", "=", subscription_id),
     )
     .onConflict((oc) =>
       oc.column("subscription_id").doUpdateSet({
         next_check_at: sql<string>`coalesce(subscriptions_sync.next_check_at, now())`,
-        websub_renew_at: sql<string>`coalesce(subscriptions_sync.websub_renew_at, now())`,
+        websub_renew_at: sql<
+          string | null
+        >`coalesce(subscriptions_sync.websub_renew_at, excluded.websub_renew_at)`,
+        vods_due_at: sql<
+          string | null
+        >`coalesce(subscriptions_sync.vods_due_at, excluded.vods_due_at)`,
       }),
     )
     .execute();
