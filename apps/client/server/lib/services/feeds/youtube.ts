@@ -13,6 +13,7 @@ import { parse, toSeconds } from "iso8601-duration";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useGoogle } from "#server/lib/google";
+import { remove_image } from "#server/utils/images";
 import { latest_date, next_check_at, retry_at } from "#server/utils/sync_schedule";
 import { async_pool } from "#shared/utils/random";
 
@@ -32,8 +33,12 @@ type PendingVideo = repositoryTypes.pendingVideos.ClaimOutput[number];
 
 type ScheduledChannel = repositoryTypes.subscriptionsSync.ClaimDueOutput[number];
 
+type CheckedVideo = repositoryTypes.videos.FindPublishedSinceOutput[number];
+
 const ENRICH_BATCH_SIZE = 50;
 const LEASE_SECONDS = 10 * 60;
+
+const MIN_BATCH_FOR_EMPTY_ANSWER = 10;
 
 export default class FeedsYoutube extends AbstractService {
   async check_channels(channels: Array<ScheduledChannel>) {
@@ -157,6 +162,39 @@ export default class FeedsYoutube extends AbstractService {
     return { stored: inserted.length, missing: missing.length, not_over: not_over.length };
   }
 
+  async check(to_check: Array<CheckedVideo>) {
+    const items = await useGoogle().youtube.videos.get_by_ids({
+      video_ids: to_check.map((video) => video.service_id),
+    });
+
+    if (items.length === 0 && to_check.length >= MIN_BATCH_FOR_EMPTY_ANSWER) {
+      throw new Error(`YouTube returned none of the ${to_check.length} checked videos`);
+    }
+
+    const returned = new Set(items.map((item) => item.id));
+    const kept = to_check.filter((video) => returned.has(video.service_id));
+    const deleted = to_check.filter((video) => !returned.has(video.service_id));
+
+    await videos.mark_checked({ ids: kept.map((video) => video.id) });
+
+    if (deleted.length > 0) {
+      await videos.remove_many({ ids: deleted.map((video) => video.id) });
+      await Promise.all(
+        deleted.flatMap((video) => [
+          remove_image(video.thumbnail_small),
+          remove_image(video.thumbnail_large),
+        ]),
+      );
+
+      logger().info(
+        { videos: deleted.map((video) => video.service_id) },
+        "Deleted or private YouTube videos removed",
+      );
+    }
+
+    return { kept: kept.length, deleted: deleted.map((video) => video.id) };
+  }
+
   private to_video(
     video: PendingVideo,
     item: Google["Youtube"]["Videos"]["Item"],
@@ -240,6 +278,8 @@ export default class FeedsYoutube extends AbstractService {
     content_type: VideoContentType,
     entries: FeedEntries,
   ) {
+    await this.check_missing_from_feed(channel, content_type, entries);
+
     let video_ids = entries.map((entry) => entry.video_id);
     let known = await pendingVideos.find_known({ service: "youtube", service_ids: video_ids });
 
@@ -270,5 +310,46 @@ export default class FeedsYoutube extends AbstractService {
     });
 
     return new_ids.length;
+  }
+
+  private async check_missing_from_feed(
+    channel: Channel,
+    content_type: VideoContentType,
+    entries: FeedEntries,
+  ) {
+    const oldest = entries.reduce<string | null>(
+      (min, entry) =>
+        !min || new Date(entry.published_at) < new Date(min) ? entry.published_at : min,
+      null,
+    );
+    if (!oldest) {
+      return;
+    }
+
+    const listed = new Set(entries.map((entry) => entry.video_id));
+    const stored = await videos.find_published_since({
+      service: "youtube",
+      subscription_id: channel.channel_id,
+      content_type,
+      since: oldest,
+    });
+
+    await videos.mark_checked({
+      ids: stored.filter((video) => listed.has(video.service_id)).map((video) => video.id),
+    });
+
+    const missing = stored.filter((video) => !listed.has(video.service_id));
+    if (missing.length === 0) {
+      return;
+    }
+
+    try {
+      await this.check(missing);
+    } catch (error) {
+      logger().warn(
+        { err: error, channel_id: channel.channel_id, videos: missing.length },
+        "Failed to check the YouTube videos missing from a feed",
+      );
+    }
   }
 }

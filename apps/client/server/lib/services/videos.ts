@@ -1,4 +1,10 @@
-import type { Page, SubscriptionType, VideoListResource, VideoResource } from "@watcher/common";
+import {
+  NotFoundError,
+  type Page,
+  type SubscriptionType,
+  type VideoListResource,
+  type VideoResource,
+} from "@watcher/common";
 import { findOrFail, repositoryTypes, videos } from "@watcher/database";
 import { formatISO, startOfDay, sub } from "date-fns";
 import { defineCachedFunction } from "nitropack/runtime";
@@ -6,6 +12,7 @@ import { useRuntimeConfig } from "nuxt/server";
 
 import type { User } from "#auth-utils";
 import { AbstractService, useLogger } from "#framework";
+import { services } from "#framework/server";
 import { useTwitch } from "#server/lib/twitch";
 import { public_image_url, sync_image } from "#server/utils/images";
 import { video_thumbnail_path } from "#server/utils/sync_images";
@@ -15,6 +22,8 @@ type VideoRow = repositoryTypes.videos.VideoRow & { video_is_hidden?: boolean };
 type VideosFilters = repositoryTypes.videos.FindAllForUserFilters;
 
 const MASTER_PLAYLIST_CACHE_TTL = 60 * 5; // 5 minutes, in seconds
+
+const CHECK_ON_OPEN_AFTER = 24 * 60 * 60 * 1000;
 
 const logger = () => useLogger("services.videos");
 
@@ -50,10 +59,40 @@ export default class VideosService extends AbstractService {
       message: "video_not_found",
     });
 
+    if (await this.deleted_on_youtube(video)) {
+      throw new NotFoundError({ message: "video_not_found" });
+    }
+
     return {
       ...this.to_list_resource(video),
       description: video.video_description,
     };
+  }
+
+  private async deleted_on_youtube(
+    video: NonNullable<repositoryTypes.videos.FindByIdForUserOutput>,
+  ) {
+    const checked_at = video.video_checked_at ? new Date(video.video_checked_at).getTime() : 0;
+    if (video.video_service !== "youtube" || Date.now() - checked_at < CHECK_ON_OPEN_AFTER) {
+      return false;
+    }
+
+    try {
+      const { deleted } = await services.feeds.youtube.check([
+        {
+          id: video.video_id,
+          service_id: video.video_service_id,
+          thumbnail_small: video.video_thumbnail_small,
+          thumbnail_large: video.video_thumbnail_large,
+        },
+      ]);
+
+      return deleted.length > 0;
+    } catch (error) {
+      logger().warn({ err: error, video_id: video.video_id }, "Failed to check a YouTube video");
+
+      return false;
+    }
   }
 
   async get_url(

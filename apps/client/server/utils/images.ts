@@ -93,7 +93,7 @@ export const write_image = async (image: Buffer, path: string, size: ImageSize) 
 };
 
 export const remove_image = async (path: string) => {
-  if (!path) {
+  if (!path || path.startsWith("https://")) {
     return;
   }
 

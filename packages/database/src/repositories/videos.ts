@@ -23,6 +23,12 @@ import type {
   MarkReadyOutput,
   RemoveByServiceIdInput,
   RemoveByServiceIdOutput,
+  FindPublishedSinceInput,
+  FindPublishedSinceOutput,
+  RemoveManyInput,
+  RemoveManyOutput,
+  MarkCheckedInput,
+  MarkCheckedOutput,
   ShowForUserInput,
   ShowForUserOutput,
   UpdateLargeThumbnailInput,
@@ -129,6 +135,8 @@ export async function find_by_id_for_user({
     .select((eb) => [
       "videos.id as video_id",
       "videos.service as video_service",
+      "videos.service_id as video_service_id",
+      "videos.checked_at as video_checked_at",
       "videos.title as video_title",
       "videos.description as video_description",
       "videos.duration as video_duration",
@@ -423,6 +431,44 @@ export async function remove_by_service_id({
     .deleteFrom("videos")
     .where("service", "=", service)
     .where("service_id", "=", service_id)
+    .execute();
+}
+
+export async function find_published_since({
+  service,
+  subscription_id,
+  content_type,
+  since,
+}: FindPublishedSinceInput): Promise<FindPublishedSinceOutput> {
+  return useDatabase()
+    .selectFrom("videos")
+    .select(["id", "service_id", "thumbnail_small", "thumbnail_large"])
+    .where("service", "=", service)
+    .where("subscription_id", "=", subscription_id)
+    .where("content_type", "=", content_type)
+    .where("created_at", ">=", since)
+    .execute();
+}
+
+export async function remove_many({ ids, options }: RemoveManyInput): Promise<RemoveManyOutput> {
+  const database = resolveDatabase(options);
+
+  if (ids.length === 0) {
+    return;
+  }
+
+  await database.deleteFrom("videos").where("id", "in", ids).execute();
+}
+
+export async function mark_checked({ ids }: MarkCheckedInput): Promise<MarkCheckedOutput> {
+  if (ids.length === 0) {
+    return;
+  }
+
+  await useDatabase()
+    .updateTable("videos")
+    .set({ checked_at: sql<string>`now()` })
+    .where("id", "in", ids)
     .execute();
 }
 

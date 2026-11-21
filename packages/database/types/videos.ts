@@ -1,4 +1,4 @@
-import type { SubscriptionType, VideoPalette } from "@watcher/common";
+import type { SubscriptionType, VideoContentType, VideoPalette } from "@watcher/common";
 
 import type { DatabaseSchema, DatabaseSchemaInsert, RepositoryContext } from "../src/database";
 
@@ -55,6 +55,8 @@ export type FindByIdForUserInput = { id: string; user_id: string };
 export type FindByIdForUserOutput =
   | (VideoRow & {
       video_description: string;
+      video_service_id: string;
+      video_checked_at: string | null;
       subscription_service_id: string;
     })
   | undefined;
@@ -132,6 +134,22 @@ export type RemoveByServiceIdInput = {
   options?: RepositoryContext;
 };
 export type RemoveByServiceIdOutput = void;
+
+export type FindPublishedSinceInput = {
+  service: SubscriptionType;
+  subscription_id: string;
+  content_type: VideoContentType;
+  since: string;
+};
+export type FindPublishedSinceOutput = Array<
+  Pick<DatabaseSchema["videos"], "id" | "service_id" | "thumbnail_small" | "thumbnail_large">
+>;
+
+export type RemoveManyInput = { ids: Array<string>; options?: RepositoryContext };
+export type RemoveManyOutput = void;
+
+export type MarkCheckedInput = { ids: Array<string> };
+export type MarkCheckedOutput = void;
 
 export type HideForUserInput = { user_id: string; video_id: string; options?: RepositoryContext };
 export type HideForUserOutput = void;
