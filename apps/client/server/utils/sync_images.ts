@@ -55,10 +55,3 @@ export const sync_video_thumbnail_and_palette = async ({ video }: Sync["Video"])
     palette: await extract_image_palette(small.image),
   };
 };
-
-export const remove_video_thumbnails = async ({ video }: Sync["Video"]) => {
-  await Promise.all([
-    remove_image(video.thumbnail_small_local),
-    remove_image(video.thumbnail_large),
-  ]);
-};

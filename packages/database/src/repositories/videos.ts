@@ -21,8 +21,6 @@ import type {
   InsertNewOutput,
   MarkReadyInput,
   MarkReadyOutput,
-  RemoveByServiceIdInput,
-  RemoveByServiceIdOutput,
   FindPublishedSinceInput,
   FindPublishedSinceOutput,
   RemoveManyInput,
@@ -418,20 +416,6 @@ export async function update_large_thumbnail({
   const database = resolveDatabase(options);
 
   await database.updateTable("videos").set({ thumbnail_large }).where("id", "=", id).execute();
-}
-
-export async function remove_by_service_id({
-  service,
-  service_id,
-  options,
-}: RemoveByServiceIdInput): Promise<RemoveByServiceIdOutput> {
-  const database = resolveDatabase(options);
-
-  await database
-    .deleteFrom("videos")
-    .where("service", "=", service)
-    .where("service_id", "=", service_id)
-    .execute();
 }
 
 export async function find_published_since({

@@ -21,15 +21,14 @@ export class VideosService extends TwitchService {
   }
 
   public async list(
-    data: { user_id: string; cursor?: string },
+    data: { user_id: string; first?: number; cursor?: string },
     config: TwitchServiceRequest,
   ): Promise<Twitch["Videos"]["List"]> {
     return await this.perform_request(config.service_id, async (token) => {
       const url = new URL("https://api.twitch.tv/helix/videos");
-      url.searchParams.set("first", "100");
-      url.searchParams.set("archive", "archive");
+      url.searchParams.set("first", String(data.first ?? 20));
+      url.searchParams.set("type", "archive");
       url.searchParams.set("sort", "time");
-      url.searchParams.set("period", "all");
       url.searchParams.set("user_id", data.user_id);
 
       if (data.cursor) {

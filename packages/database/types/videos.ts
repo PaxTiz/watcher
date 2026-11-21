@@ -128,13 +128,6 @@ export type UpdateLargeThumbnailInput = {
 };
 export type UpdateLargeThumbnailOutput = void;
 
-export type RemoveByServiceIdInput = {
-  service: SubscriptionType;
-  service_id: string;
-  options?: RepositoryContext;
-};
-export type RemoveByServiceIdOutput = void;
-
 export type FindPublishedSinceInput = {
   service: SubscriptionType;
   subscription_id: string;
