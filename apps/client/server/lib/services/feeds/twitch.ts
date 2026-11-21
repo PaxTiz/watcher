@@ -1,13 +1,37 @@
-import { type repositoryTypes, subscriptionsSync } from "@watcher/database";
-import { MAX_STREAMS_PER_REQUEST } from "@watcher/integration-twitch";
+import type { Twitch } from "@watcher/common";
+import {
+  pendingVideoImages,
+  type repositoryTypes,
+  subscriptionsSync,
+  videos,
+  withTransaction,
+} from "@watcher/database";
+import { MAX_STREAMS_PER_REQUEST, MAX_VIDEOS_PER_REQUEST } from "@watcher/integration-twitch";
 
 import { AbstractService, useLogger } from "#framework";
+import { services } from "#framework/server";
 import { useTwitch } from "#server/lib/twitch";
-import { next_live_check_at, retry_at } from "#server/utils/sync_schedule";
+import { remove_image } from "#server/utils/images";
+import {
+  latest_date,
+  next_live_check_at,
+  next_vods_read_at,
+  retry_at,
+} from "#server/utils/sync_schedule";
+import {
+  is_twitch_placeholder_thumbnail,
+  twitch_duration_seconds,
+  twitch_thumbnail_url,
+} from "#server/utils/twitch";
+import { async_pool } from "#shared/utils/random";
 
 const logger = () => useLogger("services.feeds.twitch");
 
 type ScheduledChannel = repositoryTypes.subscriptionsSync.ClaimDueOutput[number];
+
+type VodsChannel = repositoryTypes.subscriptionsSync.ClaimVodsDueOutput[number];
+
+type Vod = Twitch["Videos"]["List"]["data"][number];
 
 const chunk = <T>(items: Array<T>, size: number) =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
@@ -15,6 +39,16 @@ const chunk = <T>(items: Array<T>, size: number) =>
   );
 
 const VODS_DELAY_SECONDS = 10 * 60;
+
+const FIRST_READ_SIZE = 100;
+const NEXT_READS_SIZE = 20;
+
+const PLACEHOLDER_RETRY_MINUTES = 30;
+const FAILURE_RETRY_MINUTES = 60;
+
+const MIN_BATCH_FOR_EMPTY_ANSWER = 10;
+
+const in_minutes = (minutes: number) => new Date(Date.now() + minutes * 60_000).toISOString();
 
 export default class FeedsTwitch extends AbstractService {
   async check_lives(channels: Array<ScheduledChannel>) {
@@ -67,5 +101,199 @@ export default class FeedsTwitch extends AbstractService {
     }
 
     return totals;
+  }
+
+  async read_vods_due(channels: Array<VodsChannel>) {
+    const totals = { read: channels.length, stored: 0, updated: 0, deleted: 0, failed: 0 };
+
+    await async_pool(channels, 5, async (channel) => {
+      try {
+        const result = await this.read_vods(channel);
+        totals.stored += result.stored;
+        totals.updated += result.updated;
+        totals.deleted += result.deleted;
+      } catch (error) {
+        totals.failed++;
+        logger().error(
+          { err: error, channel_id: channel.service_id, channel: channel.name },
+          "Failed to read the VODs of a Twitch channel",
+        );
+
+        await subscriptionsSync.reschedule_vods({
+          subscription_id: channel.subscription_id,
+          vods_due_at: in_minutes(FAILURE_RETRY_MINUTES),
+          last_video_at: null,
+        });
+      }
+    });
+
+    return totals;
+  }
+
+  async read_vods(channel: VodsChannel) {
+    const stored = await videos.find_all_by_subscription({
+      service: "twitch",
+      subscription_id: channel.service_id,
+    });
+    const stored_by_id = new Map(stored.map((video) => [video.service_id, video]));
+
+    const response = await useTwitch().videos.list({
+      user_id: channel.service_id,
+      first: stored.length === 0 ? FIRST_READ_SIZE : NEXT_READS_SIZE,
+    });
+
+    const finished = response.data.filter(
+      (vod) => !channel.live_stream_id || vod.stream_id !== channel.live_stream_id,
+    );
+    const placeholders = finished.filter((vod) =>
+      is_twitch_placeholder_thumbnail(vod.thumbnail_url),
+    );
+    const ready = finished.filter((vod) => !is_twitch_placeholder_thumbnail(vod.thumbnail_url));
+
+    const created = ready.filter((vod) => !stored_by_id.has(vod.id));
+    const known = ready.filter((vod) => stored_by_id.has(vod.id));
+
+    const inserted = await withTransaction(async (tx) => {
+      const inserted = await videos.insert_new({
+        data: created.map((vod) => this.to_video(channel, vod)),
+        options: { tx },
+      });
+
+      await pendingVideoImages.add_many({
+        video_ids: inserted.map((video) => video.id),
+        options: { tx },
+      });
+
+      return inserted;
+    });
+
+    await videos.update_metadata_many({
+      data: known.map((vod) => ({
+        id: stored_by_id.get(vod.id)!.id,
+        title: vod.title,
+        description: vod.description,
+        duration: twitch_duration_seconds(vod.duration),
+      })),
+    });
+
+    await videos.mark_checked({
+      ids: response.data.flatMap((vod) => stored_by_id.get(vod.id)?.id ?? []),
+    });
+
+    const deleted = await this.remove_missing(stored, response.data);
+
+    if (inserted.length > 0) {
+      await services.search
+        .index_guests({
+          service: "twitch",
+          channel_name: channel.name,
+          videos: inserted.map((video) => ({ service_id: video.service_id, title: video.title })),
+        })
+        .catch((error: unknown) => {
+          logger().error(
+            { err: error, channel_id: channel.service_id },
+            "Failed to index the guests of Twitch VODs",
+          );
+        });
+    }
+
+    const last_video_at = latest_date(response.data.map((vod) => vod.created_at));
+
+    await subscriptionsSync.reschedule_vods({
+      subscription_id: channel.subscription_id,
+      vods_due_at:
+        placeholders.length > 0
+          ? in_minutes(PLACEHOLDER_RETRY_MINUTES)
+          : next_vods_read_at(last_video_at),
+      last_video_at,
+    });
+
+    logger().debug(
+      {
+        channel_id: channel.service_id,
+        stored: inserted.length,
+        updated: known.length,
+        placeholders: placeholders.length,
+        deleted,
+      },
+      "Twitch VODs read",
+    );
+
+    return { stored: inserted.length, updated: known.length, deleted };
+  }
+
+  private async remove_missing(
+    stored: repositoryTypes.videos.FindAllBySubscriptionOutput,
+    listed: Array<Vod>,
+  ) {
+    const oldest = listed.reduce<string | null>(
+      (min, vod) => (!min || new Date(vod.created_at) < new Date(min) ? vod.created_at : min),
+      null,
+    );
+    if (!oldest) {
+      return 0;
+    }
+
+    const listed_ids = new Set(listed.map((vod) => vod.id));
+    const missing = stored.filter(
+      (video) =>
+        !listed_ids.has(video.service_id) && new Date(video.created_at) >= new Date(oldest),
+    );
+
+    let deleted = 0;
+    for (const batch of chunk(missing, MAX_VIDEOS_PER_REQUEST)) {
+      const found = await useTwitch().videos.list_by_ids({
+        ids: batch.map((video) => video.service_id),
+      });
+
+      if (found.length === 0 && batch.length >= MIN_BATCH_FOR_EMPTY_ANSWER) {
+        throw new Error(`Twitch returned none of the ${batch.length} checked VODs`);
+      }
+
+      const found_ids = new Set(found.map((vod) => vod.id));
+      const gone = batch.filter((video) => !found_ids.has(video.service_id));
+
+      await videos.mark_checked({
+        ids: batch.filter((video) => found_ids.has(video.service_id)).map((video) => video.id),
+      });
+
+      if (gone.length > 0) {
+        await videos.remove_many({ ids: gone.map((video) => video.id) });
+        await Promise.all(
+          gone.flatMap((video) => [
+            remove_image(video.thumbnail_small),
+            remove_image(video.thumbnail_large),
+          ]),
+        );
+
+        logger().info(
+          { videos: gone.map((video) => video.service_id) },
+          "Deleted Twitch VODs removed",
+        );
+        deleted += gone.length;
+      }
+    }
+
+    return deleted;
+  }
+
+  private to_video(channel: VodsChannel, vod: Vod): repositoryTypes.videos.InsertNewData {
+    return {
+      service: "twitch",
+      service_id: vod.id,
+      subscription_id: channel.service_id,
+      title: vod.title,
+      description: vod.description,
+      created_at: vod.created_at,
+      url: vod.url,
+      duration: twitch_duration_seconds(vod.duration),
+      thumbnail_small: twitch_thumbnail_url(vod.thumbnail_url, "small"),
+      thumbnail_small_etag: "",
+      thumbnail_large: "",
+      thumbnail_large_source: twitch_thumbnail_url(vod.thumbnail_url, "large"),
+      last_synced_at: new Date().toISOString(),
+      ready_at: null,
+      content_type: "live",
+    };
   }
 }

@@ -4,6 +4,8 @@ import { sql } from "kysely";
 import type {
   ClaimDueInput,
   ClaimDueOutput,
+  ClaimVodsDueInput,
+  ClaimVodsDueOutput,
   ClaimWebsubDueInput,
   ClaimWebsubDueOutput,
   ConfirmWebsubInput,
@@ -16,6 +18,8 @@ import type {
   RecordLiveChecksOutput,
   RescheduleInput,
   RescheduleOutput,
+  RescheduleVodsInput,
+  RescheduleVodsOutput,
   StatsInput,
   StatsOutput,
   WakeInput,
@@ -253,4 +257,63 @@ export async function record_live_checks({
     )
     WHERE ss.subscription_id = c.subscription_id AND ss.next_check_at IS NOT NULL
   `.execute(useDatabase());
+}
+
+export async function claim_vods_due({
+  service,
+  limit,
+  lease_seconds,
+}: ClaimVodsDueInput): Promise<ClaimVodsDueOutput> {
+  return useDatabase()
+    .with("claimed", (db) =>
+      db
+        .updateTable("subscriptions_sync")
+        .set({
+          vods_due_at: sql<string | null>`CASE
+            WHEN EXISTS (
+              SELECT 1 FROM user_subscriptions
+              WHERE user_subscriptions.subscription_id = subscriptions_sync.subscription_id
+            )
+            THEN now() + make_interval(secs => ${lease_seconds})
+          END`,
+        })
+        .where("subscription_id", "in", (eb) =>
+          eb
+            .selectFrom("subscriptions_sync")
+            .select("subscription_id")
+            .where("service", "=", service)
+            .where("vods_due_at", "<=", sql<string>`now()`)
+            .orderBy("vods_due_at")
+            .limit(limit)
+            .forUpdate()
+            .skipLocked(),
+        )
+        .returning(["subscription_id", "vods_due_at", "live_stream_id"]),
+    )
+    .selectFrom("claimed")
+    .innerJoin("subscriptions", "subscriptions.id", "claimed.subscription_id")
+    .where("claimed.vods_due_at", "is not", null)
+    .select([
+      "claimed.subscription_id",
+      "claimed.live_stream_id",
+      "subscriptions.service_id",
+      "subscriptions.name",
+    ])
+    .execute();
+}
+
+export async function reschedule_vods({
+  subscription_id,
+  vods_due_at,
+  last_video_at,
+}: RescheduleVodsInput): Promise<RescheduleVodsOutput> {
+  await useDatabase()
+    .updateTable("subscriptions_sync")
+    .set({
+      vods_due_at,
+      last_video_at: sql<string | null>`greatest(last_video_at, ${last_video_at}::timestamptz)`,
+    })
+    .where("subscription_id", "=", subscription_id)
+    .where("vods_due_at", "is not", null)
+    .execute();
 }

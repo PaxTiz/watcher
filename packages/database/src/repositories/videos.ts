@@ -27,6 +27,8 @@ import type {
   RemoveManyOutput,
   MarkCheckedInput,
   MarkCheckedOutput,
+  UpdateMetadataManyInput,
+  UpdateMetadataManyOutput,
   ShowForUserInput,
   ShowForUserOutput,
   UpdateLargeThumbnailInput,
@@ -502,4 +504,24 @@ export async function upsert_progression({
         .where("users_videos_progression.progression", "is distinct from", progression),
     )
     .execute();
+}
+
+export async function update_metadata_many({
+  data,
+}: UpdateMetadataManyInput): Promise<UpdateMetadataManyOutput> {
+  if (data.length === 0) {
+    return;
+  }
+
+  await sql`
+    UPDATE videos v
+    SET title = d.title, description = d.description, duration = d.duration, last_synced_at = now()
+    FROM jsonb_to_recordset(${JSON.stringify(data)}::jsonb) AS d(
+      id uuid,
+      title varchar,
+      description text,
+      duration integer
+    )
+    WHERE v.id = d.id
+  `.execute(useDatabase());
 }

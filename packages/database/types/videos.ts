@@ -157,3 +157,12 @@ export type UpsertProgressionInput = {
   options?: RepositoryContext;
 };
 export type UpsertProgressionOutput = void;
+
+export type UpdateMetadataManyData = {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+};
+export type UpdateMetadataManyInput = { data: Array<UpdateMetadataManyData> };
+export type UpdateMetadataManyOutput = void;
