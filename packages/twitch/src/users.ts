@@ -1,7 +1,8 @@
-import { request_options, type Twitch } from "@watcher/common";
+import type { Twitch } from "@watcher/common";
 import { ofetch } from "ofetch";
 
 import type { TwitchClient } from "./internal/client";
+import { helix_options } from "./internal/helix";
 import { type TwitchServiceRequest, TwitchService } from "./internal/service";
 
 export class UsersService extends TwitchService {
@@ -19,13 +20,10 @@ export class UsersService extends TwitchService {
         url.searchParams.append("id", id);
       }
 
-      return await ofetch<Twitch["Users"]["List"]>(url.toString(), {
-        ...request_options(),
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Client-Id": this.client.settings.client_id,
-        },
-      });
+      return await ofetch<Twitch["Users"]["List"]>(
+        url.toString(),
+        helix_options(this.client, token),
+      );
     });
   }
 }

@@ -5,3 +5,7 @@ export const createClient = (options: ClientSettings) => {
 };
 
 export type Client = ReturnType<typeof createClient>;
+
+export type { RateLimit } from "./internal/client";
+export { MAX_STREAMS_PER_REQUEST } from "./streams";
+export { MAX_VIDEOS_PER_REQUEST } from "./videos";

@@ -1,9 +1,12 @@
 import { request_options, type Twitch } from "@watcher/common";
 import { isAfter } from "date-fns";
-import { ofetch } from "ofetch";
+import { FetchError, ofetch } from "ofetch";
 
 import type { TwitchClient } from "./internal/client";
+import { helix_options } from "./internal/helix";
 import { type TwitchServiceRequest, TwitchService } from "./internal/service";
+
+export const MAX_VIDEOS_PER_REQUEST = 100;
 
 const DEFAULT_RESOLUTIONS = {
   chunked: { name: "Source", resolution: "chunked", frameRate: 60 },
@@ -35,13 +38,44 @@ export class VideosService extends TwitchService {
         url.searchParams.set("after", data.cursor);
       }
 
-      return await ofetch<Twitch["Videos"]["List"]>(url.toString(), {
-        ...request_options(),
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Client-Id": this.client.settings.client_id,
-        },
-      });
+      return await ofetch<Twitch["Videos"]["List"]>(
+        url.toString(),
+        helix_options(this.client, token),
+      );
+    });
+  }
+
+  public async list_by_ids(data: {
+    ids: Array<string>;
+  }): Promise<Twitch["Videos"]["List"]["data"]> {
+    if (data.ids.length === 0) {
+      return [];
+    }
+
+    if (data.ids.length > MAX_VIDEOS_PER_REQUEST) {
+      throw new Error(`At most ${MAX_VIDEOS_PER_REQUEST} videos per request`);
+    }
+
+    return await this.perform_app_request(async (token) => {
+      const url = new URL("https://api.twitch.tv/helix/videos");
+      for (const id of data.ids) {
+        url.searchParams.append("id", id);
+      }
+
+      try {
+        const response = await ofetch<Twitch["Videos"]["List"]>(
+          url.toString(),
+          helix_options(this.client, token, { app: true }),
+        );
+
+        return response.data;
+      } catch (error) {
+        if (error instanceof FetchError && error.statusCode === 404) {
+          return [];
+        }
+
+        throw error;
+      }
     });
   }
 

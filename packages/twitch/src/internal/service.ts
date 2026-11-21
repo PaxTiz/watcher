@@ -1,4 +1,5 @@
 import { add, isBefore } from "date-fns";
+import { FetchError } from "ofetch";
 
 import type { ClientTokens, TwitchClient } from "./client";
 import { oauth } from "./oauth";
@@ -19,6 +20,20 @@ export class TwitchService {
     const token = await this.refresh_token_if_needed(user_id);
 
     return await callback(token.access_token);
+  }
+
+  protected async perform_app_request<T>(callback: (access_token: string) => Promise<T>) {
+    try {
+      return await callback(await this.client.get_app_token());
+    } catch (error) {
+      if (!(error instanceof FetchError) || error.statusCode !== 401) {
+        throw error;
+      }
+
+      this.client.forget_app_token();
+
+      return await callback(await this.client.get_app_token());
+    }
   }
 
   private async refresh_token_if_needed(service_id: string) {

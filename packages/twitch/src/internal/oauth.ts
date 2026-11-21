@@ -57,6 +57,28 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
   }
 }
 
+async function get_app_access_token(settings: ClientSettings) {
+  try {
+    return await ofetch<{ access_token: string; expires_in: number; token_type: "bearer" }>(
+      "https://id.twitch.tv/oauth2/token",
+      {
+        ...request_options(),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          grant_type: "client_credentials",
+          client_id: settings.client_id,
+          client_secret: settings.client_secret,
+        }),
+      },
+    );
+  } catch (err) {
+    throw new Error("Failed to get a Twitch app access token", { cause: err });
+  }
+}
+
 async function revoke_token(settings: ClientSettings, token: string) {
   try {
     await ofetch("https://id.twitch.tv/oauth2/revoke", {
@@ -79,5 +101,6 @@ export const oauth = {
   get_current_user,
   get_access_token,
   refresh_access_token,
+  get_app_access_token,
   revoke_token,
 };

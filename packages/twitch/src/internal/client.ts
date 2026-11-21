@@ -1,6 +1,7 @@
 import { add, isBefore } from "date-fns";
 
 import { FollowersService } from "../followers";
+import { StreamsService } from "../streams";
 import { UsersService } from "../users";
 import { VideosService } from "../videos";
 import { oauth } from "./oauth";
@@ -25,18 +26,54 @@ export type ClientSettings = {
   onRefreshToken: (params: { service_id: string; tokens: ClientTokens }) => Promise<ClientTokens>;
 };
 
+export type RateLimit = { limit: number; remaining: number; reset_at: Date };
+
 export class TwitchClient {
   public readonly settings: ClientSettings;
 
+  public rate_limit: RateLimit | null = null;
+
+  private app_token: Promise<{ access_token: string; expires_at: Date }> | null = null;
+
   public followers: FollowersService;
+  public streams: StreamsService;
   public users: UsersService;
   public videos: VideosService;
 
   constructor(options: ClientSettings) {
     this.settings = options;
     this.followers = new FollowersService(this);
+    this.streams = new StreamsService(this);
     this.users = new UsersService(this);
     this.videos = new VideosService(this);
+  }
+
+  async get_app_token() {
+    const current = await this.app_token?.catch(() => null);
+    if (current && isBefore(add(new Date(), { minutes: 5 }), current.expires_at)) {
+      return current.access_token;
+    }
+
+    this.app_token = oauth.get_app_access_token(this.settings).then((response) => ({
+      access_token: response.access_token,
+      expires_at: add(new Date(), { seconds: response.expires_in }),
+    }));
+
+    return (await this.app_token).access_token;
+  }
+
+  forget_app_token() {
+    this.app_token = null;
+  }
+
+  record_rate_limit(headers: Headers) {
+    const limit = Number(headers.get("ratelimit-limit"));
+    const remaining = Number(headers.get("ratelimit-remaining"));
+    const reset = Number(headers.get("ratelimit-reset"));
+
+    if (headers.has("ratelimit-remaining") && Number.isFinite(remaining)) {
+      this.rate_limit = { limit, remaining, reset_at: new Date(reset * 1000) };
+    }
   }
 
   async revoke(tokens: ClientTokens) {
