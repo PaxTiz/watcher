@@ -54,7 +54,10 @@ export default class FeedsYoutube extends AbstractService {
 
         await subscriptionsSync.reschedule({
           subscription_id: channel.subscription_id,
-          next_check_at: next_check_at(latest_date([channel.last_video_at, result.last_video_at])),
+          next_check_at: next_check_at(
+            latest_date([channel.last_video_at, result.last_video_at]),
+            channel.websub_expires_at,
+          ),
           last_video_at: result.last_video_at,
         });
       } catch (error) {

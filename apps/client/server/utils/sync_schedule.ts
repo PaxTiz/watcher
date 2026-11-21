@@ -6,22 +6,29 @@ const in_minutes = (minutes: number) => new Date(Date.now() + minutes * 60_000).
 const with_jitter = (minutes: number) => minutes * (0.9 + Math.random() * 0.2);
 
 // The less a channel publishes, the less often it's checked
-export const next_check_at = (last_video_at: string | null) => {
+const check_interval = (last_video_at: string | null) => {
   const age = last_video_at ? Date.now() - new Date(last_video_at).getTime() : Infinity;
 
   if (age < 2 * DAY) {
-    return in_minutes(30 + Math.random() * 30);
+    return 30 + Math.random() * 30;
   }
 
   if (age < 30 * DAY) {
-    return in_minutes(with_jitter(3 * 60));
+    return with_jitter(3 * 60);
   }
 
   if (age < 182 * DAY) {
-    return in_minutes(with_jitter(12 * 60));
+    return with_jitter(12 * 60);
   }
 
-  return in_minutes(with_jitter(24 * 60));
+  return with_jitter(24 * 60);
+};
+
+export const next_check_at = (last_video_at: string | null, websub_expires_at: string | null) => {
+  const websub_active = !!websub_expires_at && new Date(websub_expires_at).getTime() > Date.now();
+  const interval = check_interval(last_video_at);
+
+  return in_minutes(websub_active ? Math.max(interval, with_jitter(3 * 60)) : interval);
 };
 
 export const next_subscriptions_sync_at = () => in_minutes(with_jitter(24 * 60));

@@ -31,16 +31,22 @@ export async function attach({
 
   await database
     .insertInto("subscriptions_sync")
-    .columns(["subscription_id", "service", "next_check_at"])
+    .columns(["subscription_id", "service", "next_check_at", "websub_renew_at"])
     .expression((eb) =>
       eb
         .selectFrom("subscriptions")
-        .select(["id", "service", sql<string>`now()`.as("next_check_at")])
+        .select([
+          "id",
+          "service",
+          sql<string>`now()`.as("next_check_at"),
+          sql<string>`now()`.as("websub_renew_at"),
+        ])
         .where("id", "=", subscription_id),
     )
     .onConflict((oc) =>
       oc.column("subscription_id").doUpdateSet({
         next_check_at: sql<string>`coalesce(subscriptions_sync.next_check_at, now())`,
+        websub_renew_at: sql<string>`coalesce(subscriptions_sync.websub_renew_at, now())`,
       }),
     )
     .execute();

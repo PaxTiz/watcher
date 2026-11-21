@@ -1,8 +1,13 @@
+import type { SubscriptionType } from "@watcher/common";
 import { sql } from "kysely";
 
 import type {
   ClaimDueInput,
   ClaimDueOutput,
+  ClaimWebsubDueInput,
+  ClaimWebsubDueOutput,
+  ConfirmWebsubInput,
+  ConfirmWebsubOutput,
   FindAllForUserInput,
   FindAllForUserOutput,
   RecordFailureInput,
@@ -11,6 +16,8 @@ import type {
   RescheduleOutput,
   StatsInput,
   StatsOutput,
+  WakeInput,
+  WakeOutput,
 } from "../../types/subscriptions_sync";
 import { resolveDatabase, useDatabase } from "../database";
 
@@ -43,7 +50,13 @@ export async function claim_due({
             .forUpdate()
             .skipLocked(),
         )
-        .returning(["subscription_id", "next_check_at", "last_video_at", "failures"]),
+        .returning([
+          "subscription_id",
+          "next_check_at",
+          "last_video_at",
+          "failures",
+          "websub_expires_at",
+        ]),
     )
     .selectFrom("claimed")
     .innerJoin("subscriptions", "subscriptions.id", "claimed.subscription_id")
@@ -52,6 +65,7 @@ export async function claim_due({
       "claimed.subscription_id",
       "claimed.last_video_at",
       "claimed.failures",
+      "claimed.websub_expires_at",
       "subscriptions.service_id",
       "subscriptions.name",
     ])
@@ -74,6 +88,7 @@ export async function find_all_for_user({
       "subscriptions_sync.subscription_id",
       "subscriptions_sync.last_video_at",
       "subscriptions_sync.failures",
+      "subscriptions_sync.websub_expires_at",
       "subscriptions.service_id",
       "subscriptions.name",
     ])
@@ -127,9 +142,78 @@ export async function stats({ service }: StatsInput): Promise<StatsOutput> {
       sql<number>`count(*)::int`.as("scheduled"),
       sql<number>`(count(*) FILTER (WHERE next_check_at <= now()))::int`.as("due"),
       sql<number>`(count(*) FILTER (WHERE failures > 0))::int`.as("failing"),
+      sql<number>`(count(*) FILTER (WHERE websub_expires_at > now()))::int`.as("websub_active"),
       sql<number>`COALESCE(extract(epoch FROM now() - min(next_check_at) FILTER (WHERE next_check_at <= now())), 0)::int`.as(
         "lag_seconds",
       ),
     ])
     .executeTakeFirstOrThrow();
+}
+
+const subscription_by_channel = (service: SubscriptionType, channel_id: string) =>
+  useDatabase()
+    .selectFrom("subscriptions")
+    .select("id")
+    .where("service", "=", service)
+    .where("service_id", "=", channel_id);
+
+export async function claim_websub_due({
+  service,
+  limit,
+  lease_seconds,
+}: ClaimWebsubDueInput): Promise<ClaimWebsubDueOutput> {
+  return useDatabase()
+    .with("claimed", (db) =>
+      db
+        .updateTable("subscriptions_sync")
+        .set({
+          websub_renew_at: sql<string | null>`CASE
+            WHEN next_check_at IS NOT NULL THEN now() + make_interval(secs => ${lease_seconds})
+          END`,
+        })
+        .where("subscription_id", "in", (eb) =>
+          eb
+            .selectFrom("subscriptions_sync")
+            .select("subscription_id")
+            .where("service", "=", service)
+            .where("websub_renew_at", "<=", sql<string>`now()`)
+            .orderBy("websub_renew_at")
+            .limit(limit)
+            .forUpdate()
+            .skipLocked(),
+        )
+        .returning(["subscription_id", "websub_renew_at"]),
+    )
+    .selectFrom("claimed")
+    .innerJoin("subscriptions", "subscriptions.id", "claimed.subscription_id")
+    .where("claimed.websub_renew_at", "is not", null)
+    .select("subscriptions.service_id")
+    .execute();
+}
+
+export async function confirm_websub({
+  service,
+  channel_id,
+  expires_at,
+  renew_at,
+}: ConfirmWebsubInput): Promise<ConfirmWebsubOutput> {
+  const result = await useDatabase()
+    .updateTable("subscriptions_sync")
+    .set({ websub_expires_at: expires_at, websub_renew_at: renew_at })
+    .where("subscription_id", "=", subscription_by_channel(service, channel_id))
+    .where("next_check_at", "is not", null)
+    .executeTakeFirst();
+
+  return result.numUpdatedRows > 0n;
+}
+
+export async function wake({ service, channel_id }: WakeInput): Promise<WakeOutput> {
+  const result = await useDatabase()
+    .updateTable("subscriptions_sync")
+    .set({ next_check_at: sql<string>`now()` })
+    .where("subscription_id", "=", subscription_by_channel(service, channel_id))
+    .where("next_check_at", "is not", null)
+    .executeTakeFirst();
+
+  return result.numUpdatedRows > 0n;
 }

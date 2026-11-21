@@ -98,6 +98,7 @@ export default defineNuxtConfig({
 
     scheduledTasks: {
       "0 * * * *": ["database:purge", "youtube:subscriptions", "sync:health"],
+      "*/10 * * * *": ["youtube:websub"],
       "* * * * *": ["youtube:feeds", "youtube:enrich", "videos:images"],
     },
 
@@ -145,6 +146,7 @@ export default defineNuxtConfig({
 
     google: {
       apiKey: "",
+      websubSecret: "", // empty: no WebSub, the feeds are only polled
     },
 
     oauth: {

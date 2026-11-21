@@ -4,12 +4,14 @@ import { YoutubeFeedsService } from "./feeds";
 import { YoutubePlaylistItemsService } from "./playlist_items";
 import { YoutubeSubscriptionsService } from "./subscriptions";
 import { YoutubeVideosService } from "./videos";
+import { YoutubeWebsubService } from "./websub";
 
 export class YoutubeService extends GoogleService {
   public feeds: YoutubeFeedsService;
   public playlist_items: YoutubePlaylistItemsService;
   public subscriptions: YoutubeSubscriptionsService;
   public videos: YoutubeVideosService;
+  public websub: YoutubeWebsubService;
 
   constructor(client: GoogleClient) {
     super(client);
@@ -18,5 +20,6 @@ export class YoutubeService extends GoogleService {
     this.playlist_items = new YoutubePlaylistItemsService(client);
     this.subscriptions = new YoutubeSubscriptionsService(client);
     this.videos = new YoutubeVideosService(client);
+    this.websub = new YoutubeWebsubService(client);
   }
 }

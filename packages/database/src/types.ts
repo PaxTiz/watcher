@@ -115,6 +115,10 @@ export type SubscriptionSyncTable = {
   last_video_at: string | null;
 
   failures: ColumnType<number, number | undefined, number>;
+
+  websub_renew_at: string | null;
+
+  websub_expires_at: string | null;
 };
 
 export type PendingVideoTable = {
