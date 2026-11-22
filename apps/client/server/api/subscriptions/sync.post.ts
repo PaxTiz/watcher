@@ -8,7 +8,7 @@ export default defineRoute({
     const user = require_user(event);
 
     await start_subscriptions_sync(event, user, () =>
-      services.subscriptions.sync(user, { full: true }),
+      services.subscriptions.sync(user, { full: true, channels: "all" }),
     );
   },
 });

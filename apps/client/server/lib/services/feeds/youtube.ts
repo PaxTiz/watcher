@@ -42,7 +42,10 @@ const LEASE_SECONDS = 10 * 60;
 const MIN_BATCH_FOR_EMPTY_ANSWER = 10;
 
 export default class FeedsYoutube extends AbstractService {
-  async check_channels(channels: Array<ScheduledChannel>, options: SyncOptions = { full: false }) {
+  async check_channels(
+    channels: Array<ScheduledChannel>,
+    options: Pick<SyncOptions, "full"> = { full: false },
+  ) {
     const totals = { checked: channels.length, discovered: 0, failed: 0 };
 
     await async_pool(channels, 10, async (channel) => {
@@ -250,7 +253,7 @@ export default class FeedsYoutube extends AbstractService {
     }
   }
 
-  async sync_channel(channel: Channel, options: SyncOptions) {
+  async sync_channel(channel: Channel, options: Pick<SyncOptions, "full">) {
     const google = useGoogle();
 
     const videos = await google.youtube.feeds.list({
@@ -281,7 +284,7 @@ export default class FeedsYoutube extends AbstractService {
     channel: Channel,
     content_type: VideoContentType,
     entries: FeedEntries,
-    options: SyncOptions,
+    options: Pick<SyncOptions, "full">,
   ) {
     await this.check_missing_from_feed(channel, content_type, entries);
 

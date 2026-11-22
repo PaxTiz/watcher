@@ -142,7 +142,7 @@ export default class FeedsTwitch extends AbstractService {
     return totals;
   }
 
-  async read_vods(channel: VodsChannel, options: SyncOptions = { full: false }) {
+  async read_vods(channel: VodsChannel, options: Pick<SyncOptions, "full"> = { full: false }) {
     const stored = await videos.find_all_by_subscription({
       service: "twitch",
       subscription_id: channel.service_id,

@@ -42,7 +42,7 @@ export default class SubscriptionsService extends AbstractService {
     return { ...resource, channel: { ...resource.channel, url: row.url } };
   }
 
-  async sync(user: User, options: SyncOptions = { full: false }) {
+  async sync(user: User, options: SyncOptions) {
     useLogger("services.subscriptions").info(
       { google: !!user.integrations.google, twitch: !!user.integrations.twitch, ...options },
       "Subscriptions sync requested",

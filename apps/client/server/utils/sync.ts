@@ -8,7 +8,16 @@ import { useRateLimiter } from "#server/lib/rate_limiter";
 
 export const SYNC_STALE_AFTER_SECONDS = 30 * 60;
 
-export type SyncOptions = { full: boolean };
+export type SyncOptions = { full: boolean; channels: "all" | "new" };
+
+export const channels_to_sync = <T extends { subscription_id: string }>(
+  channels: Array<T>,
+  options: SyncOptions,
+  created_ids: Set<string>,
+) =>
+  options.channels === "new"
+    ? channels.filter((channel) => created_ids.has(channel.subscription_id))
+    : channels;
 
 export const is_sync_running = (state: { started_at: string; finished_at: string | null }) =>
   !state.finished_at &&

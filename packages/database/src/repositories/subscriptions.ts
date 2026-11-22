@@ -1,3 +1,5 @@
+import { sql } from "kysely";
+
 import type {
   FindAllByUserInput,
   FindAllByUserOutput,
@@ -58,6 +60,6 @@ export async function upsert({ data, options }: UpsertInput): Promise<UpsertOutp
         last_synced_at: (c) => c.ref("excluded.last_synced_at"),
       }),
     )
-    .returning("id")
+    .returning(["id", sql<boolean>`xmax = 0`.as("created")])
     .executeTakeFirstOrThrow();
 }

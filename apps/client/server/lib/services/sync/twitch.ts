@@ -11,7 +11,7 @@ import { formatISO } from "date-fns";
 
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
-import { count_by_status, type SyncOptions } from "#server/utils/sync";
+import { channels_to_sync, count_by_status, type SyncOptions } from "#server/utils/sync";
 import { sync_subscription_logo } from "#server/utils/sync_images";
 import type { Sync } from "#shared/types/sync";
 import { async_pool } from "#shared/utils/random";
@@ -30,17 +30,20 @@ export default class SyncTwitch extends AbstractService {
     if (!synced) {
       return;
     }
+    const { created_ids, ...counts } = synced;
 
-    const scheduled = await subscriptionsSync.find_all_for_user({
-      user_id: user.id,
-      service: "twitch",
-    });
+    const scheduled = channels_to_sync(
+      await subscriptionsSync.find_all_for_user({ user_id: user.id, service: "twitch" }),
+      options,
+      created_ids,
+    );
     const lives = await services.feeds.twitch.check_lives(scheduled);
 
-    const channels = await subscriptionsSync.find_all_for_user({
-      user_id: user.id,
-      service: "twitch",
-    });
+    const channels = channels_to_sync(
+      await subscriptionsSync.find_all_for_user({ user_id: user.id, service: "twitch" }),
+      options,
+      created_ids,
+    );
     const vods = { read: channels.length, stored: 0, deleted: 0, failed: 0 };
     await async_pool(channels, 5, async (channel) => {
       try {
@@ -59,7 +62,15 @@ export default class SyncTwitch extends AbstractService {
     const images = await services.feeds.images.process_pending();
 
     logger().info(
-      { ...synced, lives, vods, images, duration_ms: Date.now() - started_at },
+      {
+        ...counts,
+        created: created_ids.size,
+        channels: options.channels,
+        lives,
+        vods,
+        images,
+        duration_ms: Date.now() - started_at,
+      },
       "Twitch sync finished",
     );
   }
@@ -89,17 +100,20 @@ export default class SyncTwitch extends AbstractService {
     );
 
     let failed = 0;
+    const created_ids = new Set<string>();
     await async_pool(subscriptions, 10, (sub) =>
-      this.sync_subscription(user, sub).catch((error: unknown) => {
-        failed++;
-        logger().error(
-          { err: error, channel_id: sub.channel.service_id, channel: sub.channel.name },
-          "Failed to sync a Twitch subscription",
-        );
-      }),
+      this.sync_subscription(user, sub)
+        .then((created_id) => created_id && created_ids.add(created_id))
+        .catch((error: unknown) => {
+          failed++;
+          logger().error(
+            { err: error, channel_id: sub.channel.service_id, channel: sub.channel.name },
+            "Failed to sync a Twitch subscription",
+          );
+        }),
     );
 
-    return { total: subscriptions.length, failed };
+    return { total: subscriptions.length, failed, created_ids };
   }
 
   private async get_subscriptions(user: User, service_id: string, twitch_id: string) {
@@ -188,14 +202,14 @@ export default class SyncTwitch extends AbstractService {
         "Twitch subscription detached (no longer followed)",
       );
 
-      return;
+      return null;
     }
 
     const logo = await sync_subscription_logo(subscription);
     subscription.channel.logo = logo.path;
     subscription.channel.logo_etag = logo.etag;
 
-    await withTransaction(async (tx) => {
+    const upserted = await withTransaction(async (tx) => {
       const { logo_local, ...subscription_data } = subscription.channel;
       const patched_subscription = await subscriptions.upsert({
         data: subscription_data,
@@ -207,7 +221,11 @@ export default class SyncTwitch extends AbstractService {
         subscription_id: patched_subscription.id,
         options: { tx },
       });
+
+      return patched_subscription;
     });
+
+    return upserted.created ? upserted.id : null;
   }
 
   private assert_twitch(user: User): string {

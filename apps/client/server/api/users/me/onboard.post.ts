@@ -17,7 +17,9 @@ export default defineRoute({
     await services.users.onboard(user);
 
     if (body.sync) {
-      await start_subscriptions_sync(event, user, () => services.subscriptions.sync(user));
+      await start_subscriptions_sync(event, user, () =>
+        services.subscriptions.sync(user, { full: false, channels: "new" }),
+      );
     }
   },
 });

@@ -23,4 +23,4 @@ export type FindAllForSyncOutput = Array<Omit<DatabaseSchema["subscriptions"], "
 
 export type UpsertData = Omit<DatabaseSchemaInsert["subscriptions"], "id">;
 export type UpsertInput = { data: UpsertData; options?: RepositoryContext };
-export type UpsertOutput = { id: string };
+export type UpsertOutput = { id: string; created: boolean };
