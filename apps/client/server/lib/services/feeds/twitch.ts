@@ -314,7 +314,6 @@ export default class FeedsTwitch extends AbstractService {
       thumbnail_large: "",
       thumbnail_large_source: twitch_thumbnail_url(vod.thumbnail_url, "large"),
       last_synced_at: new Date().toISOString(),
-      ready_at: new Date().toISOString(),
       content_type: "live",
       palette: null,
     };

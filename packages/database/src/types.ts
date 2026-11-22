@@ -96,8 +96,6 @@ export type VideoTable = {
 
   last_synced_at: string;
 
-  ready_at: ColumnType<string | null, string | null | undefined, string | null>;
-
   content_type: ColumnType<VideoContentType, VideoContentType | undefined, VideoContentType>;
 
   checked_at: string | null;

@@ -122,7 +122,6 @@ export async function find_by_id_for_user({
   return useDatabase()
     .selectFrom("videos")
     .where("videos.id", "=", id)
-    .where("videos.ready_at", "is not", null)
     .innerJoin("subscriptions", (qb) =>
       qb
         .onRef("subscriptions.service_id", "=", "videos.subscription_id")
@@ -210,7 +209,6 @@ export async function find_adjacent({
       ...select_viewing_progression(eb),
     ])
     .where("videos.id", "!=", id)
-    .where("videos.ready_at", "is not", null)
     .where("videos.service", "=", (eb) =>
       eb.selectFrom("videos").select("service").where("id", "=", id),
     )

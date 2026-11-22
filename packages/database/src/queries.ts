@@ -38,7 +38,6 @@ export function select_visible_videos_for_user(user_id: string, filters: FindAll
         .onRef("subscriptions.service", "=", "videos.service"),
     )
     .innerJoin("user_subscriptions", "user_subscriptions.subscription_id", "subscriptions.id")
-    .where("videos.ready_at", "is not", null)
     .$if(filters.with_hidden !== true, (qb) =>
       qb.where((eb) =>
         eb.not(
@@ -176,7 +175,6 @@ export function select_subscriptions_with_user_state(user_id: string) {
         .selectFrom("videos")
         .whereRef("videos.service", "=", "subscriptions.service")
         .whereRef("videos.subscription_id", "=", "subscriptions.service_id")
-        .where("videos.ready_at", "is not", null)
         .select((eb) => eb.fn.max("videos.created_at").as("created_at"))
         .as("last_video_at"),
     )

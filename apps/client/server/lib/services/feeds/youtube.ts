@@ -158,7 +158,6 @@ export default class FeedsYoutube extends AbstractService {
       thumbnail_large: "",
       thumbnail_large_source: snippet.thumbnails.maxres?.url ?? snippet.thumbnails.high.url,
       last_synced_at: new Date().toISOString(),
-      ready_at: new Date().toISOString(),
       content_type: video.content_type,
       palette: null,
     };

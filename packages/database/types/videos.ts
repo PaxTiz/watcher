@@ -90,7 +90,7 @@ export type FindThumbnailsOutput =
 
 export type FindAllBySubscriptionInput = { service: SubscriptionType; subscription_id: string };
 export type FindAllBySubscriptionOutput = Array<
-  Omit<DatabaseSchema["videos"], "search" | "ready_at" | "content_type" | "checked_at">
+  Omit<DatabaseSchema["videos"], "search" | "content_type" | "checked_at">
 >;
 
 export type FindAllWithoutPaletteInput = { after_id: string | null; limit: number };
