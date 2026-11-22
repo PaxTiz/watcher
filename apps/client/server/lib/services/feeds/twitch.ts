@@ -25,13 +25,13 @@ const logger = () => useLogger("services.feeds.twitch");
 
 type ScheduledChannel = repositoryTypes.subscriptionsSync.ClaimDueOutput[number];
 
-type VodsChannel = repositoryTypes.subscriptionsSync.ClaimVodsDueOutput[number];
+type CheckOptions = Pick<SyncOptions, "full"> & { all_vods: boolean };
 
 type Vod = Twitch["Videos"]["List"]["data"][number];
 
 type CheckedVod = repositoryTypes.videos.ClaimToCheckOutput[number];
 
-const VODS_DELAY_SECONDS = 10 * 60;
+const VODS_DELAY_MINUTES = 10;
 
 const FIRST_READ_SIZE = 100;
 const NEXT_READS_SIZE = 20;
@@ -49,45 +49,35 @@ const EVENTSUB_HEALTHY = ["enabled", "webhook_callback_verification_pending"];
 
 const in_minutes = (minutes: number) => new Date(Date.now() + minutes * 60_000).toISOString();
 
+const earliest = (date: string | null, other: string) =>
+  date && new Date(date) < new Date(other) ? date : other;
+
 export default class FeedsTwitch extends AbstractService {
-  async check_lives(channels: Array<ScheduledChannel>) {
-    const totals = { checked: channels.length, live: 0, started: 0, ended: 0, failed: 0 };
+  async check_channels(
+    channels: Array<ScheduledChannel>,
+    options: CheckOptions = { full: false, all_vods: false },
+  ) {
+    const totals = {
+      checked: channels.length,
+      live: 0,
+      ended: 0,
+      vods_read: 0,
+      stored: 0,
+      updated: 0,
+      deleted: 0,
+      failed: 0,
+    };
 
     for (const batch of chunk(channels, MAX_STREAMS_PER_REQUEST)) {
+      let streams_by_channel: Map<string, { id: string; started_at: string }>;
       try {
         const streams = await useTwitch().streams.list({
           user_ids: batch.map((channel) => channel.service_id),
         });
-        const streams_by_channel = new Map(streams.map((stream) => [stream.user_id, stream]));
-
-        const data = batch.map((channel) => {
-          const stream = streams_by_channel.get(channel.service_id);
-          const live_ended = !!channel.live_stream_id && channel.live_stream_id !== stream?.id;
-
-          totals.live += stream ? 1 : 0;
-          totals.started += stream && stream.id !== channel.live_stream_id ? 1 : 0;
-          totals.ended += live_ended ? 1 : 0;
-
-          return {
-            subscription_id: channel.subscription_id,
-            next_check_at: next_live_check_at(
-              stream?.started_at ?? channel.last_video_at,
-              !!stream,
-            ),
-            live_stream_id: stream?.id ?? null,
-            live_started_at: stream?.started_at ?? null,
-            live_ended,
-          };
-        });
-
-        await subscriptionsSync.record_live_checks({
-          data,
-          vods_delay_seconds: VODS_DELAY_SECONDS,
-        });
+        streams_by_channel = new Map(streams.map((stream) => [stream.user_id, stream]));
       } catch (error) {
         totals.failed += batch.length;
         logger().error({ err: error, channels: batch.length }, "Failed to check Twitch lives");
-
         await Promise.all(
           batch.map((channel) =>
             subscriptionsSync.record_failure({
@@ -96,40 +86,74 @@ export default class FeedsTwitch extends AbstractService {
             }),
           ),
         );
+        continue;
       }
+
+      const checks: Array<repositoryTypes.subscriptionsSync.RecordChecksData> = [];
+
+      await async_pool(batch, 5, async (channel) => {
+        const stream = streams_by_channel.get(channel.service_id);
+        const live_ended = !!channel.live_stream_id && channel.live_stream_id !== stream?.id;
+
+        let vods_due_at = channel.vods_due_at;
+        if (live_ended) {
+          vods_due_at = earliest(vods_due_at, in_minutes(VODS_DELAY_MINUTES));
+        }
+
+        totals.live += stream ? 1 : 0;
+        totals.ended += live_ended ? 1 : 0;
+
+        let last_video_at = stream?.started_at ?? null;
+        const vods_read =
+          options.all_vods || !vods_due_at || new Date(vods_due_at).getTime() <= Date.now();
+
+        if (vods_read) {
+          try {
+            const vods = await this.read_vods(channel, stream?.id ?? null, options);
+            totals.vods_read++;
+            totals.stored += vods.stored;
+            totals.updated += vods.updated;
+            totals.deleted += vods.deleted;
+
+            last_video_at = latest_date([last_video_at, vods.last_video_at]);
+            vods_due_at =
+              vods.placeholders > 0
+                ? in_minutes(PLACEHOLDER_RETRY_MINUTES)
+                : next_vods_read_at(latest_date([channel.last_video_at, last_video_at]));
+          } catch (error) {
+            totals.failed++;
+            logger().error(
+              { err: error, channel_id: channel.service_id, channel: channel.name },
+              "Failed to read the VODs of a Twitch channel",
+            );
+            vods_due_at = in_minutes(FAILURE_RETRY_MINUTES);
+          }
+        }
+
+        checks.push({
+          subscription_id: channel.subscription_id,
+          next_check_at: next_live_check_at(
+            latest_date([channel.last_video_at, last_video_at]),
+            !!stream,
+          ),
+          live_stream_id: stream?.id ?? null,
+          last_video_at,
+          vods_due_at,
+          vods_read,
+        });
+      });
+
+      await subscriptionsSync.record_checks({ data: checks });
     }
 
     return totals;
   }
 
-  async read_vods_due(channels: Array<VodsChannel>) {
-    const totals = { read: channels.length, stored: 0, updated: 0, deleted: 0, failed: 0 };
-
-    await async_pool(channels, 5, async (channel) => {
-      try {
-        const result = await this.read_vods(channel);
-        totals.stored += result.stored;
-        totals.updated += result.updated;
-        totals.deleted += result.deleted;
-      } catch (error) {
-        totals.failed++;
-        logger().error(
-          { err: error, channel_id: channel.service_id, channel: channel.name },
-          "Failed to read the VODs of a Twitch channel",
-        );
-
-        await subscriptionsSync.reschedule_vods({
-          subscription_id: channel.subscription_id,
-          vods_due_at: in_minutes(FAILURE_RETRY_MINUTES),
-          last_video_at: null,
-        });
-      }
-    });
-
-    return totals;
-  }
-
-  async read_vods(channel: VodsChannel, options: Pick<SyncOptions, "full"> = { full: false }) {
+  private async read_vods(
+    channel: ScheduledChannel,
+    live_stream_id: string | null,
+    options: Pick<SyncOptions, "full">,
+  ) {
     const stored = await videos.find_all_by_subscription({
       service: "twitch",
       subscription_id: channel.service_id,
@@ -142,7 +166,7 @@ export default class FeedsTwitch extends AbstractService {
     });
 
     const finished = response.data.filter(
-      (vod) => !channel.live_stream_id || vod.stream_id !== channel.live_stream_id,
+      (vod) => !live_stream_id || vod.stream_id !== live_stream_id,
     );
     const placeholders = finished.filter((vod) =>
       is_twitch_placeholder_thumbnail(vod.thumbnail_url),
@@ -189,15 +213,6 @@ export default class FeedsTwitch extends AbstractService {
 
     const last_video_at = latest_date(response.data.map((vod) => vod.created_at));
 
-    await subscriptionsSync.reschedule_vods({
-      subscription_id: channel.subscription_id,
-      vods_due_at:
-        placeholders.length > 0
-          ? in_minutes(PLACEHOLDER_RETRY_MINUTES)
-          : next_vods_read_at(last_video_at),
-      last_video_at,
-    });
-
     logger().debug(
       {
         channel_id: channel.service_id,
@@ -209,7 +224,13 @@ export default class FeedsTwitch extends AbstractService {
       "Twitch VODs read",
     );
 
-    return { stored: inserted.length, updated: known.length, deleted };
+    return {
+      stored: inserted.length,
+      updated: known.length,
+      deleted,
+      placeholders: placeholders.length,
+      last_video_at,
+    };
   }
 
   async expire_due(max_batches = Infinity) {
@@ -278,7 +299,7 @@ export default class FeedsTwitch extends AbstractService {
     return deleted;
   }
 
-  private to_video(channel: VodsChannel, vod: Vod): repositoryTypes.videos.InsertNewData {
+  private to_video(channel: ScheduledChannel, vod: Vod): repositoryTypes.videos.InsertNewData {
     return {
       service: "twitch",
       service_id: vod.id,

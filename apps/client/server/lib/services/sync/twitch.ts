@@ -5,7 +5,6 @@ import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import type { FollowedChannel } from "#server/lib/services/sync/subscriptions";
 import { channels_to_sync, type SyncOptions } from "#server/utils/sync";
-import { async_pool } from "#shared/utils/random";
 
 const logger = () => useLogger("services.sync.twitch");
 
@@ -22,31 +21,14 @@ export default class SyncTwitch extends AbstractService {
     }
     const { created_ids, ...counts } = synced;
 
-    const scheduled = channels_to_sync(
-      await subscriptionsSync.find_all_for_user({ user_id: user.id, service: "twitch" }),
-      options,
-      created_ids,
-    );
-    const lives = await services.feeds.twitch.check_lives(scheduled);
-
     const channels = channels_to_sync(
       await subscriptionsSync.find_all_for_user({ user_id: user.id, service: "twitch" }),
       options,
       created_ids,
     );
-    const vods = { read: channels.length, stored: 0, deleted: 0, failed: 0 };
-    await async_pool(channels, 5, async (channel) => {
-      try {
-        const result = await services.feeds.twitch.read_vods(channel, options);
-        vods.stored += result.stored;
-        vods.deleted += result.deleted;
-      } catch (error) {
-        vods.failed++;
-        logger().error(
-          { err: error, channel_id: channel.service_id, channel: channel.name },
-          "Failed to read the VODs of a Twitch channel",
-        );
-      }
+    const feeds = await services.feeds.twitch.check_channels(channels, {
+      full: options.full,
+      all_vods: true,
     });
 
     logger().info(
@@ -54,8 +36,7 @@ export default class SyncTwitch extends AbstractService {
         ...counts,
         created: created_ids.size,
         channels: options.channels,
-        lives,
-        vods,
+        feeds,
         duration_ms: Date.now() - started_at,
       },
       "Twitch sync finished",

@@ -4,8 +4,6 @@ import { sql } from "kysely";
 import type {
   ClaimDueInput,
   ClaimDueOutput,
-  ClaimVodsDueInput,
-  ClaimVodsDueOutput,
   ClaimWebsubDueInput,
   ClaimWebsubDueOutput,
   ConfirmWebsubInput,
@@ -16,14 +14,12 @@ import type {
   FindMostFollowedOutput,
   FindAllForUserInput,
   FindAllForUserOutput,
+  RecordChecksInput,
+  RecordChecksOutput,
   RecordFailureInput,
   RecordFailureOutput,
-  RecordLiveChecksInput,
-  RecordLiveChecksOutput,
   RescheduleInput,
   RescheduleOutput,
-  RescheduleVodsInput,
-  RescheduleVodsOutput,
   StatsInput,
   StatsOutput,
   WakeInput,
@@ -67,6 +63,7 @@ export async function claim_due({
           "failures",
           "websub_expires_at",
           "live_stream_id",
+          "vods_due_at",
         ]),
     )
     .selectFrom("claimed")
@@ -78,6 +75,7 @@ export async function claim_due({
       "claimed.failures",
       "claimed.websub_expires_at",
       "claimed.live_stream_id",
+      "claimed.vods_due_at",
       "subscriptions.service_id",
       "subscriptions.name",
     ])
@@ -102,6 +100,7 @@ export async function find_all_for_user({
       "subscriptions_sync.failures",
       "subscriptions_sync.websub_expires_at",
       "subscriptions_sync.live_stream_id",
+      "subscriptions_sync.vods_due_at",
       "subscriptions.service_id",
       "subscriptions.name",
     ])
@@ -158,10 +157,6 @@ export async function stats({ service }: StatsInput): Promise<StatsOutput> {
       sql<number>`(count(*) FILTER (WHERE websub_expires_at > now()))::int`.as("websub_active"),
       sql<number>`COALESCE(extract(epoch FROM now() - min(next_check_at) FILTER (WHERE next_check_at <= now())), 0)::int`.as(
         "lag_seconds",
-      ),
-      sql<number>`(count(*) FILTER (WHERE vods_due_at <= now()))::int`.as("vods_due"),
-      sql<number>`COALESCE(extract(epoch FROM now() - min(vods_due_at) FILTER (WHERE vods_due_at <= now())), 0)::int`.as(
-        "vods_lag_seconds",
       ),
     ])
     .executeTakeFirstOrThrow();
@@ -235,10 +230,7 @@ export async function wake({ service, channel_id }: WakeInput): Promise<WakeOutp
   return result.numUpdatedRows > 0n;
 }
 
-export async function record_live_checks({
-  data,
-  vods_delay_seconds,
-}: RecordLiveChecksInput): Promise<RecordLiveChecksOutput> {
+export async function record_checks({ data }: RecordChecksInput): Promise<RecordChecksOutput> {
   if (data.length === 0) {
     return;
   }
@@ -250,80 +242,21 @@ export async function record_live_checks({
       checked_at = now(),
       failures = 0,
       live_stream_id = c.live_stream_id,
-      last_video_at = greatest(ss.last_video_at, c.live_started_at),
+      last_video_at = greatest(ss.last_video_at, c.last_video_at),
       vods_due_at = CASE
-        WHEN c.live_ended
-        THEN least(ss.vods_due_at, now() + make_interval(secs => ${vods_delay_seconds}))
-        ELSE ss.vods_due_at
+        WHEN c.vods_read THEN c.vods_due_at
+        ELSE least(ss.vods_due_at, c.vods_due_at)
       END
     FROM jsonb_to_recordset(${JSON.stringify(data)}::jsonb) AS c(
       subscription_id uuid,
       next_check_at timestamptz,
       live_stream_id varchar,
-      live_started_at timestamptz,
-      live_ended boolean
+      last_video_at timestamptz,
+      vods_due_at timestamptz,
+      vods_read boolean
     )
     WHERE ss.subscription_id = c.subscription_id AND ss.next_check_at IS NOT NULL
   `.execute(useDatabase());
-}
-
-export async function claim_vods_due({
-  service,
-  limit,
-  lease_seconds,
-}: ClaimVodsDueInput): Promise<ClaimVodsDueOutput> {
-  return useDatabase()
-    .with("claimed", (db) =>
-      db
-        .updateTable("subscriptions_sync")
-        .set({
-          vods_due_at: sql<string | null>`CASE
-            WHEN EXISTS (
-              SELECT 1 FROM user_subscriptions
-              WHERE user_subscriptions.subscription_id = subscriptions_sync.subscription_id
-            )
-            THEN now() + make_interval(secs => ${lease_seconds})
-          END`,
-        })
-        .where("subscription_id", "in", (eb) =>
-          eb
-            .selectFrom("subscriptions_sync")
-            .select("subscription_id")
-            .where("service", "=", service)
-            .where("vods_due_at", "<=", sql<string>`now()`)
-            .orderBy("vods_due_at")
-            .limit(limit)
-            .forUpdate()
-            .skipLocked(),
-        )
-        .returning(["subscription_id", "vods_due_at", "live_stream_id"]),
-    )
-    .selectFrom("claimed")
-    .innerJoin("subscriptions", "subscriptions.id", "claimed.subscription_id")
-    .where("claimed.vods_due_at", "is not", null)
-    .select([
-      "claimed.subscription_id",
-      "claimed.live_stream_id",
-      "subscriptions.service_id",
-      "subscriptions.name",
-    ])
-    .execute();
-}
-
-export async function reschedule_vods({
-  subscription_id,
-  vods_due_at,
-  last_video_at,
-}: RescheduleVodsInput): Promise<RescheduleVodsOutput> {
-  await useDatabase()
-    .updateTable("subscriptions_sync")
-    .set({
-      vods_due_at,
-      last_video_at: sql<string | null>`greatest(last_video_at, ${last_video_at}::timestamptz)`,
-    })
-    .where("subscription_id", "=", subscription_id)
-    .where("vods_due_at", "is not", null)
-    .execute();
 }
 
 export async function find_most_followed({

@@ -44,7 +44,6 @@ export default defineTask({
       feeds_failing > MAX_FAILING_RATIO && "youtube_feeds_failing",
       lives.lag_seconds > MAX_LAG_SECONDS && "twitch_lives_lagging",
       lives_failing > MAX_FAILING_RATIO && "twitch_lives_failing",
-      lives.vods_lag_seconds > MAX_LAG_SECONDS && "twitch_vods_lagging",
       unchecked_vods > 0 && "twitch_expire_lagging",
       rate_limit.limit !== null &&
         rate_limit.lowest_remaining !== null &&

@@ -9,8 +9,8 @@ const LEASE_SECONDS = 10 * 60;
 
 export default defineTask({
   meta: {
-    name: "twitch:streams",
-    description: "Check which Twitch channels are live, and schedule their VODs when a live ends",
+    name: "twitch:channels",
+    description: "Check which Twitch channels are live, and read their VODs when a live ended",
   },
 
   async run() {
@@ -22,12 +22,12 @@ export default defineTask({
       lease_seconds: LEASE_SECONDS,
     });
 
-    const totals = await services.feeds.twitch.check_lives(channels);
+    const totals = await services.feeds.twitch.check_channels(channels);
 
     if (channels.length > 0) {
-      useLogger("tasks.twitch.streams").info(
+      useLogger("tasks.twitch.channels").info(
         { ...totals, duration_ms: Date.now() - started_at },
-        "Twitch lives checked",
+        "Twitch channels checked",
       );
     }
 

@@ -6,7 +6,12 @@ export type ClaimDueInput = { service: SubscriptionType; limit: number; lease_se
 export type ClaimDueOutput = Array<
   Pick<
     DatabaseSchema["subscriptions_sync"],
-    "subscription_id" | "last_video_at" | "failures" | "websub_expires_at" | "live_stream_id"
+    | "subscription_id"
+    | "last_video_at"
+    | "failures"
+    | "websub_expires_at"
+    | "live_stream_id"
+    | "vods_due_at"
   > &
     Pick<DatabaseSchema["subscriptions"], "service_id" | "name">
 >;
@@ -36,8 +41,6 @@ export type StatsOutput = {
   failing: number;
   websub_active: number;
   lag_seconds: number;
-  vods_due: number;
-  vods_lag_seconds: number;
 };
 
 export type ClaimWebsubDueInput = {
@@ -58,31 +61,16 @@ export type ConfirmWebsubOutput = boolean;
 export type WakeInput = { service: SubscriptionType; channel_id: string };
 export type WakeOutput = boolean;
 
-export type RecordLiveChecksData = {
+export type RecordChecksData = {
   subscription_id: string;
   next_check_at: string;
   live_stream_id: string | null;
-  live_started_at: string | null;
-  live_ended: boolean;
-};
-export type RecordLiveChecksInput = {
-  data: Array<RecordLiveChecksData>;
-  vods_delay_seconds: number;
-};
-export type RecordLiveChecksOutput = void;
-
-export type ClaimVodsDueInput = { service: SubscriptionType; limit: number; lease_seconds: number };
-export type ClaimVodsDueOutput = Array<
-  Pick<DatabaseSchema["subscriptions_sync"], "subscription_id" | "live_stream_id"> &
-    Pick<DatabaseSchema["subscriptions"], "service_id" | "name">
->;
-
-export type RescheduleVodsInput = {
-  subscription_id: string;
-  vods_due_at: string;
   last_video_at: string | null;
+  vods_due_at: string | null;
+  vods_read: boolean;
 };
-export type RescheduleVodsOutput = void;
+export type RecordChecksInput = { data: Array<RecordChecksData> };
+export type RecordChecksOutput = void;
 
 export type FindMostFollowedInput = { service: SubscriptionType; limit: number };
 export type FindMostFollowedOutput = Array<string>;
