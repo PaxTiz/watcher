@@ -22,7 +22,7 @@ export class UsersService extends TwitchService {
 
       return await ofetch<Twitch["Users"]["List"]>(
         url.toString(),
-        helix_options(this.client, token),
+        helix_options("twitch.helix.users", this.client, token),
       );
     });
   }

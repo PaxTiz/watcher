@@ -18,7 +18,7 @@ export class YoutubeWebsubService extends GoogleService {
 
   async subscribe(data: { channel_id: string; callback: string; secret: string }) {
     await ofetch(HUB_URL, {
-      ...request_options(),
+      ...request_options("youtube.websub.subscribe"),
       method: "POST",
       body: new URLSearchParams({
         "hub.mode": "subscribe",

@@ -23,7 +23,7 @@ export class EventsubService extends TwitchService {
 
       return await ofetch<Twitch["Eventsub"]["List"]>(
         url.toString(),
-        helix_options(this.client, token, { app: true }),
+        helix_options("twitch.helix.eventsub.list", this.client, token, { app: true }),
       );
     });
   }
@@ -36,7 +36,7 @@ export class EventsubService extends TwitchService {
   }) {
     await this.perform_app_request(async (token) => {
       await ofetch(EVENTSUB_URL, {
-        ...helix_options(this.client, token, { app: true }),
+        ...helix_options("twitch.helix.eventsub.create", this.client, token, { app: true }),
         method: "POST",
         body: {
           type: data.type,
@@ -54,7 +54,7 @@ export class EventsubService extends TwitchService {
       url.searchParams.set("id", data.id);
 
       await ofetch(url.toString(), {
-        ...helix_options(this.client, token, { app: true }),
+        ...helix_options("twitch.helix.eventsub.delete", this.client, token, { app: true }),
         method: "DELETE",
       });
     });

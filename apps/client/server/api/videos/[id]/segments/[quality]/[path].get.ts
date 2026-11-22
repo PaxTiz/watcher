@@ -28,7 +28,11 @@ const fetch_upstream = async (url: string) => {
   }
 
   const response = await ofetch
-    .raw(url, { ...request_options({ retry: 0 }), responseType: "stream", redirect: "error" })
+    .raw(url, {
+      ...request_options("twitch.cdn.proxy", { retry: 0 }),
+      responseType: "stream",
+      redirect: "error",
+    })
     .catch((error: unknown) => {
       logger().warn({ err: error, url }, "Upstream request failed");
       return null;

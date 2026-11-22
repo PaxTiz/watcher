@@ -20,4 +20,5 @@ export * as videos from "./repositories/videos";
 export * as subscriptionsSync from "./repositories/subscriptions_sync";
 export * as search from "./repositories/search";
 export * as rateLimits from "./repositories/rate_limits";
+export * as externalRequests from "./repositories/external_requests";
 export * as webauthnChallenges from "./repositories/webauthn_challenges";

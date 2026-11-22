@@ -41,7 +41,7 @@ export class VideosService extends TwitchService {
 
       return await ofetch<Twitch["Videos"]["List"]>(
         url.toString(),
-        helix_options(this.client, token, { app: true }),
+        helix_options("twitch.helix.videos", this.client, token, { app: true }),
       );
     });
   }
@@ -66,7 +66,7 @@ export class VideosService extends TwitchService {
       try {
         const response = await ofetch<Twitch["Videos"]["List"]>(
           url.toString(),
-          helix_options(this.client, token, { app: true }),
+          helix_options("twitch.helix.videos", this.client, token, { app: true }),
         );
 
         return response.data;
@@ -124,7 +124,7 @@ export class VideosService extends TwitchService {
       const response = await ofetch<Twitch["Videos"]["__INTERNAL__"]["GetSingleVideo"]>(
         "https://gql.twitch.tv/gql",
         {
-          ...request_options(),
+          ...request_options("twitch.gql.video"),
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -175,9 +175,10 @@ export class VideosService extends TwitchService {
   }
 
   private async check_quality(url: string) {
-    const text = await ofetch(url, { ...request_options(), responseType: "text" }).catch(
-      () => null,
-    );
+    const text = await ofetch(url, {
+      ...request_options("twitch.cdn.playlist"),
+      responseType: "text",
+    }).catch(() => null);
 
     if (!text) return null;
 
@@ -187,7 +188,7 @@ export class VideosService extends TwitchService {
 
     if (text.includes(".mp4")) {
       const content = await ofetch(url.replace("index-dvr.m3u8", "init-0.mp4"), {
-        ...request_options(),
+        ...request_options("twitch.cdn.init_segment"),
         responseType: "text",
       }).catch(() => null);
 

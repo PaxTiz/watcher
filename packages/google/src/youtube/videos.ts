@@ -26,7 +26,7 @@ export class YoutubeVideosService extends GoogleService {
     url.searchParams.set("id", data.video_ids.join(","));
 
     const response = await ofetch<Google["Youtube"]["Videos"]["List"]>(url.toString(), {
-      ...request_options(),
+      ...request_options("youtube.data.videos.list"),
       headers: { "X-Goog-Api-Key": this.client.settings.api_key },
     });
 

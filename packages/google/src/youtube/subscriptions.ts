@@ -21,7 +21,7 @@ export class YoutubeSubscriptionsService extends GoogleService {
       }
 
       return await ofetch<Google["Youtube"]["Subscriptions"]["List"]>(url.toString(), {
-        ...request_options(),
+        ...request_options("youtube.data.subscriptions.list"),
         headers: {
           Authorization: `Bearer ${token}`,
         },

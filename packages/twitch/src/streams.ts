@@ -31,7 +31,7 @@ export class StreamsService extends TwitchService {
 
       const response = await ofetch<Twitch["Streams"]["List"]>(
         url.toString(),
-        helix_options(this.client, token, { app: true }),
+        helix_options("twitch.helix.streams", this.client, token, { app: true }),
       );
 
       return response.data;

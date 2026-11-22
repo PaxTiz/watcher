@@ -211,6 +211,18 @@ export type SessionTable = {
   authenticated_at: ColumnType<string, string | undefined, string>;
 };
 
+export type ExternalRequestTable = {
+  hour: ColumnType<string, string, never>;
+
+  name: string;
+
+  requests: number;
+
+  failures: number;
+
+  rate_limited: number;
+};
+
 export type RateLimitTable = {
   type: string;
 
@@ -243,6 +255,7 @@ export type DatabaseInterface = {
   videos_guests: VideosGuestsTable;
   users_videos_progression: UsersVideosProgressionTable;
   rate_limits: RateLimitTable;
+  external_requests: ExternalRequestTable;
   webauthn_challenges: WebauthnChallengeTable;
 };
 

@@ -129,7 +129,7 @@ export const sync_image = async ({
 
   const response = await ofetch
     .raw(url, {
-      ...request_options(),
+      ...request_options("images.download"),
       responseType: "stream",
       headers: await conditional_headers(current.etag, current.path),
     })

@@ -25,7 +25,7 @@ export class YoutubePlaylistItemsService extends GoogleService {
     url.searchParams.set("playlistId", data.playlist_id);
 
     const response = await ofetch<Google["Youtube"]["PlaylistItems"]["List"]>(url.toString(), {
-      ...request_options(),
+      ...request_options("youtube.data.playlist_items.list"),
       headers: { "X-Goog-Api-Key": this.client.settings.api_key },
     });
 

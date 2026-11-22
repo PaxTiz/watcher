@@ -12,11 +12,12 @@ const rate_limit_wait = (context: FetchContext) => {
 };
 
 export const helix_options = (
+  name: string,
   client: TwitchClient,
   token: string,
   { app = false }: { app?: boolean } = {},
 ) => {
-  const base = request_options();
+  const base = request_options(name);
 
   return {
     ...base,
@@ -26,9 +27,11 @@ export const helix_options = (
     },
     retryDelay: (context) =>
       context.response?.status === 429 ? rate_limit_wait(context) : base.retryDelay(context),
-    onResponse: ({ response }) => {
+    onResponse: (context) => {
+      base.onResponse(context);
+
       if (app) {
-        client.record_rate_limit(response.headers);
+        client.record_rate_limit(context.response.headers);
       }
     },
   } satisfies FetchOptions;

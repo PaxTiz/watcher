@@ -12,7 +12,7 @@ async function get_current_user(settings: ClientSettings, config: TwitchServiceR
     }
 
     const response = await ofetch<Twitch["OAuth"]["User"]>("https://id.twitch.tv/oauth2/userinfo", {
-      ...request_options(),
+      ...request_options("twitch.oauth.userinfo"),
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${tokens.access_token}`,
@@ -40,7 +40,7 @@ async function refresh_access_token(settings: ClientSettings, refresh_token: str
       scope: Array<string>;
       token_type: "bearer";
     }>("https://id.twitch.tv/oauth2/token", {
-      ...request_options({ retry: 0 }),
+      ...request_options("twitch.oauth.token", { retry: 0 }),
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -72,7 +72,7 @@ async function get_app_access_token(settings: ClientSettings) {
     return await ofetch<{ access_token: string; expires_in: number; token_type: "bearer" }>(
       "https://id.twitch.tv/oauth2/token",
       {
-        ...request_options(),
+        ...request_options("twitch.oauth.app_token"),
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -92,7 +92,7 @@ async function get_app_access_token(settings: ClientSettings) {
 async function revoke_token(settings: ClientSettings, token: string) {
   try {
     await ofetch("https://id.twitch.tv/oauth2/revoke", {
-      ...request_options({ retry: 0 }),
+      ...request_options("twitch.oauth.revoke", { retry: 0 }),
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

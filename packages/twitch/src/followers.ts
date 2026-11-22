@@ -25,7 +25,7 @@ export class FollowersService extends TwitchService {
 
       return await ofetch<Twitch["Followers"]["List"]>(
         url.toString(),
-        helix_options(this.client, token),
+        helix_options("twitch.helix.channels.followed", this.client, token),
       );
     });
   }

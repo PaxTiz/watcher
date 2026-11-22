@@ -50,7 +50,10 @@ export class YoutubeFeedsService extends GoogleService {
     url.searchParams.set("playlist_id", data.playlist_id);
 
     try {
-      const xml = await ofetch(url.toString(), { ...request_options(), responseType: "text" });
+      const xml = await ofetch(url.toString(), {
+        ...request_options("youtube.rss.feed"),
+        responseType: "text",
+      });
 
       return parse_feed(xml);
     } catch (error) {

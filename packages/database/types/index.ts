@@ -9,4 +9,5 @@ export * as videos from "./videos";
 export * as subscriptionsSync from "./subscriptions_sync";
 export * as search from "./search";
 export * as rateLimits from "./rate_limits";
+export * as externalRequests from "./external_requests";
 export * as webauthnChallenges from "./webauthn_challenges";
