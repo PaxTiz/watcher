@@ -1,11 +1,5 @@
 import type { Twitch } from "@watcher/common";
-import {
-  pendingVideoImages,
-  type repositoryTypes,
-  subscriptionsSync,
-  videos,
-  withTransaction,
-} from "@watcher/database";
+import { type repositoryTypes, subscriptionsSync, videos } from "@watcher/database";
 import { MAX_STREAMS_PER_REQUEST, MAX_VIDEOS_PER_REQUEST } from "@watcher/integration-twitch";
 
 import { AbstractService, useLogger } from "#framework";
@@ -25,7 +19,7 @@ import {
   twitch_duration_seconds,
   twitch_thumbnail_url,
 } from "#server/utils/twitch";
-import { async_pool } from "#shared/utils/random";
+import { async_pool, chunk } from "#shared/utils/random";
 
 const logger = () => useLogger("services.feeds.twitch");
 
@@ -36,11 +30,6 @@ type VodsChannel = repositoryTypes.subscriptionsSync.ClaimVodsDueOutput[number];
 type Vod = Twitch["Videos"]["List"]["data"][number];
 
 type CheckedVod = repositoryTypes.videos.ClaimToCheckOutput[number];
-
-const chunk = <T>(items: Array<T>, size: number) =>
-  Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
-    items.slice(index * size, (index + 1) * size),
-  );
 
 const VODS_DELAY_SECONDS = 10 * 60;
 
@@ -163,19 +152,10 @@ export default class FeedsTwitch extends AbstractService {
     const created = ready.filter((vod) => !stored_by_id.has(vod.id));
     const known = ready.filter((vod) => stored_by_id.has(vod.id));
 
-    const inserted = await withTransaction(async (tx) => {
-      const inserted = await videos.insert_new({
-        data: created.map((vod) => this.to_video(channel, vod)),
-        options: { tx },
-      });
-
-      await pendingVideoImages.add_many({
-        video_ids: inserted.map((video) => video.id),
-        options: { tx },
-      });
-
-      return inserted;
-    });
+    const { videos: with_thumbnails } = await services.feeds.images.with_thumbnails(
+      created.map((vod) => this.to_video(channel, vod)),
+    );
+    const inserted = await videos.insert_new({ data: with_thumbnails });
 
     await videos.update_metadata_many({
       data: known.map((vod) => ({
@@ -313,8 +293,9 @@ export default class FeedsTwitch extends AbstractService {
       thumbnail_large: "",
       thumbnail_large_source: twitch_thumbnail_url(vod.thumbnail_url, "large"),
       last_synced_at: new Date().toISOString(),
-      ready_at: null,
+      ready_at: new Date().toISOString(),
       content_type: "live",
+      palette: null,
     };
   }
 

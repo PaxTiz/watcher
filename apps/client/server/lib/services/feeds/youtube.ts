@@ -1,12 +1,5 @@
 import type { Google, VideoContentType } from "@watcher/common";
-import {
-  pendingVideoImages,
-  pendingVideos,
-  type repositoryTypes,
-  subscriptionsSync,
-  videos,
-  withTransaction,
-} from "@watcher/database";
+import { type repositoryTypes, subscriptionsSync, videos } from "@watcher/database";
 import { to_playlist_id } from "@watcher/integration-google";
 import { parse, toSeconds } from "iso8601-duration";
 
@@ -16,43 +9,47 @@ import { useGoogle } from "#server/lib/google";
 import type { SyncOptions } from "#server/utils/sync";
 import { apply_videos_check } from "#server/utils/sync_check";
 import { latest_date, next_check_at, retry_at } from "#server/utils/sync_schedule";
-import { async_pool } from "#shared/utils/random";
-
-const NOT_OVER_DELAY = 60 * 60 * 1000;
+import { async_pool, chunk } from "#shared/utils/random";
 
 const FEED_SIZE = 15;
 
+const BATCH_SIZE = 50;
+
 const logger = () => useLogger("services.feeds.youtube");
 
-type Channel = { subscription_id: string; channel_id: string };
+type Channel = { subscription_id: string; channel_id: string; name: string };
 
 type FeedEntries = NonNullable<
   Awaited<ReturnType<ReturnType<typeof useGoogle>["youtube"]["feeds"]["list"]>>
 >;
 
-type PendingVideo = repositoryTypes.pendingVideos.ClaimOutput[number];
+type DiscoveredVideo = { service_id: string; content_type: VideoContentType; channel: Channel };
 
 type ScheduledChannel = repositoryTypes.subscriptionsSync.ClaimDueOutput[number];
 
 type CheckedVideo = repositoryTypes.videos.FindPublishedSinceOutput[number];
-
-const ENRICH_BATCH_SIZE = 50;
-const LEASE_SECONDS = 10 * 60;
 
 export default class FeedsYoutube extends AbstractService {
   async check_channels(
     channels: Array<ScheduledChannel>,
     options: Pick<SyncOptions, "full"> = { full: false },
   ) {
-    const totals = { checked: channels.length, discovered: 0, failed: 0 };
+    const totals = { checked: channels.length, failed: 0 };
+    const discovered = new Map<string, DiscoveredVideo>();
 
     await async_pool(channels, 10, async (channel) => {
       try {
         const result = await this.sync_channel(
-          { subscription_id: channel.subscription_id, channel_id: channel.service_id },
+          {
+            subscription_id: channel.subscription_id,
+            channel_id: channel.service_id,
+            name: channel.name,
+          },
           options,
         );
-        totals.discovered += result.discovered.videos + result.discovered.lives;
+        for (const video of result.discovered) {
+          discovered.set(video.service_id, video);
+        }
 
         await subscriptionsSync.reschedule({
           subscription_id: channel.subscription_id,
@@ -81,90 +78,56 @@ export default class FeedsYoutube extends AbstractService {
       }
     });
 
-    return totals;
+    return {
+      ...totals,
+      discovered: discovered.size,
+      ...(await this.store([...discovered.values()])),
+    };
   }
 
-  async enrich_pending(max_batches = Infinity) {
-    const totals = { stored: 0, missing: 0, not_over: 0, failed: 0 };
+  private async store(discovered: Array<DiscoveredVideo>) {
+    const totals = { stored: 0, missing: 0, not_over: 0, fallback: 0, failed: 0 };
 
-    for (let batch = 0; batch < max_batches; batch++) {
-      const pending = await pendingVideos.claim({
-        service: "youtube",
-        limit: ENRICH_BATCH_SIZE,
-        lease_seconds: LEASE_SECONDS,
-      });
-
-      if (pending.length === 0) {
-        break;
-      }
-
+    for (const batch of chunk(discovered, BATCH_SIZE)) {
       try {
-        const result = await this.enrich(pending);
+        const result = await this.store_batch(batch);
         totals.stored += result.stored;
         totals.missing += result.missing;
         totals.not_over += result.not_over;
+        totals.fallback += result.fallback;
       } catch (error) {
-        totals.failed += pending.length;
-        logger().error({ err: error, videos: pending.length }, "Failed to enrich YouTube videos");
-
-        await pendingVideos.postpone({
-          service: "youtube",
-          service_ids: pending.map((video) => video.service_id),
-          next_attempt_at: retry_at(Math.max(...pending.map((video) => video.attempts))),
-          failed: true,
-        });
-      }
-
-      if (pending.length < ENRICH_BATCH_SIZE) {
-        break;
+        totals.failed += batch.length;
+        logger().error({ err: error, videos: batch.length }, "Failed to store YouTube videos");
       }
     }
 
     return totals;
   }
 
-  async enrich(pending: Array<PendingVideo>) {
+  private async store_batch(batch: Array<DiscoveredVideo>) {
     const items = await useGoogle().youtube.videos.get_by_ids({
-      video_ids: pending.map((video) => video.service_id),
+      video_ids: batch.map((video) => video.service_id),
     });
     const items_by_id = new Map(items.map((item) => [item.id, item]));
-    const status_of = (video: PendingVideo) =>
+    const status_of = (video: DiscoveredVideo) =>
       items_by_id.get(video.service_id)?.snippet.liveBroadcastContent;
 
-    const missing = pending.filter((video) => !status_of(video));
-    const over = pending.filter((video) => status_of(video) === "none");
-    const not_over = pending.filter((video) => ["live", "upcoming"].includes(status_of(video)!));
+    const over = batch.filter((video) => status_of(video) === "none");
+    const missing = batch.filter((video) => !status_of(video)).length;
 
-    const inserted = await withTransaction(async (tx) => {
-      const inserted = await videos.insert_new({
-        data: over.map((video) => this.to_video(video, items_by_id.get(video.service_id)!)),
-        options: { tx },
-      });
+    const { videos: ready, totals } = await services.feeds.images.with_thumbnails(
+      over.map((video) => this.to_video(video, items_by_id.get(video.service_id)!)),
+    );
+    const inserted = await videos.insert_new({ data: ready });
 
-      await pendingVideoImages.add_many({
-        video_ids: inserted.map((video) => video.id),
-        options: { tx },
-      });
+    await this.index_guests(batch, inserted);
 
-      await pendingVideos.remove_many({
-        service: "youtube",
-        service_ids: [...over, ...missing].map((video) => video.service_id),
-        options: { tx },
-      });
-
-      return inserted;
-    });
-
-    await pendingVideos.postpone({
-      service: "youtube",
-      service_ids: not_over.map((video) => video.service_id),
-      next_attempt_at: new Date(Date.now() + NOT_OVER_DELAY).toISOString(),
-      failed: false,
-    });
-
-    await this.index_guests(pending, inserted);
-
-    return { stored: inserted.length, missing: missing.length, not_over: not_over.length };
+    return {
+      stored: inserted.length,
+      missing,
+      not_over: batch.length - over.length - missing,
+      fallback: totals.fallback,
+    };
   }
 
   async check(to_check: Array<CheckedVideo>) {
@@ -176,7 +139,7 @@ export default class FeedsYoutube extends AbstractService {
   }
 
   private to_video(
-    video: PendingVideo,
+    video: DiscoveredVideo,
     item: Google["Youtube"]["Videos"]["Item"],
   ): repositoryTypes.videos.InsertNewData {
     const { snippet } = item;
@@ -184,7 +147,7 @@ export default class FeedsYoutube extends AbstractService {
     return {
       service: "youtube",
       service_id: item.id,
-      subscription_id: video.channel_id,
+      subscription_id: video.channel.channel_id,
       title: snippet.title,
       description: snippet.description,
       created_at: snippet.publishedAt,
@@ -195,16 +158,19 @@ export default class FeedsYoutube extends AbstractService {
       thumbnail_large: "",
       thumbnail_large_source: snippet.thumbnails.maxres?.url ?? snippet.thumbnails.high.url,
       last_synced_at: new Date().toISOString(),
-      ready_at: null,
+      ready_at: new Date().toISOString(),
       content_type: video.content_type,
+      palette: null,
     };
   }
 
   private async index_guests(
-    pending: Array<PendingVideo>,
+    batch: Array<DiscoveredVideo>,
     inserted: repositoryTypes.videos.InsertNewOutput,
   ) {
-    const channel_names = new Map(pending.map((video) => [video.channel_id, video.channel_name]));
+    const channel_names = new Map(
+      batch.map((video) => [video.channel.channel_id, video.channel.name]),
+    );
     const by_channel = Map.groupBy(inserted, (video) => video.subscription_id);
 
     for (const [channel_id, channel_videos] of by_channel) {
@@ -241,14 +207,17 @@ export default class FeedsYoutube extends AbstractService {
         playlist_id: to_playlist_id(channel.channel_id, "lives"),
       })) ?? [];
 
-    const discovered = {
-      videos: await this.sync_playlist(channel, "video", videos, options),
-      lives: await this.sync_playlist(channel, "live", lives, options),
-    };
+    const discovered = [
+      ...(await this.sync_playlist(channel, "video", videos, options)),
+      ...(await this.sync_playlist(channel, "live", lives, options)),
+    ];
 
     const last_video_at = latest_date([...videos, ...lives].map((entry) => entry.published_at));
 
-    logger().debug({ channel_id: channel.channel_id, ...discovered }, "YouTube feeds checked");
+    logger().debug(
+      { channel_id: channel.channel_id, discovered: discovered.length },
+      "YouTube feeds checked",
+    );
 
     return { discovered, last_video_at };
   }
@@ -258,11 +227,11 @@ export default class FeedsYoutube extends AbstractService {
     content_type: VideoContentType,
     entries: FeedEntries,
     options: Pick<SyncOptions, "full">,
-  ) {
+  ): Promise<Array<DiscoveredVideo>> {
     await this.check_missing_from_feed(channel, content_type, entries);
 
     let video_ids = entries.map((entry) => entry.video_id);
-    let known = await pendingVideos.find_known({ service: "youtube", service_ids: video_ids });
+    let known = await videos.find_known({ service: "youtube", service_ids: video_ids });
 
     if ((options.full || known.length === 0) && entries.length >= FEED_SIZE) {
       const playlist_id = to_playlist_id(
@@ -276,21 +245,12 @@ export default class FeedsYoutube extends AbstractService {
 
       const items = await useGoogle().youtube.playlist_items.list({ playlist_id });
       video_ids = items.map((item) => item.contentDetails.videoId);
-      known = await pendingVideos.find_known({ service: "youtube", service_ids: video_ids });
+      known = await videos.find_known({ service: "youtube", service_ids: video_ids });
     }
 
-    const new_ids = video_ids.filter((id) => !known.includes(id));
-
-    await pendingVideos.add_many({
-      data: new_ids.map((service_id) => ({
-        service: "youtube",
-        service_id,
-        subscription_id: channel.subscription_id,
-        content_type,
-      })),
-    });
-
-    return new_ids.length;
+    return video_ids
+      .filter((id) => !known.includes(id))
+      .map((service_id) => ({ service_id, content_type, channel }));
   }
 
   private async check_missing_from_feed(

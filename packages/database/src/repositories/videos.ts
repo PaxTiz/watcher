@@ -17,10 +17,10 @@ import type {
   FindThumbnailsOutput,
   HideForUserInput,
   HideForUserOutput,
+  FindKnownInput,
+  FindKnownOutput,
   InsertNewInput,
   InsertNewOutput,
-  MarkReadyInput,
-  MarkReadyOutput,
   FindPublishedSinceInput,
   FindPublishedSinceOutput,
   RemoveManyInput,
@@ -331,31 +331,33 @@ export async function insert_new({ data, options }: InsertNewInput): Promise<Ins
 
   return database
     .insertInto("videos")
-    .values(data)
+    .values(
+      data.map((video) => ({
+        ...video,
+        palette: video.palette ? JSON.stringify(video.palette) : null,
+      })),
+    )
     .onConflict((oc) => oc.columns(["service", "service_id"]).doNothing())
     .returning(["id", "service_id", "subscription_id", "title"])
     .execute();
 }
 
-export async function mark_ready({
-  id,
-  thumbnail_small,
-  thumbnail_small_etag,
-  palette,
-  options,
-}: MarkReadyInput): Promise<MarkReadyOutput> {
-  const database = resolveDatabase(options);
+export async function find_known({
+  service,
+  service_ids,
+}: FindKnownInput): Promise<FindKnownOutput> {
+  if (service_ids.length === 0) {
+    return [];
+  }
 
-  await database
-    .updateTable("videos")
-    .set({
-      thumbnail_small,
-      thumbnail_small_etag,
-      palette: palette ? JSON.stringify(palette) : null,
-      ready_at: sql<string>`now()`,
-    })
-    .where("id", "=", id)
+  const rows = await useDatabase()
+    .selectFrom("videos")
+    .select("service_id")
+    .where("service", "=", service)
+    .where("service_id", "in", service_ids)
     .execute();
+
+  return rows.map((row) => row.service_id);
 }
 
 export async function update_palette({

@@ -7,8 +7,6 @@ export * as userSubscriptions from "./user_subscriptions";
 export * as userSyncs from "./user_syncs";
 export * as videos from "./videos";
 export * as subscriptionsSync from "./subscriptions_sync";
-export * as pendingVideos from "./pending_videos";
-export * as pendingVideoImages from "./pending_video_images";
 export * as search from "./search";
 export * as rateLimits from "./rate_limits";
 export * as webauthnChallenges from "./webauthn_challenges";

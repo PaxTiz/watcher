@@ -49,8 +49,6 @@ export default class SyncTwitch extends AbstractService {
       }
     });
 
-    const images = await services.feeds.images.process_pending();
-
     logger().info(
       {
         ...counts,
@@ -58,7 +56,6 @@ export default class SyncTwitch extends AbstractService {
         channels: options.channels,
         lives,
         vods,
-        images,
         duration_ms: Date.now() - started_at,
       },
       "Twitch sync finished",

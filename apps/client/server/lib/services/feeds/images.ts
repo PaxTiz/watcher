@@ -1,104 +1,79 @@
-import type { repositoryTypes } from "@watcher/database";
-import { pendingVideoImages, videos, withTransaction } from "@watcher/database";
+import { setTimeout as sleep } from "node:timers/promises";
+
+import type { VideoPalette } from "@watcher/common";
 
 import { AbstractService, useLogger } from "#framework";
 import { sync_image } from "#server/utils/images";
 import { extract_image_palette } from "#server/utils/palette";
 import { video_thumbnail_path } from "#server/utils/sync_images";
-import { retry_at } from "#server/utils/sync_schedule";
 import { async_pool } from "#shared/utils/random";
 
-const MAX_ATTEMPTS = 5;
-const BATCH_SIZE = 50;
-const LEASE_SECONDS = 10 * 60;
+const RETRY_DELAYS = [2_000, 10_000];
 
-type PendingImage = repositoryTypes.pendingVideoImages.ClaimOutput[number];
+type Video = {
+  service: "youtube" | "twitch";
+  service_id: string;
+  subscription_id: string;
+  thumbnail_small: string;
+};
+
+type Thumbnail = {
+  thumbnail_small: string;
+  thumbnail_small_etag: string;
+  palette: VideoPalette | null;
+};
 
 export default class FeedsImages extends AbstractService {
-  async process_pending(max_batches = Infinity) {
-    const totals = { processed: 0, skipped: 0, fallback: 0, failed: 0 };
+  async with_thumbnails<T extends Video>(videos: Array<T>) {
+    const totals = { processed: 0, fallback: 0 };
+    const ready: Array<T & Thumbnail> = [];
 
-    for (let batch = 0; batch < max_batches; batch++) {
-      const pending = await pendingVideoImages.claim({
-        limit: BATCH_SIZE,
-        lease_seconds: LEASE_SECONDS,
-      });
+    await async_pool(videos, 10, async (video) => {
+      const thumbnail = await this.thumbnail(video);
+      totals[thumbnail.thumbnail_small === video.thumbnail_small ? "fallback" : "processed"]++;
 
-      if (pending.length === 0) {
-        break;
-      }
+      ready.push({ ...video, ...thumbnail });
+    });
 
-      await async_pool(pending, 10, async (video) => {
-        try {
-          totals[await this.process(video)]++;
-        } catch (error) {
-          totals.failed++;
-          useLogger("services.feeds.images").error(
-            { err: error, video_id: video.id },
-            "Failed to process a video thumbnail",
-          );
-        }
-      });
-
-      if (pending.length < BATCH_SIZE) {
-        break;
-      }
-    }
-
-    return totals;
+    return { videos: ready, totals };
   }
 
-  async process(video: PendingImage) {
-    if (video.ready_at) {
-      await pendingVideoImages.remove({ video_id: video.id });
-
-      return "skipped";
-    }
-
+  private async thumbnail(video: Video): Promise<Thumbnail> {
     const path = video_thumbnail_path(video, "small");
-    const small = await sync_image({
-      url: video.thumbnail_small,
-      path,
-      size: "small",
-      current: { path: "", etag: "" },
-    });
 
-    if (small) {
-      const palette = await extract_image_palette(small.image);
-      await this.mark_ready(video.id, {
-        thumbnail_small: path,
-        thumbnail_small_etag: small.etag,
-        palette,
-      });
+    for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+      if (attempt > 0) {
+        await sleep(RETRY_DELAYS[attempt - 1]);
+      }
 
-      return "processed";
+      try {
+        const small = await sync_image({
+          url: video.thumbnail_small,
+          path,
+          size: "small",
+          current: { path: "", etag: "" },
+        });
+
+        if (small) {
+          return {
+            thumbnail_small: path,
+            thumbnail_small_etag: small.etag,
+            palette: await extract_image_palette(small.image),
+          };
+        }
+      } catch (error) {
+        useLogger("services.feeds.images").warn(
+          { err: error, video_id: video.service_id, attempt: attempt + 1 },
+          "Failed to process a video thumbnail",
+        );
+      }
     }
 
-    if (video.attempts + 1 >= MAX_ATTEMPTS) {
-      await this.mark_ready(video.id, {
-        thumbnail_small: video.thumbnail_small,
-        thumbnail_small_etag: "",
-        palette: null,
-      });
+    useLogger("services.feeds.images").warn(
+      { service: video.service, video_id: video.service_id, url: video.thumbnail_small },
+      "Video thumbnail unavailable: the remote one is used",
+    );
 
-      return "fallback";
-    }
-
-    await pendingVideoImages.record_failure({
-      video_id: video.id,
-      next_attempt_at: retry_at(video.attempts),
-    });
-
-    return "failed";
-  }
-
-  private async mark_ready(
-    id: string,
-    data: Omit<repositoryTypes.videos.MarkReadyInput, "id" | "options">,
-  ) {
-    await withTransaction(async (tx) => {
-      await videos.mark_ready({ id, ...data, options: { tx } });
-      await pendingVideoImages.remove({ video_id: id, options: { tx } });
-    });
+    return { thumbnail_small: video.thumbnail_small, thumbnail_small_etag: "", palette: null };
   }
 }

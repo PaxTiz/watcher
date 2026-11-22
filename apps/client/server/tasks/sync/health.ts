@@ -1,4 +1,4 @@
-import { pendingVideoImages, pendingVideos, subscriptionsSync, videos } from "@watcher/database";
+import { subscriptionsSync, videos } from "@watcher/database";
 import { defineTask } from "nitropack/runtime";
 
 import { useLogger } from "#framework";
@@ -19,16 +19,14 @@ export default defineTask({
   },
 
   async run() {
-    const [feeds, enrich, lives, unchecked_vods, images] = await Promise.all([
+    const [feeds, lives, unchecked_vods] = await Promise.all([
       subscriptionsSync.stats({ service: "youtube" }),
-      pendingVideos.stats({ service: "youtube" }),
       subscriptionsSync.stats({ service: "twitch" }),
       videos.count_unchecked({
         service: "twitch",
         created_before: days_ago(6),
         checked_before: days_ago(2),
       }),
-      pendingVideoImages.stats(),
     ]);
 
     const twitch = useTwitch();
@@ -44,7 +42,6 @@ export default defineTask({
     const alerts = [
       feeds.lag_seconds > MAX_LAG_SECONDS && "youtube_feeds_lagging",
       feeds_failing > MAX_FAILING_RATIO && "youtube_feeds_failing",
-      enrich.lag_seconds > MAX_LAG_SECONDS && "youtube_enrich_lagging",
       lives.lag_seconds > MAX_LAG_SECONDS && "twitch_lives_lagging",
       lives_failing > MAX_FAILING_RATIO && "twitch_lives_failing",
       lives.vods_lag_seconds > MAX_LAG_SECONDS && "twitch_vods_lagging",
@@ -53,13 +50,11 @@ export default defineTask({
         rate_limit.lowest_remaining !== null &&
         rate_limit.lowest_remaining < rate_limit.limit * MIN_RATE_LIMIT_RATIO &&
         "twitch_rate_limited",
-      images.lag_seconds > MAX_LAG_SECONDS && "images_lagging",
     ].filter(Boolean);
 
     const result = {
-      youtube: { feeds: { ...feeds, failing_ratio: feeds_failing }, enrich },
+      youtube: { feeds: { ...feeds, failing_ratio: feeds_failing } },
       twitch: { lives: { ...lives, failing_ratio: lives_failing }, unchecked_vods, rate_limit },
-      images,
       alerts,
     };
     const logger = useLogger("tasks.sync.health");

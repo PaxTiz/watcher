@@ -98,20 +98,13 @@ export type FindAllWithoutPaletteOutput = Array<
   Pick<DatabaseSchema["videos"], "id" | "thumbnail_small">
 >;
 
-export type InsertNewData = Omit<DatabaseSchemaInsert["videos"], "id" | "palette">;
+export type InsertNewData = Omit<DatabaseSchemaInsert["videos"], "id" | "palette"> & {
+  palette: VideoPalette | null;
+};
 export type InsertNewInput = { data: Array<InsertNewData>; options?: RepositoryContext };
 export type InsertNewOutput = Array<
   Pick<DatabaseSchema["videos"], "id" | "service_id" | "subscription_id" | "title">
 >;
-
-export type MarkReadyInput = {
-  id: string;
-  thumbnail_small: string;
-  thumbnail_small_etag: string;
-  palette: VideoPalette | null;
-  options?: RepositoryContext;
-};
-export type MarkReadyOutput = void;
 
 export type UpdatePaletteInput = { id: string; palette: VideoPalette; options?: RepositoryContext };
 export type UpdatePaletteOutput = void;
@@ -135,6 +128,9 @@ export type FindPublishedSinceOutput = Array<
 
 export type RemoveManyInput = { ids: Array<string>; options?: RepositoryContext };
 export type RemoveManyOutput = void;
+
+export type FindKnownInput = { service: SubscriptionType; service_ids: Array<string> };
+export type FindKnownOutput = Array<string>;
 
 export type MarkCheckedInput = { ids: Array<string> };
 export type MarkCheckedOutput = void;

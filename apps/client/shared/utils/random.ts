@@ -84,3 +84,8 @@ export const with_retry = async <T>(
     }
   }
 };
+
+export const chunk = <T>(items: Array<T>, size: number) =>
+  Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
+    items.slice(index * size, (index + 1) * size),
+  );

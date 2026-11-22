@@ -28,8 +28,6 @@ export default class SyncYoutube extends AbstractService {
       created_ids,
     );
     const feeds = await services.feeds.youtube.check_channels(channels, options);
-    const enriched = await services.feeds.youtube.enrich_pending();
-    const images = await services.feeds.images.process_pending();
 
     logger().info(
       {
@@ -37,8 +35,6 @@ export default class SyncYoutube extends AbstractService {
         created: created_ids.size,
         channels: options.channels,
         feeds,
-        enriched,
-        images,
         duration_ms: Date.now() - started_at,
       },
       "YouTube sync finished",

@@ -125,30 +125,6 @@ export type SubscriptionSyncTable = {
   vods_due_at: string | null;
 };
 
-export type PendingVideoTable = {
-  service: SubscriptionType;
-
-  service_id: string;
-
-  subscription_id: string;
-
-  content_type: VideoContentType;
-
-  discovered_at: ColumnType<string, string | undefined, never>;
-
-  next_attempt_at: ColumnType<string, string | undefined, string>;
-
-  attempts: ColumnType<number, number | undefined, number>;
-};
-
-export type PendingVideoImageTable = {
-  video_id: string;
-
-  next_attempt_at: ColumnType<string, string | undefined, string>;
-
-  attempts: ColumnType<number, number | undefined, number>;
-};
-
 export type UserSubscriptionTable = {
   user_id: string;
 
@@ -268,8 +244,6 @@ export type DatabaseInterface = {
   credentials: CredentialTable;
   videos: VideoTable;
   subscriptions_sync: SubscriptionSyncTable;
-  pending_videos: PendingVideoTable;
-  pending_video_images: PendingVideoImageTable;
   hidden_users_videos: HiddenUsersVideosTable;
   videos_guests: VideosGuestsTable;
   users_videos_progression: UsersVideosProgressionTable;
