@@ -10,7 +10,7 @@ export type SearchVideosFilters = Pick<FindAllForUserFilters, "duration"> & {
   guests?: Array<string>;
 };
 
-export type Guest = { key: string; name: string; subscription_id?: string };
+export type Guest = { key: string; subscription_id: string };
 
 export type FindChannelsInput = { user_id: string; query: string; limit: number };
 export type FindChannelsOutput = Array<SubscriptionWithUserState>;
@@ -38,10 +38,7 @@ export type FindGuestsOutput = Array<{
   videos_count: number;
 }>;
 
-export type FindKnownPeopleOutput = {
-  channels: Array<{ id: string; name: string }>;
-  guests: Array<{ key: string; name: string; videos_count: number }>;
-};
+export type FindKnownChannelsOutput = Array<{ id: string; name: string }>;
 
 export type ReplaceGuestsInput = {
   service: SubscriptionType;

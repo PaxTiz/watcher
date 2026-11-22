@@ -155,10 +155,7 @@ export type VideosGuestsTable = {
   // Identifies a person whatever the way it's written ("@SuperYoutuber", "Super Youtuber")
   key: string;
 
-  // As written in the title
-  name: string;
-
-  subscription_id: string | null;
+  subscription_id: string;
 };
 
 export type UsersVideosProgressionTable = {

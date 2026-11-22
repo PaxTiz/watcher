@@ -1,19 +1,16 @@
 export type Guest = {
   key: string; // identifies a person whatever the way it's written: "@SuperYoutuber", "Super Youtuber"
-  name: string;
-  subscription_id?: string; // when the guest is a channel known in database
+  subscription_id: string;
 };
 
-export type KnownPerson = Guest;
-
-export type KnownPeople = {
-  by_key: ReadonlyMap<string, KnownPerson>;
+export type KnownChannels = {
+  by_key: ReadonlyMap<string, Guest>;
   // Comparable forms of their names, searched anywhere in titles
-  forms: ReadonlyArray<{ form: string; without_spaces: boolean; person: KnownPerson }>;
+  forms: ReadonlyArray<{ form: string; without_spaces: boolean; guest: Guest }>;
 };
 
 export type ExtractGuestsOptions = {
-  people: KnownPeople;
+  channels: KnownChannels;
   channel_name?: string; // a channel is never its own guest
 };
 
@@ -30,34 +27,6 @@ const RELIABLE_MARKER = new RegExp(
 const LIST_END =
   /[()[\]{}|#!?:;"«»“”\n【】「」『』（）［］｜！？：]|\s[-–—]|[-–—]\s|\s\/\/\s|\s(?=@)/u;
 const CONJUNCTIONS = ["et", "and", "y", "e", "und", "en", "i", "и", "ve", "og", "och", "és", "x"];
-const LIST_CLOSERS = new Set([
-  "etc",
-  "ecc",
-  "usw",
-  "co",
-  "cie",
-  "cia",
-  "compagnie",
-  "company",
-  "compania",
-  "companhia",
-  "compagnia",
-  "friends",
-  "amis",
-  "potes",
-  "amigos",
-  "amici",
-  "freunde",
-  "others",
-  "autres",
-  "otros",
-  "altri",
-  "more",
-  "等",
-  "など",
-  "他",
-  "외",
-]);
 const LIST_SEPARATOR = new RegExp(
   `\\s*(?:[,&+/、・，＆×]|\\s(?:${CONJUNCTIONS.join("|")})\\s)\\s*`,
   "iu",
@@ -67,13 +36,10 @@ const LIST_SEPARATOR = new RegExp(
 const WITHOUT_SPACES =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}]/u;
 
-const MAX_NAME_LENGTH = 40;
 const MAX_NAME_WORDS = 4;
 const MIN_FORM_LENGTH = 4;
 const MIN_FORM_LENGTH_WITHOUT_SPACES = 2;
-const MIN_VIDEOS_TO_BE_KNOWN = 2;
 const MAX_HANDLE_AFFIX_LENGTH = 3;
-const MAX_ACRONYM_LENGTH = 3;
 const MIN_VIDEOS_TO_DETECT_HOSTS = 5;
 const MIN_HOST_VIDEOS_RATIO = 0.3;
 
@@ -103,127 +69,73 @@ export function keys_in_query(query: string) {
   return [...keys];
 }
 
-const has_mixed_case = (name: string) => name !== name.toLowerCase() && name !== name.toUpperCase();
-
-// "AMEL BENT" → "Amel Bent", acronyms ("JDG") kept. No-op for scripts without case.
-const prettify = (name: string) =>
-  name !== name.toUpperCase() || name === name.toLowerCase()
-    ? name
-    : name.replace(new RegExp(`[${LETTER}]+`, "gu"), (word) =>
-        word.length <= MAX_ACRONYM_LENGTH ? word : word[0] + word.slice(1).toLowerCase(),
-      );
-
-const clean_name = (value: string) =>
-  value.replace(new RegExp(`^[^${LETTER}@]+|[^${LETTER}]+$`, "gu"), "").replace(/^@/, "");
-
-const is_name = (name: string) =>
-  name.length >= 2 &&
-  name.length <= MAX_NAME_LENGTH &&
-  name.split(/\s+/).length <= MAX_NAME_WORDS &&
-  (!/\s/.test(name) || !/^\p{Ll}/u.test(name)) &&
-  !LIST_CLOSERS.has(comparable_form(name)) &&
-  new RegExp(`[${LETTER}]`, "u").test(name);
-
-export function preferred_name(names: Array<{ name: string; count: number }>) {
-  return names.toSorted(
-    (a, b) =>
-      b.count - a.count ||
-      Number(has_mixed_case(b.name)) - Number(has_mixed_case(a.name)) ||
-      a.name.localeCompare(b.name),
-  )[0]?.name;
-}
-
-export function build_known_people({
-  channels,
-  guests,
-}: {
-  channels: Array<{ id: string; name: string }>;
-  guests: Array<{ key: string; name: string; videos_count: number }>;
-}): KnownPeople {
-  const by_key = new Map<string, KnownPerson>();
-  const names_by_key = new Map<string, Array<{ name: string; count: number }>>();
-
-  for (const guest of guests) {
-    const names = names_by_key.get(guest.key) ?? [];
-    names.push({ name: guest.name, count: guest.videos_count });
-    names_by_key.set(guest.key, names);
-  }
-
-  for (const [key, names] of names_by_key) {
-    const videos_count = names.reduce((total, name) => total + name.count, 0);
-    if (videos_count >= MIN_VIDEOS_TO_BE_KNOWN) {
-      by_key.set(key, { key, name: prettify(preferred_name(names)!) });
-    }
-  }
+export function build_known_channels(channels: Array<{ id: string; name: string }>): KnownChannels {
+  const by_key = new Map<string, Guest>();
+  const forms = [];
 
   for (const channel of channels) {
     const key = guest_key(channel.name);
-    if (key.length >= 2) {
-      by_key.set(key, { key, name: channel.name, subscription_id: channel.id });
+    if (key.length < 2 || by_key.has(key)) {
+      continue;
     }
-  }
 
-  const forms = [];
-  for (const person of by_key.values()) {
-    const names = [person.name, ...(names_by_key.get(person.key) ?? []).map(({ name }) => name)];
+    const guest = { key, subscription_id: channel.id };
+    by_key.set(key, guest);
 
-    for (const form of new Set(names.map(comparable_form))) {
-      const without_spaces = WITHOUT_SPACES.test(form);
-      const length = form.replaceAll(" ", "").length;
-
-      if (length >= (without_spaces ? MIN_FORM_LENGTH_WITHOUT_SPACES : MIN_FORM_LENGTH)) {
-        forms.push({ form, without_spaces, person });
-      }
+    const form = comparable_form(channel.name);
+    const without_spaces = WITHOUT_SPACES.test(form);
+    if (key.length >= (without_spaces ? MIN_FORM_LENGTH_WITHOUT_SPACES : MIN_FORM_LENGTH)) {
+      forms.push({ form, without_spaces, guest });
     }
   }
 
   return { by_key, forms };
 }
 
-function person_of_handle(key: string, people: KnownPeople) {
-  let found: KnownPerson | undefined;
+function channel_of_handle(key: string, channels: KnownChannels) {
+  let found = channels.by_key.get(key);
 
-  for (const person of people.by_key.values()) {
+  for (const guest of found ? [] : channels.by_key.values()) {
     if (
-      person.key.length >= MIN_FORM_LENGTH &&
-      key.length - person.key.length <= MAX_HANDLE_AFFIX_LENGTH &&
-      key.includes(person.key) &&
-      (!found || person.key.length > found.key.length)
+      guest.key.length >= MIN_FORM_LENGTH &&
+      key.length - guest.key.length <= MAX_HANDLE_AFFIX_LENGTH &&
+      key.includes(guest.key) &&
+      (!found || guest.key.length > found.key.length)
     ) {
-      found = person;
+      found = guest;
     }
   }
 
   return found;
 }
 
-function names_after_marker(title: string): Array<string> {
-  const names = [];
+function keys_after_marker(title: string): Array<string> {
+  const keys = [];
 
   for (const match of title.matchAll(RELIABLE_MARKER)) {
     const list = title.slice(match.index + match[0].length).split(LIST_END)[0] ?? "";
-    names.push(...list.split(LIST_SEPARATOR).map(clean_name));
+    keys.push(...list.split(LIST_SEPARATOR).map(guest_key));
   }
 
-  return names;
+  return keys;
 }
 
-function known_people_in(title: string, people: KnownPeople): Array<KnownPerson> {
+function channels_in(title: string, channels: KnownChannels): Array<Guest> {
   const form = comparable_form(title);
   const padded = ` ${form} `;
 
-  return people.forms
+  return channels.forms
     .filter((candidate) =>
       candidate.without_spaces
         ? form.includes(candidate.form)
         : padded.includes(` ${candidate.form} `),
     )
-    .map((candidate) => candidate.person);
+    .map((candidate) => candidate.guest);
 }
 
 export function extract_guests(
   title: string,
-  { people, channel_name }: ExtractGuestsOptions,
+  { channels, channel_name }: ExtractGuestsOptions,
 ): Array<Guest & { recognized: boolean }> {
   const channel_key = channel_name ? guest_key(channel_name) : undefined;
   const guests = new Map<string, Guest & { recognized: boolean }>();
@@ -234,31 +146,22 @@ export function extract_guests(
       (key.length >= MIN_FORM_LENGTH && channel_key.includes(key)) ||
       (channel_key.length >= MIN_FORM_LENGTH && key.includes(channel_key)));
 
-  const add = (guest: Guest, recognized = false) => {
-    if (guest.key.length >= 2 && !is_host(guest.key) && !guests.has(guest.key)) {
+  const add = (guest: Guest | undefined, recognized = false) => {
+    if (guest && !is_host(guest.key) && !guests.has(guest.key)) {
       guests.set(guest.key, { ...guest, recognized });
     }
   };
 
   for (const match of title.matchAll(HANDLE)) {
-    const handle = clean_name(match[1] ?? "");
-    const key = guest_key(handle);
-
-    if (is_name(handle)) {
-      add(people.by_key.get(key) ?? person_of_handle(key, people) ?? { key, name: handle });
-    }
+    add(channel_of_handle(guest_key(match[1] ?? ""), channels));
   }
 
-  for (const name of names_after_marker(title)) {
-    const key = guest_key(name);
-
-    if (is_name(name)) {
-      add(people.by_key.get(key) ?? { key, name: prettify(name) });
-    }
+  for (const key of keys_after_marker(title)) {
+    add(channels.by_key.get(key));
   }
 
-  for (const person of known_people_in(title, people)) {
-    add(person, true);
+  for (const guest of channels_in(title, channels)) {
+    add(guest, true);
   }
 
   return [...guests.values()];
@@ -290,6 +193,6 @@ export function extract_channel_guests(
   return guests.map((video_guests) =>
     video_guests
       .filter((guest) => !(guest.recognized && hosts.has(guest.key)))
-      .map(({ key, name, subscription_id }) => ({ key, name, subscription_id })),
+      .map(({ key, subscription_id }) => ({ key, subscription_id })),
   );
 }

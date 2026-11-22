@@ -4,7 +4,7 @@ import type { VideoListResource } from "./videos";
 export type GuestResource = {
   key: string; // identifies the person, whatever the way it's written
 
-  name: string; // as most often written in titles
+  name: string; // of the guest channel
 
   logo: string | null; // when the guest is a channel followed by the user
 

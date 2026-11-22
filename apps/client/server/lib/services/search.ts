@@ -4,7 +4,7 @@ import { search } from "@watcher/database";
 import type { User } from "#auth-utils";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
-import { build_known_people, extract_channel_guests, keys_in_query } from "#server/utils/guests";
+import { build_known_channels, extract_channel_guests, keys_in_query } from "#server/utils/guests";
 import { public_image_url } from "#server/utils/images";
 import type { SearchValidators } from "#shared/validators/search";
 
@@ -63,30 +63,11 @@ export default class SearchService extends AbstractService {
     channel_name: string;
     videos: Array<{ service_id: string; title: string }>;
   }) {
-    const known = await search.find_known_people();
-    const titles = videos.map((video) => video.title);
-
-    const known_keys = new Set(known.guests.map((guest) => guest.key));
-    const batch_guests = new Map<string, { key: string; name: string; videos_count: number }>();
-    const first_pass = extract_channel_guests(titles, {
-      people: build_known_people(known),
-      channel_name,
-    });
-    for (const guest of first_pass.flat()) {
-      if (!known_keys.has(guest.key)) {
-        const id = `${guest.key}\n${guest.name}`;
-        const entry = batch_guests.get(id) ?? { key: guest.key, name: guest.name, videos_count: 0 };
-        batch_guests.set(id, { ...entry, videos_count: entry.videos_count + 1 });
-      }
-    }
-
-    const people = build_known_people({
-      channels: known.channels,
-      guests: [...known.guests, ...batch_guests.values()],
-    });
-    const with_guests = extract_channel_guests(titles, { people, channel_name }).map(
-      (guests, index) => ({ service_id: videos[index]!.service_id, guests }),
-    );
+    const channels = build_known_channels(await search.find_known_channels());
+    const with_guests = extract_channel_guests(
+      videos.map((video) => video.title),
+      { channels, channel_name },
+    ).map((guests, index) => ({ service_id: videos[index]!.service_id, guests }));
 
     await search.replace_guests({ service, videos: with_guests });
 
