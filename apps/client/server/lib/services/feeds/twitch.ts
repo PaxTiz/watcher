@@ -12,8 +12,8 @@ import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useTwitch } from "#server/lib/twitch";
 import { eventsub_callback, eventsub_secret } from "#server/utils/eventsub";
-import { remove_image } from "#server/utils/images";
 import type { SyncOptions } from "#server/utils/sync";
+import { apply_videos_check } from "#server/utils/sync_check";
 import {
   latest_date,
   next_live_check_at,
@@ -49,8 +49,6 @@ const NEXT_READS_SIZE = 20;
 
 const PLACEHOLDER_RETRY_MINUTES = 30;
 const FAILURE_RETRY_MINUTES = 60;
-
-const MIN_BATCH_FOR_EMPTY_ANSWER = 10;
 
 const EXPIRY_MIN_AGE = 6 * 24 * 60 * 60 * 1000;
 const EXPIRY_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
@@ -271,32 +269,7 @@ export default class FeedsTwitch extends AbstractService {
       ids: to_check.map((video) => video.service_id),
     });
 
-    if (found.length === 0 && to_check.length >= MIN_BATCH_FOR_EMPTY_ANSWER) {
-      throw new Error(`Twitch returned none of the ${to_check.length} checked VODs`);
-    }
-
-    const found_ids = new Set(found.map((vod) => vod.id));
-    const kept = to_check.filter((video) => found_ids.has(video.service_id));
-    const gone = to_check.filter((video) => !found_ids.has(video.service_id));
-
-    await videos.mark_checked({ ids: kept.map((video) => video.id) });
-
-    if (gone.length > 0) {
-      await videos.remove_many({ ids: gone.map((video) => video.id) });
-      await Promise.all(
-        gone.flatMap((video) => [
-          remove_image(video.thumbnail_small),
-          remove_image(video.thumbnail_large),
-        ]),
-      );
-
-      logger().info(
-        { videos: gone.map((video) => video.service_id) },
-        "Expired or deleted Twitch VODs removed",
-      );
-    }
-
-    return { kept: kept.length, deleted: gone.map((video) => video.id) };
+    return apply_videos_check("twitch", to_check, new Set(found.map((vod) => vod.id)));
   }
 
   private async remove_missing(

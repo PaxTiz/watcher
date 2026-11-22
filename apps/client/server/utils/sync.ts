@@ -1,5 +1,6 @@
 import { userSyncs } from "@watcher/database";
 import { GoogleInvalidGrantError } from "@watcher/integration-google";
+import { TwitchInvalidGrantError } from "@watcher/integration-twitch";
 import { createError, type RequestEvent } from "nuxt/server";
 
 import type { User } from "#auth-utils";
@@ -9,6 +10,13 @@ import { useRateLimiter } from "#server/lib/rate_limiter";
 export const SYNC_STALE_AFTER_SECONDS = 30 * 60;
 
 export type SyncOptions = { full: boolean; channels: "all" | "new" };
+
+export type SyncService = "youtube" | "twitch";
+
+export const SYNC_CREDENTIALS = { youtube: "google", twitch: "twitch" } as const;
+
+export const is_invalid_grant = (error: unknown) =>
+  error instanceof GoogleInvalidGrantError || error instanceof TwitchInvalidGrantError;
 
 export const channels_to_sync = <T extends { subscription_id: string }>(
   channels: Array<T>,
@@ -52,19 +60,9 @@ export const start_subscriptions_sync = async (
 
       await userSyncs.finish({
         user_id: user.id,
-        error: error instanceof GoogleInvalidGrantError ? "integration_invalid" : "sync_failed",
+        error: is_invalid_grant(error) ? "integration_invalid" : "sync_failed",
       });
     });
 
   event.res.status = 202;
-};
-
-export const count_by_status = (items: Array<{ status: "created" | "updated" | "deleted" }>) => {
-  const counts = { created: 0, updated: 0, deleted: 0 };
-
-  for (const { status } of items) {
-    counts[status]++;
-  }
-
-  return counts;
 };

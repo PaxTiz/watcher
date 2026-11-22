@@ -13,8 +13,8 @@ import { parse, toSeconds } from "iso8601-duration";
 import { AbstractService, useLogger } from "#framework";
 import { services } from "#framework/server";
 import { useGoogle } from "#server/lib/google";
-import { remove_image } from "#server/utils/images";
 import type { SyncOptions } from "#server/utils/sync";
+import { apply_videos_check } from "#server/utils/sync_check";
 import { latest_date, next_check_at, retry_at } from "#server/utils/sync_schedule";
 import { async_pool } from "#shared/utils/random";
 
@@ -38,8 +38,6 @@ type CheckedVideo = repositoryTypes.videos.FindPublishedSinceOutput[number];
 
 const ENRICH_BATCH_SIZE = 50;
 const LEASE_SECONDS = 10 * 60;
-
-const MIN_BATCH_FOR_EMPTY_ANSWER = 10;
 
 export default class FeedsYoutube extends AbstractService {
   async check_channels(
@@ -174,32 +172,7 @@ export default class FeedsYoutube extends AbstractService {
       video_ids: to_check.map((video) => video.service_id),
     });
 
-    if (items.length === 0 && to_check.length >= MIN_BATCH_FOR_EMPTY_ANSWER) {
-      throw new Error(`YouTube returned none of the ${to_check.length} checked videos`);
-    }
-
-    const returned = new Set(items.map((item) => item.id));
-    const kept = to_check.filter((video) => returned.has(video.service_id));
-    const deleted = to_check.filter((video) => !returned.has(video.service_id));
-
-    await videos.mark_checked({ ids: kept.map((video) => video.id) });
-
-    if (deleted.length > 0) {
-      await videos.remove_many({ ids: deleted.map((video) => video.id) });
-      await Promise.all(
-        deleted.flatMap((video) => [
-          remove_image(video.thumbnail_small),
-          remove_image(video.thumbnail_large),
-        ]),
-      );
-
-      logger().info(
-        { videos: deleted.map((video) => video.service_id) },
-        "Deleted or private YouTube videos removed",
-      );
-    }
-
-    return { kept: kept.length, deleted: deleted.map((video) => video.id) };
+    return apply_videos_check("youtube", to_check, new Set(items.map((item) => item.id)));
   }
 
   private to_video(

@@ -10,15 +10,13 @@ export const video_thumbnail_path = (
 ) =>
   `${channel_directory(video.service, video.subscription_id)}/videos/${video.service_id}_${size}`;
 
-export const sync_subscription_logo = async ({ channel }: Sync["Subscription"]) => {
+export const sync_subscription_logo = async (
+  channel: { service: string; service_id: string; logo: string },
+  current: { path: string; etag: string },
+) => {
   const path = `${channel_directory(channel.service, channel.service_id)}/logo`;
 
-  const logo = await sync_image({
-    url: channel.logo,
-    path,
-    size: "logo",
-    current: { path: channel.logo_local, etag: channel.logo_etag },
-  });
+  const logo = await sync_image({ url: channel.logo, path, size: "logo", current });
 
-  return logo ? { path, etag: logo.etag } : { path: channel.logo_local, etag: channel.logo_etag };
+  return logo ? { path, etag: logo.etag } : current;
 };
