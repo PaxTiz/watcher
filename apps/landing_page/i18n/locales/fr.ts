@@ -260,6 +260,11 @@ export default {
     back_home: "Retour à l'accueil",
   },
 
+  legal: {
+    updated: "Mis à jour le {date}",
+    toc: "Sommaire",
+  },
+
   footer: {
     label: "Pied de page",
     copyright:

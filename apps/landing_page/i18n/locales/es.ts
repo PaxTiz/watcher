@@ -261,6 +261,11 @@ export default {
     back_home: "Volver al inicio",
   },
 
+  legal: {
+    updated: "Actualizado el {date}",
+    toc: "Índice",
+  },
+
   footer: {
     label: "Pie de página",
     copyright:

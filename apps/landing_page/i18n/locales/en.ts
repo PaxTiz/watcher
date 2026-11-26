@@ -257,6 +257,11 @@ export default {
     back_home: "Back to home",
   },
 
+  legal: {
+    updated: "Updated on {date}",
+    toc: "Contents",
+  },
+
   footer: {
     label: "Footer",
     copyright:

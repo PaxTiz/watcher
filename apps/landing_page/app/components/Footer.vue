@@ -8,9 +8,18 @@ const { t } = useI18n();
   >
     <span>{{ t("footer.copyright") }}</span>
     <nav class="flex gap-5" :aria-label="t('footer.label')">
-      <span>{{ t("footer.privacy") }}</span>
-      <span>{{ t("footer.terms") }}</span>
-      <span>{{ t("footer.contact") }}</span>
+      <NuxtLinkLocale to="privacy" class="text-ui-text-muted hover:text-ui-text transition-colors">
+        {{ t("footer.privacy") }}
+      </NuxtLinkLocale>
+      <NuxtLinkLocale to="terms" class="text-ui-text-muted hover:text-ui-text transition-colors">
+        {{ t("footer.terms") }}
+      </NuxtLinkLocale>
+      <a
+        :href="`mailto:${LEGAL_INFO.email}`"
+        class="text-ui-text-muted hover:text-ui-text transition-colors"
+      >
+        {{ t("footer.contact") }}
+      </a>
     </nav>
   </footer>
 </template>
