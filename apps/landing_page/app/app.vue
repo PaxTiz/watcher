@@ -5,11 +5,12 @@ const { t } = useI18n();
 <template>
   <a href="#main-content" class="skip-link">{{ t("a11y.skip_to_content") }}</a>
 
-  <Navbar />
+  <PageSheet>
+    <template #header>
+      <Navbar />
+    </template>
 
-  <main id="main-content">
     <NuxtPage />
-  </main>
-
-  <Footer />
+    <Footer />
+  </PageSheet>
 </template>

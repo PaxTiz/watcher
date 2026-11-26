@@ -4,17 +4,18 @@ const { t } = useI18n();
 useSeoMeta({
   title: computed(() => t("page.home")),
   description: computed(() => t("hero.lead")),
-  ogTitle: computed(() => `${t("hero.title")}. ${t("hero.title_soft")}.`),
+  ogTitle: computed(() => `${t("hero.title")} ${t("hero.title_accent")}`),
   ogDescription: computed(() => t("hero.lead")),
 });
 </script>
 
 <template>
   <Hero />
-  <FeedSection />
-  <PlayerSection />
-  <FavoritesSection />
-  <HowSection />
+  <WhySection />
+  <FeaturesSection />
+  <FusionSection />
+  <StartSection />
+  <RoadmapSection />
   <FaqSection />
-  <FinalSection />
+  <CtaSection />
 </template>

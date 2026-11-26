@@ -33,6 +33,22 @@ export default defineNuxtConfig({
 
   modules: ["@nuxt/fonts", "@nuxtjs/color-mode", "@watcher/i18n", "@watcher/ui", "@nuxtjs/seo"],
 
+  nitro: {
+    imports: {
+      autoImport: false,
+
+      // Only reachable through `#imports`: `@nuxtjs/i18n` (10.6.0) still imports it from there in
+      // its shared runtime, and Nitro no longer provides it with `nitroAutoImports: false`
+      imports: [{ name: "useRuntimeConfig", from: "nitropack/runtime" }],
+    },
+  },
+
+  runtimeConfig: {
+    public: {
+      appUrl: "http://localhost:3000",
+    },
+  },
+
   site: {
     url: "https://watcher.app",
     name: "Watcher",

@@ -23,30 +23,28 @@ function handleBackHome() {
 <template>
   <a href="#main-content" class="skip-link">{{ t("a11y.skip_to_content") }}</a>
 
-  <Navbar />
+  <PageSheet>
+    <template #header>
+      <Navbar />
+    </template>
 
-  <main id="main-content">
-    <section class="flex min-h-[70vh] items-center pt-24">
-      <div class="container">
-        <p class="text-alt font-mono text-sm">{{ status }}</p>
-        <TwoToneTitle
-          as="h1"
-          size="hero"
-          :title="title"
-          :soft="description"
-          class="mt-4 max-w-3xl"
-        />
-        <WatcherButton
-          :label="t('error.back_home')"
-          color="solid"
-          size="lg"
-          icon="lucide:arrow-left"
-          class="mt-8"
-          @click="handleBackHome"
-        />
-      </div>
+    <section class="flex min-h-[60vh] flex-col justify-center gap-6">
+      <p class="text-alt-text m-0 text-sm font-semibold tabular-nums">{{ status }}</p>
+      <h1
+        class="font-display text-ui-text m-0 max-w-3xl text-[clamp(34px,6vw,72px)] leading-[1.04] font-medium tracking-[-0.035em] text-balance"
+      >
+        {{ title }}
+        <span class="text-ui-text-muted block">{{ description }}</span>
+      </h1>
+      <WatcherButton
+        :label="t('error.back_home')"
+        color="solid"
+        size="lg"
+        icon="lucide:arrow-left"
+        class="self-start"
+        @click="handleBackHome"
+      />
     </section>
-  </main>
-
-  <Footer />
+    <Footer />
+  </PageSheet>
 </template>

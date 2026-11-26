@@ -1,41 +1,69 @@
 <script lang="ts" setup>
 const { t } = useI18n();
+const { appUrl } = useRuntimeConfig().public;
 
-const links = computed(() => [
-  { to: "#feed", label: t("nav.feed") },
-  { to: "#player", label: t("nav.player") },
-  { to: "#how", label: t("nav.how") },
-  { to: "#questions", label: t("nav.faq") },
-]);
+const SECTIONS = ["home", "why", "features", "fusion", "roadmap", "faq"] as const;
+
+const active = ref<(typeof SECTIONS)[number]>("home");
+
+useEventListener(
+  "scroll",
+  () => {
+    let current: (typeof SECTIONS)[number] = "home";
+    for (const id of SECTIONS) {
+      const element = document.getElementById(id);
+      if (element && element.getBoundingClientRect().top < 140) {
+        current = id;
+      }
+    }
+    active.value = current;
+  },
+  { passive: true },
+);
 </script>
 
 <template>
-  <header class="sticky top-0 z-20 bg-[var(--background)]/80 backdrop-blur-md">
-    <div class="container flex h-16 items-center gap-6">
-      <WatcherLogo class="h-[26px]" />
+  <header
+    class="dark bg-frame sticky top-0 z-50 grid h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-5 py-3 lg:grid-cols-[1fr_auto_1fr]"
+  >
+    <WatcherLogo class="h-7" />
 
-      <nav class="text-ui-text-muted ml-6 hidden gap-5.5 text-sm md:flex" aria-label="Sections">
-        <NuxtLink
-          v-for="link in links"
-          :key="link.to"
-          :to="link.to"
-          class="hover:text-ui-text transition-colors"
-        >
-          {{ link.label }}
-        </NuxtLink>
-      </nav>
+    <nav
+      :aria-label="t('nav.label')"
+      class="flex max-w-full items-center gap-0.5 justify-self-center overflow-x-auto rounded-full border border-[var(--navbar-border)] bg-[var(--navbar-bg)] p-1 backdrop-blur-md"
+    >
+      <a
+        v-for="id in SECTIONS"
+        :key="id"
+        :href="`#${id}`"
+        class="flex h-8 items-center rounded-full px-3.5 text-sm font-medium whitespace-nowrap transition-colors"
+        :class="
+          active === id ? 'bg-ui-text text-background' : 'text-ui-text-muted hover:text-ui-text'
+        "
+        :aria-current="active === id ? 'location' : undefined"
+        @click="active = id"
+      >
+        {{ t(`nav.${id}`) }}
+      </a>
+    </nav>
 
-      <div class="ml-auto flex items-center gap-1">
+    <div class="flex items-center gap-1 justify-self-end">
+      <div class="hidden items-center sm:flex">
         <WatcherLanguageToggle />
         <WatcherThemeToggle />
-        <NuxtLink
-          to="#start"
-          class="text-ui-text hover:text-alt mx-3 hidden text-sm transition-colors sm:inline"
-        >
-          {{ t("nav.login") }}
-        </NuxtLink>
-        <WatcherButton :label="t('nav.start')" to="#start" color="solid" />
       </div>
+      <a
+        :href="`${appUrl}/auth/login`"
+        class="text-ui-text hover:bg-ui-text/[0.07] hidden h-[38px] items-center rounded-xl px-3.5 text-sm font-medium whitespace-nowrap min-[980px]:flex"
+      >
+        {{ t("nav.login") }}
+      </a>
+      <a
+        href="#join"
+        class="bg-alt flex h-[38px] items-center rounded-xl px-4 text-sm font-semibold whitespace-nowrap text-[#121521] transition-colors hover:bg-[#ff7a26]"
+      >
+        {{ t("nav.join") }}
+      </a>
     </div>
   </header>
 </template>

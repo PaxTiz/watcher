@@ -1,5 +1,3 @@
-import type en from "./en";
-
 export default {
   a11y: {
     skip_to_content: "Aller au contenu",
@@ -10,132 +8,244 @@ export default {
   },
 
   nav: {
-    feed: "Le fil",
-    player: "Le lecteur",
-    how: "Comment ça marche",
+    label: "Sections",
+    home: "Accueil",
+    why: "Pourquoi",
+    features: "Fonctions",
+    fusion: "Fusion",
+    roadmap: "Roadmap",
     faq: "FAQ",
     login: "Se connecter",
-    start: "Commencer",
+    join: "Commencer",
+  },
+
+  sign_in: {
+    twitch: "Continuer avec Twitch",
+    youtube: "Continuer avec YouTube",
   },
 
   hero: {
-    title: "Toutes tes chaînes",
-    title_soft: "Un seul endroit",
-    lead: "Watcher réunit tes abonnements YouTube et Twitch dans un seul fil, dans l'ordre où les vidéos sortent. Sans algorithme.",
-    cta_start: "Commencer gratuitement",
-    cta_how: "Voir comment ça marche",
-    note: "Gratuit · Lecture seule de tes abonnements",
+    title: "Tes créateurs sont partout.",
+    title_accent: "Toi, t'as besoin d'un seul endroit.",
+    lead: "Watcher rassemble tes abonnements Twitch et YouTube dans une app calme, sans algorithme. Juste les sorties de ceux que tu suis, dans l'ordre, favoris en tête.",
+    note: "Gratuit · Connexion officielle, aucun mot de passe stocké",
+    preview_label:
+      "Aperçu de l'accueil de Watcher : nouveautés des favoris et vidéos d'hier, avec des créateurs fictifs",
   },
 
-  showcase: {
-    label: "Aperçu de l'application Watcher",
-    search: "Rechercher",
+  preview: {
+    favorites_new: "Nouveautés de vos favoris",
+    see_all: "Tout voir",
+    yesterday: "Hier",
     home: "Accueil",
-    videos: "Vidéos",
-    favorites: "Favoris",
-    subscriptions: "Abonnements",
-    greeting: "Bonjour Alex",
-    resume: "Reprendre la lecture",
-    resume_action: "Reprendre",
-    remaining: "12 min restantes",
-    latest: "Nouveautés",
-    search_capsule: "Rechercher dans tes chaînes",
+    live: "EN DIRECT",
+    viewers: "{count} en ligne",
+    up_next: "À suivre",
+    autoplay: "Lecture auto",
   },
 
   videos: {
-    gps: "Trois jours sans GPS",
-    ranked: "Session ranked, on vise le top 500",
-    gameboy: "On a démonté une Game Boy",
-    final: "VOD : la grande finale du tournoi",
-    bread: "Le pain du dimanche, enfin réussi",
-    trains: "Pourquoi les trains sont en retard",
-    hooks: {
-      gps: "SANS GPS",
-      gameboy: "ON A OSÉ",
-      bread: "ENFIN !",
-      trains: "LE VRAI PRIX",
-    },
-    tags: {
-      new: "Nouveau",
-      live: "En direct",
-      vod: "VOD",
+    live_now: "en direct",
+    items: {
+      live: { title: "Atelier peinture — paysage de nuit, jour 3", when: "" },
+      ice: { title: "Trois jours en Islande, sans voiture", when: "il y a 2 h" },
+      notes: { title: "Mon carnet de voyage, page par page", when: "il y a 3 jours" },
+      synth: { title: "Réparer un synthé de 1984 — épisode 4", when: "il y a 5 h" },
+      scope: { title: "Un oscilloscope à 15 €, ça vaut quoi ?", when: "il y a 6 jours" },
+      rediff: { title: "Rediff · Atelier peinture, jour 2", when: "hier" },
+      clip: { title: "Timelapse : le ciel en 40 secondes", when: "il y a 4 jours" },
+      cook: { title: "Une semaine de cuisine avec 20 € de restes", when: "hier" },
+      plant: { title: "Rempoter sans abîmer les racines", when: "hier" },
+      game: { title: "Mon premier jeu en 48 h : le bilan", when: "hier" },
     },
   },
 
-  feed: {
-    title: "Un seul fil",
-    title_soft: "Dans l'ordre où ça sort",
-    lead: "Les vidéos et les lives de toutes tes chaînes, YouTube et Twitch confondus. Les plus récents en haut, rien d'autre.",
-    today: "Aujourd'hui",
+  why: {
+    label: "Pourquoi Watcher",
+    title: "Suivre 50 créateurs, ça ne devrait pas demander 6 onglets.",
+    problem_label: "Le problème",
+    problem: "Deux apps, des notifs partout, et la même vidéo deux fois.",
+    solution_label: "La solution",
+    solution: "Un seul flux, dans l'ordre. Tes favoris en tête.",
+    recommended: "Recommandé pour vous",
+    feed_label:
+      "Le flux Watcher : une seule liste avec le live en cours, puis les nouvelles vidéos dans l'ordre",
+    sources: {
+      live: { what: "est en live — Atelier peinture, nuit 3", ago: "41 min" },
+      ice: { what: "Nouvelle vidéo : Trois jours en Islande…", ago: "2 h" },
+      synth: { what: "Réparer un synthé de 1984 — épisode 4", ago: "5 h" },
+      rediff: { what: "Atelier peinture, jour 2 (rediff)", ago: "hier" },
+      recommended: { what: "Trois jours en Islande, sans voiture", ago: "2 h" },
+      game: { what: "Rediff : Mon premier jeu en 48 h", ago: "hier" },
+    },
   },
 
-  player: {
-    title: "Regarde ici",
-    title_soft: "Reprends où tu t'étais arrêté",
-    lead: "Le lecteur est intégré. Watcher retient où tu en es sur chaque vidéo et enchaîne sur la suivante quand tu veux.",
-    resumed_at: "Repris à {time}",
-    up_next: "À suivre",
-    autoplay: "Lecture automatique",
-    next: "Ensuite",
+  features: {
+    label: "Fonctionnalités",
+    title: "Un lecteur, des favoris.",
+    player: {
+      label: "Lecteur",
+      title: "Twitch et YouTube, un seul lecteur.",
+      text: "Un live Twitch, puis la vidéo YouTube d'un autre créateur : tu restes dans Watcher, et la suite s'enchaîne dans la même file d'attente.",
+      preview_label:
+        "Aperçu : le lecteur Watcher lit un live Twitch, avec une file d'attente qui mélange vidéos YouTube et Twitch",
+    },
+    favorites: {
+      label: "Favoris",
+      title: "Tes favoris d'abord. Le reste, ensuite.",
+      text: "Les nouveautés de tes créateurs préférés sont en tête de l'accueil. Tes autres abonnements restent à portée, sans passer devant.",
+      preview_label: "Aperçu : les nouveautés des favoris en haut de l'accueil",
+    },
+    no_reco: {
+      title: "Pas de recommandations.",
+      text: "Watcher n'affiche que les sorties des créateurs que tu suis, dans l'ordre, favoris en tête.",
+    },
   },
 
-  favorites: {
-    title: "Tes favoris d'abord",
-    title_soft: "Le reste quand tu veux",
-    lead: "Épingle les chaînes que tu ne veux pas rater. Masque celles qui encombrent ton fil, sans te désabonner.",
-    favorites: "Favoris",
+  fusion: {
+    label: "Fusion",
+    soon: "Bientôt disponible",
+    title: "Un créateur. Toutes ses chaînes.",
+    text: "Live sur Twitch, rediffs sur une chaîne YouTube à part, clips sur une troisième ? Watcher les réunit sous un seul profil. Essaie :",
+    toggle_label: "Affichage des chaînes",
+    split: "Séparées",
+    merged: "Réunies",
     subscriptions: "Abonnements",
-    hidden: "Masquée",
+    count_split: "3 chaînes",
+    count_merged: "1 créateur",
+    tags: {
+      videos: "3 vidéos",
+      clips: "5 clips",
+    },
+    split_note: "Trois entrées, trois pages à ouvrir. Rien ne dit que c'est la même personne.",
+    channels: {
+      twitch: "Twitch",
+      rediffs: "Rediffs",
+      clips: "Clips",
+    },
+    video_channels: {
+      twitch: "Twitch",
+      rediffs: "YouTube · Rediffs",
+      clips: "YouTube · Clips",
+    },
+    all_in_one: "Tout au même endroit",
+    notice_title: "Fonctionnalité à venir.",
+    notice:
+      "La fusion des chaînes n'est pas encore disponible : cet aperçu montre ce qui est prévu.",
+    notice_link: "Voir la roadmap",
   },
 
-  how: {
-    title: "Prêt en une minute",
-    title_soft: "Sans mot de passe à créer",
-    connect: {
-      title: "Connecte ton compte",
-      text: "Google pour YouTube, Twitch, ou les deux. Watcher demande un accès en lecture seule.",
+  start: {
+    label: "30 secondes",
+    title: "Prêt avant la fin du générique.",
+    steps: {
+      twitch: {
+        title: "Connecte Twitch",
+        text: "Connexion officielle en un clic. Tes chaînes suivies sont importées.",
+      },
+      youtube: {
+        title: "Connecte YouTube",
+        text: "Pareil pour tes abonnements. Rien à ressaisir.",
+      },
+      favorites: {
+        title: "Marque tes favoris",
+        text: "Choisis qui passe en premier. Ton flux est prêt.",
+      },
     },
-    import: {
-      title: "Tes abonnements arrivent",
-      text: "Watcher importe tes chaînes et leurs dernières vidéos, puis suit les nouvelles.",
+  },
+
+  roadmap: {
+    label: "Roadmap",
+    title: "Où on en est.",
+    lead: "Ce qui est en cours de développement, ce qui est déjà disponible, et les idées qu'on garde en tête.",
+    columns: {
+      idea: "En réflexion",
+      dev: "En cours",
+      done: "Disponible",
     },
-    watch: {
-      title: "Tu regardes",
-      text: "Un fil, un lecteur, tes favoris. Tu peux tout déconnecter quand tu veux.",
+    status: {
+      idea: "En réflexion · rien n'est décidé",
+      dev: "En cours de développement",
+      done: "Disponible",
+    },
+    detail: "Le détail",
+    close: "Fermer",
+    items: {
+      fusion: {
+        title: "Fusion des chaînes",
+        description: "Réunir les chaînes Twitch et YouTube d'un même créateur sous un seul profil.",
+        detail:
+          "Beaucoup de créateurs publient sur plusieurs chaînes : un live sur Twitch, des rediffs et des clips sur YouTube. Avec la fusion, tu les regroupes sous un seul profil et leurs vidéos apparaissent ensemble dans ton flux. Tu pourras fusionner et séparer quand tu veux.",
+      },
+      mobile: {
+        title: "Application mobile",
+        description: "Retrouver ton flux Watcher sur ton téléphone.",
+        detail:
+          "Retrouver le même flux, les mêmes favoris et le même lecteur sur ton téléphone. C'est une idée à l'étude : rien n'est décidé, ni sur la forme ni sur le calendrier.",
+      },
+      platforms: {
+        title: "D'autres plateformes",
+        description: "Suivre aussi des créateurs au-delà de Twitch et de YouTube.",
+        detail:
+          "Watcher regroupe aujourd'hui Twitch et YouTube. On regarde si d'autres plateformes valent le coup d'être ajoutées. Rien n'est décidé, ni sur la liste ni sur le calendrier.",
+      },
+      favorites: {
+        title: "Favoris en tête",
+        description: "Les nouveautés de tes créateurs préférés passent avant le reste.",
+        detail:
+          "Marque des créateurs en favoris : leurs lives et leurs nouvelles vidéos remontent tout en haut de ton flux, avant le reste de tes abonnements.",
+      },
+      player: {
+        title: "Un seul lecteur",
+        description: "Twitch et YouTube dans le même lecteur, avec file d'attente.",
+        detail:
+          "Twitch et YouTube se lisent dans le même lecteur. Tu peux enchaîner des vidéos de plateformes différentes dans une même file d'attente, sans changer d'onglet.",
+      },
+      autoplay: {
+        title: "Lecture automatique",
+        description: "La vidéo suivante démarre toute seule.",
+        detail:
+          "Quand une vidéo se termine, la suivante de ta file démarre toute seule. Tu peux la couper si tu préfères garder la main.",
+      },
+      hide: {
+        title: "Masquer",
+        description: "Cacher une chaîne ou une vidéo sans te désabonner.",
+        detail:
+          "Une chaîne ou une vidéo ne t'intéresse pas ? Masque-la : elle disparaît de ton flux, sans te désabonner de la chaîne.",
+      },
+      search: {
+        title: "Recherche dans une chaîne",
+        description: "Retrouver une vidéo d'un créateur, avec filtres par date et durée.",
+        detail:
+          "Retrouve une vidéo précise d'un créateur en cherchant dans sa chaîne, et affine avec des filtres par date et par durée.",
+      },
     },
   },
 
   faq: {
-    title: "Questions",
-    title_soft: "fréquentes",
+    title: "Questions fréquentes",
     items: {
       free: {
-        question: "Watcher est-il gratuit ?",
+        question: "L'app est-elle gratuite ?",
         answer:
-          "Oui. Une offre premium viendra peut-être plus tard, sans rien retirer à la version gratuite.",
+          "Oui, Watcher est gratuit. Une offre premium, avec des filtres avancés, arrivera plus tard.",
       },
-      platforms: {
-        question: "Quelles plateformes ?",
-        answer: "YouTube et Twitch. Tu peux connecter l'une, l'autre ou les deux.",
-      },
-      access: {
-        question: "Que peut faire Watcher sur mes comptes ?",
+      algorithm: {
+        question: "Pourquoi « sans algorithme » ?",
         answer:
-          "Rien d'autre que lire la liste de tes abonnements. Il ne publie rien et ne voit jamais ton mot de passe.",
+          "Watcher ne te recommande rien. Tu vois les sorties des chaînes que tu suis, dans l'ordre, et tes favoris en tête.",
       },
-      mobile: {
-        question: "Ça marche sur mobile ?",
-        answer: "Oui, directement dans le navigateur de ton téléphone.",
+      security: {
+        question: "Mes identifiants sont-ils en sécurité ?",
+        answer:
+          "Watcher utilise uniquement les connexions officielles Twitch et YouTube (OAuth). Ton mot de passe n'est jamais stocké.",
       },
     },
   },
 
-  final: {
-    title: "Tes chaînes t'attendent",
-    title_soft: "Il ne manque que toi",
-    google: "Continuer avec Google",
-    twitch: "Continuer avec Twitch",
-    note: "Gratuit · Lecture seule · Supprimable à tout moment",
+  cta: {
+    title: "Le prochain live de ton créateur préféré, tu ne le rateras pas.",
+    note: "Gratuit, sans carte, sans engagement.",
   },
 
   error: {
@@ -151,9 +261,11 @@ export default {
   },
 
   footer: {
-    copyright: "© 2026 Watcher. Non affilié à YouTube ni à Twitch.",
+    label: "Pied de page",
+    copyright:
+      "© 2026 Watcher. Non affilié à Twitch Interactive ou YouTube LLC. Créateurs et vidéos affichés : exemples fictifs.",
     privacy: "Confidentialité",
     terms: "Conditions",
     contact: "Contact",
   },
-} satisfies typeof en;
+};

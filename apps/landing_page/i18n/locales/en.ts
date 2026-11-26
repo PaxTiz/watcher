@@ -8,132 +8,241 @@ export default {
   },
 
   nav: {
-    feed: "The feed",
-    player: "The player",
-    how: "How it works",
+    label: "Sections",
+    home: "Home",
+    why: "Why",
+    features: "Features",
+    fusion: "Merge",
+    roadmap: "Roadmap",
     faq: "FAQ",
     login: "Log in",
-    start: "Get started",
+    join: "Get started",
+  },
+
+  sign_in: {
+    twitch: "Continue with Twitch",
+    youtube: "Continue with YouTube",
   },
 
   hero: {
-    title: "All your channels",
-    title_soft: "One place",
-    lead: "Watcher brings your YouTube and Twitch subscriptions together in one feed, in the order videos come out. No algorithm.",
-    cta_start: "Get started for free",
-    cta_how: "See how it works",
-    note: "Free · Read-only access to your subscriptions",
+    title: "Your creators are everywhere.",
+    title_accent: "You just need one place.",
+    lead: "Watcher brings your Twitch and YouTube subscriptions together in a calm app, with no algorithm. Just new uploads from the people you follow, in order, favorites first.",
+    note: "Free · Official sign-in, no password stored",
+    preview_label:
+      "Preview of the Watcher home: new uploads from favorites and yesterday's videos, with fictional creators",
   },
 
-  showcase: {
-    label: "Preview of the Watcher app",
-    search: "Search",
+  preview: {
+    favorites_new: "New from your favorites",
+    see_all: "See all",
+    yesterday: "Yesterday",
     home: "Home",
-    videos: "Videos",
-    favorites: "Favorites",
-    subscriptions: "Subscriptions",
-    greeting: "Hi Alex",
-    resume: "Continue watching",
-    resume_action: "Resume",
-    remaining: "12 min left",
-    latest: "New videos",
-    search_capsule: "Search your channels",
+    live: "LIVE",
+    viewers: "{count} watching",
+    up_next: "Up next",
+    autoplay: "Autoplay",
   },
 
   videos: {
-    gps: "Three days without GPS",
-    ranked: "Ranked session, aiming for the top 500",
-    gameboy: "We took a Game Boy apart",
-    final: "VOD: the tournament grand final",
-    bread: "Sunday bread, finally nailed it",
-    trains: "Why trains are always late",
-    hooks: {
-      gps: "NO GPS",
-      gameboy: "WE DID IT",
-      bread: "FINALLY!",
-      trains: "THE REAL COST",
-    },
-    tags: {
-      new: "New",
-      live: "Live",
-      vod: "VOD",
+    live_now: "live now",
+    items: {
+      live: { title: "Painting workshop — night landscape, day 3", when: "" },
+      ice: { title: "Three days in Iceland, no car", when: "2 h ago" },
+      notes: { title: "My travel journal, page by page", when: "3 days ago" },
+      synth: { title: "Fixing a 1984 synth — episode 4", when: "5 h ago" },
+      scope: { title: "A €15 oscilloscope: any good?", when: "6 days ago" },
+      rediff: { title: "VOD · Painting workshop, day 2", when: "yesterday" },
+      clip: { title: "Timelapse: the sky in 40 seconds", when: "4 days ago" },
+      cook: { title: "A week of cooking with €20 of leftovers", when: "yesterday" },
+      plant: { title: "Repotting without hurting the roots", when: "yesterday" },
+      game: { title: "My first game in 48 h: the recap", when: "yesterday" },
     },
   },
 
-  feed: {
-    title: "One feed",
-    title_soft: "In the order things come out",
-    lead: "Videos and lives from all your channels, YouTube and Twitch alike. The most recent on top, nothing else.",
-    today: "Today",
+  why: {
+    label: "Why Watcher",
+    title: "Following 50 creators shouldn't take 6 tabs.",
+    problem_label: "The problem",
+    problem: "Two apps, notifications everywhere, and the same video twice.",
+    solution_label: "The solution",
+    solution: "One feed, in order. Your favorites first.",
+    recommended: "Recommended for you",
+    feed_label: "The Watcher feed: a single list with the current live, then new videos in order",
+    sources: {
+      live: { what: "is live — Painting workshop, night 3", ago: "41 min" },
+      ice: { what: "New video: Three days in Iceland…", ago: "2 h" },
+      synth: { what: "Fixing a 1984 synth — episode 4", ago: "5 h" },
+      rediff: { what: "Painting workshop, day 2 (VOD)", ago: "yesterday" },
+      recommended: { what: "Three days in Iceland, no car", ago: "2 h" },
+      game: { what: "VOD: My first game in 48 h", ago: "yesterday" },
+    },
   },
 
-  player: {
-    title: "Watch here",
-    title_soft: "Pick up where you left off",
-    lead: "The player is built in. Watcher remembers where you are in every video and moves on to the next one whenever you want.",
-    resumed_at: "Resumed at {time}",
-    up_next: "Up next",
-    autoplay: "Autoplay",
-    next: "Next",
+  features: {
+    label: "Features",
+    title: "One player, your favorites.",
+    player: {
+      label: "Player",
+      title: "Twitch and YouTube, one player.",
+      text: "A Twitch live, then another creator's YouTube video: you stay in Watcher, and what's next plays from the same queue.",
+      preview_label:
+        "Preview: the Watcher player showing a Twitch live, with a queue mixing YouTube and Twitch videos",
+    },
+    favorites: {
+      label: "Favorites",
+      title: "Your favorites first. The rest after.",
+      text: "New uploads from your favorite creators sit at the top of your home. Your other subscriptions stay within reach, without cutting in line.",
+      preview_label: "Preview: new uploads from favorites at the top of the home",
+    },
+    no_reco: {
+      title: "No recommendations.",
+      text: "Watcher only shows uploads from the creators you follow, in order, favorites first.",
+    },
   },
 
-  favorites: {
-    title: "Your favorites first",
-    title_soft: "The rest whenever you want",
-    lead: "Pin the channels you never want to miss. Hide the ones cluttering your feed, without unsubscribing.",
-    favorites: "Favorites",
+  fusion: {
+    label: "Merge",
+    soon: "Coming soon",
+    title: "One creator. All their channels.",
+    text: "Live on Twitch, VODs on a separate YouTube channel, clips on a third? Watcher brings them together under a single profile. Try it:",
+    toggle_label: "Channel display",
+    split: "Separate",
+    merged: "Merged",
     subscriptions: "Subscriptions",
-    hidden: "Hidden",
+    count_split: "3 channels",
+    count_merged: "1 creator",
+    tags: {
+      videos: "3 videos",
+      clips: "5 clips",
+    },
+    split_note: "Three entries, three pages to open. Nothing tells you it's the same person.",
+    channels: {
+      twitch: "Twitch",
+      rediffs: "VODs",
+      clips: "Clips",
+    },
+    video_channels: {
+      twitch: "Twitch",
+      rediffs: "YouTube · VODs",
+      clips: "YouTube · Clips",
+    },
+    all_in_one: "Everything in one place",
+    notice_title: "Upcoming feature.",
+    notice: "Channel merging isn't available yet: this preview shows what's planned.",
+    notice_link: "See the roadmap",
   },
 
-  how: {
-    title: "Ready in a minute",
-    title_soft: "No password to create",
-    connect: {
-      title: "Connect your account",
-      text: "Google for YouTube, Twitch, or both. Watcher only asks for read-only access.",
+  start: {
+    label: "30 seconds",
+    title: "Ready before the opening credits end.",
+    steps: {
+      twitch: {
+        title: "Connect Twitch",
+        text: "Official sign-in in one click. The channels you follow are imported.",
+      },
+      youtube: {
+        title: "Connect YouTube",
+        text: "Same for your subscriptions. Nothing to type in again.",
+      },
+      favorites: {
+        title: "Pick your favorites",
+        text: "Choose who comes first. Your feed is ready.",
+      },
     },
-    import: {
-      title: "Your subscriptions come in",
-      text: "Watcher imports your channels and their latest videos, then keeps up with new ones.",
+  },
+
+  roadmap: {
+    label: "Roadmap",
+    title: "Where we're at.",
+    lead: "What's being built, what's already available, and the ideas we keep in mind.",
+    columns: {
+      idea: "Considering",
+      dev: "In progress",
+      done: "Available",
     },
-    watch: {
-      title: "You watch",
-      text: "One feed, one player, your favorites. You can disconnect everything whenever you want.",
+    status: {
+      idea: "Considering · nothing decided",
+      dev: "In development",
+      done: "Available",
+    },
+    detail: "Details",
+    close: "Close",
+    items: {
+      fusion: {
+        title: "Channel merging",
+        description: "Bring a creator's Twitch and YouTube channels together under one profile.",
+        detail:
+          "Many creators publish on several channels: a live on Twitch, VODs and clips on YouTube. With merging, you group them under a single profile and their videos show up together in your feed. You'll be able to merge and split whenever you want.",
+      },
+      mobile: {
+        title: "Mobile app",
+        description: "Your Watcher feed on your phone.",
+        detail:
+          "The same feed, the same favorites and the same player on your phone. It's an idea we're looking into: nothing is decided, neither the form nor the timeline.",
+      },
+      platforms: {
+        title: "More platforms",
+        description: "Follow creators beyond Twitch and YouTube too.",
+        detail:
+          "Watcher brings together Twitch and YouTube today. We're looking at whether other platforms are worth adding. Nothing is decided, neither the list nor the timeline.",
+      },
+      favorites: {
+        title: "Favorites first",
+        description: "New uploads from your favorite creators come before the rest.",
+        detail:
+          "Mark creators as favorites: their lives and new videos rise to the very top of your feed, ahead of the rest of your subscriptions.",
+      },
+      player: {
+        title: "One player",
+        description: "Twitch and YouTube in the same player, with a queue.",
+        detail:
+          "Twitch and YouTube play in the same player. You can line up videos from different platforms in one queue, without switching tabs.",
+      },
+      autoplay: {
+        title: "Autoplay",
+        description: "The next video starts on its own.",
+        detail:
+          "When a video ends, the next one in your queue starts on its own. You can turn it off if you'd rather stay in control.",
+      },
+      hide: {
+        title: "Hide",
+        description: "Hide a channel or a video without unsubscribing.",
+        detail:
+          "Not interested in a channel or a video? Hide it: it disappears from your feed, without unsubscribing from the channel.",
+      },
+      search: {
+        title: "Search within a channel",
+        description: "Find a creator's video, with date and duration filters.",
+        detail:
+          "Find a specific video from a creator by searching their channel, and narrow it down with date and duration filters.",
+      },
     },
   },
 
   faq: {
-    title: "Frequently",
-    title_soft: "asked questions",
+    title: "Frequently asked questions",
     items: {
       free: {
-        question: "Is Watcher free?",
+        question: "Is the app free?",
+        answer: "Yes, Watcher is free. A premium plan, with advanced filters, will come later.",
+      },
+      algorithm: {
+        question: "Why “no algorithm”?",
         answer:
-          "Yes. A premium plan may come later, without taking anything away from the free version.",
+          "Watcher doesn't recommend anything. You see uploads from the channels you follow, in order, with your favorites first.",
       },
-      platforms: {
-        question: "Which platforms?",
-        answer: "YouTube and Twitch. You can connect one, the other, or both.",
-      },
-      access: {
-        question: "What can Watcher do on my accounts?",
+      security: {
+        question: "Are my credentials safe?",
         answer:
-          "Nothing but read your list of subscriptions. It never posts anything and never sees your password.",
-      },
-      mobile: {
-        question: "Does it work on mobile?",
-        answer: "Yes, right in your phone's browser.",
+          "Watcher only uses the official Twitch and YouTube sign-ins (OAuth). Your password is never stored.",
       },
     },
   },
 
-  final: {
-    title: "Your channels are waiting",
-    title_soft: "All that's missing is you",
-    google: "Continue with Google",
-    twitch: "Continue with Twitch",
-    note: "Free · Read-only · Delete your account anytime",
+  cta: {
+    title: "Your favorite creator's next live? You won't miss it.",
+    note: "Free, no card, no commitment.",
   },
 
   error: {
@@ -149,7 +258,9 @@ export default {
   },
 
   footer: {
-    copyright: "© 2026 Watcher. Not affiliated with YouTube or Twitch.",
+    label: "Footer",
+    copyright:
+      "© 2026 Watcher. Not affiliated with Twitch Interactive or YouTube LLC. Creators and videos shown are fictional examples.",
     privacy: "Privacy",
     terms: "Terms",
     contact: "Contact",
